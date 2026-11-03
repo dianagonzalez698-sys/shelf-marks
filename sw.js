@@ -2,7 +2,7 @@
    Network-first on purpose: when you're online you always get the current
    version, and the cache is only a fallback when you're not. */
 
-const VERSION = 'lit-picks-v4';
+const VERSION = 'lit-picks-v5';
 const SHELL = [
   './',
   './index.html',
@@ -57,8 +57,13 @@ self.addEventListener('fetch', (event) => {
   // Open Library search and cover images go straight to the network.
   if (url.origin !== self.location.origin) return;
 
+  // `fetch(request)` would go through the browser's HTTP cache, and GitHub
+  // Pages sends a max-age — which is why a fresh deploy could still show the
+  // old CSS until a manual hard-reload. `cache: 'reload'` skips that cache and
+  // always revalidates against the network, so an ordinary reload is enough.
+  // Offline, this rejects and we fall through to the cached copy below.
   event.respondWith(
-    fetch(request)
+    fetch(request.url, { cache: 'reload', credentials: 'same-origin' })
       .then((response) => {
         if (response && response.ok) {
           const copy = response.clone();
