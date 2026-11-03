@@ -26,8 +26,15 @@ cd ~/shelf-marks
 Go to <https://github.com/new> and make a repository named `shelf-marks`.
 Leave "Add a README" unchecked — this folder already has one.
 
-It can be **public or private**: GitHub Pages works with private repos on
-all current plans.
+**Make it public** unless you pay for GitHub Pro. On a free account, Pages
+can only publish from a public repository; Pro, Team and Enterprise can also
+publish from a private one.
+
+Either way the *site* is public — a Pages site is reachable on the internet
+even when its repository is private. Repository visibility only decides who
+can read the source. Nothing personal is in it: your books, bookmarks and
+design settings all live in your browser on your own devices, never in the
+repo.
 
 ### 2. Push this folder up
 
