@@ -5,7 +5,9 @@ the books you finish, watch the goal bars move, and collect a bookmark every
 time you complete a challenge period.
 
 The whole look is adjustable from inside the app — see
-**[CUSTOMIZATION.md](CUSTOMIZATION.md)** and Settings → Design studio.
+**[CUSTOMIZATION.md](CUSTOMIZATION.md)** for colours, type and spacing, and
+**[CONTENT.md](CONTENT.md)** for the picture library and the editorial section
+system. Both live under Settings → Design studio.
 
 Plain HTML, CSS and vanilla JavaScript — no build step, no framework, no
 backend. Everything lives on your device; the only network call is to the
@@ -203,6 +205,10 @@ css/styles.css          the design token layer, then components that only use va
 js/
   app.js                boot: registers routes, loads the database and the theme
   theme.js              design tokens, presets, persistence, export/import
+  assets.js             the picture library (uploads, downscaling, storage)
+  media.js              one descriptor + one renderer for every picture
+  sections.js           the twelve editorial section types
+  layout.js             which sections each page has, and in what order
   config.js             challenge presets, goal defaults, subject hints  ← edit me
   rules.js              the rule engine: filters, windows, targets
   periods.js            quarters, two-month periods, date maths
@@ -212,7 +218,9 @@ js/
   openlibrary.js        search + autofill + fiction/nonfiction guess
   ui.js                 router, bookmark artwork, progress, sheets, toasts
   view-*.js             one file per screen
-  view-customize.js     the Design Studio
+  view-customize.js     the Design Studio — colours and type
+  view-layout.js        the layout editor — sections and picture placement
+  view-assets.js        the picture library
 icons/                  generated PNGs
 tools/                  icon generator, local dev server
 ```

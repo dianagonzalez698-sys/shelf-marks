@@ -1,0 +1,154 @@
+// The asset library: your own photographs, paintings, cutouts and textures.
+//
+// Everything is held in IndexedDB as a data URL, which keeps the app a pure
+// static site (no uploads, no server) and lets images ride along inside the
+// ordinary device backup. Large originals are downscaled on the way in — a
+// reading journal does not need 4000px scans, and the backup file would
+// become unusable.
+
+import * as store from './store.js';
+
+export const KINDS = [
+  ['artwork', 'Artwork / painting'],
+  ['photo', 'Photograph'],
+  ['cutout', 'Cutout (transparent PNG)'],
+  ['texture', 'Texture / paper'],
+  ['ornament', 'Small ornament or sticker'],
+];
+
+// Bigger than any slot the design actually uses, small enough to keep backups sane.
+const MAX_EDGE = { artwork: 1800, photo: 1600, cutout: 1200, texture: 1200, ornament: 700 };
+const JPEG_QUALITY = 0.84;
+export const SOFT_TOTAL_WARN = 18 * 1024 * 1024;   // nag past ~18MB of assets
+
+const cache = new Map();   // id -> asset record
+let loaded = false;
+
+function uid() {
+  const rand = (crypto && crypto.randomUUID)
+    ? crypto.randomUUID().replace(/-/g, '').slice(0, 12)
+    : Math.random().toString(36).slice(2, 14);
+  return `as_${Date.now().toString(36)}_${rand}`;
+}
+
+export async function load() {
+  const rows = await store.getAll('assets');
+  cache.clear();
+  rows.filter((r) => r && r.id).forEach((r) => cache.set(r.id, r));
+  loaded = true;
+  return list();
+}
+
+export function list({ kind = null } = {}) {
+  const all = [...cache.values()].sort((a, b) =>
+    String(b.addedAt || '').localeCompare(String(a.addedAt || '')));
+  return kind ? all.filter((a) => a.kind === kind) : all;
+}
+
+export function get(id) {
+  return id ? cache.get(id) || null : null;
+}
+
+/** The data URL for an asset, or null — every renderer goes through this. */
+export function src(id) {
+  const a = get(id);
+  return a ? a.dataUrl : null;
+}
+
+export function isLoaded() { return loaded; }
+
+export function totalBytes() {
+  let n = 0;
+  cache.forEach((a) => { n += (a.bytes || (a.dataUrl ? a.dataUrl.length * 0.75 : 0)); });
+  return n;
+}
+
+/** Decode a File, downscale to the kind's limit, and return a data URL. */
+function toDataUrl(file, kind) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\//.test(file.type)) {
+      reject(new Error('That is not an image file.'));
+      return;
+    }
+    // Only the kinds that are *meant* to be transparent stay PNG. Artwork,
+    // photographs and papers are opaque by definition, so a PNG scan of a
+    // painting becomes a JPEG — otherwise one upload can be several megabytes
+    // and the backup file becomes painful to move between devices.
+    const keepAlpha = kind === 'cutout' || kind === 'ornament';
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read that image.'));
+    reader.onload = () => {
+      const original = String(reader.result || '');
+      if (/^data:image\/svg/.test(original)) { resolve({ dataUrl: original, w: 0, h: 0 }); return; }
+      const img = new Image();
+      img.onerror = () => reject(new Error('That image could not be decoded.'));
+      img.onload = () => {
+        try {
+          const max = MAX_EDGE[kind] || 1600;
+          const scale = Math.min(1, max / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          if (scale >= 1 && original.length < 700000) {
+            resolve({ dataUrl: original, w: img.width, h: img.height });
+            return;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve({
+            dataUrl: keepAlpha ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', JPEG_QUALITY),
+            w, h,
+          });
+        } catch (err) {
+          reject(new Error('That image could not be processed.'));
+        }
+      };
+      img.src = original;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function add(file, { kind = 'photo', name = '', alt = '' } = {}) {
+  const { dataUrl, w, h } = await toDataUrl(file, kind);
+  const record = {
+    id: uid(),
+    name: (name || file.name || 'Untitled').replace(/\.[a-z0-9]+$/i, '').slice(0, 80),
+    alt: alt || '',
+    kind,
+    dataUrl,
+    w, h,
+    bytes: Math.round(dataUrl.length * 0.75),
+    addedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  await store.put('assets', record);
+  cache.set(record.id, record);
+  return record;
+}
+
+export async function update(id, patch) {
+  const current = get(id);
+  if (!current) return null;
+  const record = { ...current, ...patch, id, updatedAt: new Date().toISOString() };
+  await store.put('assets', record);
+  cache.set(id, record);
+  return record;
+}
+
+export async function remove(id) {
+  await store.remove('assets', id);
+  cache.delete(id);
+}
+
+/* ------------------------------------------------- backup integration ---- */
+
+export function snapshot() {
+  return [...cache.values()].map((a) => ({ ...a }));
+}
+
+export function adoptMany(rows) {
+  (rows || []).forEach((r) => { if (r && r.id) cache.set(r.id, r); });
+}

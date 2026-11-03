@@ -355,6 +355,9 @@ export function refresh() {
 }
 
 function setChrome(view) {
+  const app = document.getElementById('app');
+  // Editorial pages drop the content gutter so sections can bleed full width.
+  if (app) app.classList.toggle('is-editorial', !!view.editorial);
   const backBtn = document.getElementById('appbar-back');
   const actions = document.getElementById('appbar-actions');
   const fab = document.getElementById('fab');

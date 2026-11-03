@@ -2,6 +2,8 @@
 
 import { load, onChange, state } from './state.js';
 import * as theme from './theme.js';
+import * as assets from './assets.js';
+import * as layout from './layout.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
 import { homeView } from './view-home.js';
 import { booksView } from './view-books.js';
@@ -10,6 +12,8 @@ import { challengesView, challengeDetailView } from './view-challenges.js';
 import { bookmarksView } from './view-bookmarks.js';
 import { settingsView } from './view-settings.js';
 import { customizeView } from './view-customize.js';
+import { assetsView } from './view-assets.js';
+import { layoutView } from './view-layout.js';
 
 route('/', homeView);
 route('/books', booksView);
@@ -21,6 +25,8 @@ route('/challenge/:id', challengeDetailView);
 route('/bookmarks', bookmarksView);
 route('/settings', settingsView);
 route('/customize', customizeView);
+route('/assets', assetsView);
+route('/layout', layoutView);
 
 function paintStorageBanner() {
   const banner = document.getElementById('storage-banner');
@@ -50,6 +56,12 @@ async function boot() {
   } catch (_) {
     // Defaults from the stylesheet are a perfectly good fallback.
   }
+
+  // Your pictures and your page arrangements. Both fall back to sensible
+  // defaults, so a failure here costs decoration, never data.
+  try {
+    await Promise.all([assets.load(), layout.load()]);
+  } catch (_) { /* default layouts and empty library still render */ }
 
   onChange(() => {
     paintStorageBanner();

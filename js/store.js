@@ -3,8 +3,14 @@
 // UI can show a banner instead of silently losing a book.
 
 const DB_NAME = 'shelf-marks';
-const DB_VERSION = 1;
-export const STORES = ['books', 'settings', 'challenges', 'unlocks', 'images', 'meta'];
+const DB_VERSION = 2;   // 2 added: assets, layouts
+// The upgrade handler creates any store missing from this list, so adding a
+// name here plus bumping DB_VERSION is a safe, data-preserving migration.
+export const STORES = [
+  'books', 'settings', 'challenges', 'unlocks', 'images', 'meta',
+  'assets',   // your uploaded photographs, paintings, textures and cutouts
+  'layouts',  // the editorial section arrangement for each page
+];
 
 let dbPromise = null;
 let lastError = null;

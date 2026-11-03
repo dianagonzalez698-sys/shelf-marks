@@ -13,99 +13,44 @@ import { evaluate, describeFilter, describeWindow, bookmarkLabels } from './rule
 import { formatDate, quarters, YEAR } from './periods.js';
 import { FILTER_TYPES, WINDOW_TYPES } from './config.js';
 import { t } from './theme.js';
+import { renderSections, renderSection } from './sections.js';
+import { figure, backdrop, media } from './media.js';
+import * as layout from './layout.js';
 
 /* ----------------------------------------------------------------- list ---- */
 
-function challengeRow(challenge) {
-  const r = evaluate(challenge, state.books);
-  const have = unlockMap();
-  const labels = bookmarkLabels(challenge);
-  const ids = [...labels.keys()];
-  const earned = ids.filter((id) => have.has(id)).length;
-
-  // A miniature run of this challenge's bookmarks, as a row ornament.
-  const strip = ids.slice(0, 7).map((id) => markVisual(id, {
-    unlocked: have.has(id),
-    bonus: !!(labels.get(id) || {}).bonus,
-    dataUrl: (state.images.get(id) || {}).dataUrl || null,
-  })).join('');
-
-  const standing = r.recurring
-    ? `${r.count} of ${r.target} periods complete`
-    : (r.targetUnset
-      ? `${r.count} matching so far · no target set`
-      : `${r.count} of ${r.target} books`);
-
-  return `<a class="list-row list-row-link" href="#/challenge/${encodeURIComponent(challenge.id)}">
-    <span class="grow">
-      <span class="entry-title">${esc(challenge.name)}</span>
-      <span class="entry-meta">${esc(describeFilter(challenge.filter))} · ${esc(describeWindow(challenge.window))}</span>
-      <span class="tags">
-        <span class="tag">${esc(standing)}</span>
-        <span class="tag tag-accent">${ids.length ? `${earned}/${ids.length} bookmarks` : 'no bookmarks yet'}</span>
-      </span>
-      ${ids.length ? `<span class="bm-strip" style="margin-top:.8rem;max-width:320px">${strip}</span>` : ''}
-    </span>
-  </a>`;
-}
+export const DIRECTORY_PAGE_ID = 'directory';
 
 export function challengesView() {
-  const list = allChallenges();
+  const sections = layout.get(DIRECTORY_PAGE_ID);
   return {
     title: t('challengesHeading'),
     tab: 'challenges',
-    banner: true,
+    banner: false,
+    editorial: true,
     html: `
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">${esc(t('challengesHeading'))}</h2>
-            <p class="section-sub">${esc(t('challengesSub'))}</p>
-          </div>
-          <button class="btn btn-sm" type="button" id="new-challenge">New challenge</button>
+      ${renderSections(sections)}
+      <div class="ed sp-tight">
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn" type="button" id="new-challenge">Begin a new challenge</button>
         </div>
-
-        <div class="list" style="margin-top:1.5rem">
-          ${list.length ? list.map(challengeRow).join('')
-            : '<div class="empty"><h3>No challenges yet</h3><p>Start one and its bookmarks appear here.</p></div>'}
-        </div>
-
-        <p class="hint center" style="margin-top:1.4rem">
+        <p class="hint center" style="margin-top:1rem">
           Challenges are plain configuration — the presets live in <code>js/config.js</code>.
         </p>
-      </section>
+      </div>
     `,
     onMount(root) {
-      root.querySelector('#new-challenge').onclick = () => openEditor(null);
+      const btn = root.querySelector('#new-challenge');
+      if (btn) btn.onclick = () => openEditor(null);
     },
   };
 }
 
 /* --------------------------------------------------------------- detail ---- */
 
-// The bookmark collection, exactly as the reference presents it: the object,
-// a check if it's yours, then its title underneath.
-function bookmarkCollection(challenge, result, have) {
-  const labels = bookmarkLabels(challenge);
-  const ids = result.allBookmarkIds;
-  if (!ids.length) return '';
+export function challengePageId(id) { return `challenge:${id}`; }
 
-  return `<div class="bm-grid">
-    ${ids.map((id) => {
-      const meta = labels.get(id);
-      const unlocked = have.has(id);
-      const img = state.images.get(id);
-      return `<a class="bm${unlocked ? '' : ' locked'}" href="#/bookmarks?focus=${encodeURIComponent(id)}">
-        ${markVisual(id, { unlocked, bonus: !!(meta && meta.bonus), dataUrl: img ? img.dataUrl : null })}
-        ${unlocked ? checkBadge() : ''}
-        <span class="bm-label">${esc(meta ? meta.title : id)}</span>
-        ${meta && meta.bonus ? '<span class="bm-sub">bonus</span>' : ''}
-      </a>`;
-    }).join('')}
-  </div>`;
-}
-
-// The working detail under the collection: what each period still needs.
+// The working list under the collection: what each period still needs.
 function periodDetail(p, have) {
   const unlocked = !!(p.bookmarkId && have.has(p.bookmarkId));
   const books = p.books.length
@@ -114,17 +59,17 @@ function periodDetail(p, have) {
           <span class="grow truncate">${esc(b.title)}</span>
           <span class="muted tiny nowrap">${esc(formatDate(b.dateFinished))}</span>
         </a>`).join('')}</span>`
-    : '<span class="check-note">Nothing logged yet.</span>';
+    : '<span class="tick-note">Nothing logged yet.</span>';
 
-  return `<div class="check-row${p.complete ? ' done' : ''}">
-    <span class="check-mark" aria-hidden="true">${checkGlyph()}</span>
-    <span class="check-body">
+  return `<div class="tick${p.complete ? ' done' : ''}">
+    <span class="tick-mark" aria-hidden="true">${checkGlyph()}</span>
+    <span class="tick-body">
       <span class="row-between">
-        <span class="check-title">${esc(p.label)}</span>
-        <span class="tag nowrap">${p.count} of ${p.target == null ? '—' : p.target}</span>
+        <span class="tick-title">${esc(p.label)}</span>
+        <span class="tag tag-plain nowrap">${p.count} of ${p.target == null ? '—' : p.target}</span>
       </span>
       ${books}
-      ${p.bookmarkId ? `<span class="check-note">${unlocked ? 'Bookmark collected' : 'Bookmark still locked'} · <code>${esc(p.bookmarkId)}</code></span>` : ''}
+      ${p.bookmarkId ? `<span class="tick-note">${unlocked ? 'Bookmark collected' : 'Bookmark still locked'}</span>` : ''}
     </span>
   </div>`;
 }
@@ -143,90 +88,116 @@ export function challengeDetailView(params) {
 
   const r = evaluate(challenge, state.books);
   const have = unlockMap();
+  const labels = bookmarkLabels(challenge);
   const canEdit = challenge.editable || challenge.custom;
   const ids = r.allBookmarkIds;
   const earned = ids.filter((id) => have.has(id)).length;
   const collectedPct = ids.length ? Math.round((earned / ids.length) * 100) : 0;
-
-  const unsetNotice = r.targetUnset
-    ? `<div class="notice">
-         <strong>This challenge has no target yet.</strong>
-         Nothing can be collected until you say how many books it takes — and who counts.
-         <div class="btn-row" style="margin-top:.8rem">
-           <button class="btn btn-sm btn-primary" type="button" id="edit-challenge">Set target &amp; authors</button>
-         </div>
-       </div>`
-    : '';
+  const cover = challenge.cover || media({ ratio: 'auto', frame: 'none', shadow: false });
 
   const standing = r.recurring
     ? `${r.count} of ${r.target} periods complete`
     : (r.targetUnset ? `${r.count} books matching` : `${r.count} of ${r.target} books read`);
 
+  /* -- the spread opens like a chapter -- */
+  const hero = `<section class="ed ed-bleed">
+    <div class="hero hero-short hero-left">
+      ${backdrop(cover, { seed: challenge.id })}
+      <span class="hero-scrim" style="--scrim:.5"></span>
+      <div class="hero-type">
+        <p class="ed-kicker">${esc(describeWindow(challenge.window))}</p>
+        <h1 class="hero-title">${esc(challenge.name)}</h1>
+        ${challenge.blurb ? `<p class="hero-sub">${esc(challenge.blurb)}</p>` : ''}
+      </div>
+    </div>
+  </section>`;
+
+  const unsetNotice = r.targetUnset
+    ? `<div class="ed sp-tight"><div class="notice">
+         <strong>This challenge has no target yet.</strong>
+         Nothing can be collected until you say how many books it takes — and who counts.
+         <div class="btn-row" style="margin-top:.8rem">
+           <button class="btn btn-sm btn-primary" type="button" id="edit-challenge">Set target &amp; authors</button>
+         </div>
+       </div></div>`
+    : '';
+
+  /* -- the collection -- */
+  const collection = ids.length
+    ? `<section class="ed">
+         <div class="ed-head ed-head-split">
+           <div>
+             <p class="ed-kicker">The collection</p>
+             <h2 class="ed-title">Bookmarks</h2>
+           </div>
+           <p class="ed-meta">${esc(describeFilter(challenge.filter))}</p>
+         </div>
+         ${progressLine(`${earned} of ${ids.length} collected`, collectedPct, { tone: 'apricot', done: earned === ids.length })}
+         <div class="bm-grid">
+           ${ids.map((id) => {
+             const meta = labels.get(id);
+             const unlocked = have.has(id);
+             const img = state.images.get(id);
+             return `<a class="bm${unlocked ? '' : ' locked'}" href="#/bookmarks?focus=${encodeURIComponent(id)}">
+               ${markVisual(id, { unlocked, bonus: !!(meta && meta.bonus), dataUrl: img ? img.dataUrl : null })}
+               ${unlocked ? checkBadge() : ''}
+               <span class="bm-label">${esc(meta ? meta.title : id)}</span>
+               ${meta && meta.bonus ? '<span class="bm-sub">bonus</span>' : ''}
+             </a>`;
+           }).join('')}
+         </div>
+         <p class="marginalia center">${esc(standing)}</p>
+       </section>`
+    : `<section class="ed"><p class="hint center">${esc(standing)}</p></section>`;
+
+  /* -- the working record -- */
   const working = r.recurring
-    ? `<section class="section section-rule">
-         <div class="section-head"><h2 class="h2">Each period</h2></div>
-         <div class="checklist" style="margin-top:.9rem">
+    ? `<section class="ed tone-sage">
+         <div class="ed-head"><p class="ed-kicker">The record</p><h2 class="ed-title">Each period</h2></div>
+         <div class="ticks">
            ${r.periods.map((p) => periodDetail(p, have)).join('')}
-           ${challenge.bonusBookmark ? `<div class="check-row${r.bonus.complete ? ' done' : ''}">
-              <span class="check-mark" aria-hidden="true">${checkGlyph()}</span>
-              <span class="check-body">
-                <span class="check-title">Bonus — every period complete</span>
-                <span class="check-note">${have.has(challenge.bonusBookmark) ? 'Collected' : 'Locked'} · <code>${esc(challenge.bonusBookmark)}</code></span>
+           ${challenge.bonusBookmark ? `<div class="tick${r.bonus.complete ? ' done' : ''}">
+              <span class="tick-mark" aria-hidden="true">${checkGlyph()}</span>
+              <span class="tick-body">
+                <span class="tick-title">Bonus — every period complete</span>
+                <span class="tick-note">${have.has(challenge.bonusBookmark) ? 'Collected' : 'Locked'}</span>
               </span>
             </div>` : ''}
          </div>
        </section>`
-    : `<section class="section section-rule">
-         <div class="section-head"><h2 class="h2">Books counted</h2></div>
-         <div class="list" style="margin-top:.9rem">
-           ${r.books.length ? r.books.map((b) => `
-             <article class="list-row">
-               <a class="list-row-link" href="#/book/${encodeURIComponent(b.id)}">
-                 ${coverImg(b)}
-                 <span class="grow">
-                   <span class="entry-title">${esc(b.title)}</span>
-                   <span class="entry-meta">${esc(b.author || '')}</span>
-                   <span class="entry-meta">Finished ${esc(formatDate(b.dateFinished))}</span>
-                 </span>
-               </a>
-             </article>`).join('')
-            : '<p class="muted italic" style="padding:1rem 0">No books match this challenge yet.</p>'}
-         </div>
+    : `<section class="ed tone-sage">
+         <div class="ed-head"><p class="ed-kicker">The record</p><h2 class="ed-title">Books counted</h2></div>
+         ${r.books.length
+           ? `<div class="shelf">${r.books.map((b) => `
+               <a class="shelf-item" href="#/book/${encodeURIComponent(b.id)}">
+                 ${coverImg(b, { big: true })}
+                 <span class="shelf-title">${esc(b.title)}</span>
+                 <span class="shelf-meta">${esc(formatDate(b.dateFinished))}</span>
+               </a>`).join('')}</div>`
+           : '<p class="muted italic">No books match this challenge yet.</p>'}
        </section>`;
+
+  // Anything you have added to this particular challenge's page.
+  const custom = layout.isCustomised(challengePageId(challenge.id))
+    ? renderSections(layout.get(challengePageId(challenge.id)))
+    : '';
 
   return {
     title: challenge.name,
     tab: 'challenges',
-    banner: true,
+    banner: false,
+    editorial: true,
     back: true,
     actions: canEdit ? '<button class="btn btn-quiet" type="button" id="edit-top">Edit</button>' : '',
     html: `
+      ${hero}
       ${unsetNotice}
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">${esc(challenge.name)}</h2>
-            ${challenge.blurb ? `<p class="section-sub">${esc(challenge.blurb)}</p>` : ''}
-          </div>
-          <p class="section-meta">${esc(describeWindow(challenge.window))}</p>
-        </div>
-
-        ${ids.length
-          ? progressLine(`${earned} of ${ids.length} bookmarks collected`, collectedPct, { done: earned === ids.length })
-          : `<p class="hint" style="margin-top:1rem">${esc(standing)}</p>`}
-
-        ${bookmarkCollection(challenge, r, have)}
-
-        <p class="center tiny muted italic" style="margin-top:1.4rem">
-          ${esc(describeFilter(challenge.filter))} · ${esc(standing)}
-        </p>
-      </section>
-
+      ${collection}
       ${working}
-
-      ${challenge.custom ? `<div class="btn-row" style="margin-top:var(--sp-section)">
+      ${custom}
+      ${challenge.custom ? `<div class="ed sp-tight"><div class="btn-row">
         <button class="btn btn-danger" type="button" id="archive">Remove this challenge</button>
-      </div>` : ''}
+      </div></div>` : ''}
     `,
     onMount(root) {
       const open = () => openEditor(challenge);

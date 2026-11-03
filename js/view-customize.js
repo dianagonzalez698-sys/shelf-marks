@@ -10,6 +10,7 @@ import {
 } from './theme.js';
 import { state } from './state.js';
 import { esc, attr, toast, confirmSheet, bookmarkArt, lockedArt, checkBadge, progressLine, openSheet } from './ui.js';
+import { studioNav } from './studio-nav.js';
 
 /** A token's current value as a number, for slider controls. */
 function numericValue(token) {
@@ -111,6 +112,7 @@ export function customizeView() {
     live: false,
     html: `
       <section class="section form-wrap">
+        ${studioNav('design')}
         <div class="section-head" style="margin-bottom:1.3rem"><div>
           <h2 class="section-title">Design studio</h2>
           <p class="section-sub">Every change lands immediately and is kept on this device.</p>

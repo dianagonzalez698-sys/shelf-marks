@@ -6,6 +6,8 @@ import * as store from './store.js';
 import { state, saveSettings, syncUnlocks, emitChange, nowISO } from './state.js';
 import { todayISO } from './periods.js';
 import * as theme from './theme.js';
+import * as assets from './assets.js';
+import * as layout from './layout.js';
 
 export const SCHEMA = 1;
 
@@ -23,6 +25,9 @@ export function buildBackup() {
     images: [...state.images.values()].map((i) => ({ ...i })),
     // The design settings ride along, so a restored device looks right too.
     theme: theme.snapshot(),
+    // …as do your pictures and the way your pages are arranged.
+    assets: assets.snapshot(),
+    layouts: layout.snapshot(),
   };
 }
 
@@ -50,6 +55,8 @@ function countsOf(payload) {
     challenges: (payload.challenges || []).length,
     unlocks: (payload.unlocks || []).length,
     images: (payload.images || []).length,
+    assets: (payload.assets || []).length,
+    layouts: (payload.layouts || []).length,
   };
 }
 
@@ -115,14 +122,18 @@ export function parseBackup(text) {
 export async function importBackup(text) {
   const data = parseBackup(text);
 
+  const assetRows = mergeCollection(data.assets, assets.snapshot(), 'assets');
+  const layoutRows = mergeCollection(data.layouts, layout.snapshot(), 'layouts');
   const books = mergeCollection(data.books, state.books, 'books');
   const challenges = mergeCollection(data.challenges, state.challengeRecords, 'challenges');
   const unlocks = mergeCollection(data.unlocks, state.unlocks, 'unlocks');
   const images = mergeCollection(data.images, [...state.images.values()], 'images');
 
-  for (const group of [books, challenges, unlocks, images]) {
+  for (const group of [books, challenges, unlocks, images, assetRows, layoutRows]) {
     if (group.writes.length) await store.putMany(group.storeName, group.writes);
   }
+  assets.adoptMany(assetRows.merged);
+  layout.adoptMany(layoutRows.merged);
 
   state.books = books.merged.filter((b) => !b.deleted);
   state.challengeRecords = challenges.merged;
@@ -157,6 +168,8 @@ export async function importBackup(text) {
     challenges: pick(challenges),
     unlocks: pick(unlocks),
     images: pick(images),
+    assets: pick(assetRows),
+    layouts: pick(layoutRows),
     settingsChanged,
     themeChanged,
     newlyUnlocked: unlockedNow.length,

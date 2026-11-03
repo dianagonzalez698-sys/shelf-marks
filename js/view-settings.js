@@ -74,6 +74,10 @@ export function settingsView() {
           </div>
           <a class="btn btn-sm nowrap" href="#/customize">Open</a>
         </div>
+        <div class="btn-row" style="margin-top:.9rem">
+          <a class="btn btn-sm" href="#/layout">Page layouts</a>
+          <a class="btn btn-sm" href="#/assets">Picture library</a>
+        </div>
       </section>
 
       <h2 class="form-heading">This device</h2>
