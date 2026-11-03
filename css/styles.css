@@ -162,35 +162,37 @@
 }
 
 /* Dark mode re-tints the same tokens; component CSS never changes. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-force-theme="light"]) {
-    --c-bg:            #231a18;   /* Mahogany, taken down to near-black */
-    --c-bg-sunk:       #2c211e;
-    --c-bg-raised:     #2e2320;
-    --c-bg-field:      #31241f;
-    --c-ink:           #f6ede0;   /* Porcelain */
-    --c-ink-soft:      #d3c2b4;
-    --c-ink-faint:     #a28b7e;
-    --c-rule:          #3d2f2a;
-    --c-rule-strong:   #54423b;
-    --c-banner-bg:     #3e5440;   /* Olive Velvet, deepened */
-    --c-banner-ink:    #f3efe2;
-    --c-banner-ink-dim:#c6d2be;
+/* The dark palette. JS resolves the viewer's preference — light, dark, or
+   follow-the-system — and stamps data-theme on <html>, so this is a single
+   plain rule rather than a media query duplicated for each case.
+   No attribute means light: Porcelain is the house ground. */
+:root[data-theme="dark"] {
+  --c-bg:            #231a18;   /* Mahogany, taken down to near-black */
+  --c-bg-sunk:       #2c211e;
+  --c-bg-raised:     #2e2320;
+  --c-bg-field:      #31241f;
+  --c-ink:           #f6ede0;   /* Porcelain */
+  --c-ink-soft:      #d3c2b4;
+  --c-ink-faint:     #a28b7e;
+  --c-rule:          #3d2f2a;
+  --c-rule-strong:   #54423b;
+  --c-banner-bg:     #3e5440;   /* Olive Velvet, deepened */
+  --c-banner-ink:    #f3efe2;
+  --c-banner-ink-dim:#c6d2be;
     /* On a dark ground Burnt Apricot reads at its true value. */
-    --c-accent:        #d4763c;
-    --c-accent-ink:    #231a18;
-    --c-accent-soft:   #3a251b;
-    --c-accent-deep:   #e89155;
-    --c-sage:          #8fa58b;   /* Wallpaper Sage carries better here */
-    --c-success:       #8fa58b;
-    --c-danger:        #e08880;
-    --c-danger-soft:   #3a2220;
-    --c-bm-empty-bg:   #281e1b;
-    --c-bm-empty-rule: #54423b;
-    --c-bm-cord:       #d4763c;
-    --paper-texture-opacity: .22;
-    --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, .55);
-  }
+  --c-accent:        #d4763c;
+  --c-accent-ink:    #231a18;
+  --c-accent-soft:   #3a251b;
+  --c-accent-deep:   #e89155;
+  --c-sage:          #8fa58b;   /* Wallpaper Sage carries better here */
+  --c-success:       #8fa58b;
+  --c-danger:        #e08880;
+  --c-danger-soft:   #3a2220;
+  --c-bm-empty-bg:   #281e1b;
+  --c-bm-empty-rule: #54423b;
+  --c-bm-cord:       #d4763c;
+  --paper-texture-opacity: .22;
+  --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, .55);
 }
 
 /* =========================================================== base ======= */

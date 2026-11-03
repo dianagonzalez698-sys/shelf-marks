@@ -25,6 +25,7 @@ to defaults** removes the overrides, so the two can never drift apart.
 
 Every control changes the page the moment you move it. Groups:
 
+- **Appearance** — Always light / Always dark / Follow my device
 - **Palette** — backgrounds, the three levels of text, rules, accent colour
 - **Editorial banner** — sage ground, banner text, height, title size, paper texture
 - **Typography** — the four typefaces, sizes, weights, letterspacing, line heights, label casing
@@ -107,8 +108,21 @@ Also `--c-ink-soft` / `--c-ink-faint` (secondary and caption text),
 `--c-rose`, `--c-blue`, `--c-terracotta`, `--c-gold`, `--c-sage` for ornament,
 and `--c-bm1-bg` … `--c-bm6-ink` for the six bookmark colourways.
 
-Dark mode re-tints the same names inside
-`@media (prefers-color-scheme: dark)`. Components never change.
+### Light and dark
+
+**The journal is light by default** — Porcelain is the house ground, and the
+dark palette is opt-in. It is *not* tied to your operating system unless you
+ask for that in the studio's **Appearance** control.
+
+How it works: `js/theme.js` resolves your choice (`light`, `dark` or `system`)
+and stamps `data-theme="light"` or `data-theme="dark"` on `<html>`. The dark
+palette is a single plain rule — `:root[data-theme="dark"]` — re-tinting the
+same token names, so components never change. A small inline script in
+`index.html` replays the choice before first paint, so switching never
+flashes the wrong palette.
+
+The choice is saved with the rest of your design, travels in the design
+export, and rides inside the ordinary device backup.
 
 ### Typography
 

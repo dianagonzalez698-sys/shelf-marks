@@ -3,8 +3,9 @@
 // visible the instant it moves. Nothing here is part of the reading experience.
 
 import {
-  THEME_SCHEMA, CONTENT_SCHEMA, FONT_STACKS, PRESETS,
+  THEME_SCHEMA, CONTENT_SCHEMA, FONT_STACKS, PRESETS, MODES,
   getToken, isOverridden, setToken, setContent, getContent,
+  getMode, setMode, resolvedMode,
   applyPreset, reset, download, importJson, exportJson,
 } from './theme.js';
 import { state } from './state.js';
@@ -115,6 +116,16 @@ export function customizeView() {
           <p class="section-sub">Every change lands immediately and is kept on this device.</p>
         </div></div>
 
+        <h2 class="form-heading">Appearance</h2>
+        <div class="seg" id="mode-seg" role="group" aria-label="Appearance">
+          ${MODES.map(([v, label]) => `<button type="button" data-mode="${attr(v)}"
+            aria-pressed="${getMode() === v}">${esc(label)}</button>`).join('')}
+        </div>
+        <p class="hint">
+          The journal is light by default. “Follow my device” hands the choice to your
+          system setting. Showing <b id="mode-now">${esc(resolvedMode())}</b> right now.
+        </p>
+
         ${preview()}
 
         <h2 class="form-heading">Starting points</h2>
@@ -173,6 +184,21 @@ export function customizeView() {
         const label = row.querySelector('label');
         if (label) label.insertAdjacentHTML('beforeend', ' <span class="token-dirty" title="Changed">•</span>');
       };
+
+      /* ---- appearance ---- */
+      const modeSeg = root.querySelector('#mode-seg');
+      modeSeg.querySelectorAll('[data-mode]').forEach((btn) => {
+        btn.onclick = async () => {
+          await setMode(btn.dataset.mode);
+          modeSeg.querySelectorAll('[data-mode]').forEach((b) => {
+            b.setAttribute('aria-pressed', String(b.dataset.mode === btn.dataset.mode));
+          });
+          const now = root.querySelector('#mode-now');
+          if (now) now.textContent = resolvedMode();
+          repaintPreview();
+          toast(`Appearance: ${esc(btn.textContent.trim().toLowerCase())}.`, 'good', 1800);
+        };
+      });
 
       /* ---- token controls ---- */
       root.querySelectorAll('[data-token]').forEach((row) => {

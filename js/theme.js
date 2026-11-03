@@ -271,9 +271,19 @@ export const PRESETS = {
 
 /* ------------------------------------------------------ state + apply ---- */
 
+// 'light' is the default on purpose: Porcelain is the house ground, and the
+// dark palette is opt-in rather than something the operating system imposes.
+export const MODES = [
+  ['light', 'Always light'],
+  ['dark', 'Always dark'],
+  ['system', 'Follow my device'],
+];
+export const DEFAULT_MODE = 'light';
+
 const state = {
   tokens: {},
   content: { ...CONTENT_DEFAULTS },
+  mode: DEFAULT_MODE,
   loaded: false,
 };
 
@@ -292,6 +302,38 @@ function notify() {
 
 export function getTokens() { return { ...state.tokens }; }
 export function getContent() { return { ...state.content }; }
+export function getMode() { return state.mode; }
+
+/** The palette actually in force once 'system' is resolved. */
+export function resolvedMode() {
+  if (state.mode === 'dark') return 'dark';
+  if (state.mode === 'system') {
+    try {
+      return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch (_) { return 'light'; }
+  }
+  return 'light';
+}
+
+function applyMode() {
+  document.documentElement.dataset.theme = resolvedMode();
+}
+
+// Only react to the device while the viewer has actually asked us to.
+try {
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  const onSystemChange = () => { if (state.mode === 'system') { applyMode(); notify(); } };
+  if (mq.addEventListener) mq.addEventListener('change', onSystemChange);
+  else if (mq.addListener) mq.addListener(onSystemChange);
+} catch (_) { /* no matchMedia — light stands */ }
+
+export async function setMode(mode) {
+  state.mode = MODES.some(([v]) => v === mode) ? mode : DEFAULT_MODE;
+  applyMode();
+  notify();
+  await persist();
+  return state.mode;
+}
 
 /** One content string, with {year} substituted. Views use this for headings. */
 export function t(key, year) {
@@ -310,7 +352,7 @@ export function isOverridden(name) {
   return Object.prototype.hasOwnProperty.call(state.tokens, name);
 }
 
-function applyTokens() {
+function applyTokensOnly() {
   const root = document.documentElement;
   // Clear everything we might have set, then re-apply — so removing an
   // override really does fall back to the stylesheet.
@@ -333,6 +375,11 @@ export function applyContent(year) {
   document.documentElement.dataset.siteName = name;
 }
 
+function applyTokens() {
+  applyTokensOnly();
+  applyMode();
+}
+
 export function apply(year) {
   applyTokens();
   applyContent(year);
@@ -350,7 +397,8 @@ function readLocal() {
 function writeLocal() {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify({
-      tokens: state.tokens, content: state.content, updatedAt: new Date().toISOString(),
+      tokens: state.tokens, content: state.content, mode: state.mode,
+      updatedAt: new Date().toISOString(),
     }));
   } catch (_) { /* Private Browsing — IndexedDB is still the real store */ }
 }
@@ -359,6 +407,7 @@ function adopt(payload) {
   if (!payload || typeof payload !== 'object') return false;
   state.tokens = (payload.tokens && typeof payload.tokens === 'object') ? { ...payload.tokens } : {};
   state.content = { ...CONTENT_DEFAULTS, ...(payload.content || {}) };
+  state.mode = MODES.some(([v]) => v === payload.mode) ? payload.mode : DEFAULT_MODE;
   return true;
 }
 
@@ -400,6 +449,7 @@ function persist() {
         id: META_ID,
         tokens: state.tokens,
         content: state.content,
+        mode: state.mode,
         updatedAt: new Date().toISOString(),
       });
     } catch (_) { /* local copy still holds */ }
@@ -447,6 +497,7 @@ export async function applyPreset(id, year) {
 export async function reset(year) {
   state.tokens = {};
   state.content = { ...CONTENT_DEFAULTS };
+  state.mode = DEFAULT_MODE;
   applyTokens();
   applyContent(year);
   notify();
@@ -462,6 +513,7 @@ export function exportJson() {
     exportedAt: new Date().toISOString(),
     tokens: state.tokens,
     content: state.content,
+    mode: state.mode,
   }, null, 2);
 }
 
@@ -502,6 +554,7 @@ export async function importJson(text, year) {
 
   state.tokens = tokens;
   state.content = { ...CONTENT_DEFAULTS, ...(data.content || {}) };
+  state.mode = MODES.some(([v]) => v === data.mode) ? data.mode : DEFAULT_MODE;
   applyTokens();
   applyContent(year);
   notify();
@@ -512,7 +565,10 @@ export async function importJson(text, year) {
 /* -------------------------------------------- backup integration --------- */
 
 export function snapshot() {
-  return { id: META_ID, tokens: state.tokens, content: state.content, updatedAt: new Date().toISOString() };
+  return {
+    id: META_ID, tokens: state.tokens, content: state.content,
+    mode: state.mode, updatedAt: new Date().toISOString(),
+  };
 }
 
 /** Adopt a theme row that arrived in a device backup. */

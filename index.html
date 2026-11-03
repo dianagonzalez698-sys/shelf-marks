@@ -12,8 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Lit Picks">
 <meta name="format-detection" content="telephone=no">
-<meta name="theme-color" content="#f8f0e4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#231a18" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f8f0e4">
 
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/icon-180.png">
@@ -31,15 +30,24 @@
    flashes the defaults. theme.js is the source of truth; this only replays
    the last known values from localStorage. */
 (function () {
+  var root = document.documentElement;
+  var mode = 'light';   // Porcelain is the default ground
   try {
-    const raw = localStorage.getItem('lit-picks-theme');
-    if (!raw) return;
-    const saved = JSON.parse(raw);
-    const root = document.documentElement;
-    Object.entries(saved.tokens || {}).forEach(([k, v]) => {
-      if (typeof v === 'string' && v) root.style.setProperty(k, v);
-    });
+    var raw = localStorage.getItem('lit-picks-theme');
+    if (raw) {
+      var saved = JSON.parse(raw);
+      if (saved.mode === 'dark' || saved.mode === 'system') mode = saved.mode;
+      Object.keys(saved.tokens || {}).forEach(function (k) {
+        var v = saved.tokens[k];
+        if (typeof v === 'string' && v) root.style.setProperty(k, v);
+      });
+    }
   } catch (_) { /* a bad cache must never stop the app booting */ }
+  try {
+    root.dataset.theme = (mode === 'dark'
+      || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches))
+      ? 'dark' : 'light';
+  } catch (_) { root.dataset.theme = 'light'; }
 })();
 </script>
 </head>
