@@ -93,6 +93,9 @@ export const THEME_SCHEMA = [
       { var: '--c-accent-deep', label: 'Accent — pressed', type: 'color' },
       { var: '--c-accent-soft', label: 'Accent tint', type: 'color' },
       { var: '--c-sage', label: 'Success / complete', type: 'color' },
+      { var: '--c-rose-ink', label: 'Rose text', type: 'color' },
+      { var: '--c-blue-ink', label: 'Blue text', type: 'color' },
+      { var: '--c-gold-ink', label: 'Gold text', type: 'color' },
     ],
   },
   {
@@ -102,6 +105,9 @@ export const THEME_SCHEMA = [
       { var: '--c-banner-bg', label: 'Banner background', type: 'color' },
       { var: '--c-banner-ink', label: 'Banner text', type: 'color' },
       { var: '--c-banner-ink-dim', label: 'Banner secondary text', type: 'color' },
+      { var: '--c-banner-accent', label: 'Banner title colour', type: 'color' },
+      { var: '--banner-swash-display', label: 'Script initial', type: 'select', options: [['inline-block', 'Show'], ['none', 'Hide']] },
+      { var: '--banner-swash-scale', label: 'Script initial size', type: 'number', min: 1, max: 3.2, step: .05 },
       { var: '--h-banner', label: 'Banner height', type: 'length', min: 100, max: 520, step: 5, unit: 'px', fluid: true, approx: 240 },
       { var: '--fs-banner-title', label: 'Banner title size', type: 'length', min: 1.6, max: 8, step: .1, unit: 'rem', fluid: true, approx: 4.4 },
       { var: '--fs-banner-eyebrow', label: 'Eyebrow size', type: 'length', min: .5, max: 1.2, step: .01, unit: 'rem' },
@@ -129,6 +135,8 @@ export const THEME_SCHEMA = [
       { var: '--lh-body', label: 'Body line height', type: 'number', min: 1.2, max: 2.1, step: .02 },
       { var: '--lh-display', label: 'Display line height', type: 'number', min: .9, max: 1.5, step: .02 },
       { var: '--tt-label', label: 'Label case', type: 'select', options: [['uppercase', 'Small caps'], ['none', 'Sentence case']] },
+      { var: '--tt-display', label: 'Headline case', type: 'select', options: [['uppercase', 'All caps'], ['none', 'Mixed case']] },
+      { var: '--ls-display', label: 'Headline letterspacing', type: 'length', min: 0, max: .25, step: .005, unit: 'em' },
     ],
   },
   {
@@ -362,6 +370,33 @@ function applyTokensOnly() {
   });
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+/**
+ * The banner title's first letter is set in the script face, as in the
+ * reference where the swash C *is* the C. It stays inline and is not
+ * duplicated, so the title still reads and copies as plain text.
+ */
+function renderBannerTitle(node, text) {
+  const first = text.trim().charAt(0);
+  const swashOn = getComputedStyle(document.documentElement)
+    .getPropertyValue('--banner-swash-display').trim() !== 'none';
+
+  if (!first || !swashOn || !/[a-z]/i.test(first)) {
+    node.classList.remove('has-swash');
+    node.textContent = text;
+    return;
+  }
+  node.classList.add('has-swash');
+  node.innerHTML =
+    `<span class="banner-swash">${escapeHtml(first)}</span>`
+    + `<span class="banner-title-rest">${escapeHtml(text.trim().slice(1))}</span>`;
+}
+
 /** Fill every [data-content] node, substituting {year}. */
 export function applyContent(year) {
   const y = year || new Date().getFullYear();
@@ -369,7 +404,9 @@ export function applyContent(year) {
     const key = node.dataset.content;
     const value = state.content[key];
     if (typeof value !== 'string') return;
-    node.textContent = value.replace(/\{year\}/g, y);
+    const text = value.replace(/\{year\}/g, y);
+    if (key === 'bannerTitle') renderBannerTitle(node, text);
+    else node.textContent = text;
   });
   const name = state.content.siteName || CONTENT_DEFAULTS.siteName;
   document.documentElement.dataset.siteName = name;

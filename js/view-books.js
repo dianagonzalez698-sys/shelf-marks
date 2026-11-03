@@ -40,14 +40,15 @@ function bookRow(book) {
   if (book.pages) bits.push(`${book.pages} pp`);
   if (book.series) bits.push(book.series);
 
+  // One palette colour per flag, so the shelf reads at a glance.
   const tags = [];
   tags.push(book.format === 'nonfiction'
     ? '<span class="tag tag-sage">Nonfiction</span>'
-    : '<span class="tag">Fiction</span>');
-  if (book.isClassic) tags.push('<span class="tag tag-accent">Classic</span>');
-  if (book.isReread) tags.push('<span class="tag">Re-read</span>');
-  if (book.isTbr) tags.push('<span class="tag">Physical TBR</span>');
-  (book.tags || []).forEach((x) => tags.push(`<span class="tag">${esc(x)}</span>`));
+    : '<span class="tag tag-accent">Fiction</span>');
+  if (book.isClassic) tags.push('<span class="tag tag-rose">Classic</span>');
+  if (book.isReread) tags.push('<span class="tag tag-blue">Re-read</span>');
+  if (book.isTbr) tags.push('<span class="tag tag-gold">Physical TBR</span>');
+  (book.tags || []).forEach((x) => tags.push(`<span class="tag tag-plain">${esc(x)}</span>`));
 
   return `<article class="list-row">
     <a class="list-row-link" href="#/book/${encodeURIComponent(book.id)}">

@@ -11,7 +11,7 @@ import { t } from './theme.js';
 import { focusQuarter, focusBimonth, daysLeftLabel, todayISO, formatDate } from './periods.js';
 
 /** One editorial goal statistic: label, big numeral, hairline bar, footnotes. */
-function goal({ label, stat, of, pct, left, right, done }) {
+function goal({ label, stat, of, pct, left, right, done, tone }) {
   const over = pct > 100;
   return `<div class="goal">
     <div class="goal-head">
@@ -21,7 +21,7 @@ function goal({ label, stat, of, pct, left, right, done }) {
       </div>
       <span class="goal-pct${over ? ' over' : ''}">${pct}%</span>
     </div>
-    ${progressBar(pct, { done })}
+    ${progressBar(pct, { done, tone })}
     <div class="goal-foot"><span>${esc(left)}</span><span>${esc(right)}</span></div>
   </div>`;
 }
@@ -172,6 +172,7 @@ export function homeView() {
             left: daysLeftLabel(annual.period),
             right: annual.pct > 100 ? `${annual.read - annual.goal} past goal` : `${annual.remaining} to go`,
             done: annual.pct >= 100,
+            tone: 'apricot',
           })}
           ${goal({
             label: q.label,
@@ -181,6 +182,7 @@ export function homeView() {
             left: daysLeftLabel(q),
             right: quarter.pct > 100 ? `${quarter.read - quarter.goal} past goal` : `${quarter.remaining} to go`,
             done: quarter.pct >= 100,
+            tone: 'blue',
           })}
           ${goal({
             label: 'Nonfiction',
@@ -190,6 +192,7 @@ export function homeView() {
             left: nf.total ? `${nf.nonfiction} of ${nf.total} books · goal ${nf.targetPct}%` : 'No books logged yet',
             right: nf.total ? (nf.onTrack ? 'on track' : `${nf.needed} more to catch up`) : '',
             done: nf.onTrack && nf.total > 0,
+            tone: 'gold',
           })}
         </div>
       </section>

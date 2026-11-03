@@ -108,6 +108,18 @@ Also `--c-ink-soft` / `--c-ink-faint` (secondary and caption text),
 `--c-rose`, `--c-blue`, `--c-terracotta`, `--c-gold`, `--c-sage` for ornament,
 and `--c-bm1-bg` … `--c-bm6-ink` for the six bookmark colourways.
 
+**Where the colour shows up.** Each goal bar takes its own hue (annual =
+Burnt Apricot, quarter = Powder Blue, nonfiction = Honey Ochre) via the
+`.bar-apricot` / `.bar-blue` / `.bar-gold` / `.bar-rose` / `.bar-sage`
+modifiers — pass `tone` to `progressBar()` or `progressLine()`. Book flags are
+colour-coded the same way: Fiction apricot, Classic rose, Re-read blue,
+Physical TBR gold, Nonfiction sage.
+
+**Text vs. fill.** Lighter swatches get a deepened `*-ink` variant for text
+(`--c-rose-ink`, `--c-blue-ink`, `--c-gold-ink`) while the literal hue stays on
+the dot beside it and on bars and bookmarks. That is the rule throughout: full
+strength where nothing must be read, deepened where something must.
+
 ### Light and dark
 
 **The journal is light by default** — Porcelain is the house ground, and the
@@ -127,14 +139,27 @@ export, and rides inside the ordinary device backup.
 ### Typography
 
 ```css
---f-script:  'Pinyon Script', …;      /* the wordmark */
---f-display: 'Cormorant Garamond', …; /* headings, big numerals */
---f-body:    'EB Garamond', …;        /* reading text */
---f-ui:      'EB Garamond', …;        /* labels, navigation, buttons */
+--f-script:  'Pinyon Script', …;  /* wordmark, and the banner's swash initial */
+--f-display: 'Bodoni Moda', …;    /* headlines, set in caps */
+--f-body:    'EB Garamond', …;    /* reading text */
+--f-ui:      'Jost', …;           /* letterspaced small caps, nav, buttons */
 ```
 
+Four faces, each with a job: a high-contrast Didone for display, a geometric
+sans for the letterspaced labels, a formal script for the wordmark and the
+banner initial, and a warm serif for anything read at length.
+
 Sizes are `--fs-*`, weights `--fw-*`, letterspacing `--ls-*`, line heights
-`--lh-*`. `--tt-label` flips every small-caps label to sentence case.
+`--lh-*`. `--tt-label` flips small-caps labels to sentence case and
+`--tt-display` does the same for headlines — set it to `none` to put the
+display face back into mixed case.
+
+**The banner's script initial.** The first letter of the banner title is set
+in the script face — it *is* the letter, not an overlay, so the title still
+reads and copies as plain text. `--banner-swash-display: none` turns it off;
+`--banner-swash-scale` sizes it. `--c-banner-accent` colours the title and the
+initial (brightened Honey Ochre by default — display sizes only, since at
+label size it falls under the contrast floor).
 
 To use a different webfont, add it to the Google Fonts `<link>` in
 `index.html`, then add the stack to `FONT_STACKS` in `js/theme.js` so it shows

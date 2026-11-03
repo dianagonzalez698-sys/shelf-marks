@@ -237,18 +237,18 @@ export function coverImg(book, { big = false, lazy = true } = {}) {
 
 /* ------------------------------------------------------------- progress ---- */
 
-export function progressBar(pct, { done = false } = {}) {
+export function progressBar(pct, { done = false, tone = '' } = {}) {
   const width = Math.max(0, Math.min(100, pct));
-  return `<div class="bar${done ? ' done' : ''}" role="img" aria-label="${pct}% complete">
+  return `<div class="bar${done ? ' done' : ''}${tone ? ` bar-${tone}` : ''}" role="img" aria-label="${pct}% complete">
     <div class="bar-fill" style="width:${width}%"></div>
   </div>`;
 }
 
 /** The reference's inline progress row: caption — hairline bar — percentage. */
-export function progressLine(label, pct, { done = false } = {}) {
+export function progressLine(label, pct, { done = false, tone = '' } = {}) {
   return `<div class="progress-line">
     <span class="progress-label">${esc(label)}</span>
-    ${progressBar(pct, { done })}
+    ${progressBar(pct, { done, tone })}
     <span class="progress-pct">${pct}%</span>
   </div>`;
 }

@@ -42,6 +42,11 @@
   --c-banner-bg:     #536e50;   /* Olive Velvet */
   --c-banner-ink:    #f8f0e4;   /* Porcelain */
   --c-banner-ink-dim:#e6ece1;   /* the eyebrow is small — it needs the lift */
+  /* Honey Ochre brightened, for the banner title and its swash. Display sizes
+     only — at label size it would fall under the contrast floor. */
+  --c-banner-accent: #f0cc7f;
+  --banner-swash-display: inline-block;
+  --banner-swash-scale:   1.9;   /* multiple of the title size */
 
   /* accent — Burnt Apricot, deepened so links and buttons stay legible.
      The literal #d4763c lives on the bookmarks, where it carries no text. */
@@ -56,6 +61,12 @@
   --c-terracotta:    #d4763c;   /* Burnt Apricot */
   --c-gold:          #e0b35a;   /* Honey Ochre */
   --c-sage:          #536e50;   /* Olive Velvet — also "complete" */
+
+  /* Text-safe versions of the lighter swatches. The literal hues stay for
+     fills and dots, where nothing has to be read against them. */
+  --c-rose-ink:      #a14a52;
+  --c-blue-ink:      #44648f;
+  --c-gold-ink:      #8a6420;
 
   --c-danger:        #8e2f2f;
   --c-danger-soft:   #f3dfdc;
@@ -77,17 +88,20 @@
   --paper-texture-opacity: .5;
 
   /* --- 2. TYPOGRAPHY ---------------------------------------------------- */
+  /* A high-contrast Didone for display, a geometric sans for the letterspaced
+     small caps, a formal script for the wordmark and the swash initial, and a
+     warm serif for anything you actually have to read at length. */
   --f-script:  'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive;
-  --f-display: 'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
+  --f-display: 'Bodoni Moda', 'Didot', 'Playfair Display', 'Times New Roman', serif;
   --f-body:    'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
-  --f-ui:      'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
+  --f-ui:      'Jost', 'Futura', -apple-system, 'Helvetica Neue', Arial, sans-serif;
 
   --fs-wordmark:       clamp(1.42rem, 3.4vw, 1.9rem);
   --fs-nav:            0.70rem;
   --fs-banner-eyebrow: 0.70rem;
-  --fs-banner-title:   clamp(2.9rem, 8.5vw, 5.6rem);
+  --fs-banner-title:   clamp(2rem, 6.6vw, 4.6rem);
   --fs-banner-sub:     clamp(0.95rem, 1.7vw, 1.12rem);
-  --fs-display:        clamp(2.1rem, 5.2vw, 3.1rem);  /* section headline */
+  --fs-display:        clamp(1.5rem, 3.6vw, 2.3rem);  /* section headline */
   --fs-h2:             1.42rem;
   --fs-h3:             1.08rem;
   --fs-body:           1.02rem;
@@ -96,6 +110,7 @@
   --fs-label:          0.70rem;   /* letterspaced small caps */
   --fs-stat:           clamp(1.7rem, 3.4vw, 2.05rem); /* big numerals */
 
+  --tt-display:  uppercase;  /* `none` returns display headings to mixed case */
   --fw-display:  500;
   --fw-heading:  600;
   --fw-body:     400;
@@ -105,7 +120,7 @@
   --ls-nav:      0.18em;
   --ls-label:    0.16em;
   --ls-eyebrow:  0.34em;
-  --ls-display:  0.004em;
+  --ls-display:  0.045em;   /* caps need air */
   --ls-body:     0.002em;
 
   --lh-display:  1.04;
@@ -186,6 +201,10 @@
   --c-accent-deep:   #e89155;
   --c-sage:          #8fa58b;   /* Wallpaper Sage carries better here */
   --c-success:       #8fa58b;
+  /* On the dark ground the palette reads at full strength. */
+  --c-rose-ink:      #c9787e;
+  --c-blue-ink:      #7d9fcf;
+  --c-gold-ink:      #e0b35a;
   --c-danger:        #e08880;
   --c-danger-soft:   #3a2220;
   --c-bm-empty-bg:   #281e1b;
@@ -348,15 +367,33 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
   color: var(--c-banner-ink-dim);
 }
 .banner-title {
-  margin: 0;
+  position: relative;
+  margin: .1em 0 .12em;
   font-family: var(--f-display);
   font-size: var(--fs-banner-title);
   font-weight: var(--fw-display);
-  font-style: italic;
   line-height: var(--lh-display);
   letter-spacing: var(--ls-display);
-  color: var(--c-banner-ink);
+  text-transform: var(--tt-display);
+  color: var(--c-banner-accent);
+  text-wrap: balance;
 }
+
+/* The flourished initial. It sits inline and *is* the first letter — the
+   title is never duplicated, so it copies and reads as plain text. Setting
+   --banner-swash-display to `none` falls back to a plain capital. */
+.banner-swash {
+  font-family: var(--f-script);
+  font-size: calc(1em * var(--banner-swash-scale));
+  font-weight: 400;
+  font-style: normal;
+  line-height: .6;            /* keep the tall script off the eyebrow above */
+  letter-spacing: 0;
+  text-transform: none;
+  margin-right: -.06em;
+  vertical-align: -.1em;
+}
+.banner-swash, .banner-title-rest { display: inline; }
 .banner-sub {
   margin: 0;
   font-family: var(--f-body);
@@ -414,6 +451,7 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
   font-weight: var(--fw-display);
   line-height: var(--lh-heading);
   letter-spacing: var(--ls-display);
+  text-transform: var(--tt-display);
   margin: 0;
 }
 .section-sub { font-style: italic; color: var(--c-ink-soft); margin: .2rem 0 0; font-size: var(--fs-body); }
@@ -500,6 +538,15 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
   transition: width .5s var(--ease);
 }
 .bar.done .bar-fill { background: var(--c-sage); }
+
+/* Tone modifiers, so each measure gets its own colour from the palette.
+   These are decorative fills, so the full-strength hues are safe here. */
+.bar-apricot   .bar-fill { background: var(--c-terracotta); }
+.bar-blue      .bar-fill { background: var(--c-blue); }
+.bar-gold      .bar-fill { background: var(--c-gold); }
+.bar-rose      .bar-fill { background: var(--c-rose); }
+.bar-sage      .bar-fill { background: var(--c-bm1-bg); }
+.bar-olive     .bar-fill { background: var(--c-sage); }
 
 /* the reference's inline progress line: label — bar — percentage */
 .progress-line { display: flex; align-items: center; gap: clamp(.9rem, 3vw, 2rem); margin-top: 1.1rem; }
@@ -695,6 +742,24 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
 }
 .tag-accent { color: var(--c-accent); }
 .tag-sage   { color: var(--c-sage); }
+.tag-rose   { color: var(--c-rose-ink); --tag-dot: var(--c-rose); }
+.tag-blue   { color: var(--c-blue-ink); --tag-dot: var(--c-blue); }
+.tag-gold   { color: var(--c-gold-ink); --tag-dot: var(--c-gold); }
+.tag-accent { --tag-dot: var(--c-terracotta); }
+.tag-sage   { --tag-dot: var(--c-bm1-bg); }
+
+/* The little colour dot that precedes a tag, at full palette strength. */
+.tag::before {
+  content: '';
+  display: inline-block;
+  width: .42em; height: .42em;
+  margin-right: .45em;
+  border-radius: 50%;
+  background: var(--tag-dot, currentColor);
+  vertical-align: .08em;
+  opacity: .85;
+}
+.tag-plain::before { display: none; }
 
 /* checklist rows (this period / challenge periods) */
 .checklist { display: grid; grid-template-columns: minmax(0, 1fr); }
