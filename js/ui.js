@@ -14,10 +14,6 @@ export function attr(value) {
   return esc(value);
 }
 
-export function plural(n, one, many) {
-  return `${n} ${n === 1 ? one : (many || one + 's')}`;
-}
-
 /* --------------------------------------------------------------- toasts ---- */
 
 export function toast(message, kind = '', ms = 3200) {

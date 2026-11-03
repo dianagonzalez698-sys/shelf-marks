@@ -16,14 +16,6 @@ export function onStorageError(fn) {
   return () => errorListeners.delete(fn);
 }
 
-export function getStorageError() {
-  return lastError;
-}
-
-export function clearStorageError() {
-  lastError = null;
-}
-
 function reportError(message, err) {
   lastError = { message, detail: err ? String(err.message || err) : '' };
   if (err) console.error('[shelf-marks]', message, err);

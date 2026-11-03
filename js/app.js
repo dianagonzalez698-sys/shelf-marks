@@ -50,12 +50,16 @@ async function boot() {
   startRouter();
 
   if ('serviceWorker' in navigator) {
-    // Registered after first paint so a stale worker can never block startup.
-    window.addEventListener('load', () => {
+    // Register after first paint so a stale worker can never block startup —
+    // but boot() awaits the database first, so `load` has often already fired
+    // by now and a plain listener would never run.
+    const register = () => {
       navigator.serviceWorker.register('./sw.js').catch(() => {
         /* offline support is a bonus, not a requirement */
       });
-    });
+    };
+    if (document.readyState === 'complete') register();
+    else window.addEventListener('load', register, { once: true });
   }
 }
 
