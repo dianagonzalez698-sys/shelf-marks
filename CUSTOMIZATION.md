@@ -11,6 +11,12 @@ They are the same values. The studio writes overrides as inline custom
 properties on `<html>`; the stylesheet holds the defaults underneath. **Reset
 to defaults** removes the overrides, so the two can never drift apart.
 
+> **If you change a colour that carries text, check it.** The defaults are all
+> at or above 4.5:1 against their background in both light and dark mode.
+> Several palette colours are too light to hold small type on Porcelain —
+> Honey Ochre is 1.7:1, Wallpaper Sage 2.3:1, Powder Blue 2.4:1. They are
+> lovely as grounds and ornament; they are not text colours.
+
 ---
 
 ## 1. The Design Studio
@@ -31,9 +37,17 @@ A dot (•) next to a control means you've changed it from the default.
 
 ### Starting points
 
-Four presets: **Sage & Parchment** (the house style), **Oxblood Library**,
-**Ink & Ivory**, **Bodoni Editorial**. A preset replaces all colour and type
-overrides. It never touches your books, challenges or bookmarks.
+Six presets:
+
+- **A Reading Room** — the house style (clears every override)
+- **Velvet Library** — Mahogany banner, Olive Velvet accent; the same palette inverted
+- **Powder & Rose** — Powder Blue above, Faded Rose beneath
+- **Sage & Parchment** — the journal's first look, kept so you can go back
+- **Ink & Ivory** — almost monochrome
+- **Bodoni Editorial** — type only; keeps whatever colours you're on
+
+A preset replaces all colour and type overrides. It never touches your books,
+challenges or bookmarks.
 
 ### Keeping and sharing a design
 
@@ -57,17 +71,41 @@ components only ever say `var(--…)`.
 
 ### Colour
 
+The house palette is **"A Reading Room in Color"**:
+
+| | Hex | Where it lives |
+|---|---|---|
+| Porcelain | `#F8F0E4` | the page (`--c-bg`) |
+| Mahogany | `#4B2828` | all type (`--c-ink`), bookmark 2 |
+| Olive Velvet | `#536E50` | the banner (`--c-banner-bg`), "complete" |
+| Wallpaper Sage | `#8FA58B` | bookmark 1 |
+| Burnt Apricot | `#D4763C` | bookmark 3, and the accent's parent colour |
+| Powder Blue | `#7D9FCF` | bookmark 4 |
+| Faded Rose | `#C9787E` | bookmark 5 |
+| Honey Ochre | `#E0B35A` | bookmark 6, ink on Mahogany |
+
 ```css
---c-bg: #f6f1e6;        /* warm ivory page */
---c-ink: #342a21;       /* deep espresso text */
---c-accent: #7b2b2b;    /* oxblood: progress, selected states */
---c-banner-bg: #8b9a7b; /* the sage editorial banner */
---c-rule: #ddd3c1;      /* hairlines */
+--c-bg: #f8f0e4;        /* Porcelain */
+--c-ink: #4b2828;       /* Mahogany */
+--c-banner-bg: #536e50; /* Olive Velvet */
+--c-accent: #a8482a;    /* Burnt Apricot, deepened — see below */
+--c-rule: #e3d6c3;      /* Porcelain pulled toward Mahogany */
 ```
 
+Two notes on how the palette was fitted to the interface:
+
+- **The accent is a deepened Burnt Apricot (`#a8482a`), not the literal
+  `#d4763c`.** At its true value Burnt Apricot only reaches 2.9:1 against
+  Porcelain — too light for links, the current nav item and button text. The
+  literal hex is used on the bookmarks, where it carries no small type.
+- **The banner is Olive Velvet, not Wallpaper Sage.** Sage gives the small
+  letterspaced eyebrow only 2.3:1; Olive Velvet gives it 5.0:1. If you prefer
+  the lighter green, change `--c-banner-bg` to `#8fa58b` and raise
+  `--c-banner-ink` to pure white — and accept the softer eyebrow.
+
 Also `--c-ink-soft` / `--c-ink-faint` (secondary and caption text),
-`--c-rose`, `--c-blue`, `--c-terracotta`, `--c-gold`, `--c-sage` for accents,
-and `--c-bm1-bg` … `--c-bm6-ink` for the bookmark colourways.
+`--c-rose`, `--c-blue`, `--c-terracotta`, `--c-gold`, `--c-sage` for ornament,
+and `--c-bm1-bg` … `--c-bm6-ink` for the six bookmark colourways.
 
 Dark mode re-tints the same names inside
 `@media (prefers-color-scheme: dark)`. Components never change.

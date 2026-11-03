@@ -16,56 +16,64 @@
 
 :root {
   /* --- 1. COLOUR -------------------------------------------------------- */
-  /* surfaces */
-  --c-bg:            #f6f1e6;   /* warm ivory / parchment */
-  --c-bg-sunk:       #efe8d9;   /* faint recess, table stripes */
-  --c-bg-raised:     #fdfaf3;   /* panels that lift off the page */
-  --c-bg-field:      #fdfaf3;   /* inputs */
+  /* Palette: "A Reading Room in Color".
+     Porcelain #F8F0E4 · Wallpaper Sage #8FA58B · Olive Velvet #536E50
+     Faded Rose #C9787E · Powder Blue #7D9FCF · Burnt Apricot #D4763C
+     Honey Ochre #E0B35A · Mahogany #4B2828
+     The eight swatches carry the character; the greys between them are mixed
+     from Porcelain and Mahogany so the whole page stays in one family. */
 
-  /* ink */
-  --c-ink:           #342a21;   /* deep espresso — primary type */
-  --c-ink-soft:      #5e5042;   /* secondary */
-  --c-ink-faint:     #8d7f6e;   /* captions, metadata */
+  /* surfaces — Porcelain and two neighbours */
+  --c-bg:            #f8f0e4;   /* Porcelain */
+  --c-bg-sunk:       #efe3d2;   /* a shade deeper, for recesses */
+  --c-bg-raised:     #fdf8f0;   /* a shade lighter, for panels */
+  --c-bg-field:      #fdf8f0;
 
-  /* lines */
-  --c-rule:          #ddd3c1;   /* hairlines */
-  --c-rule-strong:   #c6b9a3;   /* emphasised rules, input borders */
+  /* ink — Mahogany, lightened twice */
+  --c-ink:           #4b2828;   /* Mahogany */
+  --c-ink-soft:      #6e4a44;
+  --c-ink-faint:     #85625a;   /* kept just past 4.5:1 on Porcelain */
 
-  /* the sage editorial banner */
-  --c-banner-bg:     #8b9a7b;
-  --c-banner-ink:    #fbf8f0;
-  --c-banner-ink-dim:#e6e9db;
+  /* lines — Porcelain pulled toward Mahogany */
+  --c-rule:          #e3d6c3;
+  --c-rule-strong:   #c9b79e;
 
-  /* accent — oxblood, used for progress and selected states */
-  --c-accent:        #7b2b2b;
-  --c-accent-ink:    #fbf8f0;
-  --c-accent-soft:   #f0e2de;
-  --c-accent-deep:   #5e1f1f;
+  /* the editorial banner — Olive Velvet, the one green that holds small text */
+  --c-banner-bg:     #536e50;   /* Olive Velvet */
+  --c-banner-ink:    #f8f0e4;   /* Porcelain */
+  --c-banner-ink-dim:#e6ece1;   /* the eyebrow is small — it needs the lift */
 
-  /* occasional accents */
-  --c-rose:          #c08a7e;
-  --c-blue:          #8097ab;
-  --c-terracotta:    #c0714a;
-  --c-gold:          #a98545;
-  --c-sage:          #7d8f6e;
+  /* accent — Burnt Apricot, deepened so links and buttons stay legible.
+     The literal #d4763c lives on the bookmarks, where it carries no text. */
+  --c-accent:        #a8482a;
+  --c-accent-ink:    #fdf6ee;
+  --c-accent-soft:   #f3e0d4;
+  --c-accent-deep:   #8a3820;
 
-  --c-danger:        #8c2f24;
-  --c-danger-soft:   #f3e2de;
-  --c-success:       #5a7355;
+  /* the rest of the palette, for ornament */
+  --c-rose:          #c9787e;   /* Faded Rose */
+  --c-blue:          #7d9fcf;   /* Powder Blue */
+  --c-terracotta:    #d4763c;   /* Burnt Apricot */
+  --c-gold:          #e0b35a;   /* Honey Ochre */
+  --c-sage:          #536e50;   /* Olive Velvet — also "complete" */
 
-  /* bookmark palette — six variants, each a ground + a pattern ink */
-  --c-bm1-bg: #8b9a7b;  --c-bm1-ink: #f2efe2;   /* sage       */
-  --c-bm2-bg: #7b2b2b;  --c-bm2-ink: #d8ae72;   /* oxblood    */
-  --c-bm3-bg: #c0714a;  --c-bm3-ink: #f6e7d5;   /* terracotta */
-  --c-bm4-bg: #8097ab;  --c-bm4-ink: #f1f0e6;   /* faded blue */
-  --c-bm5-bg: #c08a7e;  --c-bm5-ink: #f8ece6;   /* dusty rose */
-  --c-bm6-bg: #a98545;  --c-bm6-ink: #f7f0dd;   /* ochre      */
-  --c-bm-empty-bg:   #faf6ec;   /* uncollected ground */
-  --c-bm-empty-rule: #c9bda8;   /* uncollected outline */
-  --c-bm-cord:       #7b2b2b;   /* the little hanging cord */
+  --c-danger:        #8e2f2f;
+  --c-danger-soft:   #f3dfdc;
+  --c-success:       #536e50;
 
-  --shadow-soft: 0 1px 2px rgba(52, 42, 33, .04);
-  --shadow-sheet: 0 -8px 40px rgba(40, 31, 23, .18);
+  /* bookmark palette — the six character colours, each with a legible ink */
+  --c-bm1-bg: #8fa58b;  --c-bm1-ink: #f8f0e4;   /* Wallpaper Sage */
+  --c-bm2-bg: #4b2828;  --c-bm2-ink: #e0b35a;   /* Mahogany + Honey Ochre */
+  --c-bm3-bg: #d4763c;  --c-bm3-ink: #f8f0e4;   /* Burnt Apricot */
+  --c-bm4-bg: #7d9fcf;  --c-bm4-ink: #f8f0e4;   /* Powder Blue */
+  --c-bm5-bg: #c9787e;  --c-bm5-ink: #f8f0e4;   /* Faded Rose */
+  --c-bm6-bg: #e0b35a;  --c-bm6-ink: #4b2828;   /* Honey Ochre + Mahogany */
+  --c-bm-empty-bg:   #fcf7ee;
+  --c-bm-empty-rule: #c9b79e;
+  --c-bm-cord:       #a8482a;
+
+  --shadow-soft: 0 1px 2px rgba(75, 40, 40, .05);
+  --shadow-sheet: 0 -8px 40px rgba(50, 26, 26, .20);
   --paper-texture-opacity: .5;
 
   /* --- 2. TYPOGRAPHY ---------------------------------------------------- */
@@ -156,27 +164,30 @@
 /* Dark mode re-tints the same tokens; component CSS never changes. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-force-theme="light"]) {
-    --c-bg:            #1a1713;
-    --c-bg-sunk:       #221d18;
-    --c-bg-raised:     #231e19;
-    --c-bg-field:      #262019;
-    --c-ink:           #f0e8da;
-    --c-ink-soft:      #cbbfae;
-    --c-ink-faint:     #9b8d7b;
-    --c-rule:          #352e26;
-    --c-rule-strong:   #4b4237;
-    --c-banner-bg:     #5c6b4f;
-    --c-banner-ink:    #f4f1e6;
-    --c-banner-ink-dim:#d4d8c6;
-    --c-accent:        #c06a5f;
-    --c-accent-ink:    #1a1713;
-    --c-accent-soft:   #331f1c;
-    --c-accent-deep:   #d98a7c;
-    --c-bm-empty-bg:   #201b16;
-    --c-bm-empty-rule: #4b4237;
-    --c-bm-cord:       #c06a5f;
-    --c-danger:        #d98a7c;
-    --c-danger-soft:   #331f1c;
+    --c-bg:            #231a18;   /* Mahogany, taken down to near-black */
+    --c-bg-sunk:       #2c211e;
+    --c-bg-raised:     #2e2320;
+    --c-bg-field:      #31241f;
+    --c-ink:           #f6ede0;   /* Porcelain */
+    --c-ink-soft:      #d3c2b4;
+    --c-ink-faint:     #a28b7e;
+    --c-rule:          #3d2f2a;
+    --c-rule-strong:   #54423b;
+    --c-banner-bg:     #3e5440;   /* Olive Velvet, deepened */
+    --c-banner-ink:    #f3efe2;
+    --c-banner-ink-dim:#c6d2be;
+    /* On a dark ground Burnt Apricot reads at its true value. */
+    --c-accent:        #d4763c;
+    --c-accent-ink:    #231a18;
+    --c-accent-soft:   #3a251b;
+    --c-accent-deep:   #e89155;
+    --c-sage:          #8fa58b;   /* Wallpaper Sage carries better here */
+    --c-success:       #8fa58b;
+    --c-danger:        #e08880;
+    --c-danger-soft:   #3a2220;
+    --c-bm-empty-bg:   #281e1b;
+    --c-bm-empty-rule: #54423b;
+    --c-bm-cord:       #d4763c;
     --paper-texture-opacity: .22;
     --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, .55);
   }

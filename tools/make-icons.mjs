@@ -12,11 +12,12 @@ import { fileURLToPath } from 'node:url';
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'icons');
 
+// "A Reading Room in Color": Mahogany ground, Porcelain mark, Honey Ochre trim.
 const COLORS = {
-  bg:   [0x2c, 0x38, 0x30],   // deep forest
-  mark: [0xf4, 0xed, 0xe1],   // cream bookmark
-  band: [0xc2, 0x92, 0x4a],   // gold band
-  shelf:[0xa8, 0x80, 0x3c],   // gold shelf line
+  bg:   [0x4b, 0x28, 0x28],   // Mahogany
+  mark: [0xf8, 0xf0, 0xe4],   // Porcelain
+  band: [0xe0, 0xb3, 0x5a],   // Honey Ochre
+  shelf:[0xd4, 0x76, 0x3c],   // Burnt Apricot
 };
 
 /* ----------------------------------------------------------- PNG writer ---- */

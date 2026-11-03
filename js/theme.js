@@ -194,19 +194,55 @@ export const ALL_TOKENS = THEME_SCHEMA.flatMap((g) => g.tokens);
 /* --------------------------------------------------------- presets ------- */
 
 export const PRESETS = {
-  'sage-parchment': {
-    label: 'Sage & Parchment',
-    note: 'The house style.',
+  'reading-room': {
+    label: 'A Reading Room',
+    note: 'The house style — Porcelain, Olive Velvet and Burnt Apricot.',
     tokens: {},
   },
-  'oxblood-library': {
-    label: 'Oxblood Library',
-    note: 'Darker, warmer, more bound-volume.',
+  'velvet-library': {
+    label: 'Velvet Library',
+    note: 'Mahogany banner, olive accent. The same palette, inverted.',
     tokens: {
-      '--c-bg': '#f2ebdd', '--c-bg-raised': '#f8f3e8', '--c-bg-sunk': '#e8dfcc',
-      '--c-ink': '#2c2119', '--c-banner-bg': '#6d3030', '--c-accent': '#8a4a2a',
-      '--c-accent-deep': '#6b3620', '--c-sage': '#6f7f60',
-      '--c-bm1-bg': '#6d3030', '--c-bm2-bg': '#8a6a3a', '--c-bm3-bg': '#4f5f4a',
+      '--c-banner-bg': '#4b2828',
+      '--c-banner-ink': '#f8f0e4',
+      '--c-banner-ink-dim': '#e0b35a',
+      '--c-accent': '#536e50',
+      '--c-accent-deep': '#3e5440',
+      '--c-accent-soft': '#e2e9dd',
+      '--c-bm-cord': '#536e50',
+    },
+  },
+  'powder-and-rose': {
+    label: 'Powder & Rose',
+    note: 'Cooler: Powder Blue above, Faded Rose beneath.',
+    tokens: {
+      '--c-banner-bg': '#4e6fa0',
+      '--c-banner-ink-dim': '#d8e3f2',
+      '--c-accent': '#a8505a',
+      '--c-accent-deep': '#8a3b45',
+      '--c-accent-soft': '#f3dfe1',
+      '--c-bm1-bg': '#7d9fcf', '--c-bm1-ink': '#f8f0e4',
+      '--c-bm2-bg': '#c9787e', '--c-bm2-ink': '#f8f0e4',
+      '--c-bm-cord': '#a8505a',
+    },
+  },
+  'sage-parchment': {
+    label: 'Sage & Parchment',
+    note: 'The journal’s first look, before the Reading Room palette.',
+    tokens: {
+      '--c-bg': '#f6f1e6', '--c-bg-sunk': '#efe8d9', '--c-bg-raised': '#fdfaf3',
+      '--c-bg-field': '#fdfaf3',
+      '--c-ink': '#342a21', '--c-ink-soft': '#5e5042', '--c-ink-faint': '#8d7f6e',
+      '--c-rule': '#ddd3c1', '--c-rule-strong': '#c6b9a3',
+      '--c-banner-bg': '#8b9a7b', '--c-banner-ink': '#fbf8f0', '--c-banner-ink-dim': '#e6e9db',
+      '--c-accent': '#7b2b2b', '--c-accent-deep': '#5e1f1f', '--c-accent-soft': '#f0e2de',
+      '--c-sage': '#7d8f6e', '--c-bm-cord': '#7b2b2b',
+      '--c-bm1-bg': '#8b9a7b', '--c-bm1-ink': '#f2efe2',
+      '--c-bm2-bg': '#7b2b2b', '--c-bm2-ink': '#d8ae72',
+      '--c-bm3-bg': '#c0714a', '--c-bm3-ink': '#f6e7d5',
+      '--c-bm4-bg': '#8097ab', '--c-bm4-ink': '#f1f0e6',
+      '--c-bm5-bg': '#c08a7e', '--c-bm5-ink': '#f8ece6',
+      '--c-bm6-bg': '#a98545', '--c-bm6-ink': '#f7f0dd',
     },
   },
   'ink-and-ivory': {
@@ -218,17 +254,17 @@ export const PRESETS = {
       '--c-accent': '#6a2f2f', '--c-rule': '#e0ddd4', '--c-rule-strong': '#c3bfb3',
       '--c-bm1-bg': '#2f2d28', '--c-bm2-bg': '#6a2f2f', '--c-bm3-bg': '#8a8578',
       '--c-bm4-bg': '#545c63', '--c-bm5-bg': '#a89a88', '--c-bm6-bg': '#3f4a44',
+      '--c-bm6-ink': '#f1f0e6',
     },
   },
   'bodoni-fashion': {
     label: 'Bodoni Editorial',
-    note: 'High-contrast masthead typography.',
+    note: 'Type only — keeps whatever colours you are on.',
     tokens: {
       '--f-display': "'Bodoni Moda', 'Didot', 'Times New Roman', serif",
       '--f-ui': "'Jost', -apple-system, 'Helvetica Neue', Arial, sans-serif",
       '--fw-display': '400',
       '--ls-nav': '0.24em',
-      '--c-banner-bg': '#7c8a70',
     },
   },
 };
