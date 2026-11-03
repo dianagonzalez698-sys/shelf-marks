@@ -1,27 +1,24 @@
-// The bookmark collection: one group per challenge, with a photo you can
-// attach to each one you've collected.
+// The archive: every bookmark, grouped by the challenge that awards it, with
+// a photo of the real object if you've taken one.
 
 import {
   state, allChallenges, bookmarkStats, saveBookmarkImage, deleteBookmarkImage,
 } from './state.js';
 import {
-  esc, attr, toast, markVisual, openSheet, confirmSheet,
+  esc, attr, toast, markVisual, checkBadge, openSheet, confirmSheet,
 } from './ui.js';
 import { evaluate, bookmarkLabels } from './rules.js';
 import { formatDateTime } from './periods.js';
 import { fileToDataUrl } from './backup.js';
+import { t } from './theme.js';
 
 function tile(id, meta, unlocked) {
   const img = state.images.get(id);
-  const art = markVisual(id, {
-    unlocked,
-    bonus: !!(meta && meta.bonus),
-    dataUrl: img ? img.dataUrl : null,
-  });
   return `<button class="bm${unlocked ? '' : ' locked'}" type="button" data-bm="${attr(id)}">
-    ${art}
-    <div class="bm-name">${esc(meta ? meta.title : id)}</div>
-    <div class="bm-sub">${unlocked ? 'collected' : 'locked'}</div>
+    ${markVisual(id, { unlocked, bonus: !!(meta && meta.bonus), dataUrl: img ? img.dataUrl : null })}
+    ${unlocked ? checkBadge() : ''}
+    <span class="bm-label">${esc(meta ? meta.title : id)}</span>
+    <span class="bm-sub">${unlocked ? 'collected' : 'not yet'}</span>
   </button>`;
 }
 
@@ -29,34 +26,41 @@ export function bookmarksView(params = {}) {
   const { collected, total, have } = bookmarkStats();
   const challenges = allChallenges();
   const focus = (params.query && params.query.focus) || null;
+  const pct = total ? Math.round((collected / total) * 100) : 0;
 
   const groups = challenges.map((c) => {
     const labels = bookmarkLabels(c);
     const ids = [...labels.keys()];
     if (!ids.length) {
-      return `<h2 class="section-title">${esc(c.name)}</h2>
-        <p class="small muted" style="margin:0 0 .9rem">
-          No bookmarks yet — <a href="#/challenge/${encodeURIComponent(c.id)}">set this challenge's target</a> first.
-        </p>`;
+      return `<section class="section section-rule">
+        <div class="section-head"><h2 class="h2">${esc(c.name)}</h2></div>
+        <p class="hint">No bookmarks yet — <a href="#/challenge/${encodeURIComponent(c.id)}">set this challenge's target</a> first.</p>
+      </section>`;
     }
     const mine = ids.filter((id) => have.has(id)).length;
-    return `<h2 class="section-title">${esc(c.name)} · ${mine}/${ids.length}</h2>
-      <div class="bm-grid" style="margin-bottom:.4rem">
-        ${ids.map((id) => tile(id, labels.get(id), have.has(id))).join('')}
-      </div>`;
+    return `<section class="section section-rule">
+      <div class="section-head">
+        <h2 class="h2">${esc(c.name)}</h2>
+        <span class="section-meta">${mine} of ${ids.length}</span>
+      </div>
+      <div class="bm-grid">${ids.map((id) => tile(id, labels.get(id), have.has(id))).join('')}</div>
+    </section>`;
   }).join('');
 
   return {
-    title: 'Bookmarks',
+    title: t('archiveHeading'),
     tab: 'bookmarks',
+    banner: true,
     html: `
-      <section class="card">
-        <div class="goal-head">
-          <span class="goal-label">Collection</span>
-          <span class="goal-pct">${total ? Math.round((collected / total) * 100) : 0}%</span>
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">${esc(t('archiveHeading'))}</h2>
+            <p class="section-sub">${esc(t('archiveSub'))}</p>
+          </div>
+          <p class="section-meta">${collected} of ${total} · ${pct}%</p>
         </div>
-        <div class="goal-main"><b>${collected}</b> of ${total} bookmarks collected</div>
-        <div class="goal-sub"><span>Tap one to add a photo of the real thing</span></div>
+        <p class="hint" style="margin-top:.9rem">Tap one to see how it was earned, or to add a photo of the real thing.</p>
       </section>
       ${groups}
     `,
@@ -64,7 +68,7 @@ export function bookmarksView(params = {}) {
       root.querySelectorAll('[data-bm]').forEach((btn) => {
         btn.onclick = () => openBookmark(btn.dataset.bm);
       });
-      if (focus) setTimeout(() => openBookmark(focus), 120);
+      if (focus) setTimeout(() => openBookmark(focus), 140);
     },
   };
 }
@@ -90,12 +94,6 @@ function openBookmark(id) {
   const unlocked = !!unlock;
   const img = state.images.get(id);
 
-  const art = markVisual(id, {
-    unlocked,
-    bonus: !!(meta && meta.bonus),
-    dataUrl: img ? img.dataUrl : null,
-  });
-
   const requirement = (() => {
     if (!challenge) return '';
     if (meta && meta.bonus) return 'Complete every period of this challenge.';
@@ -104,30 +102,31 @@ function openBookmark(id) {
   })();
 
   openSheet(`
-    <div class="row" style="gap:1rem;align-items:flex-start">
-      <div style="width:72px;flex:none">${art}</div>
-      <div class="grow">
-        <h2 style="margin-bottom:.2rem">${esc(meta ? meta.title : id)}</h2>
-        <p class="small muted" style="margin:0">${esc(challenge ? challenge.name : 'Unknown challenge')}</p>
-      </div>
+    <div class="row" style="gap:1.2rem;align-items:flex-start">
+      <span style="width:88px;flex:none">
+        ${markVisual(id, { unlocked, bonus: !!(meta && meta.bonus), dataUrl: img ? img.dataUrl : null })}
+      </span>
+      <span class="grow">
+        <h2 style="margin-bottom:.15rem">${esc(meta ? meta.title : id)}</h2>
+        <p class="small italic muted" style="margin:0">${esc(challenge ? challenge.name : 'Unknown challenge')}</p>
+        <dl class="kv" style="margin-top:1rem">
+          <dt>Status</dt><dd>${unlocked ? 'Collected' : 'Not yet collected'}</dd>
+          ${unlocked ? `<dt>Earned</dt><dd>${esc(formatDateTime(unlock.unlockedAt))}</dd>` : ''}
+          ${!unlocked ? `<dt>To earn</dt><dd>${esc(requirement)}</dd>` : ''}
+          <dt>Reference</dt><dd><code>${esc(id)}</code></dd>
+        </dl>
+      </span>
     </div>
-
-    <dl class="kv" style="margin:1rem 0">
-      <dt>Bookmark id</dt><dd><code>${esc(id)}</code></dd>
-      <dt>Status</dt><dd>${unlocked ? 'Collected' : 'Locked'}</dd>
-      ${unlocked ? `<dt>Unlocked</dt><dd>${esc(formatDateTime(unlock.unlockedAt))}</dd>` : ''}
-      ${!unlocked ? `<dt>To unlock</dt><dd>${esc(requirement)}</dd>` : ''}
-    </dl>
 
     ${unlocked ? `
       <input type="file" id="bm-file" accept="image/*" class="visually-hidden">
-      <div class="btn-row">
+      <div class="btn-row" style="margin-top:1.3rem">
         <button class="btn grow" type="button" id="bm-pick">${img ? 'Replace photo' : 'Add a photo'}</button>
         ${img ? '<button class="btn btn-danger" type="button" id="bm-remove">Remove photo</button>' : ''}
       </div>
-      <p class="hint">Photos are stored on this device and travel inside your JSON backup.</p>
+      <p class="hint">Photos stay on this device and travel inside your backup file.</p>
     ` : `
-      <a class="btn btn-block" href="#/challenge/${encodeURIComponent(challenge ? challenge.id : '')}" data-close>
+      <a class="btn btn-block" style="margin-top:1.3rem" href="#/challenge/${encodeURIComponent(challenge ? challenge.id : '')}" data-close>
         Open ${esc(challenge ? challenge.name : 'challenge')}
       </a>
     `}

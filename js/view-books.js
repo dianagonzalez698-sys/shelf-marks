@@ -1,8 +1,9 @@
 // My Books: everything finished in the challenge year, newest first, filterable.
 
 import { state, sortedBooks, deleteBook } from './state.js';
-import { esc, attr, toast, coverImg, navigate, confirmSheet } from './ui.js';
+import { esc, attr, toast, coverImg, confirmSheet } from './ui.js';
 import { quarters, inPeriod, formatDate, yearPeriod } from './periods.js';
+import { t } from './theme.js';
 
 const FLAGS = [
   { key: 'classic', label: 'Classic', field: 'isClassic' },
@@ -39,26 +40,32 @@ function bookRow(book) {
   if (book.pages) bits.push(`${book.pages} pp`);
   if (book.series) bits.push(book.series);
 
-  const badges = [];
-  badges.push(`<span class="badge${book.format === 'nonfiction' ? ' nf' : ''}">${book.format === 'nonfiction' ? 'Nonfiction' : 'Fiction'}</span>`);
-  if (book.isClassic) badges.push('<span class="badge cl">Classic</span>');
-  if (book.isReread) badges.push('<span class="badge">Re-read</span>');
-  if (book.isTbr) badges.push('<span class="badge">Physical TBR</span>');
-  (book.tags || []).forEach((t) => badges.push(`<span class="badge">${esc(t)}</span>`));
+  const tags = [];
+  tags.push(book.format === 'nonfiction'
+    ? '<span class="tag tag-sage">Nonfiction</span>'
+    : '<span class="tag">Fiction</span>');
+  if (book.isClassic) tags.push('<span class="tag tag-accent">Classic</span>');
+  if (book.isReread) tags.push('<span class="tag">Re-read</span>');
+  if (book.isTbr) tags.push('<span class="tag">Physical TBR</span>');
+  (book.tags || []).forEach((x) => tags.push(`<span class="tag">${esc(x)}</span>`));
 
-  return `<article class="book-row">
-    <a href="#/book/${encodeURIComponent(book.id)}" style="flex:none" aria-label="Edit ${attr(book.title)}">${coverImg(book)}</a>
-    <div class="grow">
-      <a href="#/book/${encodeURIComponent(book.id)}" style="color:inherit;text-decoration:none">
-        <div class="book-title">${esc(book.title)}</div>
-        <div class="book-meta">${esc(bits.join(' · '))}</div>
-        <div class="book-meta">Finished ${esc(formatDate(book.dateFinished))}</div>
-      </a>
-      <div class="badges">${badges.join('')}</div>
-    </div>
-    <button class="btn btn-ghost btn-sm" type="button" data-del="${attr(book.id)}"
-            aria-label="Delete ${attr(book.title)}">Delete</button>
+  return `<article class="list-row">
+    <a class="list-row-link" href="#/book/${encodeURIComponent(book.id)}">
+      ${coverImg(book)}
+      <span class="grow">
+        <span class="entry-title">${esc(book.title)}</span>
+        <span class="entry-meta">${esc(bits.join(' · '))}</span>
+        <span class="entry-meta">Finished ${esc(formatDate(book.dateFinished))}</span>
+        <span class="tags">${tags.join('')}</span>
+      </span>
+    </a>
+    <button class="btn btn-quiet btn-sm" type="button" data-del="${attr(book.id)}"
+            aria-label="Delete ${attr(book.title)}">Remove</button>
   </article>`;
+}
+
+function plural(n) {
+  return `${n} book${n === 1 ? '' : 's'}`;
 }
 
 export function booksView(params = {}) {
@@ -86,27 +93,38 @@ export function booksView(params = {}) {
   const outside = state.books.length - totalThisYear;
 
   return {
-    title: 'My Books',
+    title: t('booksHeading'),
     tab: 'books',
     fab: true,
     keepScroll: true,
     html: `
-      ${chipRow([{ value: 'all', label: 'All year' }, ...qs.map((q) => ({ value: q.key, label: q.key }))], qKey, 'q', query)}
-      ${chipRow([{ value: 'all', label: 'Fiction + nonfiction' }, { value: 'fiction', label: 'Fiction' }, { value: 'nonfiction', label: 'Nonfiction' }], format, 'format', query)}
-      ${flagRow(flags, query)}
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">${esc(t('booksHeading'))}</h2>
+            <p class="section-sub">Everything finished in ${year}, newest first.</p>
+          </div>
+          <p class="section-meta">${books.length} of ${totalThisYear} shown</p>
+        </div>
 
-      <p class="small muted" style="margin:.2rem 0 .8rem">
-        ${books.length} of ${totalThisYear} book${totalThisYear === 1 ? '' : 's'} in ${year}
-        ${filtered ? ` · <a href="#/books">clear filters</a>` : ''}
-        ${outside > 0 ? ` · ${outside} logged outside ${year}` : ''}
-      </p>
+        <div style="margin-top:1.4rem">
+          ${chipRow([{ value: 'all', label: 'All year' }, ...qs.map((q) => ({ value: q.key, label: q.key }))], qKey, 'q', query)}
+          ${chipRow([{ value: 'all', label: 'Fiction + nonfiction' }, { value: 'fiction', label: 'Fiction' }, { value: 'nonfiction', label: 'Nonfiction' }], format, 'format', query)}
+          ${flagRow(flags, query)}
+        </div>
 
-      ${books.length ? `<section class="card">${books.map(bookRow).join('')}</section>` : `
-        <div class="empty">
-          <h3>${totalThisYear ? 'Nothing matches those filters' : 'No books logged yet'}</h3>
-          <p>${totalThisYear ? 'Try clearing a filter.' : `Add the first book you finish in ${year}.`}</p>
-          <a class="btn btn-primary" href="${totalThisYear ? '#/books' : '#/add'}">${totalThisYear ? 'Clear filters' : 'Add a book'}</a>
-        </div>`}
+        <p class="hint" style="margin:.4rem 0 1rem">
+          ${filtered ? '<a href="#/books">Clear filters</a>' : `${plural(totalThisYear)} logged`}
+          ${outside > 0 ? ` · ${outside} logged outside ${year}` : ''}
+        </p>
+
+        ${books.length ? `<div class="list">${books.map(bookRow).join('')}</div>` : `
+          <div class="empty">
+            <h3>${totalThisYear ? 'Nothing matches those filters' : 'The shelf is empty'}</h3>
+            <p>${totalThisYear ? 'Try clearing one.' : `Add the first book you finish in ${year}.`}</p>
+            <a class="btn btn-primary" href="${totalThisYear ? '#/books' : '#/add'}">${totalThisYear ? 'Clear filters' : 'Add a book'}</a>
+          </div>`}
+      </section>
     `,
     onMount(root) {
       root.querySelectorAll('[data-del]').forEach((btn) => {

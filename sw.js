@@ -2,7 +2,7 @@
    Network-first on purpose: when you're online you always get the current
    version, and the cache is only a fallback when you're not. */
 
-const VERSION = 'shelf-marks-v1';
+const VERSION = 'lit-picks-v2';
 const SHELL = [
   './',
   './index.html',
@@ -23,6 +23,8 @@ const SHELL = [
   './js/view-challenges.js',
   './js/view-bookmarks.js',
   './js/view-settings.js',
+  './js/view-customize.js',
+  './js/theme.js',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',

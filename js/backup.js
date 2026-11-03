@@ -5,6 +5,7 @@
 import * as store from './store.js';
 import { state, saveSettings, syncUnlocks, emitChange, nowISO } from './state.js';
 import { todayISO } from './periods.js';
+import * as theme from './theme.js';
 
 export const SCHEMA = 1;
 
@@ -20,6 +21,8 @@ export function buildBackup() {
     unlocks: state.unlocks.map((u) => ({ ...u })),
     // Bookmark photos travel as data URLs so the backup stays one plain file.
     images: [...state.images.values()].map((i) => ({ ...i })),
+    // The design settings ride along, so a restored device looks right too.
+    theme: theme.snapshot(),
   };
 }
 
@@ -135,6 +138,17 @@ export async function importBackup(text) {
     }
   }
 
+  // The design travels with the backup; newer wins, like everything else.
+  let themeChanged = false;
+  if (data.theme && typeof data.theme === 'object') {
+    const current = await store.get('meta', 'theme');
+    if (newer(data.theme, current || {})) {
+      await store.put('meta', { ...data.theme, id: 'theme' });
+      await theme.adoptFromBackup(data.theme, state.settings.year);
+      themeChanged = true;
+    }
+  }
+
   const unlockedNow = await syncUnlocks();
   emitChange();
 
@@ -144,6 +158,7 @@ export async function importBackup(text) {
     unlocks: pick(unlocks),
     images: pick(images),
     settingsChanged,
+    themeChanged,
     newlyUnlocked: unlockedNow.length,
     exportedAt: data.exportedAt || null,
   };

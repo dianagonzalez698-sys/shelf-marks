@@ -22,19 +22,25 @@ export function addView() {
     back: true,
     live: false,
     html: `
+      <section class="section form-wrap">
+      <div class="section-head" style="margin-bottom:1.6rem"><div>
+        <h2 class="section-title">Add a book</h2>
+        <p class="section-sub">Search Open Library, or write it in by hand.</p>
+      </div></div>
       <div class="field">
-        <label for="ol-q">Search Open Library</label>
+        <label for="ol-q">Search</label>
         <input id="ol-q" type="search" inputmode="search" autocomplete="off"
                enterkeyhint="search" placeholder="Title, author, ISBN…" autofocus>
         <p class="hint">Results fill in the cover, page count, year and subjects — all editable afterwards.</p>
       </div>
       <div id="ol-status" class="muted small" aria-live="polite"></div>
       <div id="ol-results"></div>
-      <div class="card" style="margin-top:1rem">
+      <div class="panel" style="margin-top:1rem">
         <strong>Can’t find it?</strong>
         <p class="muted small" style="margin:.3rem 0 .75rem">Enter the details yourself — same form, nothing pre-filled.</p>
         <button class="btn btn-block" type="button" id="manual">Add manually</button>
       </div>
+      </section>
     `,
     onMount(root) {
       const input = root.querySelector('#ol-q');
@@ -157,8 +163,13 @@ export function bookFormView(params = {}) {
     back: true,
     live: false,
     html: `
+      <section class="section form-wrap">
+      <div class="section-head" style="margin-bottom:1.6rem"><div>
+        <h2 class="section-title">${editing ? 'Edit entry' : 'New entry'}</h2>
+        <p class="section-sub">${editing ? 'Change anything — the goals recount themselves.' : 'Everything here is yours to adjust.'}</p>
+      </div></div>
       <form id="book-form" novalidate>
-        <section class="card">
+        <section class="panel">
           <div class="row" style="align-items:flex-start;gap:.9rem;margin-bottom:.9rem">
             <div id="cover-preview">${coverImg(draft, { big: true, lazy: false })}</div>
             <div class="grow">
@@ -200,8 +211,8 @@ export function bookFormView(params = {}) {
           </div>
         </section>
 
-        <h2 class="section-title">When I read it</h2>
-        <section class="card">
+        <h2 class="form-heading">When I read it</h2>
+        <section class="panel">
           <div class="grid-2">
             <div class="field" style="margin-bottom:0">
               <label for="f-finished">Date finished</label>
@@ -216,8 +227,8 @@ export function bookFormView(params = {}) {
           <p class="hint" id="period-hint"></p>
         </section>
 
-        <h2 class="section-title">How it counts</h2>
-        <section class="card">
+        <h2 class="form-heading">How it counts</h2>
+        <section class="panel">
           <div class="field">
             <span class="field-label">Fiction or nonfiction <span class="muted">(required)</span></span>
             <div class="seg" id="f-format" role="group" aria-label="Fiction or nonfiction">
@@ -241,8 +252,8 @@ export function bookFormView(params = {}) {
           </label>
         </section>
 
-        <h2 class="section-title">Series &amp; tags</h2>
-        <section class="card">
+        <h2 class="form-heading">Series &amp; tags</h2>
+        <section class="panel">
           <div class="field">
             <label for="f-series">Series <span class="muted">(optional)</span></label>
             <input id="f-series" name="series" type="text" autocomplete="off" list="series-list"
@@ -269,8 +280,8 @@ export function bookFormView(params = {}) {
           </div>
         </section>
 
-        <h2 class="section-title">Notes</h2>
-        <section class="card">
+        <h2 class="form-heading">Notes</h2>
+        <section class="panel">
           <div class="field" style="margin-bottom:0">
             <label for="f-notes" class="visually-hidden">Notes</label>
             <textarea id="f-notes" placeholder="Anything you want to remember (optional)">${esc(draft.notes || '')}</textarea>
@@ -282,6 +293,7 @@ export function bookFormView(params = {}) {
           ${editing ? '<button class="btn btn-danger" type="button" id="delete-book">Delete</button>' : ''}
         </div>
       </form>
+      </section>
     `,
 
     onMount(root) {

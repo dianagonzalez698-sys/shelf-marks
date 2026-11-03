@@ -1,74 +1,79 @@
-// Challenges list, challenge detail (period-by-period), and the editor used
-// both for the author-list preset and for your own challenges.
+// Challenges: the index, and the challenge spread — the reference layout, with
+// the bookmark collection as its centrepiece.
 
 import {
   state, allChallenges, getChallenge, saveChallenge, archiveChallenge,
   unlockMap, knownTags, knownSeries, uid,
 } from './state.js';
 import {
-  esc, attr, toast, progressBar, markVisual,
+  esc, attr, toast, progressBar, progressLine, markVisual, checkBadge, checkGlyph,
   openSheet, navigate, confirmSheet, coverImg,
 } from './ui.js';
 import { evaluate, describeFilter, describeWindow, bookmarkLabels } from './rules.js';
 import { formatDate, quarters, YEAR } from './periods.js';
 import { FILTER_TYPES, WINDOW_TYPES } from './config.js';
+import { t } from './theme.js';
 
 /* ----------------------------------------------------------------- list ---- */
 
-// "Q1" stays "Q1"; "jan-feb" becomes "J–F" so it fits the pill.
-function shortPeriodLabel(key) {
-  const k = String(key);
-  if (k.length <= 2) return k.toUpperCase();
-  return k.split('-').map((part) => (part[0] || '').toUpperCase()).join('–');
-}
-
-const BOOKMARK_GLYPH = `<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"
-  style="vertical-align:-1px"><path d="M7 3h10v18l-5-4-5 4z" fill="none" stroke="currentColor"
-  stroke-width="2.2" stroke-linejoin="round"/></svg>`;
-
-function challengeCard(challenge) {
+function challengeRow(challenge) {
   const r = evaluate(challenge, state.books);
   const have = unlockMap();
-  const earnedCount = r.allBookmarkIds.filter((id) => have.has(id)).length;
+  const labels = bookmarkLabels(challenge);
+  const ids = [...labels.keys()];
+  const earned = ids.filter((id) => have.has(id)).length;
 
-  const body = r.recurring
-    ? `<div class="pills" style="margin-top:.6rem">
-         ${r.periods.map((p) => `<span class="pill${p.complete ? ' done' : ''}" title="${attr(p.label)}">
-            ${esc(shortPeriodLabel(p.key))}</span>`).join('')}
-         ${challenge.bonusBookmark ? `<span class="pill${r.bonus && r.bonus.complete ? ' done' : ''}" title="Bonus">★</span>` : ''}
-       </div>`
+  // A miniature run of this challenge's bookmarks, as a row ornament.
+  const strip = ids.slice(0, 7).map((id) => markVisual(id, {
+    unlocked: have.has(id),
+    bonus: !!(labels.get(id) || {}).bonus,
+    dataUrl: (state.images.get(id) || {}).dataUrl || null,
+  })).join('');
+
+  const standing = r.recurring
+    ? `${r.count} of ${r.target} periods complete`
     : (r.targetUnset
-      ? `<p class="small" style="margin:.5rem 0 0"><b>${r.count}</b> matching so far · <span class="muted">target not set yet</span></p>`
-      : `${progressBar(r.pct, { done: r.complete })}
-         <div class="goal-sub"><span>${r.count} of ${r.target} books</span><span>${r.pct}%</span></div>`);
+      ? `${r.count} matching so far · no target set`
+      : `${r.count} of ${r.target} books`);
 
-  const marks = r.allBookmarkIds.length
-    ? `${earnedCount}/${r.allBookmarkIds.length} ${BOOKMARK_GLYPH}`
-    : '<span class="tiny">no bookmarks yet</span>';
-
-  return `<a class="card card-link" href="#/challenge/${encodeURIComponent(challenge.id)}">
-    <div class="row-between">
-      <strong class="grow">${esc(challenge.name)}</strong>
-      <span class="muted small nowrap">${marks}</span>
-    </div>
-    <div class="small muted">${esc(describeFilter(challenge.filter))} · ${esc(describeWindow(challenge.window))}</div>
-    ${body}
+  return `<a class="list-row list-row-link" href="#/challenge/${encodeURIComponent(challenge.id)}">
+    <span class="grow">
+      <span class="entry-title">${esc(challenge.name)}</span>
+      <span class="entry-meta">${esc(describeFilter(challenge.filter))} · ${esc(describeWindow(challenge.window))}</span>
+      <span class="tags">
+        <span class="tag">${esc(standing)}</span>
+        <span class="tag tag-accent">${ids.length ? `${earned}/${ids.length} bookmarks` : 'no bookmarks yet'}</span>
+      </span>
+      ${ids.length ? `<span class="bm-strip" style="margin-top:.8rem;max-width:320px">${strip}</span>` : ''}
+    </span>
   </a>`;
 }
 
 export function challengesView() {
   const list = allChallenges();
   return {
-    title: 'Challenges',
+    title: t('challengesHeading'),
     tab: 'challenges',
+    banner: true,
     html: `
-      ${list.length ? list.map(challengeCard).join('') : '<div class="empty"><h3>No challenges</h3></div>'}
-      <button class="btn btn-block" type="button" id="new-challenge" style="margin-top:.4rem">
-        New challenge
-      </button>
-      <p class="hint center" style="margin-top:.6rem">
-        Challenges are plain config — the four presets live in <code>js/config.js</code>.
-      </p>
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">${esc(t('challengesHeading'))}</h2>
+            <p class="section-sub">${esc(t('challengesSub'))}</p>
+          </div>
+          <button class="btn btn-sm" type="button" id="new-challenge">New challenge</button>
+        </div>
+
+        <div class="list" style="margin-top:1.5rem">
+          ${list.length ? list.map(challengeRow).join('')
+            : '<div class="empty"><h3>No challenges yet</h3><p>Start one and its bookmarks appear here.</p></div>'}
+        </div>
+
+        <p class="hint center" style="margin-top:1.4rem">
+          Challenges are plain configuration — the presets live in <code>js/config.js</code>.
+        </p>
+      </section>
     `,
     onMount(root) {
       root.querySelector('#new-challenge').onclick = () => openEditor(null);
@@ -78,33 +83,49 @@ export function challengesView() {
 
 /* --------------------------------------------------------------- detail ---- */
 
-function periodDetail(p, challenge, have) {
+// The bookmark collection, exactly as the reference presents it: the object,
+// a check if it's yours, then its title underneath.
+function bookmarkCollection(challenge, result, have) {
+  const labels = bookmarkLabels(challenge);
+  const ids = result.allBookmarkIds;
+  if (!ids.length) return '';
+
+  return `<div class="bm-grid">
+    ${ids.map((id) => {
+      const meta = labels.get(id);
+      const unlocked = have.has(id);
+      const img = state.images.get(id);
+      return `<a class="bm${unlocked ? '' : ' locked'}" href="#/bookmarks?focus=${encodeURIComponent(id)}">
+        ${markVisual(id, { unlocked, bonus: !!(meta && meta.bonus), dataUrl: img ? img.dataUrl : null })}
+        ${unlocked ? checkBadge() : ''}
+        <span class="bm-label">${esc(meta ? meta.title : id)}</span>
+        ${meta && meta.bonus ? '<span class="bm-sub">bonus</span>' : ''}
+      </a>`;
+    }).join('')}
+  </div>`;
+}
+
+// The working detail under the collection: what each period still needs.
+function periodDetail(p, have) {
   const unlocked = !!(p.bookmarkId && have.has(p.bookmarkId));
-  const photo = p.bookmarkId ? state.images.get(p.bookmarkId) : null;
-  const art = p.bookmarkId
-    ? markVisual(p.bookmarkId, { unlocked, dataUrl: photo ? photo.dataUrl : null })
-    : '';
-
   const books = p.books.length
-    ? `<div style="margin-top:.4rem">${p.books.map((b) => `
-        <a class="row small" href="#/book/${encodeURIComponent(b.id)}" style="color:inherit;text-decoration:none;padding:.15rem 0">
+    ? `<span style="display:block;margin-top:.3rem">${p.books.map((b) => `
+        <a class="row small" href="#/book/${encodeURIComponent(b.id)}" style="color:inherit;text-decoration:none;padding:.1rem 0">
           <span class="grow truncate">${esc(b.title)}</span>
-          <span class="muted nowrap">${esc(formatDate(b.dateFinished))}</span>
-        </a>`).join('')}</div>`
-    : '<div class="small muted" style="margin-top:.3rem">Nothing logged yet.</div>';
+          <span class="muted tiny nowrap">${esc(formatDate(b.dateFinished))}</span>
+        </a>`).join('')}</span>`
+    : '<span class="check-note">Nothing logged yet.</span>';
 
-  return `<div class="check-row${p.complete ? ' done' : ''}" style="align-items:flex-start">
-    <span class="check-mark" aria-hidden="true">${p.complete ? '✓' : ''}</span>
+  return `<div class="check-row${p.complete ? ' done' : ''}">
+    <span class="check-mark" aria-hidden="true">${checkGlyph()}</span>
     <span class="check-body">
       <span class="row-between">
         <span class="check-title">${esc(p.label)}</span>
-        <span class="tiny muted nowrap">${p.count} of ${p.target == null ? '—' : p.target}</span>
+        <span class="tag nowrap">${p.count} of ${p.target == null ? '—' : p.target}</span>
       </span>
       ${books}
-      ${p.bookmarkId ? `<span class="tiny muted" style="display:block;margin-top:.35rem">
-         Bookmark <code>${esc(p.bookmarkId)}</code>${unlocked ? ' · collected' : ' · locked'}</span>` : ''}
+      ${p.bookmarkId ? `<span class="check-note">${unlocked ? 'Bookmark collected' : 'Bookmark still locked'} · <code>${esc(p.bookmarkId)}</code></span>` : ''}
     </span>
-    ${art ? `<span style="width:30px;flex:none">${art}</span>` : ''}
   </div>`;
 }
 
@@ -112,107 +133,99 @@ export function challengeDetailView(params) {
   const challenge = getChallenge(params.id);
   if (!challenge) {
     return {
-      title: 'Challenge not found',
+      title: 'Not found',
       tab: 'challenges',
       back: true,
       html: `<div class="empty"><h3>No such challenge</h3>
-        <a class="btn btn-primary" href="#/challenges">All challenges</a></div>`,
+        <a class="btn" href="#/challenges">All challenges</a></div>`,
     };
   }
 
   const r = evaluate(challenge, state.books);
   const have = unlockMap();
-  const labels = bookmarkLabels(challenge);
   const canEdit = challenge.editable || challenge.custom;
-
-  const header = `<section class="card">
-    <div class="goal-head">
-      <span class="goal-label">${esc(describeWindow(challenge.window))}</span>
-      ${r.targetUnset ? '' : `<span class="goal-pct${r.pct > 100 ? ' over' : ''}">${r.pct}%</span>`}
-    </div>
-    <div class="goal-main">${r.recurring
-      ? `<b>${r.count}</b> of ${r.target} periods complete`
-      : (r.targetUnset ? `<b>${r.count}</b> books matching` : `<b>${r.count}</b> of ${r.target} books`)}</div>
-    ${r.targetUnset ? '' : progressBar(r.pct, { done: r.complete })}
-    <div class="goal-sub">
-      <span>${esc(describeFilter(challenge.filter))}</span>
-      <span>${r.allBookmarkIds.filter((id) => have.has(id)).length} of ${r.allBookmarkIds.length || 0} bookmarks</span>
-    </div>
-    ${challenge.blurb ? `<p class="small muted" style="margin:.7rem 0 0">${esc(challenge.blurb)}</p>` : ''}
-  </section>`;
+  const ids = r.allBookmarkIds;
+  const earned = ids.filter((id) => have.has(id)).length;
+  const collectedPct = ids.length ? Math.round((earned / ids.length) * 100) : 0;
 
   const unsetNotice = r.targetUnset
     ? `<div class="notice">
-         <strong>Set a target to start unlocking bookmarks.</strong>
-         <p style="margin:.3rem 0 .6rem">This challenge has no target count yet, so nothing can be earned from it.
-         Pick how many books you want, and add the authors you count as kindred.</p>
-         <button class="btn btn-sm btn-primary" type="button" id="edit-challenge">Set target &amp; authors</button>
+         <strong>This challenge has no target yet.</strong>
+         Nothing can be collected until you say how many books it takes — and who counts.
+         <div class="btn-row" style="margin-top:.8rem">
+           <button class="btn btn-sm btn-primary" type="button" id="edit-challenge">Set target &amp; authors</button>
+         </div>
        </div>`
     : '';
 
-  const periodsBlock = r.recurring
-    ? `<h2 class="section-title">Each period</h2>
-       <section class="card"><div class="ch-periods">
-         ${r.periods.map((p) => periodDetail(p, challenge, have)).join('')}
-         ${challenge.bonusBookmark ? `<div class="check-row${r.bonus.complete ? ' done' : ''}" style="align-items:flex-start">
-            <span class="check-mark" aria-hidden="true">${r.bonus.complete ? '✓' : ''}</span>
-            <span class="check-body">
-              <span class="check-title">Bonus — every period complete</span>
-              <span class="check-note">Bookmark <code>${esc(challenge.bonusBookmark)}</code>${have.has(challenge.bonusBookmark) ? ' · collected' : ' · locked'}</span>
-            </span>
-            <span style="width:30px;flex:none">${markVisual(challenge.bonusBookmark, {
-              unlocked: have.has(challenge.bonusBookmark),
-              bonus: true,
-              dataUrl: (state.images.get(challenge.bonusBookmark) || {}).dataUrl || null,
-            })}</span>
-          </div>` : ''}
-       </div></section>`
-    : `<h2 class="section-title">Books counted</h2>
-       <section class="card">
-         ${r.books.length ? r.books.map((b) => `
-           <article class="book-row">
-             <a href="#/book/${encodeURIComponent(b.id)}" style="flex:none">${coverImg(b)}</a>
-             <a class="grow" href="#/book/${encodeURIComponent(b.id)}" style="color:inherit;text-decoration:none">
-               <div class="book-title">${esc(b.title)}</div>
-               <div class="book-meta">${esc(b.author || '')}</div>
-               <div class="book-meta">Finished ${esc(formatDate(b.dateFinished))}</div>
-             </a>
-           </article>`).join('')
-          : '<p class="muted small" style="margin:0">No books match this challenge yet.</p>'}
+  const standing = r.recurring
+    ? `${r.count} of ${r.target} periods complete`
+    : (r.targetUnset ? `${r.count} books matching` : `${r.count} of ${r.target} books read`);
+
+  const working = r.recurring
+    ? `<section class="section section-rule">
+         <div class="section-head"><h2 class="h2">Each period</h2></div>
+         <div class="checklist" style="margin-top:.9rem">
+           ${r.periods.map((p) => periodDetail(p, have)).join('')}
+           ${challenge.bonusBookmark ? `<div class="check-row${r.bonus.complete ? ' done' : ''}">
+              <span class="check-mark" aria-hidden="true">${checkGlyph()}</span>
+              <span class="check-body">
+                <span class="check-title">Bonus — every period complete</span>
+                <span class="check-note">${have.has(challenge.bonusBookmark) ? 'Collected' : 'Locked'} · <code>${esc(challenge.bonusBookmark)}</code></span>
+              </span>
+            </div>` : ''}
+         </div>
+       </section>`
+    : `<section class="section section-rule">
+         <div class="section-head"><h2 class="h2">Books counted</h2></div>
+         <div class="list" style="margin-top:.9rem">
+           ${r.books.length ? r.books.map((b) => `
+             <article class="list-row">
+               <a class="list-row-link" href="#/book/${encodeURIComponent(b.id)}">
+                 ${coverImg(b)}
+                 <span class="grow">
+                   <span class="entry-title">${esc(b.title)}</span>
+                   <span class="entry-meta">${esc(b.author || '')}</span>
+                   <span class="entry-meta">Finished ${esc(formatDate(b.dateFinished))}</span>
+                 </span>
+               </a>
+             </article>`).join('')
+            : '<p class="muted italic" style="padding:1rem 0">No books match this challenge yet.</p>'}
+         </div>
        </section>`;
-
-  const bookmarksBlock = r.allBookmarkIds.length
-    ? `<h2 class="section-title">Bookmarks from this challenge</h2>
-       <div class="bm-grid">
-         ${r.allBookmarkIds.map((id) => {
-           const meta = labels.get(id);
-           const unlocked = have.has(id);
-           const img = state.images.get(id);
-           return `<a class="bm${unlocked ? '' : ' locked'}" href="#/bookmarks?focus=${encodeURIComponent(id)}">
-             ${markVisual(id, {
-               unlocked,
-               bonus: !!(meta && meta.bonus),
-               dataUrl: img ? img.dataUrl : null,
-             })}
-             <div class="bm-name">${esc(meta ? meta.title : id)}</div>
-             <div class="bm-sub">${esc(id)}</div>
-           </a>`;
-         }).join('')}
-       </div>`
-    : '';
 
   return {
     title: challenge.name,
     tab: 'challenges',
+    banner: true,
     back: true,
-    actions: canEdit ? '<button class="btn btn-ghost" type="button" id="edit-top">Edit</button>' : '',
+    actions: canEdit ? '<button class="btn btn-quiet" type="button" id="edit-top">Edit</button>' : '',
     html: `
       ${unsetNotice}
-      ${header}
-      ${periodsBlock}
-      ${bookmarksBlock}
-      ${challenge.custom ? `<div class="btn-row" style="margin-top:1rem">
-        <button class="btn btn-danger btn-block" type="button" id="archive">Remove this challenge</button>
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">${esc(challenge.name)}</h2>
+            ${challenge.blurb ? `<p class="section-sub">${esc(challenge.blurb)}</p>` : ''}
+          </div>
+          <p class="section-meta">${esc(describeWindow(challenge.window))}</p>
+        </div>
+
+        ${ids.length
+          ? progressLine(`${earned} of ${ids.length} bookmarks collected`, collectedPct, { done: earned === ids.length })
+          : `<p class="hint" style="margin-top:1rem">${esc(standing)}</p>`}
+
+        ${bookmarkCollection(challenge, r, have)}
+
+        <p class="center tiny muted italic" style="margin-top:1.4rem">
+          ${esc(describeFilter(challenge.filter))} · ${esc(standing)}
+        </p>
+      </section>
+
+      ${working}
+
+      ${challenge.custom ? `<div class="btn-row" style="margin-top:var(--sp-section)">
+        <button class="btn btn-danger" type="button" id="archive">Remove this challenge</button>
       </div>` : ''}
     `,
     onMount(root) {
@@ -227,7 +240,7 @@ export function challengeDetailView(params) {
         archive.onclick = async () => {
           const yes = await confirmSheet({
             title: `Remove “${challenge.name}”?`,
-            body: 'Bookmarks you already collected from it stay in your collection.',
+            body: 'Bookmarks you already collected from it stay in your archive.',
             confirm: 'Remove',
             danger: true,
           });

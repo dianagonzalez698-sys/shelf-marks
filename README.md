@@ -1,8 +1,11 @@
-# Shelf Marks
+# Diana's Lit Picks
 
-A personal reading-challenge tracker for 2027. Log the books you finish,
-watch the goal bars move, and collect a bookmark every time you complete a
-challenge period.
+A personal reading journal for 2027, built as an editorial publication. Log
+the books you finish, watch the goal bars move, and collect a bookmark every
+time you complete a challenge period.
+
+The whole look is adjustable from inside the app — see
+**[CUSTOMIZATION.md](CUSTOMIZATION.md)** and Settings → Design studio.
 
 Plain HTML, CSS and vanilla JavaScript — no build step, no framework, no
 backend. Everything lives on your device; the only network call is to the
@@ -99,6 +102,7 @@ Settings (your goals) follow the same newer-wins rule. Bookmark photos travel
 inside the JSON as data URLs, so the backup is a single self-contained file.
 
 Settings shows a **Last exported** date so you can tell whether you're synced.
+Your design settings travel inside the same file.
 
 > Back up now and then regardless. Clearing Safari's website data for the site
 > erases the app's database.
@@ -185,21 +189,23 @@ node tools/make-icons.mjs
 ## Layout
 
 ```
-index.html              markup shell: app bar, tab bar, screen container
+index.html              shell: masthead, editorial banner, tab bar, content bindings
 manifest.webmanifest    home-screen name, icons, standalone display
 sw.js                   service worker — offline support, network-first
-css/styles.css          all styling; light + dark via CSS custom properties
+css/styles.css          the design token layer, then components that only use var(--…)
 js/
-  app.js                boot: registers routes, loads the database
-  config.js             challenge presets, defaults, subject hints  ← edit me
+  app.js                boot: registers routes, loads the database and the theme
+  theme.js              design tokens, presets, persistence, export/import
+  config.js             challenge presets, goal defaults, subject hints  ← edit me
   rules.js              the rule engine: filters, windows, targets
   periods.js            quarters, two-month periods, date maths
   store.js              IndexedDB wrapper; every call has error handling
   state.js              in-memory state, writes through to the database
   backup.js             JSON export / import and the merge
   openlibrary.js        search + autofill + fiction/nonfiction guess
-  ui.js                 router, toasts, sheets, bookmark artwork
+  ui.js                 router, bookmark artwork, progress, sheets, toasts
   view-*.js             one file per screen
+  view-customize.js     the Design Studio
 icons/                  generated PNGs
 tools/                  icon generator, local dev server
 ```
@@ -211,3 +217,6 @@ tools/                  icon generator, local dev server
 - Nothing is uploaded anywhere. There is no account and no analytics.
 - Storage failures (Private Browsing, a full device) surface as a banner
   rather than silently losing a book.
+- Typefaces come from Google Fonts (Cormorant Garamond, EB Garamond, Pinyon
+  Script, Bodoni Moda, Jost). Offline, the system serif stands in — every
+  stack has a real fallback.

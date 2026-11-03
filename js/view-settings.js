@@ -25,8 +25,13 @@ export function settingsView() {
     tab: 'settings',
     live: false,
     html: `
-      <h2 class="section-title">Goals</h2>
-      <section class="card">
+      <section class="section form-wrap">
+      <div class="section-head" style="margin-bottom:1.4rem"><div>
+        <h2 class="section-title">Settings</h2>
+        <p class="section-sub">Goals, syncing, and the look of the journal.</p>
+      </div></div>
+      <h2 class="form-heading">Goals</h2>
+      <section class="panel">
         ${numberField('set-annual', `Books in ${s.year}`, s.annualGoal, { min: 1, max: 2000 })}
         <span class="field-label">Each quarter</span>
         <div class="grid-2">
@@ -39,16 +44,16 @@ export function settingsView() {
         <p class="hint" id="quarter-sum">Quarters add up to ${quarterTotal} of ${s.annualGoal} for the year.</p>
       </section>
 
-      <h2 class="section-title">Nonfiction</h2>
-      <section class="card">
+      <h2 class="form-heading">Nonfiction</h2>
+      <section class="panel">
         ${numberField('set-nf', 'Share of books read that should be nonfiction (%)', s.nonfictionTargetPct, { min: 0, max: 100, hint: 'The nonfiction bar on Home measures against this percentage.' })}
       </section>
 
-      <h2 class="section-title">Sync between devices</h2>
-      <section class="card">
+      <h2 class="form-heading">Sync between devices</h2>
+      <section class="panel">
         <p class="small muted" style="margin-top:0">
           Export on one device, then import that file on the other. Items are merged by id,
-          and whichever copy was edited more recently wins.
+          and whichever copy was edited more recently wins. Your design settings travel too.
         </p>
         <div class="btn-row">
           <button class="btn btn-primary grow" type="button" id="do-export">Export backup</button>
@@ -58,8 +63,21 @@ export function settingsView() {
         <p class="hint" id="last-exported">Last exported: ${esc(formatDateTime(s.lastExportedAt))}</p>
       </section>
 
-      <h2 class="section-title">This device</h2>
-      <section class="card">
+      <h2 class="form-heading">Appearance</h2>
+      <section class="panel">
+        <div class="row-between" style="gap:1rem">
+          <div class="grow">
+            <p class="h3" style="margin:0">Design studio</p>
+            <p class="hint" style="margin:.2rem 0 0">
+              Colours, typefaces, bookmark proportions and the wording on every page.
+            </p>
+          </div>
+          <a class="btn btn-sm nowrap" href="#/customize">Open</a>
+        </div>
+      </section>
+
+      <h2 class="form-heading">This device</h2>
+      <section class="panel">
         <dl class="kv">
           <dt>Books logged</dt><dd>${state.books.length}</dd>
           <dt>Bookmarks</dt><dd>${collected} of ${total}</dd>
@@ -75,13 +93,14 @@ export function settingsView() {
         </p>
       </section>
 
-      <h2 class="section-title">About</h2>
-      <section class="card">
+      <h2 class="form-heading">About</h2>
+      <section class="panel">
         <p class="small muted" style="margin:0">
           Shelf Marks keeps everything in this browser's local database — nothing is uploaded anywhere.
           Book details come from <a href="https://openlibrary.org" rel="noopener">Open Library</a>.
           Clearing Safari's website data for this site erases your log, so export a backup now and then.
         </p>
+      </section>
       </section>
     `,
 
@@ -153,6 +172,7 @@ export function settingsView() {
               <li><span>Challenge edits</span><b>${res.counts.challenges}</b></li>
               <li><span>Bookmark unlocks</span><b>${res.counts.unlocks}</b></li>
               <li><span>Bookmark photos</span><b>${res.counts.images}</b></li>
+              <li><span>Design settings</span><b>included</b></li>
             </ul>
             <button class="btn btn-primary btn-block" type="button" data-close>Done</button>
           `);
@@ -186,6 +206,7 @@ export function settingsView() {
             </ul>
             <p class="small muted">
               ${res.settingsChanged ? 'Goals were newer in that file, so they were updated. ' : 'Your goals on this device were newer, so they were kept. '}
+              ${res.themeChanged ? 'The design settings in that file were newer and have been applied. ' : ''}
               ${res.newlyUnlocked ? `${res.newlyUnlocked} new bookmark${res.newlyUnlocked === 1 ? '' : 's'} unlocked by the merged books.` : ''}
             </p>
             <button class="btn btn-primary btn-block" type="button" data-close>Done</button>

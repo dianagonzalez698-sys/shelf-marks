@@ -82,12 +82,8 @@ export function confirmSheet({ title, body = '', confirm = 'Confirm', danger = f
 
 /* ------------------------------------------------------- bookmark artwork -- */
 
-const BM_COLORS = [
-  ['#8c5a3c', '#e8d4bf'], ['#45614f', '#dceadf'], ['#5b4a72', '#e2daee'],
-  ['#1f4f63', '#d4e6ee'], ['#7a3f45', '#eed9db'], ['#6b6230', '#eae6cc'],
-  ['#2f5b5b', '#d7e9e7'], ['#7b4a2a', '#eeddcb'], ['#3f4a6b', '#dbe0ef'],
-  ['#6b3a5c', '#eed9e8'],
-];
+const VARIANT_COUNT = 6;
+const MOTIF_COUNT = 6;
 
 function hashCode(s) {
   let h = 2166136261;
@@ -98,51 +94,114 @@ function hashCode(s) {
   return Math.abs(h);
 }
 
+// A small four-pointed star, drawn in its own element so it never distorts
+// when the bookmark ratio changes.
+const STAR = `<svg class="bm-glyph" viewBox="0 0 24 24" aria-hidden="true">
+  <path d="M12 2.6c.7 5 1.7 6 6.7 6.7-5 .7-6 1.7-6.7 6.7-.7-5-1.7-6-6.7-6.7 5-.7 6-1.7 6.7-6.7z"/></svg>`;
+
+const CORD = `<svg class="bm-cord" viewBox="0 0 40 44" aria-hidden="true" preserveAspectRatio="xMidYMax meet">
+  <path d="M20 43 C 7 33, 7 11, 20 5 C 33 11, 33 33, 20 43"
+        fill="none" stroke-width="2.6" vector-effect="non-scaling-stroke"/></svg>`;
+
 /**
- * A deterministic little bookmark graphic per bookmark id, so an unlocked
- * bookmark looks like a specific collectible even before you photograph it.
+ * The bookmark body. Drawn in a 100x340 viewBox with
+ * preserveAspectRatio="none", so it fills whatever --bm-ratio is set to.
+ * Every shape is a rectangle or a straight rule, which stretch predictably;
+ * anything that must keep its shape (the star, the cord) lives outside it.
+ */
+function bookmarkBody(motif) {
+  const ground = '<rect class="bm-ground" x="0" y="0" width="100" height="340"/>';
+  const frame = (inset) => `<rect class="bm-ink-stroke" x="${inset}" y="${inset}"
+      width="${100 - inset * 2}" height="${340 - inset * 2}" fill="none"
+      stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+
+  switch (motif) {
+    case 0: // vertical stripes
+      return ground + [12, 42, 72].map((x) =>
+        `<rect class="bm-ink" x="${x}" y="0" width="16" height="340"/>`).join('');
+    case 1: // solid with an inset rule, like a gilt-edged binding
+      return ground + frame(9) + frame(14);
+    case 2: // colour-blocked landscape
+      return ground
+        + '<rect class="bm-ink" x="0" y="0" width="100" height="128" opacity=".55"/>'
+        + '<rect class="bm-ink" x="0" y="196" width="100" height="62"/>'
+        + '<rect class="bm-ink" x="0" y="286" width="100" height="54" opacity=".4"/>';
+    case 3: // ruled paper
+      return ground + [70, 116, 162, 208, 254].map((y) =>
+        `<rect class="bm-ink" x="20" y="${y}" width="60" height="5"/>`).join('');
+    case 4: // half block with a horizon rule
+      return ground
+        + '<rect class="bm-ink" x="0" y="206" width="100" height="134" opacity=".75"/>'
+        + '<rect class="bm-ink" x="0" y="198" width="100" height="4"/>';
+    default: // broad bands
+      return ground
+        + '<rect class="bm-ink" x="0" y="54" width="100" height="26" opacity=".8"/>'
+        + '<rect class="bm-ink" x="0" y="252" width="100" height="26" opacity=".8"/>';
+  }
+}
+
+/**
+ * A collected bookmark. The colourway and motif are derived from the id, so a
+ * given bookmark always looks the same — it reads as a specific object you own.
  */
 export function bookmarkArt(id, { bonus = false } = {}) {
   const h = hashCode(String(id));
-  const [dark, light] = BM_COLORS[h % BM_COLORS.length];
-  const motif = Math.floor(h / 7) % 4;
-  const shape = 'M3 3 H57 V93 L30 79 L3 93 Z';
+  const variant = (h % VARIANT_COUNT) + 1;
+  const motif = bonus ? 1 : Math.floor(h / 7) % MOTIF_COUNT;
+  return `<span class="bm-art bm-v${variant}${bonus ? ' bm-bonus' : ''}">
+    ${CORD}
+    <span class="bm-body-wrap">
+      <svg class="bm-body" viewBox="0 0 100 340" preserveAspectRatio="none" role="img"
+           aria-label="Collected bookmark">${bookmarkBody(motif)}</svg>
+      ${bonus ? STAR : ''}
+    </span>
+  </span>`;
+}
 
-  let pattern = '';
-  if (motif === 0) {
-    pattern = [20, 34, 48].map((y) => `<rect x="12" y="${y}" width="36" height="3.4" rx="1.7" fill="${light}" opacity=".85"/>`).join('');
-  } else if (motif === 1) {
-    pattern = [0, 1, 2].map((r) => [0, 1, 2].map((c) =>
-      `<circle cx="${18 + c * 12}" cy="${24 + r * 14}" r="3.4" fill="${light}" opacity=".85"/>`).join('')).join('');
-  } else if (motif === 2) {
-    pattern = [22, 38, 54].map((y) => `<path d="M13 ${y + 8} L30 ${y} L47 ${y + 8}" fill="none" stroke="${light}" stroke-width="3" stroke-linecap="round" opacity=".85"/>`).join('');
-  } else {
-    pattern = `<rect x="11" y="22" width="38" height="40" rx="4" fill="none" stroke="${light}" stroke-width="3" opacity=".8"/>
-               <circle cx="30" cy="42" r="7" fill="${light}" opacity=".85"/>`;
-  }
+/** An uncollected bookmark: outline only, with a small star. */
+export function lockedArt() {
+  return `<span class="bm-art bm-empty">
+    ${CORD}
+    <span class="bm-body-wrap">
+      <svg class="bm-body" viewBox="0 0 100 340" preserveAspectRatio="none" role="img"
+           aria-label="Uncollected bookmark">
+        <rect class="bm-ground" x="0" y="0" width="100" height="340"/>
+        <rect class="bm-frame" x="5" y="5" width="90" height="330" fill="none"
+              stroke-width="2" vector-effect="non-scaling-stroke"/>
+        <rect class="bm-frame" x="11" y="11" width="78" height="318" fill="none"
+              stroke-width="1" vector-effect="non-scaling-stroke"/>
+      </svg>
+      ${STAR}
+    </span>
+  </span>`;
+}
 
-  const gilt = bonus
-    ? `<path d="${shape}" fill="none" stroke="#d9ab52" stroke-width="3"/>
-       <path d="M30 10 l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z" fill="#d9ab52"/>`
-    : '';
+const CHECK = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"
+  fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
-  return `<svg class="bm-art" viewBox="0 0 60 100" role="img" aria-label="Bookmark artwork" preserveAspectRatio="xMidYMid meet">
-    <path d="${shape}" fill="${dark}"/>
-    <g transform="${bonus ? 'translate(0,8) scale(1,0.9)' : ''}">${pattern}</g>
-    ${gilt}
-  </svg>`;
+export function checkBadge() {
+  return `<span class="bm-check">${CHECK}</span>`;
+}
+
+export function checkGlyph() {
+  return CHECK;
 }
 
 /**
  * The single way a bookmark is drawn anywhere in the app: your photo if there
- * is one, otherwise the generated artwork, otherwise the locked outline.
+ * is one, otherwise the generated artwork, otherwise the uncollected outline.
  * A photo that fails to decode falls back to the artwork (see initArtFallback).
  */
 export function markVisual(id, { bonus = false, unlocked = true, dataUrl = null } = {}) {
   if (!unlocked) return lockedArt();
   if (dataUrl) {
-    return `<img class="bm-photo" src="${attr(dataUrl)}" alt=""
-            data-bm-id="${attr(id)}" data-bm-bonus="${bonus ? '1' : ''}">`;
+    return `<span class="bm-art bm-has-photo">
+      ${CORD}
+      <span class="bm-body-wrap">
+        <img class="bm-photo" src="${attr(dataUrl)}" alt=""
+             data-bm-id="${attr(id)}" data-bm-bonus="${bonus ? '1' : ''}">
+      </span>
+    </span>`;
   }
   return bookmarkArt(id, { bonus });
 }
@@ -154,19 +213,12 @@ export function initArtFallback() {
     if (!el || el.tagName !== 'IMG' || !el.classList.contains('bm-photo')) return;
     const id = el.dataset.bmId;
     if (!id) return;
+    const host = el.closest('.bm-art');
     const span = document.createElement('span');
     span.innerHTML = bookmarkArt(id, { bonus: !!el.dataset.bmBonus });
-    const svg = span.firstElementChild;
-    if (svg) el.replaceWith(svg);
+    const replacement = span.firstElementChild;
+    if (host && replacement) host.replaceWith(replacement);
   }, true);
-}
-
-export function lockedArt() {
-  return `<svg class="bm-art" viewBox="0 0 60 100" role="img" aria-label="Locked bookmark" preserveAspectRatio="xMidYMid meet">
-    <path d="M3 3 H57 V93 L30 79 L3 93 Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="6 5" opacity=".55"/>
-    <path d="M24 46 v-5 a6 6 0 0 1 12 0 v5" fill="none" stroke="currentColor" stroke-width="2.5" opacity=".55"/>
-    <rect x="21" y="46" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2.5" opacity=".55"/>
-  </svg>`;
 }
 
 /* ------------------------------------------------------------ cover art ---- */
@@ -187,10 +239,17 @@ export function coverImg(book, { big = false, lazy = true } = {}) {
 
 export function progressBar(pct, { done = false } = {}) {
   const width = Math.max(0, Math.min(100, pct));
-  const over = pct > 100;
-  return `<div class="bar${done || over ? ' done' : ''}">
+  return `<div class="bar${done ? ' done' : ''}" role="img" aria-label="${pct}% complete">
     <div class="bar-fill" style="width:${width}%"></div>
-    ${over ? '<div class="bar-over" style="left:100%"></div>' : ''}
+  </div>`;
+}
+
+/** The reference's inline progress row: caption — hairline bar — percentage. */
+export function progressLine(label, pct, { done = false } = {}) {
+  return `<div class="progress-line">
+    <span class="progress-label">${esc(label)}</span>
+    ${progressBar(pct, { done })}
+    <span class="progress-pct">${pct}%</span>
   </div>`;
 }
 
@@ -255,9 +314,11 @@ export function render() {
     const app = document.getElementById('app');
     if (!match) {
       current = null;
-      app.innerHTML = `<div class="empty"><h3>Nothing here</h3><p>That page does not exist.</p>
-        <a class="btn btn-primary" href="#/">Back to home</a></div>`;
-      setChrome({ title: 'Shelf Marks', back: false, actions: '', fab: false });
+      app.innerHTML = `<div class="empty"><h3>Nothing on this page</h3>
+        <p>That address isn't part of the journal.</p>
+        <a class="btn" href="#/">Back to the journal</a></div>`;
+      setChrome({ title: '', back: false, actions: '', fab: false, banner: false });
+      highlightTab(null);
       return;
     }
 
@@ -294,12 +355,15 @@ export function refresh() {
 }
 
 function setChrome(view) {
-  const title = document.getElementById('appbar-title');
   const backBtn = document.getElementById('appbar-back');
   const actions = document.getElementById('appbar-actions');
   const fab = document.getElementById('fab');
-  if (title) title.textContent = view.title || 'Shelf Marks';
+  const banner = document.getElementById('editorial-banner');
+
   if (backBtn) backBtn.hidden = !view.back;
+  if (banner) banner.hidden = !view.banner;
+  if (fab) fab.hidden = !view.fab;
+
   if (actions) {
     actions.innerHTML = view.actions || '';
     actions.querySelectorAll('[data-nav]').forEach((node) => {
@@ -309,14 +373,15 @@ function setChrome(view) {
       });
     });
   }
-  if (fab) fab.hidden = !view.fab;
-  document.title = view.title && view.title !== 'Shelf Marks'
-    ? `${view.title} · Shelf Marks` : 'Shelf Marks';
+
+  const site = document.documentElement.dataset.siteName || "Diana's Lit Picks";
+  document.title = view.title ? `${view.title} · ${site}` : site;
 }
 
+// Both the desktop masthead links and the phone tab bar mark the same section.
 function highlightTab(tab) {
-  document.querySelectorAll('.tab').forEach((a) => {
-    if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
+  document.querySelectorAll('.tab, .masthead-link').forEach((a) => {
+    if (tab && a.dataset.tab === tab) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   });
 }

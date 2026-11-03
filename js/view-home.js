@@ -1,58 +1,34 @@
-// Home: the Goodreads-style goal cards, this period's checklist, and the
-// bookmark shelf teaser.
+// The journal's opening spread: the editorial banner, the year's goals as
+// editorial statistics, this period's checklist, and the bookmark archive.
 
 import {
   state, annualProgress, quarterProgress, nonfictionProgress,
   bookmarkStats, allChallenges, getChallenge,
 } from './state.js';
-import { esc, progressBar, markVisual, lockedArt, attr } from './ui.js';
+import { esc, attr, progressBar, markVisual, lockedArt, checkGlyph } from './ui.js';
 import { evaluate } from './rules.js';
+import { t } from './theme.js';
 import { focusQuarter, focusBimonth, daysLeftLabel, todayISO, formatDate } from './periods.js';
 
-function goalCard({ label, read, goal, pct, period }) {
+/** One editorial goal statistic: label, big numeral, hairline bar, footnotes. */
+function goal({ label, stat, of, pct, left, right, done }) {
   const over = pct > 100;
-  return `<section class="card">
+  return `<div class="goal">
     <div class="goal-head">
-      <span class="goal-label">${esc(label)}</span>
+      <div>
+        <p class="label">${esc(label)}</p>
+        <p class="goal-stat"><b>${esc(stat)}</b> <span class="of">${esc(of)}</span></p>
+      </div>
       <span class="goal-pct${over ? ' over' : ''}">${pct}%</span>
     </div>
-    <div class="goal-main"><b>${read}</b> of ${goal} books read</div>
-    ${progressBar(pct)}
-    <div class="goal-sub">
-      <span>${esc(daysLeftLabel(period))}</span>
-      <span>${over ? `${read - goal} past goal` : `${Math.max(0, goal - read)} to go`}</span>
-    </div>
-  </section>`;
-}
-
-function nonfictionCard() {
-  const nf = nonfictionProgress();
-  const over = nf.pct > 100;
-  const detail = nf.total === 0
-    ? 'No books logged yet this year.'
-    : `${nf.nonfiction} of ${nf.total} books · goal ${nf.targetPct}%`;
-  const right = nf.total === 0
-    ? ''
-    : (nf.onTrack
-      ? 'on track'
-      : `${nf.needed} more nonfiction to catch up`);
-  return `<section class="card">
-    <div class="goal-head">
-      <span class="goal-label">Nonfiction</span>
-      <span class="goal-pct${over ? ' over' : ''}">${nf.actualPct}%</span>
-    </div>
-    <div class="goal-main"><b>${nf.actualPct}%</b> of what I read</div>
-    ${progressBar(nf.pct, { done: nf.onTrack && nf.total > 0 })}
-    <div class="goal-sub">
-      <span>${esc(detail)}</span>
-      <span>${esc(right)}</span>
-    </div>
-  </section>`;
+    ${progressBar(pct, { done })}
+    <div class="goal-foot"><span>${esc(left)}</span><span>${esc(right)}</span></div>
+  </div>`;
 }
 
 function checkRow(done, title, note, href) {
   return `<a class="check-row${done ? ' done' : ''}" href="${attr(href)}">
-    <span class="check-mark" aria-hidden="true">${done ? '✓' : ''}</span>
+    <span class="check-mark" aria-hidden="true">${checkGlyph()}</span>
     <span class="check-body">
       <span class="check-title">${esc(title)}</span>
       <span class="check-note">${esc(note)}</span>
@@ -61,12 +37,12 @@ function checkRow(done, title, note, href) {
 }
 
 // One row per preset recurring challenge, scoped to the period we're in now.
-function periodChecklist() {
+function periodChecklist(year) {
   const rows = [];
   const specs = [
-    { id: 'classic-every-quarter', period: focusQuarter(state.settings.year), label: 'Classic' },
-    { id: 'reread-every-quarter', period: focusQuarter(state.settings.year), label: 'Re-read' },
-    { id: 'physical-tbr-every-other-month', period: focusBimonth(state.settings.year), label: 'Physical TBR' },
+    { id: 'classic-every-quarter', period: focusQuarter(year), label: 'A classic' },
+    { id: 'reread-every-quarter', period: focusQuarter(year), label: 'A re-read' },
+    { id: 'physical-tbr-every-other-month', period: focusBimonth(year), label: 'From the physical pile' },
   ];
 
   for (const spec of specs) {
@@ -79,7 +55,7 @@ function periodChecklist() {
     // checkRow escapes for us, so these stay raw text.
     const note = done
       ? `${p.books[0].title} · finished ${formatDate(p.books[0].dateFinished)}`
-      : `${p.label} · ${p.count} of ${p.target}`;
+      : `${p.label} · nothing logged yet`;
     rows.push(checkRow(
       done,
       `${spec.label} — ${p.label.replace(/^Q\d · /, '')}`,
@@ -89,36 +65,73 @@ function periodChecklist() {
   }
 
   if (!rows.length) return '';
-  return `<h2 class="section-title">This period</h2>
-    <section class="card"><div class="checklist">${rows.join('')}</div></section>`;
+  return `<section class="section section-rule">
+    <div class="section-head">
+      <h2 class="section-title">${esc(t('periodHeading'))}</h2>
+    </div>
+    <div class="checklist" style="margin-top:1.1rem">${rows.join('')}</div>
+  </section>`;
 }
 
-function bookmarkRow() {
+function archiveTeaser() {
   const { collected, total, catalog, have } = bookmarkStats();
   const recent = [...have.values()]
     .sort((a, b) => String(b.unlockedAt || '').localeCompare(String(a.unlockedAt || '')))
-    .slice(0, 8);
+    .slice(0, 10);
 
   const strip = recent.length
-    ? `<div class="bm-strip">${recent.map((u) => {
+    ? recent.map((u) => {
         const img = state.images.get(u.id);
         const meta = catalog.get(u.id);
         return markVisual(u.id, {
           bonus: !!(meta && meta.bonus),
           dataUrl: img ? img.dataUrl : null,
         });
-      }).join('')}</div>`
-    : `<div class="bm-strip">${[0, 1, 2, 3].map(() => lockedArt()).join('')}</div>`;
+      }).join('')
+    : [0, 1, 2, 3, 4, 5].map(() => lockedArt()).join('');
 
-  return `<h2 class="section-title">Bookmarks</h2>
-    <a class="card card-link" href="#/bookmarks">
-      <div class="row-between" style="margin-bottom:.6rem">
-        <strong>${collected} of ${total} bookmarks collected</strong>
-        <span class="muted small">All ›</span>
+  return `<section class="section section-rule">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">${esc(t('archiveHeading'))}</h2>
+        <p class="section-sub">${esc(t('archiveSub'))}</p>
       </div>
-      ${strip}
-      ${!recent.length ? '<p class="tiny muted" style="margin:.6rem 0 0">Finish a challenge period to unlock your first one.</p>' : ''}
+      <a class="section-meta" href="#/bookmarks" style="text-decoration:none">
+        ${collected} of ${total} collected →
+      </a>
+    </div>
+    <div class="bm-strip" style="margin-top:1.3rem">${strip}</div>
+    ${recent.length ? '' : '<p class="hint">Finish a challenge period to press the first one.</p>'}
+  </section>`;
+}
+
+function challengeTeaser(year) {
+  const list = allChallenges();
+  if (!list.length) return '';
+  const rows = list.slice(0, 4).map((c) => {
+    const r = evaluate(c, state.books);
+    const count = r.recurring
+      ? `${r.count} of ${r.target} periods`
+      : (r.targetUnset ? `${r.count} matching · no target yet` : `${r.count} of ${r.target} books`);
+    return `<a class="check-row${r.complete ? ' done' : ''}" href="#/challenge/${encodeURIComponent(c.id)}">
+      <span class="check-mark" aria-hidden="true">${checkGlyph()}</span>
+      <span class="check-body">
+        <span class="check-title">${esc(c.name)}</span>
+        <span class="check-note">${esc(count)}</span>
+      </span>
     </a>`;
+  }).join('');
+
+  return `<section class="section section-rule">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">${esc(t('challengesHeading'))}</h2>
+        <p class="section-sub">${esc(t('challengesSub'))}</p>
+      </div>
+      <a class="section-meta" href="#/challenges" style="text-decoration:none">All ${list.length} →</a>
+    </div>
+    <div class="checklist" style="margin-top:1.1rem">${rows}</div>
+  </section>`;
 }
 
 export function homeView() {
@@ -126,32 +139,64 @@ export function homeView() {
   const annual = annualProgress();
   const q = focusQuarter(year);
   const quarter = quarterProgress(q);
+  const nf = nonfictionProgress();
   const today = todayISO();
 
   const preface = today < `${year}-01-01`
-    ? `<div class="notice">The ${year} challenge has not started yet. Anything you finish before Jan 1 will not count toward these goals — log it on or after ${formatDate(`${year}-01-01`)}.</div>`
+    ? `<div class="notice"><strong>The ${year} challenge hasn’t opened yet.</strong>
+         Anything finished before January 1 won’t count toward these goals.</div>`
     : '';
 
-  const challengeCount = allChallenges().length;
-
   return {
-    title: 'Shelf Marks',
+    title: '',
     tab: 'home',
+    banner: true,
     fab: true,
     html: `
       ${preface}
-      ${goalCard({ label: `${year} reading challenge`, read: annual.read, goal: annual.goal, pct: annual.pct, period: annual.period })}
-      ${goalCard({ label: q.label, read: quarter.read, goal: quarter.goal, pct: quarter.pct, period: q })}
-      ${nonfictionCard()}
-      ${periodChecklist()}
-      ${bookmarkRow()}
-      <h2 class="section-title">Challenges</h2>
-      <a class="card card-link" href="#/challenges">
-        <div class="row-between">
-          <strong>${challengeCount} challenge${challengeCount === 1 ? '' : 's'} running</strong>
-          <span class="muted small">Open ›</span>
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">${esc(t('homeHeading', year))}</h2>
+            <p class="section-sub">${esc(t('homeSub', year))}</p>
+          </div>
+          <p class="section-meta">January — December ${year}</p>
         </div>
-      </a>
+
+        <div style="margin-top:1.5rem">
+          ${goal({
+            label: `${year} reading challenge`,
+            stat: annual.read,
+            of: `of ${annual.goal} books`,
+            pct: annual.pct,
+            left: daysLeftLabel(annual.period),
+            right: annual.pct > 100 ? `${annual.read - annual.goal} past goal` : `${annual.remaining} to go`,
+            done: annual.pct >= 100,
+          })}
+          ${goal({
+            label: q.label,
+            stat: quarter.read,
+            of: `of ${quarter.goal} books`,
+            pct: quarter.pct,
+            left: daysLeftLabel(q),
+            right: quarter.pct > 100 ? `${quarter.read - quarter.goal} past goal` : `${quarter.remaining} to go`,
+            done: quarter.pct >= 100,
+          })}
+          ${goal({
+            label: 'Nonfiction',
+            stat: `${nf.actualPct}%`,
+            of: `of ${nf.total || 'nothing'} read`,
+            pct: nf.pct,
+            left: nf.total ? `${nf.nonfiction} of ${nf.total} books · goal ${nf.targetPct}%` : 'No books logged yet',
+            right: nf.total ? (nf.onTrack ? 'on track' : `${nf.needed} more to catch up`) : '',
+            done: nf.onTrack && nf.total > 0,
+          })}
+        </div>
+      </section>
+
+      ${periodChecklist(year)}
+      ${challengeTeaser(year)}
+      ${archiveTeaser()}
     `,
   };
 }
