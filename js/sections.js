@@ -39,7 +39,7 @@ function sectionShell(sec, inner, extraClass = '') {
 
   // A shaped edge only reads against a ground — masking a section that is the
   // same colour as the page cuts a shape out of nothing.
-  const hasGround = photo || (sec.tone && sec.tone !== 'none');
+  const hasGround = photo || (sec.tone && sec.tone !== 'none') || sec.type === 'hero';
   const edge = (hasGround && sec.edge && sec.edge !== 'none') ? sec.edge : '';
 
   // A custom edge is an uploaded PNG used as a mask: opaque where the paper
@@ -140,6 +140,9 @@ export const SECTION_TYPES = {
       { key: 'align', label: 'Type alignment', type: 'select', options: [['center', 'Centred'], ['left', 'Left'], ['right', 'Right']] },
       { key: 'scrim', label: 'Darkening over image', type: 'range', min: 0, max: 90, step: 5 },
       { key: 'backdrop', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
+      { key: 'edge', label: 'Bottom edge', type: 'select', options: EDGES },
+      { key: 'edgeImage', label: 'Your own edge (PNG)', type: 'media', role: 'backdrop', size: '1800 × 140 px, transparent PNG' },
+      { key: 'edgeHeight', label: 'Edge depth', type: 'range', min: 8, max: 120, step: 2 },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
     ],

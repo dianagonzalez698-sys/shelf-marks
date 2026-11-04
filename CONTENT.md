@@ -185,9 +185,19 @@ mask: wherever the PNG is **opaque the section stays**, and wherever it is
 the image solid and erase the bottom in an irregular line. Colour does not
 matter — only opacity.
 
-A shaped edge needs a ground to cut into. On a plain paper section there is
-nothing to shape, so the control has no effect; use a **Decorative interlude**
-between two plain sections instead. Its **Lace band** and **Vine band** modes
+**A shaped edge needs a ground to cut into.** On a plain paper section there
+is nothing to shape — the editor now says so, right under the control, and the
+warning clears the moment you add a background colour or photograph. For two
+plain sections meeting, use a **Decorative interlude** between them instead.
+
+The **hero** always has a ground (its photograph, or the painterly default),
+so it can take an edge too — a torn bottom edge on the hero is the quickest
+way to make the opening feel like a printed page.
+
+If you choose **My own shape**, the PNG must be added to the library as a
+**Cutout**. Added as artwork or a photograph it is stored without
+transparency, so the mask comes out solid and the edge stays straight — the
+editor warns about this by name. Its **Lace band** and **Vine band** modes
 draw an ornamental divider in the accent colour, and its **Image strip** mode
 takes your own band at 1800 × 260 px.
 

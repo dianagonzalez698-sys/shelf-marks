@@ -2101,6 +2101,21 @@ a.ed-meta:hover { color: var(--c-accent); }
    transparent layer, so an edge set to "none" simply contributes nothing.
    ======================================================================== */
 
+/* A hero's ground is the banner inside it, so the mask applies there and the
+   section keeps its normal flow. */
+.ed-hero.has-edge { -webkit-mask-image: none; mask-image: none; padding-bottom: 0; }
+.ed-hero.has-edge .hero {
+  -webkit-mask-image: var(--edge-img), linear-gradient(black, black);
+  -webkit-mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + 1px);
+  -webkit-mask-position: bottom left, top left;
+  -webkit-mask-repeat: repeat-x, no-repeat;
+  mask-image: var(--edge-img), linear-gradient(black, black);
+  mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + 1px);
+  mask-position: bottom left, top left;
+  mask-repeat: repeat-x, no-repeat;
+  padding-bottom: var(--edge-h);
+}
+
 .ed.has-edge {
   --edge-img: none;
   --edge-h: 0px;

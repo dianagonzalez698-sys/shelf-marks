@@ -197,6 +197,45 @@ function openTypePicker(pageId) {
 
 /* --------------------------------------------------- section editor ----- */
 
+/**
+ * Settings that cannot take effect as configured. Every one of these used to
+ * fail silently — the control moved, nothing changed on the page, and there
+ * was no way to tell why.
+ */
+function sectionWarnings(sec) {
+  const out = [];
+  const hasGround = !!(sec.bgImage && sec.bgImage.assetId)
+    || (sec.tone && sec.tone !== 'none')
+    || sec.type === 'hero';
+  const edged = sec.edge && sec.edge !== 'none';
+
+  if (edged && !hasGround) {
+    out.push('This section sits on plain paper, so a shaped bottom edge has '
+      + 'nothing to cut into and will not show. Give it a background colour or '
+      + 'a photograph, or put a Decorative interlude underneath instead.');
+  }
+  if (sec.edge === 'custom' && !(sec.edgeImage && sec.edgeImage.assetId)) {
+    out.push('“My own shape” needs a transparent PNG in the edge slot below. '
+      + 'Without one the edge stays straight.');
+  }
+  if (sec.edge === 'custom' && sec.edgeImage && sec.edgeImage.assetId) {
+    const a = assets.get(sec.edgeImage.assetId);
+    if (a && a.kind !== 'cutout' && a.kind !== 'ornament') {
+      out.push(`“${a.name}” was added to the library as `
+        + `${(assets.KINDS.find((k) => k[0] === a.kind) || [, a.kind])[1].toLowerCase()}, `
+        + 'which is stored without transparency — so the mask is solid and the '
+        + 'edge stays straight. Add it again as a Cutout.');
+    }
+  }
+  return out;
+}
+
+function warningsHtml(sec) {
+  const list = sectionWarnings(sec);
+  if (!list.length) return '';
+  return list.map((w) => `<p class="notice">${esc(w)}</p>`).join('');
+}
+
 function fieldControl(f, value, secId) {
   const id = `f-${secId}-${f.key}`;
   switch (f.type) {
@@ -262,6 +301,7 @@ export function openSectionEditor(pageId, sectionId) {
   openSheet(`
     <h2>${esc(def.label)}</h2>
     <p class="small muted">${esc(def.blurb)}</p>
+    <div id="sec-warnings">${warningsHtml(sec)}</div>
     <div id="sec-fields" style="margin-top:1rem">
       ${def.fields.map((f) => fieldControl(f, sec[f.key], sec.id)).join('')}
     </div>
@@ -270,8 +310,12 @@ export function openSectionEditor(pageId, sectionId) {
     </div>
   `, {
     onMount(sheet) {
+      const warnBox = sheet.querySelector('#sec-warnings');
       const commit = async (patch) => {
         await layout.updateSection(pageId, sectionId, patch);
+        // Re-check after every change, so a warning clears the moment it is
+        // resolved rather than waiting for the sheet to be reopened.
+        if (warnBox) warnBox.innerHTML = warningsHtml(layout.getSection(pageId, sectionId));
       };
 
       sheet.querySelectorAll('[data-field]').forEach((el) => {
