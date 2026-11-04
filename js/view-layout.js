@@ -220,11 +220,23 @@ function sectionWarnings(sec) {
   }
   if (sec.edge === 'custom' && sec.edgeImage && sec.edgeImage.assetId) {
     const a = assets.get(sec.edgeImage.assetId);
-    if (a && a.kind !== 'cutout' && a.kind !== 'ornament') {
-      out.push(`“${a.name}” was added to the library as `
+    const mode = sec.edgeMode || 'auto';
+    if (a && a.hasAlpha === false && mode === 'alpha') {
+      out.push(`“${esc(a.name)}” has no transparent areas, so reading it as `
+        + 'transparency cuts nothing and the edge stays straight. Set '
+        + '“Read your edge image as” to <b>Light and dark</b> — the dark parts '
+        + 'of the picture become the cut.');
+    }
+    if (a && a.hasAlpha === false && mode === 'auto') {
+      out.push(`“${esc(a.name)}” has no transparent areas, so it is being read by `
+        + 'light and dark instead: the <b>dark</b> parts of the picture are cut '
+        + 'away and the light parts stay. Invert the image if that is backwards.');
+    }
+    if (a && a.hasAlpha !== false && a.kind !== 'cutout' && a.kind !== 'ornament') {
+      out.push(`“${esc(a.name)}” was added as `
         + `${(assets.KINDS.find((k) => k[0] === a.kind) || [, a.kind])[1].toLowerCase()}, `
-        + 'which is stored without transparency — so the mask is solid and the '
-        + 'edge stays straight. Add it again as a Cutout.');
+        + 'which is stored without transparency. Add it again as a <b>Cutout</b> '
+        + 'if you meant to cut with its see-through areas.');
     }
   }
   return out;
@@ -233,7 +245,8 @@ function sectionWarnings(sec) {
 function warningsHtml(sec) {
   const list = sectionWarnings(sec);
   if (!list.length) return '';
-  return list.map((w) => `<p class="notice">${esc(w)}</p>`).join('');
+  // Warning copy is authored here, not user input, so the <b> tags are ours.
+  return list.map((w) => `<p class="notice">${w}</p>`).join('');
 }
 
 function fieldControl(f, value, secId) {

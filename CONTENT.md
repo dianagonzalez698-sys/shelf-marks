@@ -194,10 +194,20 @@ The **hero** always has a ground (its photograph, or the painterly default),
 so it can take an edge too — a torn bottom edge on the hero is the quickest
 way to make the opening feel like a printed page.
 
-If you choose **My own shape**, the PNG must be added to the library as a
-**Cutout**. Added as artwork or a photograph it is stored without
-transparency, so the mask comes out solid and the edge stays straight — the
-editor warns about this by name. Its **Lace band** and **Vine band** modes
+**My own shape** reads your image one of two ways, and it works this out for
+you:
+
+- **Transparency** — the see-through parts are cut away. For this the file
+  must be a real transparent PNG *and* added to the library as a **Cutout**;
+  added as artwork or a photograph it is flattened to JPEG and loses its alpha.
+- **Light and dark** — the **dark** parts are cut away and the light parts
+  stay. This is what most downloaded ornaments need: a gold valance on a black
+  background has no transparency at all, and reading it as transparency would
+  cut nothing.
+
+“Work it out for me” checks whether the image actually has transparent pixels
+and picks the right one. The editor says which it chose, so if the cut comes
+out backwards you can invert the image or switch the mode by hand. Its **Lace band** and **Vine band** modes
 draw an ornamental divider in the accent colour, and its **Image strip** mode
 takes your own band at 1800 × 260 px.
 

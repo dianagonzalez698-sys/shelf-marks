@@ -64,6 +64,12 @@ async function boot() {
     await Promise.all([assets.load(), layout.load()]);
   } catch (_) { /* default layouts and empty library still render */ }
 
+  // Pictures added before transparency was recorded get the flag filled in,
+  // then the page redraws so any auto edge mode settles on the right one.
+  assets.backfillAlpha()
+    .then((n) => { if (n) refresh(); })
+    .catch(() => {});
+
   onChange(() => {
     paintStorageBanner();
     theme.applyContent(state.settings.year);

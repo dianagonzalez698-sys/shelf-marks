@@ -57,6 +57,19 @@ export function src(id) {
 
 export function isLoaded() { return loaded; }
 
+/** Fill in hasAlpha for anything added before it was recorded. */
+export async function backfillAlpha() {
+  const pending = [...cache.values()].filter((a) => a.hasAlpha === undefined);
+  if (!pending.length) return 0;
+  for (const a of pending) {
+    const hasAlpha = await detectAlpha(a.dataUrl);
+    const next = { ...a, hasAlpha };
+    cache.set(a.id, next);
+    try { await store.put('assets', next); } catch (_) { /* cache still right */ }
+  }
+  return pending.length;
+}
+
 export function totalBytes() {
   let n = 0;
   cache.forEach((a) => { n += (a.bytes || (a.dataUrl ? a.dataUrl.length * 0.75 : 0)); });
@@ -111,6 +124,35 @@ function toDataUrl(file, kind) {
   });
 }
 
+/**
+ * Does this image actually have transparent pixels? A PNG with a solid black
+ * background is opaque, and using it as an alpha mask cuts nothing — which
+ * looks exactly like the feature being broken.
+ */
+export function detectAlpha(dataUrl) {
+  return new Promise((resolve) => {
+    if (!dataUrl || !/^data:image\/(png|webp|gif|svg)/.test(dataUrl)) { resolve(false); return; }
+    const img = new Image();
+    img.onerror = () => resolve(false);
+    img.onload = () => {
+      try {
+        const w = Math.min(120, img.width || 120);
+        const h = Math.max(1, Math.round((img.height / img.width) * w)) || 1;
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, w, h);
+        const { data } = ctx.getImageData(0, 0, w, h);
+        for (let i = 3; i < data.length; i += 4) {
+          if (data[i] < 240) { resolve(true); return; }
+        }
+        resolve(false);
+      } catch (_) { resolve(false); }
+    };
+    img.src = dataUrl;
+  });
+}
+
 export async function add(file, { kind = 'photo', name = '', alt = '' } = {}) {
   const { dataUrl, w, h } = await toDataUrl(file, kind);
   const record = {
@@ -121,6 +163,7 @@ export async function add(file, { kind = 'photo', name = '', alt = '' } = {}) {
     dataUrl,
     w, h,
     bytes: Math.round(dataUrl.length * 0.75),
+    hasAlpha: await detectAlpha(dataUrl),
     addedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };

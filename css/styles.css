@@ -2160,10 +2160,16 @@ a.ed-meta:hover { color: var(--c-accent); }
   --edge-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath fill='black' d='M0 0H200V6C170 16 130-2 100 6 70 14 30-2 0 6Z'/%3E%3C/svg%3E");
 }
 
-/* Your own shape — an uploaded PNG used as the mask. */
+/* Your own shape — an uploaded image used as the mask. By default the mask
+   reads transparency; `edge-lum` reads brightness instead, so a black-backed
+   PNG (white keeps, black cuts) works without an alpha channel. */
 .ed.edge-custom {
   --edge-h: clamp(16px, 3vw, 44px);
   --edge-tile: 100%;
+}
+.ed.edge-lum, .ed-hero.edge-lum .hero {
+  -webkit-mask-source-type: luminance, alpha;
+  mask-mode: luminance, alpha;
 }
 
 /* Dissolve — the ground fades out rather than ending. */

@@ -8,7 +8,7 @@
 
 import { esc, attr, progressBar, progressLine, markVisual, checkGlyph, coverImg } from './ui.js';
 import { figure, backdrop, media, hasAsset } from './media.js';
-import { src as assetSrc } from './assets.js';
+import { src as assetSrc, get as getAsset } from './assets.js';
 import {
   state, annualProgress, quarterProgress, nonfictionProgress,
   bookmarkStats, allChallenges, getChallenge, sortedBooks, unlockMap,
@@ -45,16 +45,23 @@ function sectionShell(sec, inner, extraClass = '') {
   // A custom edge is an uploaded PNG used as a mask: opaque where the paper
   // stays, transparent where it tears away.
   const edgeStyles = [];
+  let edgeLum = false;
   if (edge === 'custom') {
+    const asset = getAsset((sec.edgeImage || {}).assetId);
     const url = assetSrc((sec.edgeImage || {}).assetId);
     if (url) edgeStyles.push(`--edge-img:url('${attr(url)}')`);
+    // An image with no transparency has to be read by brightness instead, or
+    // the mask is solid everywhere and nothing is cut.
+    const mode = sec.edgeMode || 'auto';
+    edgeLum = mode === 'luminance'
+      || (mode === 'auto' && !!asset && asset.hasAlpha === false);
   }
   if (edge && Number(sec.edgeHeight) > 0) edgeStyles.push(`--edge-h:${Number(sec.edgeHeight)}px`);
   const style = edgeStyles.length ? ` style="${edgeStyles.join(';')}"` : '';
 
   return `<section class="ed ed-${sec.type}${tone}${pad}`
     + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''}`
-    + `${edge ? ` has-edge edge-${edge}` : ''} ${extraClass}"`
+    + `${edge ? ` has-edge edge-${edge}` : ''}${edgeLum ? ' edge-lum' : ''} ${extraClass}"`
     + ` data-sec="${attr(sec.id)}"${style}>${bg}${inner}</section>`;
 }
 
@@ -95,6 +102,11 @@ const COMMON_FIELDS = [
   { key: 'edge', label: 'Bottom edge', type: 'select', options: EDGES },
   { key: 'edgeImage', label: 'Your own edge (PNG)', type: 'media', role: 'backdrop', size: '1800 × 140 px, transparent PNG' },
   { key: 'edgeHeight', label: 'Edge depth', type: 'range', min: 8, max: 120, step: 2 },
+  { key: 'edgeMode', label: 'Read your edge image as', type: 'select', options: [
+    ['auto', 'Work it out for me'],
+    ['alpha', 'Transparency — see-through parts are cut away'],
+    ['luminance', 'Light and dark — dark parts are cut away'],
+  ] },
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 ];
 
@@ -109,6 +121,7 @@ export const SECTION_BASE = {
   edge: 'none',
   edgeImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   edgeHeight: 0,
+  edgeMode: 'auto',
 };
 
 /* -------------------------------------------------------------- types ---- */
@@ -143,6 +156,11 @@ export const SECTION_TYPES = {
       { key: 'edge', label: 'Bottom edge', type: 'select', options: EDGES },
       { key: 'edgeImage', label: 'Your own edge (PNG)', type: 'media', role: 'backdrop', size: '1800 × 140 px, transparent PNG' },
       { key: 'edgeHeight', label: 'Edge depth', type: 'range', min: 8, max: 120, step: 2 },
+  { key: 'edgeMode', label: 'Read your edge image as', type: 'select', options: [
+    ['auto', 'Work it out for me'],
+    ['alpha', 'Transparency — see-through parts are cut away'],
+    ['luminance', 'Light and dark — dark parts are cut away'],
+  ] },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
     ],
