@@ -207,40 +207,22 @@ function sectionWarnings(sec) {
   const hasGround = !!(sec.bgImage && sec.bgImage.assetId)
     || (sec.tone && sec.tone !== 'none')
     || sec.type === 'hero';
-  const edged = sec.edge && sec.edge !== 'none';
+  const edge = sec.edge && sec.edge !== 'none' ? sec.edge : '';
 
-  if (edged && !hasGround) {
-    out.push('This section sits on plain paper, so a shaped bottom edge has '
-      + 'nothing to cut into and will not show. Give it a background colour or '
-      + 'a photograph, or put a Decorative interlude underneath instead.');
+  if (edge && edge !== 'artwork' && !hasGround) {
+    out.push('This section sits on plain paper, so a shaped edge has nothing to '
+      + 'cut into. Give it a background colour or photograph — or choose '
+      + '<b>My own artwork</b>, which works on any section.');
   }
-  if (sec.trim && sec.trim !== 'none' && !(sec.trimImage && sec.trimImage.assetId)) {
-    out.push('A decorative band is switched on but has no artwork chosen, so '
-      + 'nothing is drawn. Pick a picture in <b>Band artwork</b> below.');
+  if (edge === 'artwork' && !(sec.edgeArt && sec.edgeArt.assetId)) {
+    out.push('Choose the artwork for the edge below, or nothing is drawn.');
   }
-  if (sec.edge === 'custom' && !(sec.edgeImage && sec.edgeImage.assetId)) {
-    out.push('“My own shape” needs a transparent PNG in the edge slot below. '
-      + 'Without one the edge stays straight.');
-  }
-  if (sec.edge === 'custom' && sec.edgeImage && sec.edgeImage.assetId) {
-    const a = assets.get(sec.edgeImage.assetId);
-    const mode = sec.edgeMode || 'auto';
-    if (a && a.hasAlpha === false && mode === 'alpha') {
-      out.push(`“${esc(a.name)}” has no transparent areas, so reading it as `
-        + 'transparency cuts nothing and the edge stays straight. Set '
-        + '“Read your edge image as” to <b>Light and dark</b> — the dark parts '
-        + 'of the picture become the cut.');
-    }
-    if (a && a.hasAlpha === false && mode === 'auto') {
-      out.push(`“${esc(a.name)}” has no transparent areas, so it is being read by `
-        + 'light and dark instead: the <b>dark</b> parts of the picture are cut '
-        + 'away and the light parts stay. Invert the image if that is backwards.');
-    }
-    if (a && a.hasAlpha !== false && a.kind !== 'cutout' && a.kind !== 'ornament') {
-      out.push(`“${esc(a.name)}” was added as `
-        + `${(assets.KINDS.find((k) => k[0] === a.kind) || [, a.kind])[1].toLowerCase()}, `
-        + 'which is stored without transparency. Add it again as a <b>Cutout</b> '
-        + 'if you meant to cut with its see-through areas.');
+  if (edge === 'artwork' && sec.edgeArt && sec.edgeArt.assetId) {
+    const a = assets.get(sec.edgeArt.assetId);
+    if (a && a.hasAlpha === false) {
+      out.push(`“${esc(a.name)}” has no transparent areas, so it will draw as a `
+        + 'solid block rather than sitting over the page. Use a cut-out PNG and '
+        + 'add it to the library as a <b>Cutout</b>.');
     }
   }
   return out;
@@ -292,6 +274,15 @@ function fieldControl(f, value, secId) {
   }
 }
 
+/** Fields that apply to this section as currently configured. */
+function visibleFields(def, sec) {
+  return def.fields.filter((f) => typeof f.when !== 'function' || f.when(sec));
+}
+
+function fieldsHtml(def, sec) {
+  return visibleFields(def, sec).map((f) => fieldControl(f, sec[f.key], sec.id)).join('');
+}
+
 function mediaButton(key, m, removable = false, role = '') {
   const descriptor = media(m || {});
   const url = assets.src(descriptor.assetId);
@@ -323,76 +314,98 @@ export function openSectionEditor(pageId, sectionId) {
     <h2>${esc(def.label)}</h2>
     <p class="small muted">${esc(def.blurb)}</p>
     <div id="sec-warnings">${warningsHtml(sec)}</div>
-    <div id="sec-fields" style="margin-top:1rem">
-      ${def.fields.map((f) => fieldControl(f, sec[f.key], sec.id)).join('')}
-    </div>
+    <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, sec)}</div>
     <div class="btn-row" style="margin-top:1rem">
       <button class="btn btn-block" type="button" data-close>Done</button>
     </div>
   `, {
     onMount(sheet) {
       const warnBox = sheet.querySelector('#sec-warnings');
-      const commit = async (patch) => {
-        await layout.updateSection(pageId, sectionId, patch);
-        // Re-check after every change, so a warning clears the moment it is
-        // resolved rather than waiting for the sheet to be reopened.
-        if (warnBox) warnBox.innerHTML = warningsHtml(layout.getSection(pageId, sectionId));
+      const fieldBox = sheet.querySelector('#sec-fields');
+
+      const refreshPanel = () => {
+        const fresh = layout.getSection(pageId, sectionId);
+        if (warnBox) warnBox.innerHTML = warningsHtml(fresh);
+        if (fieldBox) {
+          fieldBox.innerHTML = fieldsHtml(def, fresh);
+          bind();
+        }
       };
 
-      sheet.querySelectorAll('[data-field]').forEach((el) => {
-        const key = el.dataset.field;
-        const evt = (el.type === 'checkbox' || el.tagName === 'SELECT' || el.type === 'range') ? 'input' : 'input';
-        el.addEventListener(evt, async () => {
-          let v;
-          if (el.type === 'checkbox') v = el.checked;
-          else if (el.type === 'range') {
-            v = Number(el.value);
-            const out = el.closest('.field').querySelector('[data-readout]');
-            if (out) out.textContent = v;
-          } else v = el.value;
-          await commit({ [key]: v });
+      const commit = async (patch, { rebuild = false } = {}) => {
+        await layout.updateSection(pageId, sectionId, patch);
+        const fresh = layout.getSection(pageId, sectionId);
+        if (warnBox) warnBox.innerHTML = warningsHtml(fresh);
+        // A control that decides which other controls apply redraws the panel,
+        // so the sheet never shows settings that cannot do anything.
+        if (rebuild && fieldBox) {
+          fieldBox.innerHTML = fieldsHtml(def, fresh);
+          bind();
+        }
+      };
+
+      function bind() {
+        sheet.querySelectorAll('[data-field]').forEach((el) => {
+          const key = el.dataset.field;
+          const fieldDef = def.fields.find((x) => x.key === key) || {};
+          el.addEventListener('input', async () => {
+            let v;
+            if (el.type === 'checkbox') v = el.checked;
+            else if (el.type === 'range') {
+              v = Number(el.value);
+              const out = el.closest('.field').querySelector('[data-readout]');
+              if (out) out.textContent = v;
+            } else v = el.value;
+            await commit({ [key]: v }, { rebuild: !!fieldDef.controls });
+          });
         });
-      });
 
-      // single media slots
-      sheet.querySelectorAll('[data-media]').forEach((btn) => {
-        btn.onclick = () => {
-          const key = btn.dataset.media;
-          const [base, idx] = key.split(':');
-          const current = idx === undefined ? sec[base] : (sec[base] || [])[Number(idx)];
-          const fieldDef = def.fields.find((x) => x.key === base) || {};
-          openMediaEditor(current, async (next) => {
+        sheet.querySelectorAll('[data-media]').forEach((btn) => {
+          btn.onclick = () => {
+            const key = btn.dataset.media;
+            const [base, idx] = key.split(':');
+            const current = idx === undefined
+              ? layout.getSection(pageId, sectionId)[base]
+              : (layout.getSection(pageId, sectionId)[base] || [])[Number(idx)];
+            const fieldDef = def.fields.find((x) => x.key === base) || {};
+            openMediaEditor(current, async (next) => {
+              const fresh = layout.getSection(pageId, sectionId);
+              if (idx === undefined) await commit({ [base]: next }, { rebuild: true });
+              else {
+                const list = [...(fresh[base] || [])];
+                list[Number(idx)] = next;
+                await commit({ [base]: list });
+              }
+              refreshPanel();
+              render();
+            }, { role: fieldDef.role || '', size: fieldDef.size || '' });
+          };
+        });
+
+        sheet.querySelectorAll('[data-rmmedia]').forEach((btn) => {
+          btn.onclick = async () => {
+            const [base, idx] = btn.dataset.rmmedia.split(':');
             const fresh = layout.getSection(pageId, sectionId);
-            if (idx === undefined) await commit({ [base]: next });
-            else {
-              const list = [...(fresh[base] || [])];
-              list[Number(idx)] = next;
-              await commit({ [base]: list });
-            }
+            const list = [...(fresh[base] || [])];
+            list.splice(Number(idx), 1);
+            await commit({ [base]: list });
+            refreshPanel();
             render();
-          }, { role: fieldDef.role || '', size: fieldDef.size || '' });
-        };
-      });
+          };
+        });
 
-      sheet.querySelectorAll('[data-rmmedia]').forEach((btn) => {
-        btn.onclick = async () => {
-          const [base, idx] = btn.dataset.rmmedia.split(':');
-          const fresh = layout.getSection(pageId, sectionId);
-          const list = [...(fresh[base] || [])];
-          list.splice(Number(idx), 1);
-          await commit({ [base]: list });
-          render();
-        };
-      });
+        sheet.querySelectorAll('[data-addmedia]').forEach((btn) => {
+          btn.onclick = async () => {
+            const base = btn.dataset.addmedia;
+            const fresh = layout.getSection(pageId, sectionId);
+            await commit({ [base]: [...(fresh[base] || []), media({})] });
+            refreshPanel();
+            render();
+          };
+        });
+      }
 
-      sheet.querySelectorAll('[data-addmedia]').forEach((btn) => {
-        btn.onclick = async () => {
-          const base = btn.dataset.addmedia;
-          const fresh = layout.getSection(pageId, sectionId);
-          await commit({ [base]: [...(fresh[base] || []), media({})] });
-          render();
-        };
-      });
+      bind();
     },
   });
 }

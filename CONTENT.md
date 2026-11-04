@@ -171,67 +171,28 @@ rules, progress bars and bookmark labels all move to the banner palette.
 
 ### The seam between sections
 
-There are **two different ways** to treat the join, and they are easy to
-confuse:
+One setting: **Edge treatment**.
 
-| | What it does | Use it for |
-|---|---|---|
-| **Decorative band over the edge** | Shows your artwork, at its own colours, laid across the seam | A lace strip, a curtain valance, a painted border |
-| **Bottom edge** | Uses a shape to *cut* the section away | A torn paper edge, scallops, a soft wave |
+| Choice | What happens |
+|---|---|
+| **None** | A straight edge |
+| **Torn paper · Scalloped · Lace · Soft wave · Dissolve** | The section is *cut* into that shape. Needs a background colour or photograph to cut into. |
+| **My own artwork…** | Your picture is *shown*, laid across the seam. Works on any section. |
 
-If you want to *see* the picture you uploaded, you want the **band**. The
-bottom edge never shows your image — it only uses its outline to cut.
+Choosing it reveals only what applies:
 
-#### Decorative band
+- A preset shape adds **Size** (how deep the cut bites)
+- **My own artwork** adds **Artwork**, **Where it goes** (bottom, top or both),
+  **Size** (the band's height) and **Hang over the edge** (how far it drapes
+  onto the section below — this is what gives the layered, pasted-in look)
 
-- **Band artwork** — best as a **transparent PNG, 1800 × 200 px**, added to
-  the library as a **Cutout** so the page shows through around it
-- **Along the bottom / top / both**
-- **Band height** and **Across the width** (stretch, or repeat the pattern)
-- **Hang over the edge** — lets the band drape onto the section below, which
-  is what gives the layered, pasted-in look
+For artwork, use a **transparent PNG, 1800 × 200 px**, added to the library as
+a **Cutout** so the page shows through around it. A picture with no
+transparency will draw as a solid block; the editor says so if it spots one.
 
-#### Shaped edge
-
-A section with a ground — a tint or a photograph — can end in a shaped edge
-instead of a straight cut, so one section flows into the next:
-
-**Torn paper · Scalloped · Lace · Soft wave · Dissolve · My own shape**
-
-**Edge depth** sets how deep the shape bites. Leave it at 0 to use the
-built-in depth for that shape.
-
-**My own shape** takes a **transparent PNG, 1800 × 140 px**. It is used as a
-mask: wherever the PNG is **opaque the section stays**, and wherever it is
-**transparent the section is cut away**. So for a torn edge, paint the top of
-the image solid and erase the bottom in an irregular line. Colour does not
-matter — only opacity.
-
-**A shaped edge needs a ground to cut into.** On a plain paper section there
-is nothing to shape — the editor now says so, right under the control, and the
-warning clears the moment you add a background colour or photograph. For two
-plain sections meeting, use a **Decorative interlude** between them instead.
-
-The **hero** always has a ground (its photograph, or the painterly default),
-so it can take an edge too — a torn bottom edge on the hero is the quickest
-way to make the opening feel like a printed page.
-
-**My own shape** reads your image one of two ways, and it works this out for
-you:
-
-- **Transparency** — the see-through parts are cut away. For this the file
-  must be a real transparent PNG *and* added to the library as a **Cutout**;
-  added as artwork or a photograph it is flattened to JPEG and loses its alpha.
-- **Light and dark** — the **dark** parts are cut away and the light parts
-  stay. This is what most downloaded ornaments need: a gold valance on a black
-  background has no transparency at all, and reading it as transparency would
-  cut nothing.
-
-“Work it out for me” checks whether the image actually has transparent pixels
-and picks the right one. The editor says which it chose, so if the cut comes
-out backwards you can invert the image or switch the mode by hand. Its **Lace band** and **Vine band** modes
-draw an ornamental divider in the accent colour, and its **Image strip** mode
-takes your own band at 1800 × 260 px.
+For two plain paper sections meeting, use a **Decorative interlude** between
+them — its **Lace band** and **Vine band** modes draw an ornamental divider,
+and **Image strip** takes your own band.
 
 ---
 

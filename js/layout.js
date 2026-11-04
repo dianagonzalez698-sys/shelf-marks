@@ -10,7 +10,7 @@
 //   'challenge:<id>'        an override for one particular challenge
 
 import * as store from './store.js';
-import { createSection, SECTION_TYPES } from './sections.js';
+import { createSection, SECTION_TYPES, migrateSection } from './sections.js';
 import { media } from './media.js';
 
 const cache = new Map();
@@ -110,14 +110,14 @@ function defaultsFor(pageId) {
 /** Sections for a page, falling back to the shared layout then the default. */
 export function get(pageId) {
   const row = cache.get(pageId);
-  if (row && Array.isArray(row.sections)) return row.sections;
+  if (row && Array.isArray(row.sections)) return row.sections.map(migrateSection);
 
   // 'challenge:abc' falls back to the shared 'challenge' layout.
   if (pageId.includes(':')) {
     const shared = cache.get(pageId.split(':')[0]);
     if (shared && Array.isArray(shared.sections)) return shared.sections;
   }
-  return defaultsFor(pageId);
+  return defaultsFor(pageId).map(migrateSection);
 }
 
 export function isCustomised(pageId) {

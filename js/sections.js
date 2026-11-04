@@ -37,51 +37,39 @@ function sectionShell(sec, inner, extraClass = '') {
       + `<span class="ed-scrim" style="--scrim:${Number(sec.bgScrim == null ? 45 : sec.bgScrim) / 100}"></span>`
     : '';
 
-  // A shaped edge only reads against a ground — masking a section that is the
-  // same colour as the page cuts a shape out of nothing.
+  // One edge setting, two outcomes: a preset shape cuts the section, and
+  // "artwork" lays your picture across the seam instead.
   const hasGround = photo || (sec.tone && sec.tone !== 'none') || sec.type === 'hero';
-  const edge = (hasGround && sec.edge && sec.edge !== 'none') ? sec.edge : '';
+  const want = sec.edge && sec.edge !== 'none' ? sec.edge : '';
+  const isArt = want === 'artwork';
+  const cut = (want && !isArt && hasGround) ? want : '';
 
-  // A custom edge is an uploaded PNG used as a mask: opaque where the paper
-  // stays, transparent where it tears away.
-  const edgeStyles = [];
-  let edgeLum = false;
-  if (edge === 'custom') {
-    const asset = getAsset((sec.edgeImage || {}).assetId);
-    const url = assetSrc((sec.edgeImage || {}).assetId);
-    if (url) edgeStyles.push(`--edge-img:url('${attr(url)}')`);
-    // An image with no transparency has to be read by brightness instead, or
-    // the mask is solid everywhere and nothing is cut.
-    const mode = sec.edgeMode || 'auto';
-    edgeLum = mode === 'luminance'
-      || (mode === 'auto' && !!asset && asset.hasAlpha === false);
-  }
-  if (edge && Number(sec.edgeHeight) > 0) edgeStyles.push(`--edge-h:${Number(sec.edgeHeight)}px`);
-  const style = edgeStyles.length ? ` style="${edgeStyles.join(';')}"` : '';
+  const styles = [];
+  if (cut && Number(sec.edgeSize) > 0) styles.push(`--edge-h:${Number(sec.edgeSize)}px`);
 
-  // A decorative band is the opposite of a shaped edge: the artwork itself is
-  // laid across the seam rather than used to cut one.
-  const trimUrl = assetSrc((sec.trimImage || {}).assetId);
-  const trimWhere = sec.trim && sec.trim !== 'none' ? sec.trim : '';
-  let trim = '';
-  if (trimWhere && trimUrl) {
-    const ts = `--trim-img:url('${attr(trimUrl)}')`
-      + `;--trim-h:${Number(sec.trimHeight) || 90}px`
-      + `;--trim-over:${Number(sec.trimOverlap) || 0}px`;
-    const fit = sec.trimFit === 'repeat' ? ' ed-trim-repeat' : '';
-    if (trimWhere === 'bottom' || trimWhere === 'both') {
-      trim += `<span class="ed-trim ed-trim-bottom${fit}" style="${ts}" aria-hidden="true"></span>`;
-    }
-    if (trimWhere === 'top' || trimWhere === 'both') {
-      trim += `<span class="ed-trim ed-trim-top${fit}" style="${ts}" aria-hidden="true"></span>`;
+  let band = '';
+  if (isArt) {
+    const url = assetSrc((sec.edgeArt || {}).assetId);
+    if (url) {
+      const where = sec.edgeWhere || 'bottom';
+      const bs = `--trim-img:url('${attr(url)}')`
+        + `;--trim-h:${Number(sec.edgeSize) || 140}px`
+        + `;--trim-over:${Number(sec.edgeHang) || 0}px`;
+      if (where === 'bottom' || where === 'both') {
+        band += `<span class="ed-trim ed-trim-bottom" style="${bs}" aria-hidden="true"></span>`;
+      }
+      if (where === 'top' || where === 'both') {
+        band += `<span class="ed-trim ed-trim-top" style="${bs}" aria-hidden="true"></span>`;
+      }
     }
   }
+  const style = styles.length ? ` style="${styles.join(';')}"` : '';
 
   return `<section class="ed ed-${sec.type}${tone}${pad}`
     + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''}`
-    + `${edge ? ` has-edge edge-${edge}` : ''}${edgeLum ? ' edge-lum' : ''}`
-    + `${trim ? ' has-trim' : ''} ${extraClass}"`
-    + ` data-sec="${attr(sec.id)}"${style}>${bg}${trim}${inner}</section>`;
+    + `${cut ? ` has-edge edge-${cut}` : ''}`
+    + `${band ? ' has-trim' : ''} ${extraClass}"`
+    + ` data-sec="${attr(sec.id)}"${style}>${bg}${band}${inner}</section>`;
 }
 
 function kicker(text) {
@@ -105,37 +93,64 @@ const TONES = [
 ];
 const SPACING = [['', 'Normal'], ['tight', 'Tight'], ['loose', 'Loose'], ['flush', 'Flush (no gap)']];
 const EDGES = [
-  ['none', 'Straight'],
+  ['none', 'None'],
   ['torn', 'Torn paper'],
   ['scallop', 'Scalloped'],
   ['lace', 'Lace'],
   ['wave', 'Soft wave'],
   ['fade', 'Dissolve'],
-  ['custom', 'My own shape…'],
+  ['artwork', 'My own artwork…'],
 ];
+const EDGE_WHERE = [
+  ['bottom', 'Along the bottom'],
+  ['top', 'Along the top'],
+  ['both', 'Both edges'],
+];
+
+/**
+ * Older sections carried two separate edge features — a mask and an overlay
+ * band — with ten controls between them, and nothing stopped both being on at
+ * once. They collapse into one `edge` setting here, so saved layouts keep
+ * working and the editor only ever shows one.
+ */
+export function migrateSection(sec) {
+  if (!sec || sec.edgeArt !== undefined) return sec;
+  const next = { ...sec };
+
+  if (sec.trim && sec.trim !== 'none' && sec.trimImage && sec.trimImage.assetId) {
+    next.edge = 'artwork';
+    next.edgeArt = sec.trimImage;
+    next.edgeWhere = sec.trim;
+    next.edgeSize = Number(sec.trimHeight) || 140;
+    next.edgeHang = Number(sec.trimOverlap) || 0;
+  } else if (sec.edge === 'custom' && sec.edgeImage && sec.edgeImage.assetId) {
+    // A custom cut becomes shown artwork, which is what it was nearly always for.
+    next.edge = 'artwork';
+    next.edgeArt = sec.edgeImage;
+    next.edgeWhere = 'bottom';
+    next.edgeSize = Number(sec.edgeHeight) || 140;
+    next.edgeHang = 0;
+  } else {
+    next.edge = (sec.edge === 'custom') ? 'none' : (sec.edge || 'none');
+    next.edgeArt = media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false });
+    next.edgeWhere = 'bottom';
+    next.edgeSize = Number(sec.edgeHeight) || 0;
+    next.edgeHang = 0;
+  }
+  return next;
+}
+
 const COMMON_FIELDS = [
   { key: 'tone', label: 'Background colour', type: 'select', options: TONES },
   { key: 'bgImage', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
-  { key: 'bgScrim', label: 'Darken the photograph', type: 'range', min: 0, max: 90, step: 5 },
-  { key: 'bgInk', label: 'Type over the photograph', type: 'select', options: [['light', 'Light'], ['dark', 'Dark']] },
-  { key: 'edge', label: 'Bottom edge', type: 'select', options: EDGES },
-  { key: 'edgeImage', label: 'Your own edge (PNG)', type: 'media', role: 'backdrop', size: '1800 × 140 px, transparent PNG' },
-  { key: 'edgeHeight', label: 'Edge depth', type: 'range', min: 8, max: 120, step: 2 },
-  { key: 'edgeMode', label: 'Read your edge image as', type: 'select', options: [
-    ['auto', 'Work it out for me'],
-    ['alpha', 'Transparency — see-through parts are cut away'],
-    ['luminance', 'Light and dark — dark parts are cut away'],
-  ] },
-  { key: 'trim', label: 'Decorative band over the edge', type: 'select', options: [
-    ['none', 'None'],
-    ['bottom', 'Along the bottom'],
-    ['top', 'Along the top'],
-    ['both', 'Both edges'],
-  ] },
-  { key: 'trimImage', label: 'Band artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG' },
-  { key: 'trimHeight', label: 'Band height', type: 'range', min: 20, max: 280, step: 4 },
-  { key: 'trimFit', label: 'Across the width', type: 'select', options: [['stretch', 'Stretch to fit'], ['repeat', 'Repeat the pattern']] },
-  { key: 'trimOverlap', label: 'Hang over the edge', type: 'range', min: 0, max: 120, step: 2 },
+  { key: 'bgScrim', label: 'Darken the photograph', type: 'range', min: 0, max: 90, step: 5, when: (s) => !!(s.bgImage && s.bgImage.assetId) },
+  { key: 'bgInk', label: 'Type over the photograph', type: 'select', options: [['light', 'Light'], ['dark', 'Dark']], when: (s) => !!(s.bgImage && s.bgImage.assetId) },
+
+  { key: 'edge', label: 'Edge treatment', type: 'select', options: EDGES, controls: true },
+  { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
+  { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
+  { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
+  { key: 'edgeHang', label: 'Hang over the edge', type: 'range', min: 0, max: 120, step: 2, when: (s) => s.edge === 'artwork' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 ];
@@ -151,12 +166,10 @@ export const SECTION_BASE = {
   edge: 'none',
   edgeImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   edgeHeight: 0,
-  edgeMode: 'auto',
-  trim: 'none',
-  trimImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
-  trimHeight: 90,
-  trimFit: 'stretch',
-  trimOverlap: 0,
+  edgeArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
+  edgeWhere: 'bottom',
+  edgeSize: 0,
+  edgeHang: 0,
 };
 
 /* -------------------------------------------------------------- types ---- */
@@ -188,25 +201,11 @@ export const SECTION_TYPES = {
       { key: 'align', label: 'Type alignment', type: 'select', options: [['center', 'Centred'], ['left', 'Left'], ['right', 'Right']] },
       { key: 'scrim', label: 'Darkening over image', type: 'range', min: 0, max: 90, step: 5 },
       { key: 'backdrop', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
-      { key: 'edge', label: 'Bottom edge', type: 'select', options: EDGES },
-      { key: 'edgeImage', label: 'Your own edge (PNG)', type: 'media', role: 'backdrop', size: '1800 × 140 px, transparent PNG' },
-      { key: 'edgeHeight', label: 'Edge depth', type: 'range', min: 8, max: 120, step: 2 },
-  { key: 'edgeMode', label: 'Read your edge image as', type: 'select', options: [
-    ['auto', 'Work it out for me'],
-    ['alpha', 'Transparency — see-through parts are cut away'],
-    ['luminance', 'Light and dark — dark parts are cut away'],
-  ] },
-  { key: 'trim', label: 'Decorative band over the edge', type: 'select', options: [
-    ['none', 'None'],
-    ['bottom', 'Along the bottom'],
-    ['top', 'Along the top'],
-    ['both', 'Both edges'],
-  ] },
-  { key: 'trimImage', label: 'Band artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG' },
-  { key: 'trimHeight', label: 'Band height', type: 'range', min: 20, max: 280, step: 4 },
-  { key: 'trimFit', label: 'Across the width', type: 'select', options: [['stretch', 'Stretch to fit'], ['repeat', 'Repeat the pattern']] },
-  { key: 'trimOverlap', label: 'Hang over the edge', type: 'range', min: 0, max: 120, step: 2 },
-
+      { key: 'edge', label: 'Edge treatment', type: 'select', options: EDGES, controls: true },
+      { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
+      { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
+      { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
+      { key: 'edgeHang', label: 'Hang over the edge', type: 'range', min: 0, max: 120, step: 2, when: (s) => s.edge === 'artwork' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
     ],
@@ -658,7 +657,8 @@ export function challengeSpread(c, index = 0) {
 
 /* ----------------------------------------------------------- rendering --- */
 
-export function renderSection(sec) {
+export function renderSection(raw) {
+  const sec = migrateSection(raw);
   if (!sec || sec.visible === false) return '';
   const type = SECTION_TYPES[sec.type];
   if (!type) return '';
