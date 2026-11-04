@@ -218,7 +218,7 @@ function fieldControl(f, value, secId) {
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
         ${mediaButton(f.key, value, false, f.role)}
         ${f.role === 'backdrop'
-          ? '<p class="hint">Fills the whole banner. Frames and tilts don’t apply here — use the framed photo on top for those.</p>'
+          ? '<p class="hint">Fills the whole section, edge to edge. Frames and tilts don’t apply to a background — put those on a picture inside the section.</p>'
           : ''}</div>`;
     case 'medialist':
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
@@ -237,7 +237,7 @@ function mediaButton(key, m, removable = false, role = '') {
   const url = assets.src(descriptor.assetId);
   const a = assets.get(descriptor.assetId);
   const meta = role === 'backdrop'
-    ? `fills the banner · ${Math.round(Number(descriptor.opacity) * 100)}%`
+    ? `fills the section · ${Math.round(Number(descriptor.opacity) * 100)}%`
     : `${descriptor.frame} · ${descriptor.ratio}`;
   return `<span class="media-slot">
     <button class="media-pick" type="button" data-media="${attr(key)}">
@@ -363,7 +363,7 @@ export function openMediaEditor(value, onSave, { role = '' } = {}) {
     ${isBackdrop ? `<p class="notice" style="margin-top:1.1rem">
       <strong>This is a background.</strong>
       It fills the whole section, so frames, shapes and tilts don’t apply.
-      Use the <b>framed photo on top</b> for those.</p>` : ''}
+      Put those on a picture inside the section instead.</p>` : ''}
 
     <div class="field" style="margin-top:1.1rem" ${isBackdrop ? 'hidden' : ''}>
       <label for="m-frame">Frame</label>

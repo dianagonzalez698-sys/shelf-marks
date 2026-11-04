@@ -1206,6 +1206,35 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 /* Full-bleed sections escape the measure entirely. */
 .ed-bleed { max-width: none; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; }
 
+/* A photograph behind a section. It bleeds the full width while the contents
+   stay in column, and carries a scrim so type stays readable over it. */
+.ed.has-bg {
+  max-width: none;
+  overflow: hidden;
+  isolation: isolate;
+  padding-top: calc(var(--sp-section) * 1.25);
+  padding-bottom: calc(var(--sp-section) * 1.25);
+  padding-left: max(calc((100% - var(--w-content)) / 2 + var(--sp-page-x)), var(--sp-page-x));
+  padding-right: max(calc((100% - var(--w-content)) / 2 + var(--sp-page-x)), var(--sp-page-x));
+}
+.ed.has-bg.sp-tight { padding-top: calc(var(--sp-section) * .6); padding-bottom: calc(var(--sp-section) * .6); }
+.ed.has-bg.sp-flush { padding-top: 0; padding-bottom: 0; }
+.ed-scrim {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(28, 18, 14, calc(var(--scrim, .45) + .14)) 0%,
+    rgba(28, 18, 14, calc(var(--scrim, .45) * .82)) 50%,
+    rgba(28, 18, 14, calc(var(--scrim, .45) * .5)) 100%);
+}
+/* A photographed section with dark type gets a pale wash instead. */
+.ed.has-bg:not(.ed-dark) .ed-scrim {
+  background: linear-gradient(
+    to top,
+    rgba(248, 240, 228, calc(var(--scrim, .45) + .30)) 0%,
+    rgba(248, 240, 228, calc(var(--scrim, .45) + .16)) 100%);
+}
+
 /* Tinted grounds. A toned section bleeds its colour the full width while its
    contents stay in column. */
 .ed[class*="tone-"] {
@@ -1220,10 +1249,38 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .ed.tone-gold    { background: var(--tone-gold); }
 .ed.tone-olive   { background: var(--tone-olive); color: var(--tone-deep-ink); }
 .ed.tone-ink     { background: var(--tone-ink);  color: var(--tone-deep-ink); }
-.ed.tone-olive .ed-kicker, .ed.tone-ink .ed-kicker,
-.ed.tone-olive .ed-sub,    .ed.tone-ink .ed-sub,
-.ed.tone-olive .ed-meta,   .ed.tone-ink .ed-meta { color: var(--c-banner-ink-dim); }
-.ed.tone-olive .ed-title,  .ed.tone-ink .ed-title { color: var(--c-banner-accent); }
+/* Any section on a dark ground — a deep tone, or a photograph with light
+   type over it — flips to the banner palette. */
+.ed-dark { color: var(--tone-deep-ink); }
+.ed-dark .ed-kicker,
+.ed-dark .ed-sub,
+.ed-dark .ed-meta,
+.ed-dark .hint,
+.ed-dark .tick-note,
+.ed-dark .measure-foot,
+.ed-dark .measure-pct,
+.ed-dark .bm-sub,
+.ed-dark .spread-filter,
+.ed-dark .shelf-meta,
+.ed-dark .m-cap { color: var(--c-banner-ink-dim); }
+.ed-dark .ed-title,
+.ed-dark .ed-subtitle,
+.ed-dark .spread-title,
+.ed-dark .measure-stat,
+.ed-dark .tick-title,
+.ed-dark .shelf-title,
+.ed-dark .bm-label { color: var(--c-banner-accent); }
+.ed-dark .measure-stat span { color: var(--c-banner-ink-dim); }
+/* The accent is tuned for paper; on a dark ground it loses too much. */
+.ed-dark .measure-pct.over,
+.ed-dark .goal-pct.over { color: var(--c-banner-accent); }
+.ed-dark .tick,
+.ed-dark .tick:first-child,
+.ed-dark .measure { border-color: rgba(255, 255, 255, .20); }
+.ed-dark .tick-mark { border-color: rgba(255, 255, 255, .42); }
+.ed-dark .bar { background: rgba(255, 255, 255, .24); border-color: transparent; }
+.ed-dark .ornament-line { background: rgba(255, 255, 255, .34); }
+.ed-dark a { color: var(--c-banner-accent); }
 
 /* Painted-canvas grain over toned grounds. */
 .ed[class*="tone-"]::before {
@@ -1232,7 +1289,9 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
   mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.5' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23c)'/%3E%3C/svg%3E");
 }
-.ed > * { position: relative; z-index: 1; }
+.ed > * { position: relative; z-index: 2; }
+.ed > .m-backdrop { z-index: 0; }
+.ed > .ed-scrim { z-index: 1; }
 
 /* ---------------------------------------------------- editorial type ----- */
 
@@ -1265,7 +1324,7 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
   color: var(--c-accent);
   margin-right: .06em;
 }
-.ed.tone-olive .ed-script, .ed.tone-ink .ed-script { color: var(--c-banner-accent); }
+.ed-dark .ed-script { color: var(--c-banner-accent); }
 .ed-subtitle {
   margin: 0;
   font-family: var(--f-display);
@@ -1306,7 +1365,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 }
 .marginalia.big { font-size: clamp(1.7rem, 4vw, 2.9rem); margin: 0; }
 .marginalia.center { text-align: center; }
-.ed.tone-olive .marginalia, .ed.tone-ink .marginalia { color: var(--c-banner-accent); }
+.ed-dark .marginalia { color: var(--c-banner-accent); }
 
 /* --------------------------------------------------------------- hero ---- */
 
@@ -1455,8 +1514,8 @@ a.ed-meta:hover { color: var(--c-accent); }
   font-size: var(--fs-label); letter-spacing: var(--ls-label);
   text-transform: var(--tt-label); color: var(--c-ink-faint);
 }
-.ed.tone-olive .statement cite, .ed.tone-ink .statement cite { color: var(--c-banner-ink-dim); }
-.ed.tone-olive .st-quote::before, .ed.tone-ink .st-quote::before { color: var(--c-banner-accent); }
+.ed-dark .statement cite { color: var(--c-banner-ink-dim); }
+.ed-dark .st-quote::before { color: var(--c-banner-accent); }
 
 /* ------------------------------------------------------ interlude ------- */
 

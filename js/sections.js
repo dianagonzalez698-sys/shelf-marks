@@ -23,7 +23,22 @@ const uid = (p) => `${p}_${Date.now().toString(36)}_${Math.random().toString(36)
 function sectionShell(sec, inner, extraClass = '') {
   const tone = sec.tone && sec.tone !== 'none' ? ` tone-${sec.tone}` : '';
   const pad = sec.spacing ? ` sp-${sec.spacing}` : '';
-  return `<section class="ed ed-${sec.type}${tone}${pad} ${extraClass}" data-sec="${attr(sec.id)}">${inner}</section>`;
+  const photo = hasAsset(sec.bgImage);
+  const ink = sec.bgInk || 'light';
+
+  // Type has to flip to the light palette over a dark ground, whether that
+  // ground is a deep tone or a photograph.
+  const onDark = (photo && ink === 'light')
+    || sec.tone === 'olive' || sec.tone === 'ink';
+
+  const bg = photo
+    ? backdrop(sec.bgImage, { seed: sec.id })
+      + `<span class="ed-scrim" style="--scrim:${Number(sec.bgScrim == null ? 45 : sec.bgScrim) / 100}"></span>`
+    : '';
+
+  return `<section class="ed ed-${sec.type}${tone}${pad}`
+    + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''} ${extraClass}"`
+    + ` data-sec="${attr(sec.id)}">${bg}${inner}</section>`;
 }
 
 function kicker(text) {
@@ -47,9 +62,22 @@ const TONES = [
 ];
 const SPACING = [['', 'Normal'], ['tight', 'Tight'], ['loose', 'Loose'], ['flush', 'Flush (no gap)']];
 const COMMON_FIELDS = [
-  { key: 'tone', label: 'Background', type: 'select', options: TONES },
+  { key: 'tone', label: 'Background colour', type: 'select', options: TONES },
+  { key: 'bgImage', label: 'Background photograph', type: 'media', role: 'backdrop' },
+  { key: 'bgScrim', label: 'Darken the photograph', type: 'range', min: 0, max: 90, step: 5 },
+  { key: 'bgInk', label: 'Type over the photograph', type: 'select', options: [['light', 'Light'], ['dark', 'Dark']] },
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 ];
+
+// Defaults every section carries, whatever its type.
+export const SECTION_BASE = {
+  visible: true,
+  tone: 'none',
+  spacing: '',
+  bgImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
+  bgScrim: 45,
+  bgInk: 'light',
+};
 
 /* -------------------------------------------------------------- types ---- */
 
@@ -79,7 +107,7 @@ export const SECTION_TYPES = {
       { key: 'height', label: 'Height', type: 'select', options: [['short', 'Short'], ['tall', 'Tall'], ['full', 'Full screen']] },
       { key: 'align', label: 'Type alignment', type: 'select', options: [['center', 'Centred'], ['left', 'Left'], ['right', 'Right']] },
       { key: 'scrim', label: 'Darkening over image', type: 'range', min: 0, max: 90, step: 5 },
-      { key: 'backdrop', label: 'Background image', type: 'media', role: 'backdrop' },
+      { key: 'backdrop', label: 'Background photograph', type: 'media', role: 'backdrop' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media' },
     ],
@@ -548,7 +576,7 @@ export function renderSections(sections) {
 export function createSection(type) {
   const def = SECTION_TYPES[type];
   if (!def) return null;
-  return { id: uid('sec'), type, visible: true, tone: 'none', spacing: '', ...def.create() };
+  return { id: uid('sec'), type, ...SECTION_BASE, ...def.create() };
 }
 
 export function typeList() {

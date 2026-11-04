@@ -128,8 +128,21 @@ Pages you can compose:
 The six **live** types are real features wearing editorial clothes. Hiding one
 hides the presentation, never the data.
 
-Every section also takes a **background** (paper, or one of six palette tints)
-and a **vertical space** setting.
+### Every section's own background
+
+Whatever its type, every section takes:
+
+- **Background colour** — paper, or one of six palette tints (olive and
+  mahogany are full strength and flip the type to light automatically)
+- **Background photograph** — any picture from your library, bleeding the full
+  width while the contents stay in column
+- **Darken the photograph** — the scrim between the picture and the type
+- **Type over the photograph** — Light or Dark, so you can run a pale wash over
+  a bright picture and keep mahogany type, or darken a photo and set it in gold
+- **Vertical space** — tight, normal, loose, or flush
+
+A section on a dark ground re-tints everything inside it: headings, captions,
+rules, progress bars and bookmark labels all move to the banner palette.
 
 ---
 
