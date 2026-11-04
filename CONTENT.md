@@ -75,6 +75,11 @@ becomes a clean stack rather than a mess.
 or configure its sections. Reordering is the ↑ ↓ buttons; **Reset page**
 returns to the default arrangement.
 
+> **If a picture you placed doesn't appear**, check the section's
+> **Shown / Hidden** switch. A hidden section renders nothing at all — its
+> pictures and settings are kept, they just aren't drawn. The editor warns you
+> at the top of the page when anything is hidden.
+
 Pages you can compose:
 
 - **The journal (home)**

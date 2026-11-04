@@ -36,17 +36,21 @@ export function layoutView(params = {}) {
   const rows = sections.map((sec, i) => {
     const def = SECTION_TYPES[sec.type] || { label: sec.type, blurb: '' };
     const summary = sec.title || sec.text || sec.kicker || def.blurb;
-    return `<li class="lay-row${sec.visible === false ? ' is-hidden' : ''}" data-sec="${attr(sec.id)}">
+    const hidden = sec.visible === false;
+    return `<li class="lay-row${hidden ? ' is-hidden' : ''}" data-sec="${attr(sec.id)}">
       <span class="lay-order">
         <button class="icon-btn" type="button" data-move="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
         <button class="icon-btn" type="button" data-move="1" ${i === sections.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button>
       </span>
       <span class="lay-body">
-        <span class="lay-type">${esc(def.label)}</span>
+        <span class="lay-type">${esc(def.label)}${hidden ? '<em class="lay-flag">hidden</em>' : ''}</span>
         <span class="lay-summary">${esc(String(summary || '').slice(0, 72))}</span>
       </span>
       <span class="lay-acts">
-        <button class="btn btn-quiet btn-sm" type="button" data-act="vis">${sec.visible === false ? 'Show' : 'Hide'}</button>
+        <label class="vis-switch" title="${hidden ? 'Hidden — not shown on the page' : 'Shown on the page'}">
+          <input type="checkbox" data-act="vis" ${hidden ? '' : 'checked'}>
+          <span>${hidden ? 'Hidden' : 'Shown'}</span>
+        </label>
         <button class="btn btn-sm" type="button" data-act="edit">Edit</button>
         <button class="icon-btn" type="button" data-act="del" aria-label="Remove section">×</button>
       </span>
@@ -88,6 +92,12 @@ export function layoutView(params = {}) {
           <a class="btn" href="#/${pageId === 'directory' ? 'challenges' : pageId.startsWith('challenge:') ? `challenge/${encodeURIComponent(pageId.slice(10))}` : ''}">View page</a>
           ${custom ? '<button class="btn btn-danger" type="button" id="lay-reset">Reset page</button>' : ''}
         </div>
+
+        ${sections.some((x) => x.visible === false)
+          ? `<p class="notice" style="margin-bottom:1rem"><strong>Some sections are hidden.</strong>
+              Anything inside a hidden section — pictures included — won't appear on the page.
+              Switch it back to <b>Shown</b> to bring it back.</p>`
+          : ''}
 
         ${sections.length
           ? `<ol class="lay-list">${rows}</ol>`
@@ -132,9 +142,10 @@ export function layoutView(params = {}) {
             render();
           };
         });
-        row.querySelector('[data-act="vis"]').onclick = async () => {
-          const sec = layout.getSection(pageId, id);
-          await layout.updateSection(pageId, id, { visible: sec.visible === false });
+        // The checkbox carries the state directly, so there is no toggle to
+        // get out of step with what the row is showing.
+        row.querySelector('[data-act="vis"]').onchange = async (e) => {
+          await layout.updateSection(pageId, id, { visible: e.target.checked });
           render();
         };
         row.querySelector('[data-act="edit"]').onclick = () => openSectionEditor(pageId, id);
