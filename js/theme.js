@@ -177,6 +177,18 @@ export const THEME_SCHEMA = [
     ],
   },
   {
+    id: 'frames',
+    label: 'Picture frames',
+    note: 'The gilding on the museum frame. Four tones make the moulding read as leaf rather than paint.',
+    tokens: [
+      { var: '--c-gilt-light', label: 'Gilt highlight', type: 'color' },
+      { var: '--c-gilt-mid', label: 'Gilt mid-tone', type: 'color' },
+      { var: '--c-gilt-deep', label: 'Gilt shadow', type: 'color' },
+      { var: '--c-gilt-shadow', label: 'Rebate / outline', type: 'color' },
+      { var: '--gilt-width', label: 'Moulding width', type: 'length', min: 4, max: 60, step: 1, unit: 'px', fluid: true, approx: 20 },
+    ],
+  },
+  {
     id: 'bookmark-colours',
     label: 'Bookmark colourways',
     note: 'Each collected bookmark picks one of these six, consistently, from its id.',

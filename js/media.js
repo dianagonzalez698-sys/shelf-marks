@@ -11,6 +11,8 @@ import { esc, attr } from './ui.js';
 
 export const FRAMES = [
   ['none', 'None'],
+  ['gilt', 'Gilt museum frame'],
+  ['gilt-oval', 'Gilt oval'],
   ['plate', 'Paper plate'],
   ['polaroid', 'Polaroid'],
   ['deckle', 'Torn edge'],
@@ -79,9 +81,15 @@ function frameClass(m) {
   return bits.join(' ');
 }
 
+// The shape goes on the inner box. Putting it on the figure made any frame
+// padding invisible: an absolutely positioned `inset: 0` child is laid out
+// against the padding box, so the picture covered the mount.
+function shapeStyle(m) {
+  return (m.ratio && m.ratio !== 'auto') ? `aspect-ratio:${m.ratio}` : '';
+}
+
 function boxStyle(m) {
   const out = [];
-  if (m.ratio && m.ratio !== 'auto') out.push(`aspect-ratio:${m.ratio}`);
   if (Number(m.width) !== 100) out.push(`width:${Number(m.width)}%`);
   if (Number(m.opacity) !== 1) out.push(`opacity:${Number(m.opacity)}`);
   if (Number(m.rotate)) out.push(`--m-rot:${Number(m.rotate)}deg`);
@@ -110,8 +118,14 @@ export function figure(m, { seed = '', className = '', eager = false } = {}) {
          <svg viewBox="0 0 48 48" class="m-empty-mark"><path d="M24 7.5c1.3 9.2 3.1 11 12.3 12.3C27.1 21.1 25.3 22.9 24 32.1c-1.3-9.2-3.1-11-12.3-12.3C20.9 18.5 22.7 16.7 24 7.5z"/></svg>
        </span>`;
 
-  return `<figure class="m-fig ${frameClass(descriptor)} ${className}" style="${boxStyle(descriptor)}">
-    <span class="m-box">${inner}</span>
+  const auto = !descriptor.ratio || descriptor.ratio === 'auto';
+  // The mount carries the frame — its padding and gilding. Keeping it separate
+  // from the figure means a caption sits *below* the frame rather than being
+  // printed on the moulding.
+  return `<figure class="m-fig ${frameClass(descriptor)}${auto ? ' m-auto' : ''} ${className}" style="${boxStyle(descriptor)}">
+    <span class="m-mount">
+      <span class="m-box" style="${shapeStyle(descriptor)}">${inner}</span>
+    </span>
     ${descriptor.caption ? `<figcaption class="m-cap">${esc(descriptor.caption)}</figcaption>` : ''}
   </figure>`;
 }

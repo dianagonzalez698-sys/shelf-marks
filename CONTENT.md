@@ -50,7 +50,7 @@ section and click a picture slot.
 | Control | What it does |
 |---|---|
 | Picture | Which image from your library (or none) |
-| Frame | None, paper plate, polaroid, torn edge, oval, arch, hairline, postage stamp |
+| Frame | Gilt museum frame, gilt oval, paper plate, polaroid, torn edge, oval, arch, hairline, postage stamp, none |
 | Shape | Square, portrait, landscape, panorama, or the picture's natural ratio |
 | Crop | Fill the shape, or fit the whole picture inside it |
 | Focal point | Horizontal and vertical — what stays in frame when cropped |
@@ -66,6 +66,13 @@ section and click a picture slot.
 
 Tilts and offsets are flattened on narrow screens automatically, so a collage
 becomes a clean stack rather than a mess.
+
+**The gilt frames** are built from layered gradients rather than an image, so
+they stay sharp at any size and cost nothing to load. Four tokens set the
+gilding — highlight, mid-tone, shadow and rebate — under Design studio →
+Design → **Picture frames**, along with the moulding width. A caption under a
+gilt frame is set as a letterspaced museum label; under a polaroid it is set in
+script, inside the border. The oval suits vintage portraits and miniatures.
 
 ---
 
@@ -118,7 +125,8 @@ and a **vertical space** setting.
 |---|---|
 | Add a new section type | `js/sections.js` — add an entry to `SECTION_TYPES` with `create()`, `fields` and `render()`. It appears in the editor automatically. |
 | Change a page's default arrangement | `js/layout.js` — `defaultLayout()` |
-| Add a frame, shape or tape style | `js/media.js` (`FRAMES`, `RATIOS`, `TAPES`) + the matching `.mf-*` rule in `css/styles.css` |
+| Add a frame, shape or tape style | `js/media.js` (`FRAMES`, `RATIOS`, `TAPES`) + the matching `.mf-*` rule in `css/styles.css`. Style the `.m-mount` inside the frame, not the figure — the figure handles placement, the mount is the framed object, and the caption sits outside it. |
+| Re-tint the gilt frame | Design studio → Design → **Picture frames**, or `--c-gilt-*` in `css/styles.css` |
 | Change how uploads are stored | `js/assets.js` — `MAX_EDGE`, `JPEG_QUALITY`, `KINDS` |
 | Restyle a section | `css/styles.css`, under **EDITORIAL SECTIONS** |
 | The empty-plate tints | `css/styles.css` — `.m-tint-*` |

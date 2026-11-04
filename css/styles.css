@@ -64,6 +64,14 @@
 
   /* Text-safe versions of the lighter swatches. The literal hues stay for
      fills and dots, where nothing has to be read against them. */
+  /* Gilding for the museum frame — a vintage brass, warmer and greyer than
+     raw gold so it reads as aged leaf rather than metallic paint. */
+  --c-gilt-light:    #f0dcae;
+  --c-gilt-mid:      #c6a45c;
+  --c-gilt-deep:     #94703a;
+  --c-gilt-shadow:   #5d431f;
+  --gilt-width:      clamp(11px, 4.5%, 30px);
+
   --c-rose-ink:      #a14a52;
   --c-blue-ink:      #44648f;
   --c-gold-ink:      #8a6420;
@@ -216,6 +224,10 @@
   --c-rose-ink:      #c9787e;
   --c-blue-ink:      #7d9fcf;
   --c-gold-ink:      #e0b35a;
+  --c-gilt-light:    #e4cd9c;
+  --c-gilt-mid:      #ab8c4b;
+  --c-gilt-deep:     #7a5c2e;
+  --c-gilt-shadow:   #3f2d14;
   --tone-sage:       #2a322a;
   --tone-rose:       #352525;
   --tone-blue:       #23292f;
@@ -1534,16 +1546,17 @@ a.ed-meta:hover { color: var(--c-accent); }
   transform: rotate(var(--m-rot, 0deg));
   transition: transform var(--dur) var(--ease);
 }
+.m-mount { position: relative; display: block; width: 100%; }
 .m-box {
   position: relative;
   display: block;
-  width: 100%; height: 100%;
+  width: 100%;
   overflow: hidden;
   background: var(--c-bg-sunk);
 }
-.m-fig[style*="aspect-ratio"] .m-box { position: absolute; inset: 0; }
-.m-fig[style*="aspect-ratio"] { display: block; }
-.m-img { display: block; width: 100%; height: 100%; }
+.m-img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+/* A picture at its natural shape has no height to fill, so it flows instead. */
+.m-auto .m-img { position: static; height: auto; }
 .m-cap {
   margin-top: .55rem;
   font-family: var(--f-ui); font-size: var(--fs-tiny);
@@ -1572,7 +1585,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 .m-empty-mark, .m-tint-sage .m-empty-mark { fill: rgba(255,255,255,.75); }
 
 /* ---- frames ---- */
-.mf-shadow .m-box { box-shadow: 0 2px 5px rgba(60, 36, 28, .10), 0 14px 34px rgba(60, 36, 28, .13); }
+.mf-shadow .m-mount { box-shadow: 0 2px 5px rgba(60, 36, 28, .10), 0 14px 34px rgba(60, 36, 28, .13); }
 .mf-line .m-box { border: var(--rule-w) solid var(--c-rule-strong); }
 .mf-plate .m-box { border: 1px solid rgba(120, 92, 70, .22); }
 .mf-plate .m-box::after {
@@ -1582,7 +1595,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 .mf-oval .m-box { border-radius: 50% / 50%; }
 .mf-arch .m-box { border-radius: 50% 50% var(--bm-radius) var(--bm-radius) / 36% 36% var(--bm-radius) var(--bm-radius); }
 
-.mf-polaroid {
+.mf-polaroid .m-mount {
   background: var(--c-bg-raised);
   padding: 9px 9px 42px;
   box-shadow: 0 2px 5px rgba(60, 36, 28, .12), 0 16px 36px rgba(60, 36, 28, .16);
@@ -1593,7 +1606,7 @@ a.ed-meta:hover { color: var(--c-accent); }
   font-family: var(--f-script); font-size: 1.1rem;
   letter-spacing: 0; text-transform: none; color: var(--c-ink-soft);
 }
-.mf-polaroid[style*="aspect-ratio"] { padding-bottom: 42px; }
+
 
 /* A torn deckle edge, cut with a mask so it works over any ground. */
 .mf-deckle .m-box {
@@ -1602,21 +1615,23 @@ a.ed-meta:hover { color: var(--c-accent); }
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
 }
 
-/* A postage stamp: perforations punched around a white border. */
-.mf-stamp {
+/* A postage stamp. The perforation mask is applied to the white backing only —
+   masking the mount itself punched holes straight through the picture. */
+.mf-stamp .m-mount { position: relative; padding: 11px; }
+.mf-stamp .m-mount::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
   background: var(--c-bg-raised);
-  padding: 10px;
   filter: drop-shadow(0 6px 14px rgba(60, 36, 28, .18));
-  -webkit-mask-image:
-    radial-gradient(circle at 5px 5px, transparent 4px, #000 4.5px);
-  mask-image: radial-gradient(circle at 5px 5px, transparent 4px, #000 4.5px);
-  -webkit-mask-size: 10px 10px; mask-size: 10px 10px;
+  -webkit-mask: radial-gradient(circle 5px at 5px 5px, transparent 97%, #000) -5px -5px / 10px 10px;
+  mask: radial-gradient(circle 5px at 5px 5px, transparent 97%, #000) -5px -5px / 10px 10px;
 }
+.mf-stamp .m-box { z-index: 1; }
 
 /* Washi tape holding a picture to the page. */
-.mf-tape-top::before,
-.mf-tape-corners::before,
-.mf-tape-corners::after {
+.mf-tape-top .m-mount::before,
+.mf-tape-corners .m-mount::before,
+.mf-tape-corners .m-mount::after {
   content: '';
   position: absolute; z-index: 4;
   width: 92px; height: 26px;
@@ -1624,9 +1639,9 @@ a.ed-meta:hover { color: var(--c-accent); }
   box-shadow: 0 1px 3px rgba(60,36,28,.14);
   opacity: .9;
 }
-.mf-tape-top::before { top: -11px; left: 50%; transform: translateX(-50%) rotate(-2.5deg); }
-.mf-tape-corners::before { top: -12px; left: -16px; transform: rotate(-38deg); }
-.mf-tape-corners::after  { top: -12px; right: -16px; transform: rotate(38deg); }
+.mf-tape-top .m-mount::before { top: -11px; left: 50%; transform: translateX(-50%) rotate(-2.5deg); }
+.mf-tape-corners .m-mount::before { top: -12px; left: -16px; transform: rotate(-38deg); }
+.mf-tape-corners .m-mount::after  { top: -12px; right: -16px; transform: rotate(38deg); }
 
 /* Full-bleed backdrop behind a hero. */
 .m-backdrop {
@@ -1789,4 +1804,74 @@ a.ed-meta:hover { color: var(--c-accent); }
   font-size: var(--fs-tiny); letter-spacing: .08em;
   text-transform: var(--tt-label);
   color: var(--c-accent);
+}
+
+/* ---------------------------------------------------------------- gilt ----
+   A vintage brass museum frame. Built from layered gradients rather than an
+   image so it stays sharp at any size, costs nothing to load, and re-tints
+   from four tokens.
+
+   The profile reads outward from the picture: a dark rebate, a bright fillet,
+   a shadowed scotia, then the broad gilded moulding with a lit outer lip.
+   Light is assumed to fall from the upper left throughout.               */
+
+.mf-gilt .m-mount, .mf-gilt-oval .m-mount {
+  padding: var(--gilt-width);
+  background-color: var(--c-gilt-mid);
+  background-image:
+    /* burnished striations — the tooth of hand-laid leaf */
+    repeating-linear-gradient(46deg,
+      rgba(255, 252, 240, .16) 0 1px, rgba(0, 0, 0, .05) 1px 2px, transparent 2px 5px),
+    /* light catching the top-left, shadow pooling bottom-right */
+    radial-gradient(90% 90% at 10% 6%, rgba(255, 248, 225, .62) 0%, transparent 52%),
+    radial-gradient(95% 95% at 92% 96%, rgba(60, 40, 14, .42) 0%, transparent 55%),
+    /* the moulding itself, rounded across its width */
+    linear-gradient(132deg,
+      var(--c-gilt-light) 0%,
+      var(--c-gilt-mid) 24%,
+      var(--c-gilt-deep) 50%,
+      var(--c-gilt-mid) 72%,
+      var(--c-gilt-light) 100%);
+  box-shadow:
+    /* lit outer lip, then the drop into the wall */
+    inset 0 0 0 1px rgba(255, 246, 219, .55),
+    inset 0 0 0 2px var(--c-gilt-shadow),
+    0 2px 5px rgba(48, 32, 14, .26),
+    0 20px 44px rgba(48, 32, 14, .30);
+}
+
+/* The rebate: where the gilding meets the picture. */
+.mf-gilt .m-box {
+  box-shadow:
+    0 0 0 1px var(--c-gilt-shadow),
+    0 0 0 4px var(--c-gilt-light),
+    0 0 0 5px var(--c-gilt-deep),
+    inset 0 2px 7px rgba(40, 26, 10, .36);
+}
+
+/* Oval — for portrait miniatures and cameos. */
+.mf-gilt-oval .m-mount { border-radius: 50%; }
+.mf-gilt-oval .m-box {
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px var(--c-gilt-shadow),
+    0 0 0 4px var(--c-gilt-light),
+    0 0 0 5px var(--c-gilt-deep),
+    inset 0 2px 9px rgba(40, 26, 10, .40);
+}
+.mf-gilt-oval .m-cap { text-align: center; }
+
+/* A caption under a gilt frame reads as a museum label. */
+.mf-gilt .m-cap, .mf-gilt-oval .m-cap {
+  margin-top: .75rem;
+  font-family: var(--f-ui);
+  font-size: var(--fs-tiny);
+  letter-spacing: .14em;
+  text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+
+/* The moulding narrows on a phone so small pictures keep their picture. */
+@media (max-width: 759px) {
+  .mf-gilt, .mf-gilt-oval { --gilt-width: clamp(8px, 3.5%, 16px); }
 }
