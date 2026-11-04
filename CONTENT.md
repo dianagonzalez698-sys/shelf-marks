@@ -50,7 +50,7 @@ section and click a picture slot.
 | Control | What it does |
 |---|---|
 | Picture | Which image from your library (or none) |
-| Frame | Gilt museum frame, gilt oval, paper plate, polaroid, torn edge, oval, arch, hairline, postage stamp, none |
+| Frame | Carved gilt (baroque), gilt museum frame, gilt oval, antique bronze, paper plate, polaroid, torn edge, oval, arch, hairline, postage stamp, none |
 | Shape | Square, portrait, landscape, panorama, or the picture's natural ratio |
 | Crop | Fill the shape, or fit the whole picture inside it |
 | Focal point | Horizontal and vertical — what stays in frame when cropped |
@@ -73,7 +73,15 @@ becomes a clean stack rather than a mess.
 > a framed picture on a hero, tick **Show a framed photo on top** and set the
 > frame on that.
 
-**The gilt frames** are built from layered gradients rather than an image, so
+**The carved gilt frame** is a different animal from the others. Its acanthus
+scrollwork and corner cartouches are drawn as SVG in `js/frames.js` and applied
+with `border-image`, so the corners render once and the rails repeat along each
+side at any length. It is generated from the same four gilt tokens, so
+re-tinting the gilding re-tints the carving. Give it room — the ornament needs
+width to read, so it suits a hero photo or a split composition better than a
+thumbnail.
+
+**The gilt and bronze frames** are built from layered gradients rather than an image, so
 they stay sharp at any size and cost nothing to load. Four tokens set the
 gilding — highlight, mid-tone, shadow and rebate — under Design studio →
 Design → **Picture frames**, along with the moulding width. A caption under a

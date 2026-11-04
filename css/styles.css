@@ -72,6 +72,20 @@
   --c-gilt-shadow:   #5d431f;
   --gilt-width:      clamp(11px, 4.5%, 30px);
 
+  /* Antique bronze — darker, wider and more sculpted than the gilt. Five
+     tones, because a stepped moulding needs a lit edge, two mid bands, a
+     recess and a near-black rebate to read as carved rather than printed. */
+  --c-bronze-light:  #cda96c;
+  --c-bronze-mid:    #8d6c3b;
+  --c-bronze-deep:   #5b4526;
+  --c-bronze-dark:   #35271a;
+  --c-bronze-patina: #4d5942;
+  --bronze-width:    clamp(9px, 7%, 46px);
+  /* The carved frame needs real width for its scrollwork to read. Container
+     units, because border-width rejects percentages — a percentage here makes
+     the whole declaration invalid and the frame silently vanishes. */
+  --ornate-width:    clamp(16px, 13cqw, 64px);
+
   --c-rose-ink:      #a14a52;
   --c-blue-ink:      #44648f;
   --c-gold-ink:      #8a6420;
@@ -228,6 +242,11 @@
   --c-gilt-mid:      #ab8c4b;
   --c-gilt-deep:     #7a5c2e;
   --c-gilt-shadow:   #3f2d14;
+  --c-bronze-light:  #b8945b;
+  --c-bronze-mid:    #7a5d33;
+  --c-bronze-deep:   #4d3a20;
+  --c-bronze-dark:   #241a10;
+  --c-bronze-patina: #3f4937;
   --tone-sage:       #2a322a;
   --tone-rose:       #352525;
   --tone-blue:       #23292f;
@@ -1874,4 +1893,140 @@ a.ed-meta:hover { color: var(--c-accent); }
 /* The moulding narrows on a phone so small pictures keep their picture. */
 @media (max-width: 759px) {
   .mf-gilt, .mf-gilt-oval { --gilt-width: clamp(8px, 3.5%, 16px); }
+}
+
+/* -------------------------------------------------------------- bronze ----
+   An antique bronze moulding: darker, wider and more sculpted than the gilt.
+
+   The relief is built from stacked inset rings rather than one gradient band.
+   Inset shadows paint in source order, so a list of increasing spreads cuts
+   concentric steps inward from the outer edge — a lit lip, a drop, a deep
+   cove, a convex bead, a groove, then the rebate at the picture. That stepping
+   is what reads as carved; a single gradient only ever looks printed.
+
+   The picture sits above the mount's decoration (z-index), so the patina and
+   the corner rosettes show on the moulding only.                          */
+
+.mf-bronze .m-mount {
+  position: relative;
+  padding: var(--bronze-width);
+  background-color: var(--c-bronze-mid);
+  background-image:
+    /* hammered tooth */
+    repeating-linear-gradient(54deg,
+      rgba(255, 238, 198, .09) 0 1px, rgba(0, 0, 0, .09) 1px 3px, transparent 3px 8px),
+    /* light from the upper left, pooling dark at the lower right */
+    radial-gradient(85% 85% at 12% 8%, rgba(255, 234, 186, .50) 0%, transparent 55%),
+    radial-gradient(95% 95% at 90% 94%, rgba(20, 13, 6, .55) 0%, transparent 58%),
+    /* the moulding, turned across its width */
+    linear-gradient(128deg,
+      var(--c-bronze-light) 0%,
+      var(--c-bronze-mid) 20%,
+      var(--c-bronze-deep) 44%,
+      var(--c-bronze-dark) 56%,
+      var(--c-bronze-mid) 78%,
+      var(--c-bronze-light) 100%);
+  box-shadow:
+    /* outer lip */
+    inset 0 0 0 2px var(--c-bronze-light),
+    inset 0 0 0 4px var(--c-bronze-dark),
+    /* cove — the deep recess that gives the frame its depth */
+    inset 0 0 0 10px var(--c-bronze-deep),
+    inset 0 0 0 13px var(--c-bronze-dark),
+    /* bead — the convex roll catching light */
+    inset 0 0 0 16px var(--c-bronze-light),
+    inset 0 0 0 21px var(--c-bronze-mid),
+    inset 0 0 0 24px var(--c-bronze-deep),
+    /* and the frame's own shadow on the wall */
+    0 3px 7px rgba(26, 17, 8, .34),
+    0 24px 52px rgba(26, 17, 8, .34);
+}
+
+/* Mottled patina, settling into the recesses. */
+.mf-bronze .m-mount::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  mix-blend-mode: soft-light;
+  opacity: .55;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.62' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23b)'/%3E%3C/svg%3E");
+}
+
+/* Corner rosettes, as cast on an antique frame. */
+.mf-bronze .m-mount::after {
+  content: '';
+  position: absolute; z-index: 2; pointer-events: none;
+  inset: calc(var(--bronze-width) * .12);
+  --r: calc(var(--bronze-width) * .42);
+  background-image:
+    radial-gradient(circle at 0 0, var(--c-bronze-light) 0 calc(var(--r) * .42), var(--c-bronze-dark) calc(var(--r) * .5), transparent calc(var(--r) * .62)),
+    radial-gradient(circle at 100% 0, var(--c-bronze-light) 0 calc(var(--r) * .42), var(--c-bronze-dark) calc(var(--r) * .5), transparent calc(var(--r) * .62)),
+    radial-gradient(circle at 0 100%, var(--c-bronze-light) 0 calc(var(--r) * .42), var(--c-bronze-dark) calc(var(--r) * .5), transparent calc(var(--r) * .62)),
+    radial-gradient(circle at 100% 100%, var(--c-bronze-light) 0 calc(var(--r) * .42), var(--c-bronze-dark) calc(var(--r) * .5), transparent calc(var(--r) * .62));
+  opacity: .9;
+}
+
+/* The picture rides above the decoration, so patina and rosettes stay on the
+   moulding and never creep over the image. */
+.mf-bronze .m-box {
+  position: relative;
+  z-index: 3;
+  box-shadow:
+    0 0 0 2px var(--c-bronze-dark),
+    0 0 0 4px var(--c-bronze-light),
+    0 0 0 6px var(--c-bronze-deep),
+    inset 0 3px 11px rgba(18, 11, 4, .48);
+}
+
+.mf-bronze .m-cap {
+  margin-top: .8rem;
+  font-family: var(--f-ui);
+  font-size: var(--fs-tiny);
+  letter-spacing: .14em;
+  text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+
+@media (max-width: 759px) {
+  .mf-bronze .m-mount { --bronze-width: clamp(8px, 6%, 22px); }
+}
+
+/* -------------------------------------------------------------- ornate ----
+   Carved baroque gilt. The scrollwork is an SVG generated in js/frames.js and
+   applied as a border-image, so the corner cartouches draw once and the
+   acanthus rails repeat along each side however long it is. Everything else
+   here is the mount it sits on.                                           */
+
+.mf-ornate { container-type: inline-size; }
+.mf-ornate .m-mount {
+  position: relative;
+  /* Fallback first for anything without container queries. */
+  border: clamp(16px, 4.2vw, 56px) solid transparent;
+  border-width: var(--ornate-width);
+  border-image-source: var(--frame-ornate);
+  border-image-slice: 96;
+  border-image-repeat: round;
+  filter: drop-shadow(0 3px 6px rgba(34, 22, 8, .30))
+          drop-shadow(0 22px 40px rgba(34, 22, 8, .26));
+}
+
+/* The rebate: a dark lip where the carving meets the picture. */
+.mf-ornate .m-box {
+  position: relative;
+  z-index: 1;
+  box-shadow:
+    0 0 0 1px var(--c-gilt-shadow),
+    inset 0 2px 9px rgba(32, 20, 6, .34);
+}
+
+.mf-ornate .m-cap {
+  margin-top: .85rem;
+  font-family: var(--f-ui);
+  font-size: var(--fs-tiny);
+  letter-spacing: .14em;
+  text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+
+@media (max-width: 759px) {
+  .mf-ornate .m-mount { --ornate-width: clamp(12px, 13cqw, 34px); }
 }

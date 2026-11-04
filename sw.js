@@ -2,7 +2,7 @@
    Network-first on purpose: when you're online you always get the current
    version, and the cache is only a fallback when you're not. */
 
-const VERSION = 'lit-picks-v6';
+const VERSION = 'lit-picks-v7';
 const SHELL = [
   './',
   './index.html',
@@ -32,6 +32,7 @@ const SHELL = [
   './js/media.js',
   './js/sections.js',
   './js/layout.js',
+  './js/frames.js',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',

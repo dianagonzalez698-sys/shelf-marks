@@ -11,8 +11,10 @@ import { esc, attr } from './ui.js';
 
 export const FRAMES = [
   ['none', 'None'],
+  ['ornate', 'Carved gilt (baroque)'],
   ['gilt', 'Gilt museum frame'],
   ['gilt-oval', 'Gilt oval'],
+  ['bronze', 'Antique bronze'],
   ['plate', 'Paper plate'],
   ['polaroid', 'Polaroid'],
   ['deckle', 'Torn edge'],

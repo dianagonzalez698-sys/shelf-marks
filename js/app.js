@@ -4,6 +4,7 @@ import { load, onChange, state } from './state.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
+import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
 import { homeView } from './view-home.js';
 import { booksView } from './view-books.js';
@@ -69,7 +70,13 @@ async function boot() {
     refresh();
   });
 
-  theme.onThemeChange(() => theme.applyContent(state.settings.year));
+  theme.onThemeChange(() => {
+    theme.applyContent(state.settings.year);
+    // The carved frame is generated from the gilt tokens, so it re-tints too.
+    installOrnateFrame();
+  });
+
+  installOrnateFrame();
 
   paintStorageBanner();
   if (!location.hash) navigate('/', { replace: true });
