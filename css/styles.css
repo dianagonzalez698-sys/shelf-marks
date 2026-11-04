@@ -1348,7 +1348,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 .hero-inset {
   position: absolute; z-index: 3;
   right: clamp(1rem, 5vw, 5rem);
-  bottom: clamp(-1.5rem, -2vw, -1rem);
+  bottom: clamp(1rem, 2.2vw, 2.2rem);
   width: clamp(120px, 17vw, 230px);
 }
 

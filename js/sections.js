@@ -79,9 +79,9 @@ export const SECTION_TYPES = {
       { key: 'height', label: 'Height', type: 'select', options: [['short', 'Short'], ['tall', 'Tall'], ['full', 'Full screen']] },
       { key: 'align', label: 'Type alignment', type: 'select', options: [['center', 'Centred'], ['left', 'Left'], ['right', 'Right']] },
       { key: 'scrim', label: 'Darkening over image', type: 'range', min: 0, max: 90, step: 5 },
-      { key: 'backdrop', label: 'Background image', type: 'media' },
-      { key: 'showInset', label: 'Show floating photo', type: 'bool' },
-      { key: 'inset', label: 'Floating photo', type: 'media' },
+      { key: 'backdrop', label: 'Background image', type: 'media', role: 'backdrop' },
+      { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
+      { key: 'inset', label: 'Framed photo', type: 'media' },
     ],
     render(sec) {
       const year = state.settings.year;

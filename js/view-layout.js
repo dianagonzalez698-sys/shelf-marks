@@ -216,7 +216,10 @@ function fieldControl(f, value, secId) {
         <input type="range" id="${id}" data-field="${attr(f.key)}" min="${f.min}" max="${f.max}" step="${f.step}" value="${attr(value)}"></div>`;
     case 'media':
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
-        ${mediaButton(f.key, value)}</div>`;
+        ${mediaButton(f.key, value, false, f.role)}
+        ${f.role === 'backdrop'
+          ? '<p class="hint">Fills the whole banner. Frames and tilts don’t apply here — use the framed photo on top for those.</p>'
+          : ''}</div>`;
     case 'medialist':
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
         <div class="media-list" data-medialist="${attr(f.key)}">
@@ -229,17 +232,20 @@ function fieldControl(f, value, secId) {
   }
 }
 
-function mediaButton(key, m, removable = false) {
+function mediaButton(key, m, removable = false, role = '') {
   const descriptor = media(m || {});
   const url = assets.src(descriptor.assetId);
   const a = assets.get(descriptor.assetId);
+  const meta = role === 'backdrop'
+    ? `fills the banner · ${Math.round(Number(descriptor.opacity) * 100)}%`
+    : `${descriptor.frame} · ${descriptor.ratio}`;
   return `<span class="media-slot">
     <button class="media-pick" type="button" data-media="${attr(key)}">
       <span class="media-thumb">${url
         ? `<img src="${attr(url)}" alt="">`
         : '<span class="media-thumb-empty">empty</span>'}</span>
       <span class="media-label">${esc(a ? a.name : 'Choose a picture')}</span>
-      <span class="media-meta">${esc(descriptor.frame)} · ${esc(descriptor.ratio)}</span>
+      <span class="media-meta">${esc(meta)}</span>
     </button>
     ${removable ? `<button class="icon-btn" type="button" data-rmmedia="${attr(key)}" aria-label="Remove picture">×</button>` : ''}
   </span>`;
@@ -287,6 +293,7 @@ export function openSectionEditor(pageId, sectionId) {
           const key = btn.dataset.media;
           const [base, idx] = key.split(':');
           const current = idx === undefined ? sec[base] : (sec[base] || [])[Number(idx)];
+          const fieldDef = def.fields.find((x) => x.key === base) || {};
           openMediaEditor(current, async (next) => {
             const fresh = layout.getSection(pageId, sectionId);
             if (idx === undefined) await commit({ [base]: next });
@@ -296,7 +303,7 @@ export function openSectionEditor(pageId, sectionId) {
               await commit({ [base]: list });
             }
             render();
-          });
+          }, { role: fieldDef.role || '' });
         };
       });
 
@@ -325,9 +332,13 @@ export function openSectionEditor(pageId, sectionId) {
 
 /* ------------------------------------------------------ media editor ---- */
 
-export function openMediaEditor(value, onSave) {
+export function openMediaEditor(value, onSave, { role = '' } = {}) {
   const m = media(value || {});
   const library = assets.list();
+  // A background fills its section edge to edge, so framing, shaping, tilting
+  // and captioning have nothing to act on. Offering those controls anyway was
+  // the reason a chosen frame appeared to do nothing.
+  const isBackdrop = role === 'backdrop';
 
   const num = (key, label, min, max, step) => `
     <div class="token-row">
@@ -349,13 +360,18 @@ export function openMediaEditor(value, onSave) {
     </div>
     ${library.length ? '' : '<p class="hint">Your library is empty — <a href="#/assets" data-close>add some pictures</a> first. An empty slot still renders as a tinted plate.</p>'}
 
-    <div class="field" style="margin-top:1.1rem">
+    ${isBackdrop ? `<p class="notice" style="margin-top:1.1rem">
+      <strong>This is a background.</strong>
+      It fills the whole section, so frames, shapes and tilts don’t apply.
+      Use the <b>framed photo on top</b> for those.</p>` : ''}
+
+    <div class="field" style="margin-top:1.1rem" ${isBackdrop ? 'hidden' : ''}>
       <label for="m-frame">Frame</label>
       <select id="m-frame" data-m="frame">
         ${FRAMES.map(([v, l]) => `<option value="${attr(v)}" ${v === m.frame ? 'selected' : ''}>${esc(l)}</option>`).join('')}
       </select>
     </div>
-    <div class="grid-2">
+    <div class="grid-2" ${isBackdrop ? 'hidden' : ''}>
       <div class="field"><label for="m-ratio">Shape</label>
         <select id="m-ratio" data-m="ratio">
           ${RATIOS.map(([v, l]) => `<option value="${attr(v)}" ${v === m.ratio ? 'selected' : ''}>${esc(l)}</option>`).join('')}
@@ -371,26 +387,31 @@ export function openMediaEditor(value, onSave) {
     ${num('focalX', 'Horizontal', 0, 100, 1)}
     ${num('focalY', 'Vertical', 0, 100, 1)}
 
-    <p class="field-label" style="margin-top:.6rem">Placement</p>
-    ${num('width', 'Width (% of slot)', 10, 100, 1)}
-    ${num('rotate', 'Tilt (degrees)', -20, 20, 1)}
-    ${num('opacity', 'Opacity', 0.1, 1, 0.05)}
-    ${num('z', 'Layer order', 1, 9, 1)}
-    ${num('x', 'Nudge across (%)', -50, 50, 1)}
-    ${num('y', 'Nudge down (%)', -50, 50, 1)}
+    ${isBackdrop ? `
+      <p class="field-label" style="margin-top:.6rem">Strength</p>
+      ${num('opacity', 'Opacity', 0.1, 1, 0.05)}
+    ` : `
+      <p class="field-label" style="margin-top:.6rem">Placement</p>
+      ${num('width', 'Width (% of slot)', 10, 100, 1)}
+      ${num('rotate', 'Tilt (degrees)', -20, 20, 1)}
+      ${num('opacity', 'Opacity', 0.1, 1, 0.05)}
+      ${num('z', 'Layer order', 1, 9, 1)}
+      ${num('x', 'Nudge across (%)', -50, 50, 1)}
+      ${num('y', 'Nudge down (%)', -50, 50, 1)}
+    `}
 
-    <div class="field" style="margin-top:.8rem">
+    <div class="field" style="margin-top:.8rem" ${isBackdrop ? 'hidden' : ''}>
       <label for="m-tape">Tape</label>
       <select id="m-tape" data-m="tape">
         ${TAPES.map(([v, l]) => `<option value="${attr(v)}" ${v === m.tape ? 'selected' : ''}>${esc(l)}</option>`).join('')}
       </select>
     </div>
-    <label class="switch-row"><input type="checkbox" data-m="shadow" ${m.shadow ? 'checked' : ''}>
+    <label class="switch-row" ${isBackdrop ? 'hidden' : ''}><input type="checkbox" data-m="shadow" ${m.shadow ? 'checked' : ''}>
       <span class="switch-text">Drop shadow</span></label>
-    <label class="switch-row"><input type="checkbox" data-m="hideOnMobile" ${m.hideOnMobile ? 'checked' : ''}>
+    <label class="switch-row" ${isBackdrop ? 'hidden' : ''}><input type="checkbox" data-m="hideOnMobile" ${m.hideOnMobile ? 'checked' : ''}>
       <span class="switch-text">Hide on phones<em>Useful for decorative layers that crowd a small screen.</em></span></label>
 
-    <div class="field" style="margin-top:.8rem">
+    <div class="field" style="margin-top:.8rem" ${isBackdrop ? 'hidden' : ''}>
       <label for="m-cap">Caption</label>
       <input type="text" id="m-cap" data-m="caption" value="${attr(m.caption || '')}">
     </div>

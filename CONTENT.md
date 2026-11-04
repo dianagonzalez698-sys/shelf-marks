@@ -67,6 +67,12 @@ section and click a picture slot.
 Tilts and offsets are flattened on narrow screens automatically, so a collage
 becomes a clean stack rather than a mess.
 
+> **Frames only apply to framed pictures, not backgrounds.** A hero's
+> *Background image* fills the whole banner, so it uses just the picture, the
+> focal point and opacity — the editor now hides the rest and says so. To hang
+> a framed picture on a hero, tick **Show a framed photo on top** and set the
+> frame on that.
+
 **The gilt frames** are built from layered gradients rather than an image, so
 they stay sharp at any size and cost nothing to load. Four tokens set the
 gilding — highlight, mid-tone, shadow and rebate — under Design studio →
