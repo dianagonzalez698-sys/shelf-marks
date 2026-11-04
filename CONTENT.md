@@ -90,6 +90,31 @@ script, inside the border. The oval suits vintage portraits and miniatures.
 
 ---
 
+## 2b. Picture dimensions
+
+Every picture slot shows its recommended size in the editor, so you rarely
+need this table. Anything larger is scaled down on upload; anything much
+smaller will look soft.
+
+| Slot | Size | Shape |
+|---|---|---|
+| Section background / hero background | **1800 × 1100 px** | landscape, 16:10 |
+| Hero's framed photo | **900 × 1125 px** | portrait, 4:5 |
+| Image & text picture | **1200 × 1500 px** | portrait, 4:5 |
+| Collage pictures | **1000 × 1250 px** each | portrait, 4:5 |
+| Gallery pictures | **800 × 1000 px** each | portrait, 4:5 |
+| Decorative image strip | **1800 × 260 px** | wide band |
+| Your own section edge | **1800 × 140 px** | transparent PNG |
+
+Shape is only a suggestion — the **Shape** control re-crops any picture to
+square, portrait, landscape or panorama, and the **focal point** decides what
+stays in frame.
+
+Hard ceilings on upload, by kind: artwork 1800 px on its longest edge,
+photographs 1600, cutouts 1200, textures 1200, ornaments 700.
+
+---
+
 ## 3. Sections
 
 **Settings → Design studio → Layouts.** Pick a page, then add, reorder, hide
@@ -143,6 +168,28 @@ Whatever its type, every section takes:
 
 A section on a dark ground re-tints everything inside it: headings, captions,
 rules, progress bars and bookmark labels all move to the banner palette.
+
+### The seam between sections
+
+A section with a ground — a tint or a photograph — can end in a shaped edge
+instead of a straight cut, so one section flows into the next:
+
+**Torn paper · Scalloped · Lace · Soft wave · Dissolve · My own shape**
+
+**Edge depth** sets how deep the shape bites. Leave it at 0 to use the
+built-in depth for that shape.
+
+**My own shape** takes a **transparent PNG, 1800 × 140 px**. It is used as a
+mask: wherever the PNG is **opaque the section stays**, and wherever it is
+**transparent the section is cut away**. So for a torn edge, paint the top of
+the image solid and erase the bottom in an irregular line. Colour does not
+matter — only opacity.
+
+A shaped edge needs a ground to cut into. On a plain paper section there is
+nothing to shape, so the control has no effect; use a **Decorative interlude**
+between two plain sections instead. Its **Lace band** and **Vine band** modes
+draw an ornamental divider in the accent colour, and its **Image strip** mode
+takes your own band at 1800 × 260 px.
 
 ---
 

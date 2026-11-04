@@ -8,6 +8,7 @@
 
 import { esc, attr, progressBar, progressLine, markVisual, checkGlyph, coverImg } from './ui.js';
 import { figure, backdrop, media, hasAsset } from './media.js';
+import { src as assetSrc } from './assets.js';
 import {
   state, annualProgress, quarterProgress, nonfictionProgress,
   bookmarkStats, allChallenges, getChallenge, sortedBooks, unlockMap,
@@ -36,9 +37,25 @@ function sectionShell(sec, inner, extraClass = '') {
       + `<span class="ed-scrim" style="--scrim:${Number(sec.bgScrim == null ? 45 : sec.bgScrim) / 100}"></span>`
     : '';
 
+  // A shaped edge only reads against a ground — masking a section that is the
+  // same colour as the page cuts a shape out of nothing.
+  const hasGround = photo || (sec.tone && sec.tone !== 'none');
+  const edge = (hasGround && sec.edge && sec.edge !== 'none') ? sec.edge : '';
+
+  // A custom edge is an uploaded PNG used as a mask: opaque where the paper
+  // stays, transparent where it tears away.
+  const edgeStyles = [];
+  if (edge === 'custom') {
+    const url = assetSrc((sec.edgeImage || {}).assetId);
+    if (url) edgeStyles.push(`--edge-img:url('${attr(url)}')`);
+  }
+  if (edge && Number(sec.edgeHeight) > 0) edgeStyles.push(`--edge-h:${Number(sec.edgeHeight)}px`);
+  const style = edgeStyles.length ? ` style="${edgeStyles.join(';')}"` : '';
+
   return `<section class="ed ed-${sec.type}${tone}${pad}`
-    + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''} ${extraClass}"`
-    + ` data-sec="${attr(sec.id)}">${bg}${inner}</section>`;
+    + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''}`
+    + `${edge ? ` has-edge edge-${edge}` : ''} ${extraClass}"`
+    + ` data-sec="${attr(sec.id)}"${style}>${bg}${inner}</section>`;
 }
 
 function kicker(text) {
@@ -61,11 +78,23 @@ const TONES = [
   ['gold', 'Honey ochre'], ['ink', 'Mahogany'],
 ];
 const SPACING = [['', 'Normal'], ['tight', 'Tight'], ['loose', 'Loose'], ['flush', 'Flush (no gap)']];
+const EDGES = [
+  ['none', 'Straight'],
+  ['torn', 'Torn paper'],
+  ['scallop', 'Scalloped'],
+  ['lace', 'Lace'],
+  ['wave', 'Soft wave'],
+  ['fade', 'Dissolve'],
+  ['custom', 'My own shape…'],
+];
 const COMMON_FIELDS = [
   { key: 'tone', label: 'Background colour', type: 'select', options: TONES },
-  { key: 'bgImage', label: 'Background photograph', type: 'media', role: 'backdrop' },
+  { key: 'bgImage', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
   { key: 'bgScrim', label: 'Darken the photograph', type: 'range', min: 0, max: 90, step: 5 },
   { key: 'bgInk', label: 'Type over the photograph', type: 'select', options: [['light', 'Light'], ['dark', 'Dark']] },
+  { key: 'edge', label: 'Bottom edge', type: 'select', options: EDGES },
+  { key: 'edgeImage', label: 'Your own edge (PNG)', type: 'media', role: 'backdrop', size: '1800 × 140 px, transparent PNG' },
+  { key: 'edgeHeight', label: 'Edge depth', type: 'range', min: 8, max: 120, step: 2 },
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 ];
 
@@ -77,6 +106,9 @@ export const SECTION_BASE = {
   bgImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   bgScrim: 45,
   bgInk: 'light',
+  edge: 'none',
+  edgeImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
+  edgeHeight: 0,
 };
 
 /* -------------------------------------------------------------- types ---- */
@@ -107,9 +139,9 @@ export const SECTION_TYPES = {
       { key: 'height', label: 'Height', type: 'select', options: [['short', 'Short'], ['tall', 'Tall'], ['full', 'Full screen']] },
       { key: 'align', label: 'Type alignment', type: 'select', options: [['center', 'Centred'], ['left', 'Left'], ['right', 'Right']] },
       { key: 'scrim', label: 'Darkening over image', type: 'range', min: 0, max: 90, step: 5 },
-      { key: 'backdrop', label: 'Background photograph', type: 'media', role: 'backdrop' },
+      { key: 'backdrop', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
-      { key: 'inset', label: 'Framed photo', type: 'media' },
+      { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
     ],
     render(sec) {
       const year = state.settings.year;
@@ -149,7 +181,7 @@ export const SECTION_TYPES = {
       { key: 'flip', label: 'Picture on the right', type: 'bool' },
       { key: 'dropcap', label: 'Drop capital', type: 'bool' },
       { key: 'ratio', label: 'Proportions', type: 'select', options: [['balanced', 'Even'], ['wide-image', 'Wider picture'], ['wide-text', 'Wider text']] },
-      { key: 'picture', label: 'Picture', type: 'media' },
+      { key: 'picture', label: 'Picture', type: 'media', size: '1200 × 1500 px' },
       ...COMMON_FIELDS,
     ],
     render(sec) {
@@ -187,7 +219,7 @@ export const SECTION_TYPES = {
       { key: 'title', label: 'Heading', type: 'text' },
       { key: 'note', label: 'Handwritten note', type: 'text' },
       { key: 'height', label: 'Height', type: 'select', options: [['short', 'Short'], ['tall', 'Tall'], ['taller', 'Taller']] },
-      { key: 'items', label: 'Pictures', type: 'medialist' },
+      { key: 'items', label: 'Pictures', type: 'medialist', size: '1000 × 1250 px' },
       ...COMMON_FIELDS,
     ],
     render(sec) {
@@ -217,7 +249,7 @@ export const SECTION_TYPES = {
       { key: 'title', label: 'Heading', type: 'text' },
       { key: 'columns', label: 'Columns', type: 'range', min: 2, max: 5, step: 1 },
       { key: 'stagger', label: 'Stagger vertically', type: 'bool' },
-      { key: 'items', label: 'Pictures', type: 'medialist' },
+      { key: 'items', label: 'Pictures', type: 'medialist', size: '800 × 1000 px' },
       ...COMMON_FIELDS,
     ],
     render(sec) {
@@ -266,9 +298,9 @@ export const SECTION_TYPES = {
       strip: media({ ratio: '21/9', frame: 'none', shadow: false }),
     }),
     fields: [
-      { key: 'mode', label: 'Kind', type: 'select', options: [['ornament', 'Ornament rule'], ['strip', 'Image strip'], ['rule', 'Plain rule']] },
+      { key: 'mode', label: 'Kind', type: 'select', options: [['ornament', 'Ornament rule'], ['lace', 'Lace band'], ['vine', 'Vine band'], ['strip', 'Image strip'], ['rule', 'Plain rule']] },
       { key: 'note', label: 'Handwritten note', type: 'text' },
-      { key: 'strip', label: 'Strip image', type: 'media' },
+      { key: 'strip', label: 'Strip image', type: 'media', size: '1800 × 260 px' },
       ...COMMON_FIELDS,
     ],
     render(sec) {
@@ -277,7 +309,9 @@ export const SECTION_TYPES = {
         ? `<div class="interlude-strip">${figure(sec.strip, { seed: sec.id })}</div>`
         : mode === 'rule'
           ? '<hr class="interlude-rule">'
-          : `<div class="ornament" aria-hidden="true">
+          : (mode === 'lace' || mode === 'vine')
+            ? `<div class="lacework lacework-${mode}" aria-hidden="true"></div>`
+            : `<div class="ornament" aria-hidden="true">
                <span class="ornament-line"></span>
                <svg viewBox="0 0 48 48"><path d="M24 7.5c1.3 9.2 3.1 11 12.3 12.3C27.1 21.1 25.3 22.9 24 32.1c-1.3-9.2-3.1-11-12.3-12.3C20.9 18.5 22.7 16.7 24 7.5z"/></svg>
                <span class="ornament-line"></span>

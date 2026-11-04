@@ -217,6 +217,7 @@ function fieldControl(f, value, secId) {
     case 'media':
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
         ${mediaButton(f.key, value, false, f.role)}
+        ${f.size ? `<p class="hint">Best at <b>${esc(f.size)}</b>. Anything larger is scaled down on upload.</p>` : ''}
         ${f.role === 'backdrop'
           ? '<p class="hint">Fills the whole section, edge to edge. Frames and tilts don’t apply to a background — put those on a picture inside the section.</p>'
           : ''}</div>`;
@@ -225,7 +226,8 @@ function fieldControl(f, value, secId) {
         <div class="media-list" data-medialist="${attr(f.key)}">
           ${(value || []).map((m, i) => mediaButton(`${f.key}:${i}`, m, true)).join('')}
         </div>
-        <button class="btn btn-sm" type="button" data-addmedia="${attr(f.key)}">Add a picture</button></div>`;
+        <button class="btn btn-sm" type="button" data-addmedia="${attr(f.key)}">Add a picture</button>
+        ${f.size ? `<p class="hint">Best at <b>${esc(f.size)}</b> each.</p>` : ''}</div>`;
     default:
       return `<div class="field"><label for="${id}">${esc(f.label)}</label>
         <input type="text" id="${id}" data-field="${attr(f.key)}" value="${attr(value || '')}"></div>`;
@@ -303,7 +305,7 @@ export function openSectionEditor(pageId, sectionId) {
               await commit({ [base]: list });
             }
             render();
-          }, { role: fieldDef.role || '' });
+          }, { role: fieldDef.role || '', size: fieldDef.size || '' });
         };
       });
 
@@ -332,7 +334,7 @@ export function openSectionEditor(pageId, sectionId) {
 
 /* ------------------------------------------------------ media editor ---- */
 
-export function openMediaEditor(value, onSave, { role = '' } = {}) {
+export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
   const m = media(value || {});
   const library = assets.list();
   // A background fills its section edge to edge, so framing, shaping, tilting
@@ -350,6 +352,8 @@ export function openMediaEditor(value, onSave, { role = '' } = {}) {
 
   openSheet(`
     <h2>Picture</h2>
+    ${size ? `<p class="hint" style="margin-top:-.3rem">This slot looks best at <b>${esc(size)}</b>.
+      Bigger is fine — it is scaled down when you add it to the library.</p>` : ''}
 
     <div class="asset-picker">
       <button class="asset-opt${!m.assetId ? ' is-on' : ''}" type="button" data-pick="">

@@ -2089,3 +2089,102 @@ a.ed-meta:hover { color: var(--c-accent); }
 @media (max-width: 759px) {
   .mf-ornate .m-mount { --ornate-width: clamp(12px, 13cqw, 34px); }
 }
+
+/* ===========================================================================
+   SECTION EDGES
+   The seam where one section meets the next. A section with a ground — a tint
+   or a photograph — can end in a torn, scalloped, laced or waved edge instead
+   of a straight cut, so the page reads as one continuous object.
+
+   Built as a two-layer mask: a repeating strip carries the shape along the
+   bottom, a plain block covers everything above it. `mask-image: none` is a
+   transparent layer, so an edge set to "none" simply contributes nothing.
+   ======================================================================== */
+
+.ed.has-edge {
+  --edge-img: none;
+  --edge-h: 0px;
+  --edge-tile: 100%;
+  -webkit-mask-image: var(--edge-img), linear-gradient(black, black);
+  -webkit-mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + 1px);
+  -webkit-mask-position: bottom left, top left;
+  -webkit-mask-repeat: repeat-x, no-repeat;
+  mask-image: var(--edge-img), linear-gradient(black, black);
+  mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + 1px);
+  mask-position: bottom left, top left;
+  mask-repeat: repeat-x, no-repeat;
+  /* keep content clear of the shaped edge */
+  padding-bottom: calc(var(--sp-section) + var(--edge-h) * .7);
+}
+
+/* Torn paper — irregular, like a sheet pulled against a straightedge. */
+.ed.edge-torn {
+  --edge-h: clamp(14px, 2.2vw, 26px);
+  --edge-tile: 160px;
+  --edge-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 22' preserveAspectRatio='none'%3E%3Cpath fill='black' d='M0 0H160V11l-9 5-11-5-12 6-12-5-12 6-12-5-12 6-12-6-12 5-12-6-11 5-10-5-11 6z'/%3E%3C/svg%3E");
+}
+
+/* Scallop — the repeating half-round of a lace hem. */
+.ed.edge-scallop {
+  --edge-h: clamp(12px, 1.8vw, 20px);
+  --edge-tile: 44px;
+  --edge-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 14'%3E%3Cpath fill='black' d='M0 0H44V3A11 11 0 0 1 22 3A11 11 0 0 1 0 3Z'/%3E%3C/svg%3E");
+}
+
+/* Lace — scallops with a course of eyelets punched above them. */
+.ed.edge-lace {
+  --edge-h: clamp(16px, 2.4vw, 28px);
+  --edge-tile: 44px;
+  --edge-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 20'%3E%3Cpath fill='black' fill-rule='evenodd' d='M0 0H44V9A11 11 0 0 1 22 9A11 11 0 0 1 0 9Z M11 5a2.2 2.2 0 1 0 0.1 0Z M33 5a2.2 2.2 0 1 0 0.1 0Z'/%3E%3C/svg%3E");
+}
+
+/* Wave — a long soft undulation, barely there. */
+.ed.edge-wave {
+  --edge-h: clamp(12px, 1.8vw, 20px);
+  --edge-tile: 200px;
+  --edge-img: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 16' preserveAspectRatio='none'%3E%3Cpath fill='black' d='M0 0H200V6C170 16 130-2 100 6 70 14 30-2 0 6Z'/%3E%3C/svg%3E");
+}
+
+/* Your own shape — an uploaded PNG used as the mask. */
+.ed.edge-custom {
+  --edge-h: clamp(16px, 3vw, 44px);
+  --edge-tile: 100%;
+}
+
+/* Dissolve — the ground fades out rather than ending. */
+.ed.edge-fade {
+  --edge-h: clamp(40px, 7vw, 110px);
+  --edge-tile: 100%;
+  --edge-img: linear-gradient(to top, transparent, black);
+}
+
+/* A shaped edge and a photograph both want the picture to reach the cut. */
+.ed.has-edge > .m-backdrop, .ed.has-edge > .ed-scrim { bottom: 0; }
+
+@media (max-width: 759px) {
+  .ed.edge-torn    { --edge-tile: 120px; }
+  .ed.edge-wave    { --edge-tile: 150px; }
+  .ed.edge-scallop, .ed.edge-lace { --edge-tile: 34px; }
+}
+
+/* Standalone decorative bands, for a divider between two plain sections.
+   Drawn as masks over a colour fill rather than coloured SVG, so they take
+   the palette like everything else. */
+.lacework {
+  height: clamp(22px, 3.4vw, 40px);
+  background-color: var(--c-accent);
+  opacity: .85;
+  -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: auto 100%; mask-size: auto 100%;
+}
+.ed-dark .lacework { background-color: var(--c-banner-accent); }
+
+.lacework-lace {
+  -webkit-mask-image: var(--lace-mask); mask-image: var(--lace-mask);
+  --lace-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 30'%3E%3Cg fill='none' stroke='black' stroke-width='1.6'%3E%3Cpath d='M0 4h96'/%3E%3Cpath d='M4 4v3a20 20 0 0 0 40 0V4'/%3E%3Cpath d='M52 4v3a20 20 0 0 0 40 0V4'/%3E%3C/g%3E%3Cg fill='black'%3E%3Ccircle cx='24' cy='20' r='3'/%3E%3Ccircle cx='72' cy='20' r='3'/%3E%3Ccircle cx='48' cy='8' r='2.2'/%3E%3Ccircle cx='0' cy='8' r='2.2'/%3E%3Ccircle cx='96' cy='8' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
+}
+.lacework-vine {
+  -webkit-mask-image: var(--vine-mask); mask-image: var(--vine-mask);
+  --vine-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 30'%3E%3Cpath fill='none' stroke='black' stroke-width='1.8' d='M0 15c15-13 30 13 45 0s30-13 45 0 20 13 30 0'/%3E%3Cpath fill='black' d='M22 8c0-4 3-7 7-7 0 4-3 7-7 7ZM68 22c0 4 3 7 7 7 0-4-3-7-7-7ZM45 15c4-2 8 0 9 4-4 2-8 0-9-4Z'/%3E%3C/svg%3E");
+}
