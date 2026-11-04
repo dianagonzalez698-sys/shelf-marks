@@ -59,10 +59,29 @@ function sectionShell(sec, inner, extraClass = '') {
   if (edge && Number(sec.edgeHeight) > 0) edgeStyles.push(`--edge-h:${Number(sec.edgeHeight)}px`);
   const style = edgeStyles.length ? ` style="${edgeStyles.join(';')}"` : '';
 
+  // A decorative band is the opposite of a shaped edge: the artwork itself is
+  // laid across the seam rather than used to cut one.
+  const trimUrl = assetSrc((sec.trimImage || {}).assetId);
+  const trimWhere = sec.trim && sec.trim !== 'none' ? sec.trim : '';
+  let trim = '';
+  if (trimWhere && trimUrl) {
+    const ts = `--trim-img:url('${attr(trimUrl)}')`
+      + `;--trim-h:${Number(sec.trimHeight) || 90}px`
+      + `;--trim-over:${Number(sec.trimOverlap) || 0}px`;
+    const fit = sec.trimFit === 'repeat' ? ' ed-trim-repeat' : '';
+    if (trimWhere === 'bottom' || trimWhere === 'both') {
+      trim += `<span class="ed-trim ed-trim-bottom${fit}" style="${ts}" aria-hidden="true"></span>`;
+    }
+    if (trimWhere === 'top' || trimWhere === 'both') {
+      trim += `<span class="ed-trim ed-trim-top${fit}" style="${ts}" aria-hidden="true"></span>`;
+    }
+  }
+
   return `<section class="ed ed-${sec.type}${tone}${pad}`
     + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''}`
-    + `${edge ? ` has-edge edge-${edge}` : ''}${edgeLum ? ' edge-lum' : ''} ${extraClass}"`
-    + ` data-sec="${attr(sec.id)}"${style}>${bg}${inner}</section>`;
+    + `${edge ? ` has-edge edge-${edge}` : ''}${edgeLum ? ' edge-lum' : ''}`
+    + `${trim ? ' has-trim' : ''} ${extraClass}"`
+    + ` data-sec="${attr(sec.id)}"${style}>${bg}${trim}${inner}</section>`;
 }
 
 function kicker(text) {
@@ -107,6 +126,17 @@ const COMMON_FIELDS = [
     ['alpha', 'Transparency — see-through parts are cut away'],
     ['luminance', 'Light and dark — dark parts are cut away'],
   ] },
+  { key: 'trim', label: 'Decorative band over the edge', type: 'select', options: [
+    ['none', 'None'],
+    ['bottom', 'Along the bottom'],
+    ['top', 'Along the top'],
+    ['both', 'Both edges'],
+  ] },
+  { key: 'trimImage', label: 'Band artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG' },
+  { key: 'trimHeight', label: 'Band height', type: 'range', min: 20, max: 280, step: 4 },
+  { key: 'trimFit', label: 'Across the width', type: 'select', options: [['stretch', 'Stretch to fit'], ['repeat', 'Repeat the pattern']] },
+  { key: 'trimOverlap', label: 'Hang over the edge', type: 'range', min: 0, max: 120, step: 2 },
+
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 ];
 
@@ -122,6 +152,11 @@ export const SECTION_BASE = {
   edgeImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   edgeHeight: 0,
   edgeMode: 'auto',
+  trim: 'none',
+  trimImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
+  trimHeight: 90,
+  trimFit: 'stretch',
+  trimOverlap: 0,
 };
 
 /* -------------------------------------------------------------- types ---- */
@@ -161,6 +196,17 @@ export const SECTION_TYPES = {
     ['alpha', 'Transparency — see-through parts are cut away'],
     ['luminance', 'Light and dark — dark parts are cut away'],
   ] },
+  { key: 'trim', label: 'Decorative band over the edge', type: 'select', options: [
+    ['none', 'None'],
+    ['bottom', 'Along the bottom'],
+    ['top', 'Along the top'],
+    ['both', 'Both edges'],
+  ] },
+  { key: 'trimImage', label: 'Band artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG' },
+  { key: 'trimHeight', label: 'Band height', type: 'range', min: 20, max: 280, step: 4 },
+  { key: 'trimFit', label: 'Across the width', type: 'select', options: [['stretch', 'Stretch to fit'], ['repeat', 'Repeat the pattern']] },
+  { key: 'trimOverlap', label: 'Hang over the edge', type: 'range', min: 0, max: 120, step: 2 },
+
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
     ],

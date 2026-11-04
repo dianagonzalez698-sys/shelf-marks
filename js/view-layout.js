@@ -214,6 +214,10 @@ function sectionWarnings(sec) {
       + 'nothing to cut into and will not show. Give it a background colour or '
       + 'a photograph, or put a Decorative interlude underneath instead.');
   }
+  if (sec.trim && sec.trim !== 'none' && !(sec.trimImage && sec.trimImage.assetId)) {
+    out.push('A decorative band is switched on but has no artwork chosen, so '
+      + 'nothing is drawn. Pick a picture in <b>Band artwork</b> below.');
+  }
   if (sec.edge === 'custom' && !(sec.edgeImage && sec.edgeImage.assetId)) {
     out.push('“My own shape” needs a transparent PNG in the edge slot below. '
       + 'Without one the edge stays straight.');
@@ -270,9 +274,11 @@ function fieldControl(f, value, secId) {
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
         ${mediaButton(f.key, value, false, f.role)}
         ${f.size ? `<p class="hint">Best at <b>${esc(f.size)}</b>. Anything larger is scaled down on upload.</p>` : ''}
-        ${f.role === 'backdrop'
-          ? '<p class="hint">Fills the whole section, edge to edge. Frames and tilts don’t apply to a background — put those on a picture inside the section.</p>'
-          : ''}</div>`;
+        ${f.role === 'trim'
+          ? '<p class="hint">Shown as it is, laid across the edge. Use a transparent PNG so the page shows through around the artwork.</p>'
+          : f.role === 'backdrop'
+            ? '<p class="hint">Fills the whole section, edge to edge. Frames and tilts don’t apply to a background — put those on a picture inside the section.</p>'
+            : ''}</div>`;
     case 'medialist':
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
         <div class="media-list" data-medialist="${attr(f.key)}">
@@ -290,9 +296,11 @@ function mediaButton(key, m, removable = false, role = '') {
   const descriptor = media(m || {});
   const url = assets.src(descriptor.assetId);
   const a = assets.get(descriptor.assetId);
-  const meta = role === 'backdrop'
-    ? `fills the section · ${Math.round(Number(descriptor.opacity) * 100)}%`
-    : `${descriptor.frame} · ${descriptor.ratio}`;
+  const meta = role === 'trim'
+    ? 'laid across the edge'
+    : role === 'backdrop'
+      ? `fills the section · ${Math.round(Number(descriptor.opacity) * 100)}%`
+      : `${descriptor.frame} · ${descriptor.ratio}`;
   return `<span class="media-slot">
     <button class="media-pick" type="button" data-media="${attr(key)}">
       <span class="media-thumb">${url
@@ -397,7 +405,8 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
   // A background fills its section edge to edge, so framing, shaping, tilting
   // and captioning have nothing to act on. Offering those controls anyway was
   // the reason a chosen frame appeared to do nothing.
-  const isBackdrop = role === 'backdrop';
+  const isBackdrop = role === 'backdrop' || role === 'trim';
+  const isTrim = role === 'trim';
 
   const num = (key, label, min, max, step) => `
     <div class="token-row">
@@ -421,7 +430,12 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
     </div>
     ${library.length ? '' : '<p class="hint">Your library is empty — <a href="#/assets" data-close>add some pictures</a> first. An empty slot still renders as a tinted plate.</p>'}
 
-    ${isBackdrop ? `<p class="notice" style="margin-top:1.1rem">
+    ${isTrim ? `<p class="notice" style="margin-top:1.1rem">
+      <strong>This is a decorative band.</strong>
+      The artwork is shown as it is, laid across the edge of the section — not
+      used to cut a shape. A transparent PNG works best, so the page shows
+      through around it.</p>` : ''}
+    ${isBackdrop && !isTrim ? `<p class="notice" style="margin-top:1.1rem">
       <strong>This is a background.</strong>
       It fills the whole section, so frames, shapes and tilts don’t apply.
       Put those on a picture inside the section instead.</p>` : ''}

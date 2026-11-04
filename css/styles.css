@@ -2209,3 +2209,39 @@ a.ed-meta:hover { color: var(--c-accent); }
   -webkit-mask-image: var(--vine-mask); mask-image: var(--vine-mask);
   --vine-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 30'%3E%3Cpath fill='none' stroke='black' stroke-width='1.8' d='M0 15c15-13 30 13 45 0s30-13 45 0 20 13 30 0'/%3E%3Cpath fill='black' d='M22 8c0-4 3-7 7-7 0 4-3 7-7 7ZM68 22c0 4 3 7 7 7 0-4-3-7-7-7ZM45 15c4-2 8 0 9 4-4 2-8 0-9-4Z'/%3E%3C/svg%3E");
 }
+
+/* ---------------------------------------------------------------- trim ----
+   A decorative band laid ACROSS the seam — the artwork itself, shown at its
+   own colours. This is the opposite of a shaped edge, which uses an image to
+   cut the section away. A lace strip, a curtain valance, a painted border.
+
+   It hangs outside the section, so a section carrying one must not clip. */
+
+.ed.has-trim { overflow: visible; }
+
+.ed-trim {
+  position: absolute;
+  left: 0; right: 0;
+  height: var(--trim-h, 90px);
+  z-index: 5;
+  pointer-events: none;
+  background-image: var(--trim-img);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;     /* stretch across by default */
+}
+.ed-trim-repeat {
+  background-repeat: repeat-x;
+  background-size: auto 100%;
+}
+.ed-trim-bottom { bottom: calc(var(--trim-over, 0px) * -1); }
+.ed-trim-top    { top: calc(var(--trim-over, 0px) * -1); }
+
+/* A hero clips its own banner, so a band hanging off it needs room. */
+.ed-hero.has-trim .hero { overflow: visible; }
+
+@media (max-width: 759px) {
+  /* Wide decorative bands become stamp-sized on a phone; let them keep their
+     drawing by repeating rather than squashing. */
+  .ed-trim { height: calc(var(--trim-h, 90px) * .62); }
+}

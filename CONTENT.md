@@ -171,6 +171,28 @@ rules, progress bars and bookmark labels all move to the banner palette.
 
 ### The seam between sections
 
+There are **two different ways** to treat the join, and they are easy to
+confuse:
+
+| | What it does | Use it for |
+|---|---|---|
+| **Decorative band over the edge** | Shows your artwork, at its own colours, laid across the seam | A lace strip, a curtain valance, a painted border |
+| **Bottom edge** | Uses a shape to *cut* the section away | A torn paper edge, scallops, a soft wave |
+
+If you want to *see* the picture you uploaded, you want the **band**. The
+bottom edge never shows your image — it only uses its outline to cut.
+
+#### Decorative band
+
+- **Band artwork** — best as a **transparent PNG, 1800 × 200 px**, added to
+  the library as a **Cutout** so the page shows through around it
+- **Along the bottom / top / both**
+- **Band height** and **Across the width** (stretch, or repeat the pattern)
+- **Hang over the edge** — lets the band drape onto the section below, which
+  is what gives the layered, pasted-in look
+
+#### Shaped edge
+
 A section with a ground — a tint or a photograph — can end in a shaped edge
 instead of a straight cut, so one section flows into the next:
 
