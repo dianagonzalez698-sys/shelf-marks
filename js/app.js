@@ -15,6 +15,7 @@ import { settingsView } from './view-settings.js';
 import { customizeView } from './view-customize.js';
 import { assetsView } from './view-assets.js';
 import { layoutView } from './view-layout.js';
+import { wordsView, wordDetailView } from './view-words.js';
 
 route('/', homeView);
 route('/books', booksView);
@@ -28,6 +29,8 @@ route('/settings', settingsView);
 route('/customize', customizeView);
 route('/assets', assetsView);
 route('/layout', layoutView);
+route('/words', wordsView);
+route('/word/:id', wordDetailView);
 
 function paintStorageBanner() {
   const banner = document.getElementById('storage-banner');

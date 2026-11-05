@@ -12,6 +12,7 @@ import { src as assetSrc, get as getAsset } from './assets.js';
 import {
   state, annualProgress, quarterProgress, nonfictionProgress,
   bookmarkStats, allChallenges, getChallenge, sortedBooks, unlockMap,
+  allWords, getWord, wordStats,
 } from './state.js';
 import { evaluate, describeFilter, describeWindow, bookmarkLabels } from './rules.js';
 import { focusQuarter, focusBimonth, daysLeftLabel, formatDate, yearPeriod, inPeriod } from './periods.js';
@@ -878,6 +879,122 @@ export const SECTION_TYPES = {
         </div>`;
       }).join('');
       return sectionShell(sec, `${head}${groups}`);
+    },
+  },
+
+
+  /* 18. Word of the year --------------------------------------------------- */
+  // One word, set enormous: the thing you kept meeting all year. The subtitle
+  // leads to its own page, where every book you met it in is counted up.
+  word: {
+    label: 'Word of the year',
+    blurb: 'A single word, set large, with a picture and a link to its tally.',
+    create: () => ({
+      wordId: '',
+      showLabel: true,
+      showNote: true,
+      showCount: true,
+      align: 'center',
+      picture: media({ ratio: '4/5', frame: 'plate' }),
+      flip: false,
+    }),
+    fields: [
+      { key: 'wordId', label: 'Which word', type: 'word' },
+      { key: 'align', label: 'Type alignment', type: 'select', options: [['center', 'Centred'], ['left', 'Left'], ['right', 'Right']] },
+      { key: 'picture', label: 'Picture beside it', type: 'media', size: '900 × 1125 px' },
+      { key: 'flip', label: 'Picture on the other side', type: 'bool' },
+      { key: 'showLabel', label: 'Show the small label', type: 'bool' },
+      { key: 'showNote', label: 'Show the note underneath', type: 'bool' },
+      { key: 'showCount', label: 'Show the tally', type: 'bool' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec, ctx) {
+      // On a word's own page the page says which word; elsewhere the section
+      // does. Falling back to the newest word means a freshly added section
+      // shows something rather than nothing.
+      const w = (ctx && ctx.word)
+        || (sec.wordId ? getWord(sec.wordId) : null)
+        || allWords()[0]
+        || null;
+      // Drawing nothing when there is no word to draw reads as the section
+      // being broken. Say what is missing and where to fix it.
+      if (!w || !w.word) {
+        return sectionShell(sec, `<div class="empty">
+          <h3>No word chosen yet</h3>
+          <p>A word of the year is one you kept meeting — add it, then record the books you met it in.</p>
+          <a class="btn btn-primary" href="#/words">Add a word</a>
+        </div>`);
+      }
+      const st = wordStats(w);
+      const href = `#/word/${encodeURIComponent(w.id)}`;
+      const tally = st.books
+        ? `${st.books} book${st.books === 1 ? '' : 's'} · ${st.total} time${st.total === 1 ? '' : 's'}`
+        : 'Nothing logged against it yet';
+      const hasPic = hasAsset(sec.picture);
+
+      const type = `<div class="word-type">
+        ${sec.showLabel !== false ? kicker(`${w.label || 'Word of the Year'}${w.period ? ` · ${w.period}` : ''}`) : ''}
+        <p class="word-word">${esc(w.word)}</p>
+        ${sec.showNote !== false && w.note ? `<p class="word-note">${esc(w.note)}</p>` : ''}
+        ${sec.showCount !== false ? `<p class="word-tally"><a class="word-link" href="${href}">${esc(tally)} &rarr;</a></p>` : ''}
+      </div>`;
+
+      return sectionShell(sec, hasPic
+        ? `<div class="word-split${sec.flip ? ' is-flipped' : ''}">
+             <div class="word-pic">${figure(sec.picture, { seed: `${sec.id}w` })}</div>
+             ${type}
+           </div>`
+        : `<div class="word-solo word-${sec.align || 'center'}">${type}</div>`);
+    },
+  },
+
+  /* 19. Word — the books it turned up in ----------------------------------- */
+  wordShelf: {
+    label: 'Word — where you met it',
+    blurb: 'Every book the word turned up in, counted, with the tallies.',
+    needs: 'word',
+    create: () => ({ kicker: 'The record', title: 'Where you met it', showStats: true }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'text' },
+      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'showStats', label: 'Show the summary figures', type: 'bool' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec, ctx) {
+      const { word: w, stats: st } = ctx;
+      const stat = (n, l) => `<div class="wstat"><span class="wstat-n">${esc(n)}</span>
+        <span class="wstat-l">${esc(l)}</span></div>`;
+
+      const figures = sec.showStats === false ? '' : `<div class="wstats">
+        ${stat(st.books, st.books === 1 ? 'book' : 'books')}
+        ${stat(st.total, 'times in all')}
+        ${stat(st.average, 'average a book')}
+        ${stat(`${st.share}%`, 'of everything read')}
+      </div>
+      ${st.mostIn ? `<p class="marginalia center">Thickest in
+        <a href="#/book/${encodeURIComponent(st.mostIn.id)}">${esc(st.mostIn.title)}</a>
+        — ${st.mostCount} time${st.mostCount === 1 ? '' : 's'}.</p>` : ''}`;
+
+      const list = st.rows.length
+        ? `<div class="list">${st.rows.map((r) => `
+            <article class="list-row">
+              <a class="list-row-link" href="#/book/${encodeURIComponent(r.book.id)}">
+                ${coverImg(r.book)}
+                <span class="grow">
+                  <span class="entry-title">${esc(r.book.title)}</span>
+                  <span class="entry-meta">${esc(r.book.author || '')}</span>
+                  <span class="entry-meta">Finished ${esc(formatDate(r.book.dateFinished))}</span>
+                </span>
+              </a>
+              <span class="word-count" title="times the word appears">${r.count}&times;</span>
+            </article>`).join('')}</div>`
+        : `<div class="empty"><h3>Nothing logged against this word yet</h3>
+             <p>Open <b>Edit</b> above and add the books you met it in.</p></div>`;
+
+      return sectionShell(sec, `
+        <div class="ed-head"><div>${kicker(sec.kicker)}${headline(sec.title)}</div></div>
+        ${figures}
+        ${list}`);
     },
   },
 

@@ -5,7 +5,7 @@ import * as layout from './layout.js';
 import { SECTION_TYPES, typeList, FONT_CHOICES } from './sections.js';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
-import { allChallenges, state } from './state.js';
+import { allChallenges, state, allWords } from './state.js';
 import { esc, attr, toast, openSheet, confirmSheet, navigate, render } from './ui.js';
 import { studioNav } from './studio-nav.js';
 
@@ -18,6 +18,7 @@ function pageOptions() {
     ['books', 'My Books'],
     ['bookmarks', 'The bookmark archive'],
   ];
+  allWords().forEach((w) => pages.push([`word:${w.id}`, `Word — ${w.word}`]));
   allChallenges().forEach((c) => pages.push([`challenge:${c.id}`, `Challenge — ${c.name}`]));
   return pages;
 }
@@ -256,6 +257,11 @@ function sectionWarnings(sec) {
     || (sec.tone && sec.tone !== 'none')
     || sec.type === 'hero';
   const edge = sec.edge && sec.edge !== 'none' ? sec.edge : '';
+
+  if (sec.type === 'word' && !allWords().length) {
+    out.push('There are no words yet, so this section has nothing to show. '
+      + '<a href="#/words">Add a word</a> first.');
+  }
 
   if (edge === 'curtain' && !(sec.curtainArt && sec.curtainArt.assetId)) {
     out.push('Choose the curtain picture below, or nothing is drawn.');

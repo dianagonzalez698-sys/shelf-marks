@@ -2471,3 +2471,110 @@ a.ed-meta:hover { color: var(--c-accent); }
     padding-block-start: calc(var(--cur-arch) * .62 + var(--sp-section) * .6);
   }
 }
+
+/* ------------------------------------------------------- word of the year --
+   One word, set as large as the measure allows: it is the focal point, so it
+   is sized against the viewport rather than the type scale. */
+
+.word-word {
+  margin: .1em 0 0;
+  font-family: var(--f-display);
+  font-size: clamp(3.2rem, 13vw, 11rem);
+  font-weight: var(--fw-display);
+  line-height: .9;
+  letter-spacing: -.012em;
+  text-transform: var(--tt-display);
+  color: var(--c-title-ink, var(--c-accent));
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.word-note {
+  margin: 1.1rem 0 0;
+  font-family: var(--f-body);
+  font-style: italic;
+  font-size: var(--fs-lead);
+  color: var(--c-body-ink, var(--c-ink-soft));
+  max-width: 34ch;
+}
+.word-tally { margin: 1.3rem 0 0; }
+.word-link {
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
+  color: var(--c-accent); text-decoration: none;
+  border-bottom: 1px solid currentColor; padding-bottom: 2px;
+}
+.word-link:hover { color: var(--c-accent-deep); }
+
+.word-center { text-align: center; }
+.word-center .word-note { margin-inline: auto; }
+.word-right { text-align: right; }
+.word-right .word-note { margin-inline-start: auto; }
+
+/* With a picture beside it, the word takes the larger share. */
+.word-split {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
+  gap: clamp(1.6rem, 5vw, 4.5rem);
+  align-items: center;
+}
+.word-split.is-flipped { grid-template-columns: minmax(0, 5fr) minmax(0, 3fr); }
+.word-split.is-flipped .word-pic { order: 2; }
+
+/* The tally page's summary figures. */
+.wstats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: clamp(1rem, 3vw, 2.4rem);
+  margin: 0 0 1.8rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 1px solid var(--c-rule);
+  text-align: center;
+}
+.wstat-n {
+  display: block;
+  font-family: var(--f-display);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1;
+  color: var(--c-accent);
+}
+.wstat-l {
+  display: block; margin-top: .35rem;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+
+.word-count {
+  flex: 0 0 auto;
+  font-family: var(--f-display);
+  font-size: 1.3rem;
+  color: var(--c-accent);
+  padding-inline: .8rem .2rem;
+}
+
+/* The editor's per-book tally list. */
+.wlist { max-height: 46vh; overflow-y: auto; margin-top: .5rem; }
+.wrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5rem;
+  grid-template-areas: "title n" "meta n";
+  align-items: center;
+  gap: 0 .8rem;
+  padding: .5rem .6rem;
+  border-bottom: 1px solid var(--c-rule);
+  cursor: text;
+}
+.wrow.is-on { background: var(--c-accent-soft); }
+.wrow-title { grid-area: title; font-weight: 500; }
+.wrow-meta { grid-area: meta; font-size: .85em; color: var(--c-ink-faint); }
+.wrow input { grid-area: n; text-align: center; }
+
+@media (max-width: 759px) {
+  .word-split, .word-split.is-flipped { grid-template-columns: minmax(0, 1fr); }
+  .word-split.is-flipped .word-pic { order: 0; }
+  /* justify-self, not margin:auto — an auto margin makes a grid item
+     shrink-to-fit, and the figure inside is width:100%, so the pair collapse
+     to nothing. */
+  .word-pic { inline-size: 100%; max-inline-size: 320px; justify-self: center; }
+}

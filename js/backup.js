@@ -28,6 +28,7 @@ export function buildBackup() {
     // …as do your pictures and the way your pages are arranged.
     assets: assets.snapshot(),
     layouts: layout.snapshot(),
+    words: state.words.map((w) => ({ ...w })),
   };
 }
 
@@ -57,6 +58,7 @@ function countsOf(payload) {
     images: (payload.images || []).length,
     assets: (payload.assets || []).length,
     layouts: (payload.layouts || []).length,
+    words: (payload.words || []).length,
   };
 }
 
@@ -124,12 +126,13 @@ export async function importBackup(text) {
 
   const assetRows = mergeCollection(data.assets, assets.snapshot(), 'assets');
   const layoutRows = mergeCollection(data.layouts, layout.snapshot(), 'layouts');
+  const words = mergeCollection(data.words, state.words, 'words');
   const books = mergeCollection(data.books, state.books, 'books');
   const challenges = mergeCollection(data.challenges, state.challengeRecords, 'challenges');
   const unlocks = mergeCollection(data.unlocks, state.unlocks, 'unlocks');
   const images = mergeCollection(data.images, [...state.images.values()], 'images');
 
-  for (const group of [books, challenges, unlocks, images, assetRows, layoutRows]) {
+  for (const group of [books, challenges, unlocks, images, assetRows, layoutRows, words]) {
     if (group.writes.length) await store.putMany(group.storeName, group.writes);
   }
   assets.adoptMany(assetRows.merged);
@@ -139,6 +142,7 @@ export async function importBackup(text) {
   state.challengeRecords = challenges.merged;
   state.unlocks = unlocks.merged;
   state.images = new Map(images.merged.map((i) => [i.id, i]));
+  state.words = words.merged.filter((w) => !w.deleted);
 
   // Settings is a single row, so it follows the same newer-wins rule.
   let settingsChanged = false;

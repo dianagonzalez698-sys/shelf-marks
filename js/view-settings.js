@@ -60,6 +60,15 @@ export function settingsView() {
         ${numberField('set-nf', 'Share of books read that should be nonfiction (%)', s.nonfictionTargetPct, { min: 0, max: 100, hint: 'The nonfiction bar on Home measures against this percentage.' })}
       </section>
 
+      <h2 class="form-heading">Words</h2>
+      <section class="panel">
+        <p class="small muted" style="margin-top:0">
+          A word you kept meeting — one for the year, or one a season.
+          Record the books you met it in and it keeps its own tally.
+        </p>
+        <div class="btn-row"><a class="btn grow" href="#/words">Words of the year</a></div>
+      </section>
+
       <h2 class="form-heading">Sync between devices</h2>
       <section class="panel">
         ${untouchedDevice() ? `<div class="notice" style="margin-top:0">

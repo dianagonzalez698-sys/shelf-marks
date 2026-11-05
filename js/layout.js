@@ -8,6 +8,7 @@
 //   'directory'             the challenge index
 //   'books'                 the shelf
 //   'bookmarks'             the bookmark archive
+//   'word' / 'word:<id>'    a word of the year and its tally
 //   'challenge'             the shared challenge spread
 //   'challenge:<id>'        an override for one particular challenge
 
@@ -74,6 +75,14 @@ export function defaultLayout(pageId) {
       }),
       build('challenges', { title: '', subtitle: '', layout: 'editorial', limit: 0, spacing: 'tight' }),
       build('note', { text: 'begin anywhere — they all end in a bookmark', rotate: -2 }),
+    ].filter(Boolean);
+  }
+
+  if (base === 'word') {
+    // The word's own page: the word set large, then every book it turned up in.
+    return [
+      build('word', { showCount: false, align: 'center', spacing: 'loose' }),
+      build('wordShelf', { kicker: 'The record', title: 'Where you met it' }),
     ].filter(Boolean);
   }
 

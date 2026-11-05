@@ -285,6 +285,41 @@ Items merge by id and the more recently edited copy wins, so importing is safe
 in either direction and can be repeated whenever the two drift apart. A device
 with nothing on it yet says so, right above those buttons.
 
+## Word of the year
+
+A word you kept meeting — *pantomime* for 2026 — gets a section and a page of
+its own.
+
+**Settings → Words of the year → Add a word.** Give it the word, what to call
+it (*Word of the Year*, *Word of the Summer* — anything), the year or season it
+belongs to, and a line about why it stuck. Then, in the same panel, put a
+number against each book: **how many times the word turned up in it**. Leave a
+book blank if it never did.
+
+Counting per book rather than just ticking the books is what makes the tally
+worth having — the interesting question is not only how many books carried the
+word but which one was steeped in it.
+
+**On any page**, add a **Word of the year** section. The word is set as large
+as the measure allows, with an optional picture beside it, and the line
+underneath links to the word's own page. The section can point at a particular
+word or just follow the newest one.
+
+**The word's page** — reached from that link, or from Settings → Words —
+carries the word again, then every book it turned up in, commonest first, with
+the tally for each and four figures across the top:
+
+| Figure | What it counts |
+|---|---|
+| **Books** | How many books the word appeared in |
+| **Times in all** | Every appearance added up |
+| **Average a book** | Times in all, divided by books |
+| **Of everything read** | Those books as a share of your whole log |
+
+Underneath, a line names the book it was thickest in. The page is built from
+its layout like every other, so its arrangement is yours to change — and each
+word gets its own entry in the Layouts page list.
+
 ### Light and dark
 
 The sun/moon in the top right switches the journal between them, one tap, and
@@ -322,6 +357,41 @@ point of the arch, both measured from the picture itself.
 A picture with no see-through centre cannot be a curtain, and the editor says
 so rather than drawing nothing. On a phone the whole thing hangs shallower,
 since a narrow screen cannot spare a third of its width on cloth.
+
+## Word of the year
+
+A word you kept meeting — *pantomime* for 2026 — gets a section and a page of
+its own.
+
+**Settings → Words of the year → Add a word.** Give it the word, what to call
+it (*Word of the Year*, *Word of the Summer* — anything), the year or season it
+belongs to, and a line about why it stuck. Then, in the same panel, put a
+number against each book: **how many times the word turned up in it**. Leave a
+book blank if it never did.
+
+Counting per book rather than just ticking the books is what makes the tally
+worth having — the interesting question is not only how many books carried the
+word but which one was steeped in it.
+
+**On any page**, add a **Word of the year** section. The word is set as large
+as the measure allows, with an optional picture beside it, and the line
+underneath links to the word's own page. The section can point at a particular
+word or just follow the newest one.
+
+**The word's page** — reached from that link, or from Settings → Words —
+carries the word again, then every book it turned up in, commonest first, with
+the tally for each and four figures across the top:
+
+| Figure | What it counts |
+|---|---|
+| **Books** | How many books the word appeared in |
+| **Times in all** | Every appearance added up |
+| **Average a book** | Times in all, divided by books |
+| **Of everything read** | Those books as a share of your whole log |
+
+Underneath, a line names the book it was thickest in. The page is built from
+its layout like every other, so its arrangement is yours to change — and each
+word gets its own entry in the Layouts page list.
 
 ### Light and dark
 

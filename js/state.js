@@ -14,6 +14,7 @@ export const state = {
   challengeRecords: [], // overrides for presets + custom challenges
   unlocks: [],
   images: new Map(),    // bookmarkId -> { id, dataUrl, updatedAt }
+  words: [],            // words of the year, with where you met them
   storageError: null,
 };
 
@@ -46,12 +47,13 @@ export async function load() {
     emitChange();
   });
 
-  const [books, settingsRow, challengeRecords, unlocks, images] = await Promise.all([
+  const [books, settingsRow, challengeRecords, unlocks, images, words] = await Promise.all([
     store.getAll('books'),
     store.get('settings', 'settings'),
     store.getAll('challenges'),
     store.getAll('unlocks'),
     store.getAll('images'),
+    store.getAll('words'),
   ]);
 
   state.books = books.filter((b) => b && b.id && !b.deleted);
@@ -63,6 +65,7 @@ export async function load() {
   state.challengeRecords = challengeRecords.filter((c) => c && c.id);
   state.unlocks = unlocks.filter((u) => u && u.id);
   state.images = new Map(images.filter((i) => i && i.id).map((i) => [i.id, i]));
+  state.words = words.filter((w) => w && w.id && !w.deleted);
   state.ready = true;
 
   await syncUnlocks();
@@ -124,6 +127,86 @@ export async function deleteBook(id) {
   await store.remove('books', id);
   state.books = state.books.filter((b) => b.id !== id);
   emitChange();
+}
+
+/* ---------------------------------------------------------------- words ---- */
+//
+// A word you kept meeting — "pantomime" for 2026 — and the books you met it
+// in. Occurrences are counted per book, because the interesting question is
+// not only how many books carried the word but which one was steeped in it.
+
+export function allWords() {
+  return [...state.words].sort((a, b) => String(b.period || '').localeCompare(String(a.period || ''))
+    || String(a.word || '').localeCompare(String(b.word || '')));
+}
+
+export function getWord(id) {
+  return state.words.find((w) => w.id === id) || null;
+}
+
+export function newWord(fields = {}) {
+  return {
+    id: uid('word'),
+    word: '',
+    label: 'Word of the Year',
+    period: String(state.settings.year),
+    note: '',
+    image: null,
+    entries: [],          // [{ bookId, count }]
+    createdAt: nowISO(),
+    updatedAt: nowISO(),
+    ...fields,
+  };
+}
+
+export async function saveWord(word) {
+  const record = { ...word, updatedAt: nowISO() };
+  if (!record.createdAt) record.createdAt = record.updatedAt;
+  record.entries = (record.entries || [])
+    .filter((e) => e && e.bookId)
+    .map((e) => ({ bookId: e.bookId, count: Math.max(0, Number(e.count) || 0) }))
+    .filter((e) => e.count > 0);
+  await store.put('words', record);
+  const i = state.words.findIndex((w) => w.id === record.id);
+  if (i >= 0) state.words[i] = record; else state.words.push(record);
+  emitChange();
+  return record;
+}
+
+export async function deleteWord(id) {
+  await store.remove('words', id);
+  state.words = state.words.filter((w) => w.id !== id);
+  emitChange();
+}
+
+/**
+ * What the word did across the year.
+ *
+ * Entries point at books by id, and a book can be deleted after the fact, so
+ * every reader of this resolves the book and drops what no longer exists
+ * rather than rendering a blank row.
+ */
+export function wordStats(word) {
+  const rows = ((word && word.entries) || [])
+    .map((e) => ({ ...e, book: getBook(e.bookId) }))
+    .filter((r) => r.book)
+    .sort((a, b) => b.count - a.count
+      || String(a.book.title || '').localeCompare(String(b.book.title || '')));
+
+  const total = rows.reduce((n, r) => n + r.count, 0);
+  const top = rows[0] || null;
+  const thisYear = rows.filter((r) => inPeriod(r.book.dateFinished, yearPeriod(state.settings.year)));
+  return {
+    rows,
+    books: rows.length,
+    total,
+    top,
+    mostIn: top ? top.book : null,
+    mostCount: top ? top.count : 0,
+    average: rows.length ? Math.round((total / rows.length) * 10) / 10 : 0,
+    booksThisYear: thisYear.length,
+    share: state.books.length ? Math.round((rows.length / state.books.length) * 100) : 0,
+  };
 }
 
 /* ------------------------------------------------------------- settings ---- */
