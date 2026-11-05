@@ -46,7 +46,7 @@ export function defaultLayout(pageId) {
       build('interlude', { mode: 'ornament' }),
       build('period', { title: 'This Period' }),
       build('challenges', {
-        kicker: 'In progress',
+        kicker: '',
         title: 'Reading Challenges',
         subtitle: 'Little projects to read against, all year long.',
         layout: 'editorial', limit: 3,

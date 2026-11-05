@@ -713,13 +713,15 @@ export const SECTION_TYPES = {
               <span class="tick-note">${esc(standing)}</span></span></a>`;
           }).join('')}</div>`
         : `<div class="spreads">${list.map((c, i) => challengeSpread(c, i)).join('')}</div>`;
-      return sectionShell(sec, `
-        <div class="ed-head ed-head-split">
-          <div>${kicker(sec.kicker)}${headline(sec.title)}
-            ${sec.subtitle ? `<p class="ed-sub">${esc(sec.subtitle)}</p>` : ''}</div>
-          <a class="ed-meta" href="#/challenges">All ${all.length} &rarr;</a>
-        </div>
-        ${body}`);
+      // No "all N" link: the masthead already carries Reading Challenges and
+      // every card leads to its own, so it was a third way to the same place.
+      const head = (sec.kicker || sec.title || sec.subtitle)
+        ? `<div class="ed-head">
+             <div>${kicker(sec.kicker)}${headline(sec.title)}
+               ${sec.subtitle ? `<p class="ed-sub">${esc(sec.subtitle)}</p>` : ''}</div>
+           </div>`
+        : '';
+      return sectionShell(sec, `${head}${body}`);
     },
   },
 

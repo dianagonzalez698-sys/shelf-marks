@@ -63,10 +63,12 @@ function paintSheet() {
   const html = typeof top.reopen === 'function' ? top.reopen() : top.innerHtml;
   const nested = sheetStack.length > 1;
 
+  // Every panel carries its own way out, at the top where a back control
+  // belongs. Nested, it returns to the panel underneath; outermost, it closes
+  // — so the masthead's chevron is never the only way back out of settings.
   host.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">`
-    + (nested
-      ? '<button class="sheet-back" type="button" data-sheet-back>&larr; Back</button>'
-      : '')
+    + `<button class="sheet-back" type="button" data-sheet-back>`
+    + `&larr; ${nested ? 'Back' : 'Done'}</button>`
     + `${html}</div>`;
   host.hidden = false;
   document.body.style.overflow = 'hidden';
