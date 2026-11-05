@@ -239,11 +239,42 @@ first time you open the app, and you can move or delete them from there.
 ### Type and colour, section by section
 
 The Design Studio sets the typography for the whole journal. Every section can
-then depart from it on its own, without touching the rest — open a section's
-**Edit** panel and scroll to the bottom:
+depart from it on its own — open a section's **Edit** panel and scroll to the
+bottom. Four rows, one per role:
 
-| Control | What it re-types |
+| Row | What it re-types |
 |---|---|
+| **Headings** | The big display line, and any subheading |
+| **Body text** | Running text, captions, metadata |
+| **Small labels** | The letterspaced eyebrow above a heading |
+| **Script initial** | The swash first letter, where one is on |
+
+Each row is a typeface and a colour. Tap the typeface to open a specimen list —
+21 faces, grouped, **each one drawn in itself** so you can see what you are
+picking. Tap the dot for colour: your palette first, then a colour wheel and a
+hex box for anything else. Both panels open inside the row and close when you
+choose.
+
+Both start at **Match the site**, so a section looks exactly as it does now
+until you move something. The crossed swatch (first in the colour row) hands it
+back.
+
+**A colour you set here wins over the automatic light-on-dark flip.** A section
+over a photograph or a deep tone normally switches its type to the pale banner
+colours; an explicit colour overrides that, because you asked for it by name.
+If a section goes hard to read over its background, that is the usual cause —
+clear the colour and the automatic behaviour comes back.
+
+### Why edges overlap very slightly
+
+Every edge treatment — a hanging band, or a preset cut like torn or lace —
+bites about 3px into the section it sits on. Landing it exactly on the seam
+leaves a hairline of page showing through, because a section's height is
+rarely a whole number of pixels: the background paints to 530.46 and the band
+starts at 531. The overlap is roughly 2% of a band's height and closes the
+seam completely.
+
+---|---|
 | **Headings** / **Heading colour** | The big display line, and any subheading |
 | **Body text** / **Body colour** | Running text, captions, metadata |
 | **Small labels** / **Label colour** | The letterspaced eyebrow above a heading |

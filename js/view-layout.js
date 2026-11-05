@@ -168,6 +168,52 @@ export function layoutView(params = {}) {
   };
 }
 
+/* -------------------------------------------------- typeface pickers ---- */
+// Both pickers expand inside the row rather than opening a sheet: the editor
+// is itself a sheet, and there is only one sheet slot — opening a second one
+// tore the panel out from under you. Inline is also one less layer to get out
+// of.
+
+// A specimen sheet: every face drawn in itself. A native <select> renders its
+// options in the UI font on macOS and iOS, so the list had to stop being one.
+function facePickerHtml(current) {
+  let group = null;
+  let rows = '';
+  for (const f of FONT_CHOICES) {
+    const g = f.group || '';
+    if (g && g !== group) rows += `<p class="face-group">${esc(g)}</p>`;
+    group = g;
+    rows += `<button type="button" class="face-opt${f.value === current ? ' is-on' : ''}"
+      data-val="${attr(f.value)}" style="font-family:${attr(f.value || 'inherit')}">
+      <span class="face-specimen">${esc(f.label)}</span>
+      <span class="face-sample">Aa Bb · 123</span>
+    </button>`;
+  }
+  return `<div class="face-list">${rows}</div>`;
+}
+
+// Palette first, then a wheel and a hex box for anything else.
+function inkPickerHtml(current, id) {
+  const cur = String(current || '');
+  const sw = (v, l, cls = '') => `<button type="button" class="ink-sw ${cls}${v === cur ? ' is-on' : ''}"
+    data-val="${attr(v)}" style="--sw:${attr(v || 'transparent')}" title="${attr(l)}"
+    aria-label="${attr(l)}"></button>`;
+  return `<div class="ink-pick">
+      ${sw('', 'Match the site', 'ink-auto')}
+      ${INK_SWATCHES.map(([v, l]) => sw(v, l)).join('')}
+    </div>
+    <div class="ink-custom-row">
+      <label class="ink-wheel" title="Colour wheel">
+        <input type="color" data-wheel value="${attr(cur || '#4B2828')}">
+      </label>
+      <div class="field" style="margin:0;flex:1">
+        <label for="${attr(id)}">Hex</label>
+        <input type="text" id="${attr(id)}" data-hex spellcheck="false"
+          placeholder="#C9787E" value="${attr(cur)}">
+      </div>
+    </div>`;
+}
+
 /* ------------------------------------------------------ type picker ----- */
 
 function openTypePicker(pageId) {
@@ -255,6 +301,13 @@ function refreshInkSwatches() {
     .filter(([v]) => v && !seen.has(v) && seen.add(v));
 }
 
+// The section currently being edited, so a combined row can read its partner
+// value without the caller threading it through.
+let EDITING = null;
+function sec_ink(secId, key) {
+  return EDITING && EDITING.id === secId ? EDITING[key] : '';
+}
+
 function fieldControl(f, value, secId) {
   const id = `f-${secId}-${f.key}`;
   switch (f.type) {
@@ -264,46 +317,27 @@ function fieldControl(f, value, secId) {
     case 'bool':
       return `<label class="switch-row"><input type="checkbox" id="${id}" data-field="${attr(f.key)}" ${value ? 'checked' : ''}>
         <span class="switch-text">${esc(f.label)}</span></label>`;
-    case 'ink': {
-      // Swatches come from the live palette, so a section's type is recoloured
-      // from the colours the design already uses — and "Match" hands it back.
-      const cur = String(value || '');
-      const swatch = (v, label) => `<button type="button" class="ink-sw${v === cur ? ' is-on' : ''}"
-        data-ink="${attr(v)}" style="--sw:${attr(v)}" title="${attr(label)}"
-        aria-label="${attr(label)}" aria-pressed="${v === cur}"></button>`;
-      return `<div class="field" data-inkfield="${attr(f.key)}">
-        <span class="field-label">${esc(f.label)}</span>
-        <div class="ink-pick">
-          <button type="button" class="ink-sw ink-auto${cur ? '' : ' is-on'}" data-ink=""
-            title="Match the site" aria-label="Match the site" aria-pressed="${!cur}"></button>
-          ${INK_SWATCHES.map(([v, l]) => swatch(v, l)).join('')}
-          <label class="ink-sw ink-custom" title="Any other colour">
-            <input type="color" data-inkcustom value="${attr(cur || '#000000')}">
-          </label>
+    case 'typeface': {
+      // Face and colour on one line. Both open a proper picker rather than a
+      // native menu, because a native <option> cannot show its own typeface —
+      // which is the whole point of choosing one.
+      const face = String(value || '');
+      const ink = String(sec_ink(secId, f.inkKey) || '');
+      const name = (FONT_CHOICES.find((x) => x.value === face) || {}).label || 'Match the site';
+      return `<div class="type-row">
+        <span class="type-row-label">${esc(f.label)}</span>
+        <div class="type-row-ctl">
+          <button type="button" class="face-btn" data-face="${attr(f.key)}"
+            style="font-family:${attr(face || 'inherit')}">${esc(name)}</button>
+          <button type="button" class="ink-dot${ink ? '' : ' is-auto'}" data-inkopen="${attr(f.inkKey)}"
+            style="--sw:${attr(ink || 'transparent')}" title="Colour"
+            aria-label="${esc(f.label)} colour"></button>
         </div>
-        <input type="hidden" data-field="${attr(f.key)}" value="${attr(cur)}">
+        <input type="hidden" data-field="${attr(f.key)}" value="${attr(face)}">
+        <input type="hidden" data-field="${attr(f.inkKey)}" value="${attr(ink)}">
+        <div class="type-pop" data-pop="face" hidden>${facePickerHtml(face)}</div>
+        <div class="type-pop" data-pop="ink" hidden>${inkPickerHtml(ink, `hex-${secId}-${f.inkKey}`)}</div>
       </div>`;
-    }
-    case 'font': {
-      // Each option is drawn in its own face, so the list is a specimen sheet
-      // rather than twenty names you have to audition one at a time.
-      const cur = String(value || '');
-      let out = '';
-      let group = null;
-      for (const f of FONT_CHOICES) {
-        const g = f.group || '';
-        if (g !== group) {
-          if (group !== null && group !== '') out += '</optgroup>';
-          if (g) out += `<optgroup label="${attr(g)}">`;
-          group = g;
-        }
-        out += `<option value="${attr(f.value)}" style="font-family:${attr(f.value || 'inherit')}"`
-          + `${f.value === cur ? ' selected' : ''}>${esc(f.label)}</option>`;
-      }
-      if (group) out += '</optgroup>';
-      return `<div class="field"><label for="${id}">${esc(f.label)}</label>
-        <select class="font-pick" id="${id}" data-field="${attr(f.key)}"
-          style="font-family:${attr(cur || 'inherit')}">${out}</select></div>`;
     }
     case 'select':
       return `<div class="field"><label for="${id}">${esc(f.label)}</label>
@@ -341,6 +375,7 @@ function visibleFields(def, sec) {
 }
 
 function fieldsHtml(def, sec) {
+  EDITING = sec;
   refreshInkSwatches();
   return visibleFields(def, sec).map((f) => fieldControl(f, sec[f.key], sec.id)).join('');
 }
@@ -423,24 +458,78 @@ export function openSectionEditor(pageId, sectionId) {
           });
         });
 
-        // Swatch and custom-colour clicks write through the hidden field, so
-        // every control still commits down the one path above.
-        sheet.querySelectorAll('[data-inkfield]').forEach((box) => {
-          const hidden = box.querySelector('[data-field]');
-          const set = (v) => {
-            hidden.value = v;
-            box.querySelectorAll('.ink-sw').forEach((b) => {
-              const on = (b.dataset.ink || '') === v;
-              b.classList.toggle('is-on', b.matches('[data-ink]') && on);
-              if (b.matches('[data-ink]')) b.setAttribute('aria-pressed', String(on));
-            });
-            hidden.dispatchEvent(new Event('input', { bubbles: true }));
+        // Both pickers write through the row's hidden field, so every control
+        // still commits down the one path above.
+        const writeField = (key, v) => {
+          const el = sheet.querySelector(`[data-field="${key}"]`);
+          if (!el) return;
+          el.value = v;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        const faceName = (v) => (FONT_CHOICES.find((x) => x.value === v) || {}).label || 'Match the site';
+
+        sheet.querySelectorAll('.type-row').forEach((row) => {
+          const faceBtn = row.querySelector('[data-face]');
+          const inkBtn = row.querySelector('[data-inkopen]');
+          const facePop = row.querySelector('[data-pop="face"]');
+          const inkPop = row.querySelector('[data-pop="ink"]');
+          const faceKey = faceBtn.dataset.face;
+          const inkKey = inkBtn.dataset.inkopen;
+
+          // Only one panel open at a time, across every row.
+          const toggle = (pop) => {
+            const show = pop.hidden;
+            sheet.querySelectorAll('.type-pop').forEach((x) => { x.hidden = true; });
+            pop.hidden = !show;
           };
-          box.querySelectorAll('[data-ink]').forEach((b) => {
-            b.onclick = () => set(b.dataset.ink || '');
+          faceBtn.onclick = () => toggle(facePop);
+          inkBtn.onclick = () => toggle(inkPop);
+
+          facePop.querySelectorAll('.face-opt').forEach((o) => {
+            o.onclick = () => {
+              const v = o.dataset.val;
+              writeField(faceKey, v);
+              faceBtn.style.fontFamily = v || 'inherit';
+              faceBtn.textContent = faceName(v);
+              facePop.querySelectorAll('.face-opt').forEach((x) => x.classList.toggle('is-on', x === o));
+              facePop.hidden = true;
+            };
           });
-          const custom = box.querySelector('[data-inkcustom]');
-          if (custom) custom.addEventListener('input', () => set(custom.value));
+
+          const wheel = inkPop.querySelector('[data-wheel]');
+          const hex = inkPop.querySelector('[data-hex]');
+          const paintDot = (v) => {
+            inkBtn.style.setProperty('--sw', v || 'transparent');
+            inkBtn.classList.toggle('is-auto', !v);
+          };
+          inkPop.querySelectorAll('.ink-sw').forEach((o) => {
+            o.onclick = () => {
+              const v = o.dataset.val;
+              writeField(inkKey, v);
+              paintDot(v);
+              if (hex) hex.value = v;
+              inkPop.querySelectorAll('.ink-sw').forEach((x) => x.classList.toggle('is-on', x === o));
+              inkPop.hidden = true;
+            };
+          });
+          if (wheel) {
+            wheel.addEventListener('input', () => {
+              hex.value = wheel.value;
+              writeField(inkKey, wheel.value);
+              paintDot(wheel.value);
+            });
+          }
+          if (hex) {
+            hex.addEventListener('input', () => {
+              const v = hex.value.trim();
+              // Only commit a complete colour, so typing "#C9" doesn't blank it.
+              if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) {
+                if (wheel) wheel.value = v;
+                writeField(inkKey, v); paintDot(v);
+              } else if (v === '') { writeField(inkKey, ''); paintDot(''); }
+            });
+          }
         });
 
         sheet.querySelectorAll('[data-media]').forEach((btn) => {

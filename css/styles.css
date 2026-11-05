@@ -2108,11 +2108,11 @@ a.ed-meta:hover { color: var(--c-accent); }
 .ed-hero.has-edge { -webkit-mask-image: none; mask-image: none; padding-bottom: 0; }
 .ed-hero.has-edge .hero {
   -webkit-mask-image: var(--edge-img), linear-gradient(black, black);
-  -webkit-mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + 1px);
+  -webkit-mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + var(--trim-bite));
   -webkit-mask-position: bottom left, top left;
   -webkit-mask-repeat: repeat-x, no-repeat;
   mask-image: var(--edge-img), linear-gradient(black, black);
-  mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + 1px);
+  mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + var(--trim-bite));
   mask-position: bottom left, top left;
   mask-repeat: repeat-x, no-repeat;
   padding-bottom: var(--edge-h);
@@ -2123,11 +2123,11 @@ a.ed-meta:hover { color: var(--c-accent); }
   --edge-h: 0px;
   --edge-tile: 100%;
   -webkit-mask-image: var(--edge-img), linear-gradient(black, black);
-  -webkit-mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + 1px);
+  -webkit-mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + var(--trim-bite));
   -webkit-mask-position: bottom left, top left;
   -webkit-mask-repeat: repeat-x, no-repeat;
   mask-image: var(--edge-img), linear-gradient(black, black);
-  mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + 1px);
+  mask-size: var(--edge-tile) var(--edge-h), 100% calc(100% - var(--edge-h) + var(--trim-bite));
   mask-position: bottom left, top left;
   mask-repeat: repeat-x, no-repeat;
   /* keep content clear of the shaped edge */
@@ -2222,13 +2222,18 @@ a.ed-meta:hover { color: var(--c-accent); }
 .ed.has-trim { overflow: visible; }
 /* A band hanging below reserves its drop, so what follows clears it while the
    band still covers the gap — draped over the next section, not pushed off. */
-.ed.has-trim-bottom { margin-bottom: var(--trim-render-h, 0px); }
-.ed.has-trim-top    { margin-top: var(--trim-render-h, 0px); }
+.ed.has-trim-bottom { margin-bottom: calc(var(--trim-render-h, 0px) - var(--trim-bite)); }
+.ed.has-trim-top    { margin-top: calc(var(--trim-render-h, 0px) - var(--trim-bite)); }
 
 .ed {
   /* One rendered height drives the band, its offset and the space reserved
      below it, so they can never disagree when the band scales down. */
   --trim-render-h: var(--trim-h, 90px);
+  /* Every edge treatment bites this far into the section it sits on. A band
+     whose top lands exactly on the seam still shows a hairline of page
+     through it — subpixel rounding, or a soft edge in the artwork itself. A
+     few pixels of overlap kills it and is far below noticing. */
+  --trim-bite: min(3px, calc(var(--trim-render-h) * .1));
 }
 .ed-trim {
   position: absolute;
@@ -2247,8 +2252,8 @@ a.ed-meta:hover { color: var(--c-accent); }
 }
 /* Flush against the edge it hangs from: the band's top edge lands exactly on
    the section's bottom, so nothing of the section shows beneath it. */
-.ed-trim-bottom { bottom: calc(var(--trim-render-h) * -1); }
-.ed-trim-top    { top: calc(var(--trim-render-h) * -1); }
+.ed-trim-bottom { bottom: calc(var(--trim-render-h) * -1 + var(--trim-bite)); }
+.ed-trim-top    { top: calc(var(--trim-render-h) * -1 + var(--trim-bite)); }
 
 /* A hero clips its own banner, so a band hanging off it needs room. */
 .ed-hero.has-trim .hero { overflow: visible; }
@@ -2263,9 +2268,6 @@ a.ed-meta:hover { color: var(--c-accent); }
    A section can depart from the site's typography. The picker shows each face
    in itself, and the colour swatches are drawn from the live palette, so both
    lists are specimens rather than names you have to audition one at a time. */
-
-.font-pick { font-size: 1.02rem; }
-.font-pick option { font-size: 1rem; padding: 2px 0; }
 
 .ink-pick {
   display: flex; flex-wrap: wrap; gap: 6px;
@@ -2293,16 +2295,102 @@ a.ed-meta:hover { color: var(--c-accent); }
     var(--c-bg);
 }
 
-.ink-custom { position: relative; overflow: hidden; display: grid; place-items: center;
-  background: conic-gradient(#c9787e, #e0b35a, #8fa58b, #7d9fcf, #c9787e); }
-.ink-custom input[type="color"] {
-  position: absolute; inset: -4px; inline-size: calc(100% + 8px);
-  block-size: calc(100% + 8px); padding: 0; border: 0;
-  opacity: 0; cursor: pointer;
-}
-
 @media (max-width: 759px) { .ink-sw { inline-size: 34px; block-size: 34px; } }
 
 /* Each challenge's run of bookmarks inside the archive section. */
 .arc-group + .arc-group { margin-top: 2.4rem; padding-top: 2rem; border-top: 1px solid var(--c-rule); }
 .arc-group .ed-head-split { margin-bottom: 1rem; }
+
+/* ------------------------------------------------- per-section type UI ---
+   Four rows, one per role: the face (shown in itself) and its colour. Both
+   open a picker — a native <select> renders options in the UI font, which
+   defeats the point of choosing a typeface. */
+
+.type-row {
+  display: flex; align-items: center; gap: .9rem; flex-wrap: wrap;
+  padding: .55rem 0;
+  border-top: 1px solid var(--c-rule);
+}
+.type-row-label {
+  flex: 0 0 7.5rem;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+.type-row-ctl { flex: 1; display: flex; align-items: center; gap: .5rem; min-width: 0; }
+
+.face-btn {
+  flex: 1; min-width: 0;
+  text-align: left; cursor: pointer;
+  padding: .5rem .7rem;
+  font-size: 1.02rem; line-height: 1.3;
+  color: var(--c-ink);
+  background: var(--c-bg-raised);
+  border: 1px solid var(--c-rule-strong); border-radius: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.face-btn:hover { border-color: var(--c-accent); }
+
+.ink-dot {
+  flex: 0 0 auto; inline-size: 34px; block-size: 34px; padding: 0;
+  border-radius: 50%; cursor: pointer;
+  background: var(--sw, transparent);
+  border: 1px solid var(--c-rule-strong);
+  box-shadow: inset 0 0 0 2px var(--c-bg-raised);
+}
+.ink-dot:hover { border-color: var(--c-accent); }
+/* "Match the site" reads as the absence of a colour, not as another colour. */
+.ink-dot.is-auto, .ink-sw.ink-auto {
+  background:
+    linear-gradient(135deg, transparent 44%, var(--c-ink-faint) 44%,
+      var(--c-ink-faint) 56%, transparent 56%),
+    var(--c-bg);
+}
+
+/* The panels expand inside the row. */
+.type-pop {
+  flex: 1 0 100%;
+  margin: .6rem 0 .3rem;
+  padding: .7rem;
+  background: var(--c-bg-sunk);
+  border: 1px solid var(--c-rule);
+  border-radius: 4px;
+}
+
+/* The specimen sheet. */
+.face-list { max-height: 46vh; overflow-y: auto; margin: 0 -.2rem; }
+.face-group {
+  margin: 1rem 0 .3rem; padding: 0 .2rem;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+.face-opt {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  inline-size: 100%; text-align: left; cursor: pointer;
+  padding: .6rem .7rem; border: 1px solid transparent; border-radius: 3px;
+  background: none; color: var(--c-ink);
+}
+.face-opt:hover { background: var(--c-bg-sunk); }
+.face-opt.is-on { border-color: var(--c-accent); background: var(--c-accent-soft); }
+.face-specimen { font-size: 1.25rem; line-height: 1.2; }
+.face-sample { font-size: 1rem; color: var(--c-ink-faint); white-space: nowrap; }
+
+/* The colour picker: palette, then a wheel and a hex box. */
+.ink-custom-row { display: flex; align-items: flex-end; gap: .7rem; margin-top: .9rem; }
+.ink-wheel {
+  position: relative; overflow: hidden; flex: 0 0 auto;
+  inline-size: 44px; block-size: 44px; border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--c-rule-strong);
+  background: conic-gradient(#c9787e, #e0b35a, #8fa58b, #7d9fcf, #c9787e);
+}
+.ink-wheel input[type="color"] {
+  position: absolute; inset: -6px; inline-size: calc(100% + 12px);
+  block-size: calc(100% + 12px); padding: 0; border: 0; opacity: 0; cursor: pointer;
+}
+.ink-custom-row input[type="text"] { font-family: var(--f-ui); text-transform: uppercase; }
+
+@media (max-width: 559px) {
+  .type-row { flex-wrap: wrap; gap: .4rem; }
+  .type-row-label { flex: 1 0 100%; }
+}

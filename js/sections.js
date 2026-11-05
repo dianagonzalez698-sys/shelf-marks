@@ -263,15 +263,14 @@ export const FONT_CHOICES = [
   ...FONT_STACKS,
 ];
 
+// One row per role — the face and its colour together, since nobody thinks
+// about them separately. Eight stacked controls read as a wall; four rows of
+// two read as a list of four decisions.
 const TYPE_FIELDS = [
-  { key: 'fontDisplay', label: 'Headings', type: 'font' },
-  { key: 'inkDisplay', label: 'Heading colour', type: 'ink' },
-  { key: 'fontBody', label: 'Body text', type: 'font' },
-  { key: 'inkBody', label: 'Body colour', type: 'ink' },
-  { key: 'fontUi', label: 'Small labels', type: 'font' },
-  { key: 'inkUi', label: 'Label colour', type: 'ink' },
-  { key: 'fontScript', label: 'Script initial', type: 'font' },
-  { key: 'inkScript', label: 'Script colour', type: 'ink' },
+  { key: 'fontDisplay', inkKey: 'inkDisplay', label: 'Headings', type: 'typeface' },
+  { key: 'fontBody', inkKey: 'inkBody', label: 'Body text', type: 'typeface' },
+  { key: 'fontUi', inkKey: 'inkUi', label: 'Small labels', type: 'typeface' },
+  { key: 'fontScript', inkKey: 'inkScript', label: 'Script initial', type: 'typeface' },
 ];
 
 const COMMON_FIELDS = [
