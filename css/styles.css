@@ -2270,8 +2270,17 @@ a.ed-meta:hover { color: var(--c-accent); }
 .ed.has-trim { overflow: visible; }
 /* A band hanging below reserves its drop, so what follows clears it while the
    band still covers the gap — draped over the next section, not pushed off. */
-.ed.has-trim-bottom { margin-bottom: calc(var(--trim-render-h, 0px) - var(--trim-bite)); }
-.ed.has-trim-top    { margin-top: calc(var(--trim-render-h, 0px) - var(--trim-bite)); }
+/* The reserve shrinks by whatever the band was carried down, so the section
+   below rises to meet it and the band laps over that section instead of a
+   gap opening above it. */
+.ed.has-trim-bottom {
+  margin-bottom: calc(var(--trim-render-h, 0px) - var(--trim-bite) - var(--trim-shift, 0px));
+}
+.ed.has-trim-top { margin-top: calc(var(--trim-render-h, 0px) - var(--trim-bite)); }
+
+/* A band lies on the section beneath it: without this the next section, being
+   later in the document, would paint over the cloth. */
+.ed.has-trim-bottom { position: relative; z-index: 3; }
 
 .ed {
   /* One rendered height drives the band, its offset and the space reserved
@@ -2309,6 +2318,9 @@ a.ed-meta:hover { color: var(--c-accent); }
 }
 /* Flush against the edge it hangs from: the band's top edge lands exactly on
    the section's bottom, so nothing of the section shows beneath it. */
+/* The band stays anchored to the seam it hangs from — moving it down would
+   open the very gap it exists to close. The shift is spent on the reserve
+   below instead, so the next section rises to lap underneath the cloth. */
 .ed-trim-bottom { bottom: calc(var(--trim-render-h) * -1 + var(--trim-bite)); }
 .ed-trim-top    { top: calc(var(--trim-render-h) * -1 + var(--trim-bite)); }
 

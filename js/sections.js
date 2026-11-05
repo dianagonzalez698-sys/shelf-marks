@@ -232,7 +232,12 @@ function sectionShell(sec, inner, extraClass = '') {
       // There is no partial setting — "somewhere near the edge" was the whole
       // problem, and an offset nobody can see the effect of is not a control.
       const size = Number(sec.edgeSize) || 140;
-      styles.push(`--trim-h:${size}px`);
+      // How far the band sits below the seam. Positive carries it down over
+      // the section beneath, which is what makes cloth or cloud read as
+      // lying on that section rather than stopping short of it; the section
+      // below is pulled up by the same amount so no gap opens above.
+      const shift = Math.max(-200, Math.min(300, Number(sec.edgeShift) || 0));
+      styles.push(`--trim-h:${size}px`, `--trim-shift:${shift}px`);
       const bs = `--trim-img:url('${attr(url)}')`;
       if (where === 'bottom' || where === 'both') {
         band += `<span class="ed-trim ed-trim-bottom" style="${bs}" aria-hidden="true"></span>`;
@@ -362,6 +367,7 @@ const COMMON_FIELDS = [
   { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
   { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
+  { key: 'edgeShift', label: 'How far it sits below the seam', type: 'range', min: -120, max: 220, step: 4, when: (s) => s.edge === 'artwork' },
   { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
   { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
   { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
@@ -385,6 +391,7 @@ export const SECTION_BASE = {
   edgeArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   edgeWhere: 'bottom',
   edgeSize: 0,
+  edgeShift: 0,
   curtainArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   curtainDrop: 30,
   curtainGap: 0,
@@ -437,6 +444,7 @@ export const SECTION_TYPES = {
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
+      { key: 'edgeShift', label: 'How far it sits below the seam', type: 'range', min: -120, max: 220, step: 4, when: (s) => s.edge === 'artwork' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
       { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
       { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
@@ -1144,6 +1152,7 @@ export const SECTION_TYPES = {
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
+      { key: 'edgeShift', label: 'How far it sits below the seam', type: 'range', min: -120, max: 220, step: 4, when: (s) => s.edge === 'artwork' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
       { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
       { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
