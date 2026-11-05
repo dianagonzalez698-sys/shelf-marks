@@ -32,35 +32,75 @@ export function toast(message, kind = '', ms = 3200) {
 
 /* --------------------------------------------------------------- sheets ---- */
 
-let sheetCloser = null;
 
-export function openSheet(innerHtml, { onMount } = {}) {
+// Sheets stack.
+//
+// Editing a picture from inside a section's panel used to replace that panel,
+// so closing the picture dropped you back at the page and you had to find your
+// way in again. A sheet now opens on top of the one below it and closing
+// returns you there — Cancel, Done, Escape and the backdrop all mean "back",
+// and a nested sheet shows a Back control saying so.
+let sheetStack = [];
+
+function onSheetKey(e) { if (e.key === 'Escape') popSheet(); }
+
+function paintSheet() {
   const host = document.getElementById('sheet-host');
-  if (!host) return () => {};
-  host.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${innerHtml}</div>`;
+  if (!host) return;
+  const top = sheetStack[sheetStack.length - 1];
+
+  if (!top) {
+    host.hidden = true;
+    host.innerHTML = '';
+    host.onclick = null;
+    document.body.style.overflow = '';
+    document.removeEventListener('keydown', onSheetKey);
+    return;
+  }
+
+  // A sheet returned to is rebuilt when it knows how, so it shows what changed
+  // underneath it rather than the snapshot it was opened with.
+  const html = typeof top.reopen === 'function' ? top.reopen() : top.innerHtml;
+  const nested = sheetStack.length > 1;
+
+  host.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">`
+    + (nested
+      ? '<button class="sheet-back" type="button" data-sheet-back>&larr; Back</button>'
+      : '')
+    + `${html}</div>`;
   host.hidden = false;
   document.body.style.overflow = 'hidden';
 
-  const close = () => {
-    host.hidden = true;
-    host.innerHTML = '';
-    document.body.style.overflow = '';
-    sheetCloser = null;
-    document.removeEventListener('keydown', onKey);
-  };
-  function onKey(e) { if (e.key === 'Escape') close(); }
-  document.addEventListener('keydown', onKey);
+  const sheet = host.querySelector('.sheet');
+  sheet.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', popSheet));
+  const back = sheet.querySelector('[data-sheet-back]');
+  if (back) back.onclick = popSheet;
+  host.onclick = (e) => { if (e.target === host) popSheet(); };
+  document.addEventListener('keydown', onSheetKey);
 
-  host.onclick = (e) => { if (e.target === host) close(); };
-  host.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
-  sheetCloser = close;
-  if (onMount) onMount(host.querySelector('.sheet'), close);
-  return close;
+  if (top.onMount) top.onMount(sheet, popSheet);
 }
 
+function popSheet() {
+  sheetStack.pop();
+  paintSheet();
+}
+
+export function openSheet(innerHtml, { onMount, reopen } = {}) {
+  const host = document.getElementById('sheet-host');
+  if (!host) return () => {};
+  sheetStack.push({ innerHtml, onMount, reopen });
+  paintSheet();
+  return popSheet;
+}
+
+/** Dismiss every open sheet — used when the page itself changes. */
 export function closeSheet() {
-  if (sheetCloser) sheetCloser();
+  if (!sheetStack.length) return;
+  sheetStack = [];
+  paintSheet();
 }
+
 
 export function confirmSheet({ title, body = '', confirm = 'Confirm', danger = false }) {
   return new Promise((resolve) => {
@@ -332,6 +372,9 @@ export function render() {
     // keepScroll only holds position across re-renders of the same screen;
     // arriving at a different screen always starts at the top.
     if (!view.keepScroll || path !== previousPath) window.scrollTo(0, 0);
+    // Moving to a different screen dismisses any open sheet; a re-render of
+    // the same screen leaves it alone, so saving from inside one is safe.
+    if (path !== previousPath) closeSheet();
     app.querySelectorAll('[data-nav]').forEach((node) => {
       node.addEventListener('click', (e) => {
         e.preventDefault();

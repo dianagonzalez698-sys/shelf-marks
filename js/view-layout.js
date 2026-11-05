@@ -428,15 +428,22 @@ export function openSectionEditor(pageId, sectionId) {
   const def = SECTION_TYPES[sec.type];
   if (!def) return;
 
-  openSheet(`
+  // Rebuilt rather than snapshotted, so returning from the picture editor
+  // shows the picture you just chose.
+  const build = () => {
+    const fresh = layout.getSection(pageId, sectionId) || sec;
+    return `
     <h2>${esc(def.label)}</h2>
     <p class="small muted">${esc(def.blurb)}</p>
-    <div id="sec-warnings">${warningsHtml(sec)}</div>
-    <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, sec)}</div>
+    <div id="sec-warnings">${warningsHtml(fresh)}</div>
+    <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, fresh)}</div>
     <div class="btn-row" style="margin-top:1rem">
       <button class="btn btn-block" type="button" data-close>Done</button>
-    </div>
-  `, {
+    </div>`;
+  };
+
+  openSheet(build(), {
+    reopen: build,
     onMount(sheet) {
       const warnBox = sheet.querySelector('#sec-warnings');
       const fieldBox = sheet.querySelector('#sec-fields');
@@ -724,9 +731,12 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
         });
       });
 
-      sheet.querySelector('[data-act="save"]').onclick = () => {
+      sheet.querySelector('[data-act="save"]').onclick = async () => {
+        // Save before closing: closing returns to the panel underneath and
+        // rebuilds it, so committing afterwards would rebuild from stale data
+        // and the picture would look as though it had not been placed.
+        await onSave(draft);
         close();
-        onSave(draft);
         toast('Picture placed.', 'good', 1600);
       };
     },

@@ -2611,3 +2611,15 @@ a.ed-meta:hover { color: var(--c-accent); }
   letter-spacing: var(--ls-label); text-transform: uppercase;
   color: var(--c-accent);
 }
+
+/* A sheet opened on top of another says how to get back to it. */
+.sheet-back {
+  display: inline-flex; align-items: center; gap: .3rem;
+  margin: 0 0 .9rem; padding: .3rem .6rem .3rem 0;
+  background: none; border: 0; cursor: pointer;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
+  color: var(--c-accent);
+}
+.sheet-back:hover { color: var(--c-accent-deep); }
+@media (pointer: coarse) { .sheet-back { padding: .6rem 1rem .6rem 0; min-block-size: 44px; } }

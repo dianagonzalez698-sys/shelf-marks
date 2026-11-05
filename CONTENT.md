@@ -285,6 +285,17 @@ Items merge by id and the more recently edited copy wins, so importing is safe
 in either direction and can be repeated whenever the two drift apart. A device
 with nothing on it yet says so, right above those buttons.
 
+## Panels stack
+
+Opening a picture from inside a section's panel used to replace that panel, so
+closing the picture dropped you back at the page with the section to find
+again. Panels open on top of one another now: **Back** at the top of the inner
+one returns you to the outer, and Cancel, Done, Escape and tapping outside all
+mean the same thing. Only the outermost panel closes outright.
+
+A panel you come back to is rebuilt rather than restored from a snapshot, so
+it shows the picture you just chose instead of the one that was there before.
+
 ## Bookmarks sit on one line
 
 A challenge's bookmarks are one set, so they are drawn as one row rather than
@@ -405,6 +416,17 @@ point of the arch, both measured from the picture itself.
 A picture with no see-through centre cannot be a curtain, and the editor says
 so rather than drawing nothing. On a phone the whole thing hangs shallower,
 since a narrow screen cannot spare a third of its width on cloth.
+
+## Panels stack
+
+Opening a picture from inside a section's panel used to replace that panel, so
+closing the picture dropped you back at the page with the section to find
+again. Panels open on top of one another now: **Back** at the top of the inner
+one returns you to the outer, and Cancel, Done, Escape and tapping outside all
+mean the same thing. Only the outermost panel closes outright.
+
+A panel you come back to is rebuilt rather than restored from a snapshot, so
+it shows the picture you just chose instead of the one that was there before.
 
 ## Bookmarks sit on one line
 
