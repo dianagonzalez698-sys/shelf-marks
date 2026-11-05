@@ -416,8 +416,13 @@ point of the arch, both measured from the picture itself.
 The curtain rides up over whatever is above it so it covers the seam rather
 than meeting it — about **75px at a 2048px window**, scaling with the width and
 floored so a phone still overlaps. That is a position only: the curtain's
-height and proportions are untouched, and the content below stays where it
-was.
+height and proportions are untouched.
+
+Content starts just below the valance's **lowest** point, with 24–32px of air.
+That depth is measured across the whole opening when the picture is added, not
+sampled down the middle: a scalloped pelmet is usually at its highest in the
+centre, between two swags, so a centre reading says the cloth stops far higher
+than it does and text ends up underneath it.
 
 A picture with no see-through centre cannot be a curtain, and the editor says
 so rather than drawing nothing. On a phone the whole thing hangs shallower,

@@ -64,7 +64,9 @@ export function isLoaded() { return loaded; }
 export async function backfillAlpha() {
   const pending = [...cache.values()]
     .filter((a) => a.hasAlpha === undefined || a.trimmed === undefined
-      || a.frameSlice === undefined);
+      || a.frameSlice === undefined
+      // measured before the valance's true depth was recorded
+      || (a.frameSlice && a.frameSlice.archMax === undefined));
   if (!pending.length) return 0;
 
   for (const a of pending) {
@@ -79,7 +81,10 @@ export async function backfillAlpha() {
       }
     }
     next.trimmed = true;
-    if (next.frameSlice === undefined) next.frameSlice = await detectFrameSlice(next.dataUrl);
+    if (next.frameSlice === undefined
+      || (next.frameSlice && next.frameSlice.archMax === undefined)) {
+      next.frameSlice = await detectFrameSlice(next.dataUrl);
+    }
     if (next.hasAlpha === undefined) next.hasAlpha = await detectAlpha(next.dataUrl);
     cache.set(a.id, next);
     try { await store.put('assets', next); } catch (_) { /* cache still right */ }
@@ -262,6 +267,25 @@ export function detectFrameSlice(dataUrl) {
         // No hole in the middle — not a frame. Caller falls back.
         if (top + bottom >= h - 2 || left + right >= w - 2) { resolve(null); return; }
 
+        // How far the valance actually reaches down, across the whole opening.
+        //
+        // `top` above is sampled from one column — the middle — which is only
+        // the lowest point if the picture happens to dip there. A scalloped
+        // pelmet usually does the opposite: the centre is a high point between
+        // two swags, so a centre sample reads far too shallow and anything
+        // placed below it ends up under the cloth. Walk every column between
+        // the drapes and keep the deepest.
+        let archMax = 0;
+        for (let x = left; x < w - right; x += 1) {
+          let d = 0;
+          while (d < h - 1 && solid(x, d)) d += 1;
+          if (d > archMax) archMax = d;
+          // A column that is opaque all the way down is part of a drape, not
+          // the valance; ignore it rather than let it claim the whole height.
+          if (archMax >= h - 1) { archMax = top; break; }
+        }
+        if (archMax < top) archMax = top;
+
         // Keep a sliver of the opening in each slice so the stretched edges
         // never sample the hard cut line.
         const pad = 2;
@@ -270,6 +294,7 @@ export function detectFrameSlice(dataUrl) {
           right: Math.min(w - 1, right + pad),
           bottom: Math.min(h - 1, bottom + pad),
           left: Math.min(w - 1, left + pad),
+          archMax: Math.min(h - 1, archMax + pad),
           w,
           h,
         });

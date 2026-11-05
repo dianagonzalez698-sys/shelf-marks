@@ -2443,14 +2443,26 @@ a.ed-meta:hover { color: var(--c-accent); }
     calc((100% - var(--w-content)) / 2 + var(--sp-page-x)),
     calc(var(--cur-side) + 1.6rem),
     var(--sp-page-x));
-  padding-block-start: calc(var(--cur-arch) + var(--sp-section) * .75);
   /* How far the curtain rides up over the section above, so it covers the
      seam rather than meeting it. ~75px at a 2048px viewport; floored so a
      phone still overlaps, capped so a wide screen does not swallow the
      banner. Purely a position: the curtain's height is untouched. */
   --cur-lift: clamp(18px, 3.66vw, 96px);
+  /* Air between the valance's lowest point and the first line of text. */
+  --cur-clear: clamp(24px, 2vw, 32px);
+  /* Where the valance's deepest point lands, measured from the section's top:
+     its depth in the picture, less however far the curtain was lifted over
+     the section above. Reserve to there plus breathing room — and never less
+     than the section's own spacing, for a shallow curtain or a big lift. */
+  padding-block-start: max(
+    calc(var(--cur-arch) - var(--cur-lift) - var(--trim-bite, 3px) + var(--cur-clear)),
+    var(--sp-section));
 }
-.ed.has-curtain.sp-flush { padding-block-start: calc(var(--cur-arch) + 1rem); }
+.ed.has-curtain.sp-flush {
+  padding-block-start: max(
+    calc(var(--cur-arch) - var(--cur-lift) - var(--trim-bite, 3px) + var(--cur-clear)),
+    1rem);
+}
 
 /* One picture, drawn whole and hung from the top. Not a nine-slice: a
    nine-slice's opening is a rectangle, so an arch came out as a box with
@@ -2494,7 +2506,10 @@ a.ed-meta:hover { color: var(--c-accent); }
   .ed-curtain { height: calc(var(--cur-h) * .62); }
   .ed.has-curtain {
     padding-inline: max(calc(var(--cur-side) * .9 + .6rem), var(--sp-page-x));
-    padding-block-start: calc(var(--cur-arch) * .62 + var(--sp-section) * .6);
+    /* The curtain hangs at .62 here, so its arch lands proportionally higher. */
+    padding-block-start: max(
+      calc(var(--cur-arch) * .62 - var(--cur-lift) - var(--trim-bite, 3px) + var(--cur-clear)),
+      calc(var(--sp-section) * .6));
   }
 }
 

@@ -168,7 +168,10 @@ function sectionShell(sec, inner, extraClass = '') {
       const iw = Math.max(1, Number(sl.w) || 1);
       const ih = Math.max(1, Number(sl.h) || 1);
       const sideFrac = Math.max(0, Math.min(0.45, (Number(sl.left) || 0) / iw));
-      const archFrac = Math.max(0, Math.min(1, (Number(sl.top) || 0) / ih));
+      // The deepest the valance reaches, not where it happens to sit at the
+      // centre — that is what content has to clear.
+      const archPx = Number(sl.archMax) || Number(sl.top) || 0;
+      const archFrac = Math.max(0, Math.min(1, archPx / ih));
       styles.push(
         `--cur-img:url('${attr(url)}')`,
         `--cur-h:${drop}vw`,
