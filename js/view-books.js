@@ -1,15 +1,12 @@
 // My Books: everything finished in the challenge year, newest first, filterable.
 
 import { state, sortedBooks, deleteBook } from './state.js';
-import { esc, attr, toast, coverImg, confirmSheet } from './ui.js';
-import { quarters, inPeriod, formatDate, yearPeriod } from './periods.js';
-import { t } from './theme.js';
+import { esc, toast, confirmSheet } from './ui.js';
+import { quarters, inPeriod, yearPeriod } from './periods.js';
+import { renderSections, SHELF_FLAGS as FLAGS } from './sections.js';
+import * as layout from './layout.js';
 
-const FLAGS = [
-  { key: 'classic', label: 'Classic', field: 'isClassic' },
-  { key: 'reread', label: 'Re-read', field: 'isReread' },
-  { key: 'tbr', label: 'Physical TBR', field: 'isTbr' },
-];
+export const BOOKS_PAGE_ID = 'books';
 
 function chipRow(items, currentValue, paramName, query) {
   return `<div class="filters" role="group">${items.map((it) => {
@@ -32,41 +29,6 @@ function flagRow(activeFlags, query) {
     return `<a class="chip${on ? ' on' : ''}" href="#/books${qs ? `?${qs}` : ''}"
       aria-pressed="${on}">${esc(f.label)}</a>`;
   }).join('')}</div>`;
-}
-
-function bookRow(book) {
-  const bits = [];
-  if (book.author) bits.push(book.author);
-  if (book.pages) bits.push(`${book.pages} pp`);
-  if (book.series) bits.push(book.series);
-
-  // One palette colour per flag, so the shelf reads at a glance.
-  const tags = [];
-  tags.push(book.format === 'nonfiction'
-    ? '<span class="tag tag-sage">Nonfiction</span>'
-    : '<span class="tag tag-accent">Fiction</span>');
-  if (book.isClassic) tags.push('<span class="tag tag-rose">Classic</span>');
-  if (book.isReread) tags.push('<span class="tag tag-blue">Re-read</span>');
-  if (book.isTbr) tags.push('<span class="tag tag-gold">Physical TBR</span>');
-  (book.tags || []).forEach((x) => tags.push(`<span class="tag tag-plain">${esc(x)}</span>`));
-
-  return `<article class="list-row">
-    <a class="list-row-link" href="#/book/${encodeURIComponent(book.id)}">
-      ${coverImg(book)}
-      <span class="grow">
-        <span class="entry-title">${esc(book.title)}</span>
-        <span class="entry-meta">${esc(bits.join(' · '))}</span>
-        <span class="entry-meta">Finished ${esc(formatDate(book.dateFinished))}</span>
-        <span class="tags">${tags.join('')}</span>
-      </span>
-    </a>
-    <button class="btn btn-quiet btn-sm" type="button" data-del="${attr(book.id)}"
-            aria-label="Delete ${attr(book.title)}">Remove</button>
-  </article>`;
-}
-
-function plural(n) {
-  return `${n} book${n === 1 ? '' : 's'}`;
 }
 
 export function booksView(params = {}) {
@@ -93,40 +55,23 @@ export function booksView(params = {}) {
   const filtered = flags.length || qKey !== 'all' || format !== 'all';
   const outside = state.books.length - totalThisYear;
 
+  // The page is its layout: the shelf, the filters and the tally are one
+  // section, so the Layouts editor lists exactly what renders here.
+  const chips = `<div style="margin-top:1.4rem">
+    ${chipRow([{ value: 'all', label: 'All year' }, ...qs.map((q) => ({ value: q.key, label: q.key }))], qKey, 'q', query)}
+    ${chipRow([{ value: 'all', label: 'Fiction + nonfiction' }, { value: 'fiction', label: 'Fiction' }, { value: 'nonfiction', label: 'Nonfiction' }], format, 'format', query)}
+    ${flagRow(flags, query)}
+  </div>`;
+
+  const ctx = { books, totalThisYear, outside, filtered, year, chips };
+
   return {
-    title: t('booksHeading'),
+    title: '',
     tab: 'books',
     fab: true,
+    editorial: true,
     keepScroll: true,
-    html: `
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">${esc(t('booksHeading'))}</h2>
-            <p class="section-sub">Everything finished in ${year}, newest first.</p>
-          </div>
-          <p class="section-meta">${books.length} of ${totalThisYear} shown</p>
-        </div>
-
-        <div style="margin-top:1.4rem">
-          ${chipRow([{ value: 'all', label: 'All year' }, ...qs.map((q) => ({ value: q.key, label: q.key }))], qKey, 'q', query)}
-          ${chipRow([{ value: 'all', label: 'Fiction + nonfiction' }, { value: 'fiction', label: 'Fiction' }, { value: 'nonfiction', label: 'Nonfiction' }], format, 'format', query)}
-          ${flagRow(flags, query)}
-        </div>
-
-        <p class="hint" style="margin:.4rem 0 1rem">
-          ${filtered ? '<a href="#/books">Clear filters</a>' : `${plural(totalThisYear)} logged`}
-          ${outside > 0 ? ` · ${outside} logged outside ${year}` : ''}
-        </p>
-
-        ${books.length ? `<div class="list">${books.map(bookRow).join('')}</div>` : `
-          <div class="empty">
-            <h3>${totalThisYear ? 'Nothing matches those filters' : 'The shelf is empty'}</h3>
-            <p>${totalThisYear ? 'Try clearing one.' : `Add the first book you finish in ${year}.`}</p>
-            <a class="btn btn-primary" href="${totalThisYear ? '#/books' : '#/add'}">${totalThisYear ? 'Clear filters' : 'Add a book'}</a>
-          </div>`}
-      </section>
-    `,
+    html: renderSections(layout.get(BOOKS_PAGE_ID), ctx),
     onMount(root) {
       root.querySelectorAll('[data-del]').forEach((btn) => {
         btn.onclick = async () => {

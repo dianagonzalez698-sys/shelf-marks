@@ -2302,3 +2302,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 }
 
 @media (max-width: 759px) { .ink-sw { inline-size: 34px; block-size: 34px; } }
+
+/* Each challenge's run of bookmarks inside the archive section. */
+.arc-group + .arc-group { margin-top: 2.4rem; padding-top: 2rem; border-top: 1px solid var(--c-rule); }
+.arc-group .ed-head-split { margin-bottom: 1rem; }

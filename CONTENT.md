@@ -210,6 +210,32 @@ For two plain paper sections meeting, use a **Decorative interlude** between
 them — its **Lace band** and **Vine band** modes draw an ornamental divider,
 and **Image strip** takes your own band.
 
+## Every page is its layout
+
+The Layouts editor lists **everything** a page draws. There are no blocks
+hidden in the code behind it: if you can see it on the page, it is a row in the
+list, and it can be reordered, hidden, restyled or removed.
+
+| Page | What it is made of |
+|---|---|
+| The journal (home) | Hero, progress, this period, challenges, bookmarks, recent reading |
+| Challenge index | Hero, the challenge list, a margin note |
+| **My Books** | The shelf — heading, filter chips, tally and list |
+| **The bookmark archive** | The archive — every bookmark, grouped by challenge |
+| **Challenge — *each one*** | Opening, bookmarks, the record — plus anything you add |
+
+Some sections belong to one page and only appear in **Add a section** there:
+*Challenge — opening*, *— bookmarks* and *— the record* on a challenge spread,
+*The shelf* on My Books, *The bookmark archive* on the archive. They draw from
+whatever that page is about, so the same *Challenge — opening* section shows
+each challenge its own cover, name and window.
+
+Earlier versions drew a challenge spread's opening, bookmarks and record
+straight from the code, so the editor listed only the sections you had added on
+top of them. They are ordinary sections now. An arrangement saved before that
+change keeps everything it had — the three blocks are added back at the top the
+first time you open the app, and you can move or delete them from there.
+
 ### Type and colour, section by section
 
 The Design Studio sets the typography for the whole journal. Every section can

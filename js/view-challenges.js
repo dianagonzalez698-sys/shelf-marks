@@ -88,30 +88,10 @@ export function challengeDetailView(params) {
 
   const r = evaluate(challenge, state.books);
   const have = unlockMap();
-  const labels = bookmarkLabels(challenge);
   const canEdit = challenge.editable || challenge.custom;
-  const ids = r.allBookmarkIds;
-  const earned = ids.filter((id) => have.has(id)).length;
-  const collectedPct = ids.length ? Math.round((earned / ids.length) * 100) : 0;
-  const cover = challenge.cover || media({ ratio: 'auto', frame: 'none', shadow: false });
 
-  const standing = r.recurring
-    ? `${r.count} of ${r.target} periods complete`
-    : (r.targetUnset ? `${r.count} books matching` : `${r.count} of ${r.target} books read`);
-
-  /* -- the spread opens like a chapter -- */
-  const hero = `<section class="ed ed-bleed">
-    <div class="hero hero-short hero-left">
-      ${backdrop(cover, { seed: challenge.id })}
-      <span class="hero-scrim" style="--scrim:.5"></span>
-      <div class="hero-type">
-        <p class="ed-kicker">${esc(describeWindow(challenge.window))}</p>
-        <h1 class="hero-title">${esc(challenge.name)}</h1>
-        ${challenge.blurb ? `<p class="hero-sub">${esc(challenge.blurb)}</p>` : ''}
-      </div>
-    </div>
-  </section>`;
-
+  // A challenge with no target can't yield anything yet; that's a prompt to
+  // finish setting it up, not editorial content, so it isn't a section.
   const unsetNotice = r.targetUnset
     ? `<div class="ed sp-tight"><div class="notice">
          <strong>This challenge has no target yet.</strong>
@@ -122,65 +102,11 @@ export function challengeDetailView(params) {
        </div></div>`
     : '';
 
-  /* -- the collection -- */
-  const collection = ids.length
-    ? `<section class="ed">
-         <div class="ed-head ed-head-split">
-           <div>
-             <p class="ed-kicker">The collection</p>
-             <h2 class="ed-title">Bookmarks</h2>
-           </div>
-           <p class="ed-meta">${esc(describeFilter(challenge.filter))}</p>
-         </div>
-         ${progressLine(`${earned} of ${ids.length} collected`, collectedPct, { tone: 'apricot', done: earned === ids.length })}
-         <div class="bm-grid">
-           ${ids.map((id) => {
-             const meta = labels.get(id);
-             const unlocked = have.has(id);
-             const img = state.images.get(id);
-             return `<a class="bm${unlocked ? '' : ' locked'}" href="#/bookmarks?focus=${encodeURIComponent(id)}">
-               ${markVisual(id, { unlocked, bonus: !!(meta && meta.bonus), dataUrl: img ? img.dataUrl : null })}
-               ${unlocked ? checkBadge() : ''}
-               <span class="bm-label">${esc(meta ? meta.title : id)}</span>
-               ${meta && meta.bonus ? '<span class="bm-sub">bonus</span>' : ''}
-             </a>`;
-           }).join('')}
-         </div>
-         <p class="marginalia center">${esc(standing)}</p>
-       </section>`
-    : `<section class="ed"><p class="hint center">${esc(standing)}</p></section>`;
-
-  /* -- the working record -- */
-  const working = r.recurring
-    ? `<section class="ed tone-sage">
-         <div class="ed-head"><p class="ed-kicker">The record</p><h2 class="ed-title">Each period</h2></div>
-         <div class="ticks">
-           ${r.periods.map((p) => periodDetail(p, have)).join('')}
-           ${challenge.bonusBookmark ? `<div class="tick${r.bonus.complete ? ' done' : ''}">
-              <span class="tick-mark" aria-hidden="true">${checkGlyph()}</span>
-              <span class="tick-body">
-                <span class="tick-title">Bonus — every period complete</span>
-                <span class="tick-note">${have.has(challenge.bonusBookmark) ? 'Collected' : 'Locked'}</span>
-              </span>
-            </div>` : ''}
-         </div>
-       </section>`
-    : `<section class="ed tone-sage">
-         <div class="ed-head"><p class="ed-kicker">The record</p><h2 class="ed-title">Books counted</h2></div>
-         ${r.books.length
-           ? `<div class="shelf">${r.books.map((b) => `
-               <a class="shelf-item" href="#/book/${encodeURIComponent(b.id)}">
-                 ${coverImg(b, { big: true })}
-                 <span class="shelf-title">${esc(b.title)}</span>
-                 <span class="shelf-meta">${esc(formatDate(b.dateFinished))}</span>
-               </a>`).join('')}</div>`
-           : '<p class="muted italic">No books match this challenge yet.</p>'}
-       </section>`;
-
-  // Anything you have added to this particular challenge's page.
-  const custom = layout.isCustomised(challengePageId(challenge.id))
-    ? renderSections(layout.get(challengePageId(challenge.id)))
-    : '';
+  // Every editorial block on this page is a section in the page's layout, so
+  // what the Layouts editor lists is exactly what renders. The page passes the
+  // challenge in as context; the sections draw themselves from it.
+  const ctx = { challenge, result: r, have };
+  const spread = renderSections(layout.get(challengePageId(challenge.id)), ctx);
 
   return {
     title: challenge.name,
@@ -190,11 +116,8 @@ export function challengeDetailView(params) {
     back: true,
     actions: canEdit ? '<button class="btn btn-quiet" type="button" id="edit-top">Edit</button>' : '',
     html: `
-      ${hero}
+      ${spread}
       ${unsetNotice}
-      ${collection}
-      ${working}
-      ${custom}
       ${challenge.custom ? `<div class="ed sp-tight"><div class="btn-row">
         <button class="btn btn-danger" type="button" id="archive">Remove this challenge</button>
       </div></div>` : ''}

@@ -15,6 +15,8 @@ function pageOptions() {
   const pages = [
     ['home', 'The journal (home)'],
     ['directory', 'Challenge index'],
+    ['books', 'My Books'],
+    ['bookmarks', 'The bookmark archive'],
   ];
   allChallenges().forEach((c) => pages.push([`challenge:${c.id}`, `Challenge — ${c.name}`]));
   return pages;
@@ -173,7 +175,7 @@ function openTypePicker(pageId) {
     <h2>Add a section</h2>
     <p class="small muted">Each one is a different kind of editorial composition.</p>
     <div class="type-list">
-      ${typeList().map((t) => `<button class="type-opt" type="button" data-type="${attr(t.value)}">
+      ${typeList(pageId).map((t) => `<button class="type-opt" type="button" data-type="${attr(t.value)}">
         <span class="type-name">${esc(t.label)}</span>
         <span class="type-blurb">${esc(t.blurb)}</span>
       </button>`).join('')}

@@ -8,6 +8,10 @@ import {
   esc, attr, toast, markVisual, checkBadge, openSheet, confirmSheet,
 } from './ui.js';
 import { evaluate, bookmarkLabels } from './rules.js';
+import { renderSections } from './sections.js';
+import * as layout from './layout.js';
+
+export const ARCHIVE_PAGE_ID = 'bookmarks';
 import { formatDateTime } from './periods.js';
 import { fileToDataUrl } from './backup.js';
 import { t } from './theme.js';
@@ -28,42 +32,16 @@ export function bookmarksView(params = {}) {
   const focus = (params.query && params.query.focus) || null;
   const pct = total ? Math.round((collected / total) * 100) : 0;
 
-  const groups = challenges.map((c) => {
-    const labels = bookmarkLabels(c);
-    const ids = [...labels.keys()];
-    if (!ids.length) {
-      return `<section class="section section-rule">
-        <div class="section-head"><h2 class="h2">${esc(c.name)}</h2></div>
-        <p class="hint">No bookmarks yet — <a href="#/challenge/${encodeURIComponent(c.id)}">set this challenge's target</a> first.</p>
-      </section>`;
-    }
-    const mine = ids.filter((id) => have.has(id)).length;
-    return `<section class="section section-rule">
-      <div class="section-head">
-        <h2 class="h2">${esc(c.name)}</h2>
-        <span class="section-meta">${mine} of ${ids.length}</span>
-      </div>
-      <div class="bm-grid">${ids.map((id) => tile(id, labels.get(id), have.has(id))).join('')}</div>
-    </section>`;
-  }).join('');
+  // Every block on this page is a section in its layout, so what the Layouts
+  // editor lists is exactly what renders.
+  const ctx = { have, challenges, tile, collected, total, pct };
 
   return {
-    title: t('archiveHeading'),
+    title: '',
     tab: 'bookmarks',
-    banner: true,
-    html: `
-      <section class="section">
-        <div class="section-head">
-          <div>
-            <h2 class="section-title">${esc(t('archiveHeading'))}</h2>
-            <p class="section-sub">${esc(t('archiveSub'))}</p>
-          </div>
-          <p class="section-meta">${collected} of ${total} · ${pct}%</p>
-        </div>
-        <p class="hint" style="margin-top:.9rem">Tap one to see how it was earned, or to add a photo of the real thing.</p>
-      </section>
-      ${groups}
-    `,
+    banner: false,
+    editorial: true,
+    html: renderSections(layout.get(ARCHIVE_PAGE_ID), ctx),
     onMount(root) {
       root.querySelectorAll('[data-bm]').forEach((btn) => {
         btn.onclick = () => openBookmark(btn.dataset.bm);

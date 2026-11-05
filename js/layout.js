@@ -6,6 +6,8 @@
 //
 //   'home'                  the journal's opening
 //   'directory'             the challenge index
+//   'books'                 the shelf
+//   'bookmarks'             the bookmark archive
 //   'challenge'             the shared challenge spread
 //   'challenge:<id>'        an override for one particular challenge
 
@@ -75,15 +77,26 @@ export function defaultLayout(pageId) {
     ].filter(Boolean);
   }
 
-  if (base === 'challenge') {
-    // The challenge spread. The detail view injects its own live blocks
-    // between these, so this is the editorial frame around them.
+  if (base === 'books') {
     return [
-      build('hero', {
-        eyebrow: '', title: '', subtitle: '',
-        height: 'short', scrim: 40, script: false,
-      }),
+      build('shelf', { kicker: 'The shelf', title: 'My Books' }),
+    ].filter(Boolean);
+  }
+
+  if (base === 'bookmarks') {
+    return [
+      build('archive', { kicker: 'The collection', title: 'Bookmarks' }),
+    ].filter(Boolean);
+  }
+
+  if (base === 'challenge') {
+    // The whole spread, in order. These used to be hard-coded in the view,
+    // which is why the editor listed only what you had added on top of them.
+    return [
+      build('challengeHero', { height: 'short', align: 'left', scrim: 50 }),
       build('interlude', { mode: 'ornament', spacing: 'tight' }),
+      build('challengeMarks', { kicker: 'The collection', title: 'Bookmarks' }),
+      build('challengeRecord', { kicker: 'The record', title: '', tone: 'sage' }),
     ].filter(Boolean);
   }
 
@@ -97,7 +110,35 @@ export async function load() {
   cache.clear();
   rows.filter((r) => r && r.id).forEach((r) => cache.set(r.id, r));
   loaded = true;
+  try { await adoptChallengeBlocks(); } catch (_) { /* a stale layout still renders */ }
   return cache.size;
+}
+
+// A challenge spread's opening, bookmarks and record used to be hard-coded in
+// the view and so were absent from any saved arrangement. Put them back at the
+// front of layouts saved before they became sections — otherwise upgrading
+// would silently empty the page of everything except what you had added.
+// Marked once, so deleting a block afterwards sticks.
+const CHALLENGE_BLOCKS = ['challengeHero', 'challengeMarks', 'challengeRecord'];
+
+async function adoptChallengeBlocks() {
+  for (const [id, row] of [...cache]) {
+    if (!id.startsWith('challenge')) continue;
+    if (row.specV >= 1 || !Array.isArray(row.sections)) continue;
+    const present = new Set(row.sections.map((x) => x && x.type));
+    const missing = CHALLENGE_BLOCKS
+      .filter((type) => !present.has(type))
+      .map((type) => build(type, type === 'challengeRecord' ? { tone: 'sage' } : {}))
+      .filter(Boolean);
+    const record = {
+      ...row,
+      sections: [...missing, ...row.sections],
+      specV: 1,
+      updatedAt: new Date().toISOString(),
+    };
+    await store.put('layouts', record);
+    cache.set(id, record);
+  }
 }
 
 export function isLoaded() { return loaded; }
@@ -125,7 +166,9 @@ export function isCustomised(pageId) {
 }
 
 export async function save(pageId, sections) {
-  const record = { id: pageId, sections, updatedAt: new Date().toISOString() };
+  // specV marks the layout as current, so the one-time block adoption above
+  // never runs again — deleting a block you don't want has to stick.
+  const record = { id: pageId, sections, specV: 1, updatedAt: new Date().toISOString() };
   await store.put('layouts', record);
   cache.set(pageId, record);
   return record;

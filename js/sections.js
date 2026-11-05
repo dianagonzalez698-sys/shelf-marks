@@ -6,7 +6,7 @@
 // bookmarks, this period) read live app state — they are real features wearing
 // editorial clothes, not decoration.
 
-import { esc, attr, progressBar, progressLine, markVisual, checkGlyph, coverImg } from './ui.js';
+import { esc, attr, progressBar, progressLine, markVisual, checkBadge, checkGlyph, coverImg } from './ui.js';
 import { figure, backdrop, media, hasAsset } from './media.js';
 import { src as assetSrc, get as getAsset } from './assets.js';
 import {
@@ -34,6 +34,69 @@ const SECTION_VARS = [
   ['inkUi', '--c-label-ink'], ['inkUi', '--c-ink-faint'],
   ['inkScript', '--c-script-ink'],
 ];
+
+// One period's line in a recurring challenge's record.
+function periodTick(p, have) {
+  const unlocked = !!(p.bookmarkId && have.has(p.bookmarkId));
+  const books = p.books.length
+    ? `<span style="display:block;margin-top:.3rem">${p.books.map((b) => `
+        <a class="row small" href="#/book/${encodeURIComponent(b.id)}" style="color:inherit;text-decoration:none;padding:.1rem 0">
+          <span class="grow truncate">${esc(b.title)}</span>
+          <span class="muted tiny nowrap">${esc(formatDate(b.dateFinished))}</span>
+        </a>`).join('')}</span>`
+    : '<span class="tick-note">Nothing logged yet.</span>';
+
+  return `<div class="tick${p.complete ? ' done' : ''}">
+    <span class="tick-mark" aria-hidden="true">${checkGlyph()}</span>
+    <span class="tick-body">
+      <span class="row-between">
+        <span class="tick-title">${esc(p.label)}</span>
+        <span class="tag tag-plain nowrap">${p.count} of ${p.target == null ? '—' : p.target}</span>
+      </span>
+      ${books}
+      ${p.bookmarkId ? `<span class="tick-note">${unlocked ? 'Bookmark collected' : 'Bookmark still locked'}</span>` : ''}
+    </span>
+  </div>`;
+}
+
+const SHELF_FLAGS = [
+  { key: 'classic', label: 'Classic', field: 'isClassic' },
+  { key: 'reread', label: 'Re-read', field: 'isReread' },
+  { key: 'tbr', label: 'Physical TBR', field: 'isTbr' },
+];
+export { SHELF_FLAGS };
+
+// One book's row on the shelf.
+function bookRow(book) {
+  const bits = [];
+  if (book.author) bits.push(book.author);
+  if (book.pages) bits.push(`${book.pages} pp`);
+  if (book.series) bits.push(book.series);
+
+  // One palette colour per flag, so the shelf reads at a glance.
+  const tags = [];
+  tags.push(book.format === 'nonfiction'
+    ? '<span class="tag tag-sage">Nonfiction</span>'
+    : '<span class="tag tag-accent">Fiction</span>');
+  if (book.isClassic) tags.push('<span class="tag tag-rose">Classic</span>');
+  if (book.isReread) tags.push('<span class="tag tag-blue">Re-read</span>');
+  if (book.isTbr) tags.push('<span class="tag tag-gold">Physical TBR</span>');
+  (book.tags || []).forEach((x) => tags.push(`<span class="tag tag-plain">${esc(x)}</span>`));
+
+  return `<article class="list-row">
+    <a class="list-row-link" href="#/book/${encodeURIComponent(book.id)}">
+      ${coverImg(book)}
+      <span class="grow">
+        <span class="entry-title">${esc(book.title)}</span>
+        <span class="entry-meta">${esc(bits.join(' · '))}</span>
+        <span class="entry-meta">Finished ${esc(formatDate(book.dateFinished))}</span>
+        <span class="tags">${tags.join('')}</span>
+      </span>
+    </a>
+    <button class="btn btn-quiet btn-sm" type="button" data-del="${attr(book.id)}"
+            aria-label="Delete ${attr(book.title)}">Remove</button>
+  </article>`;
+}
 
 const uid = (p) => `${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -692,6 +755,245 @@ export const SECTION_TYPES = {
         </div>`);
     },
   },
+
+
+  /* 16. My Books — the shelf itself --------------------------------------- */
+  // The filterable shelf that fills the My Books page. Like the challenge
+  // blocks, it used to be written straight into the view, so the page had
+  // nothing the editor could list.
+  shelf: {
+    label: 'The shelf',
+    blurb: 'Everything finished this year, filterable, newest first.',
+    needs: 'books',
+    create: () => ({
+      kicker: '',
+      title: '',
+      showFilters: true,
+      showCount: true,
+    }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'text' },
+      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'showFilters', label: 'Show the filter chips', type: 'bool' },
+      { key: 'showCount', label: 'Show the tally', type: 'bool' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec, ctx) {
+      const { books, totalThisYear, outside, filtered, year, chips } = ctx;
+      const head = (sec.kicker || sec.title)
+        ? `<div class="ed-head ed-head-split">
+             <div>${kicker(sec.kicker)}${headline(sec.title)}</div>
+             ${sec.showCount !== false ? `<p class="ed-meta">${books.length} of ${totalThisYear} shown</p>` : ''}
+           </div>`
+        : '';
+      return sectionShell(sec, `
+        ${head}
+        ${sec.showFilters !== false ? chips : ''}
+        ${sec.showCount !== false ? `<p class="hint" style="margin:.4rem 0 1rem">
+          ${filtered ? '<a href="#/books">Clear filters</a>' : `${totalThisYear} book${totalThisYear === 1 ? '' : 's'} logged`}
+          ${outside > 0 ? ` · ${outside} logged outside ${year}` : ''}
+        </p>` : ''}
+        ${books.length
+          ? `<div class="list">${books.map(bookRow).join('')}</div>`
+          : `<div class="empty">
+               <h3>${totalThisYear ? 'Nothing matches those filters' : 'The shelf is empty'}</h3>
+               <p>${totalThisYear ? 'Try clearing one.' : `Add the first book you finish in ${year}.`}</p>
+               <a class="btn btn-primary" href="${totalThisYear ? '#/books' : '#/add'}">${totalThisYear ? 'Clear filters' : 'Add a book'}</a>
+             </div>`}`);
+    },
+  },
+
+  /* 17. Archive — the bookmarks, by challenge ------------------------------ */
+  archive: {
+    label: 'The bookmark archive',
+    blurb: 'Every bookmark, grouped by the challenge that awards it.',
+    needs: 'bookmarks',
+    create: () => ({ kicker: '', title: '', showCount: true }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'text' },
+      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'showCount', label: 'Show each tally', type: 'bool' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec, ctx) {
+      const { have, challenges, tile } = ctx;
+      const head = (sec.kicker || sec.title)
+        ? `<div class="ed-head"><div>${kicker(sec.kicker)}${headline(sec.title)}</div></div>`
+        : '';
+      const groups = challenges.map((c) => {
+        const labels = bookmarkLabels(c);
+        const ids = [...labels.keys()];
+        if (!ids.length) {
+          return `<div class="arc-group">
+            <div class="ed-head-split"><h3 class="ed-subtitle">${esc(c.name)}</h3></div>
+            <p class="hint">No bookmarks yet — <a href="#/challenge/${encodeURIComponent(c.id)}">set this challenge's target</a> first.</p>
+          </div>`;
+        }
+        const mine = ids.filter((id) => have.has(id)).length;
+        return `<div class="arc-group">
+          <div class="ed-head-split">
+            <h3 class="ed-subtitle">${esc(c.name)}</h3>
+            ${sec.showCount !== false ? `<span class="ed-meta">${mine} of ${ids.length}</span>` : ''}
+          </div>
+          <div class="bm-grid">${ids.map((id) => tile(id, labels.get(id), have.has(id))).join('')}</div>
+        </div>`;
+      }).join('');
+      return sectionShell(sec, `${head}${groups}`);
+    },
+  },
+
+  /* 13. Challenge — the chapter opening ----------------------------------- */
+  // The three types below belong to a challenge spread. They were the page's
+  // hard-coded blocks: the editor listed only what you had *added*, so most of
+  // what you could see was not in the list. As sections they reorder, hide and
+  // restyle like everything else.
+  challengeHero: {
+    label: 'Challenge — opening',
+    blurb: "The spread's cover: the challenge's own artwork, name and blurb.",
+    needs: 'challenge',
+    create: () => ({
+      height: 'short',
+      align: 'left',
+      scrim: 50,
+      showWindow: true,
+      showBlurb: true,
+    }),
+    fields: [
+      { key: 'height', label: 'Height', type: 'select', options: [['short', 'Short'], ['tall', 'Tall'], ['full', 'Full screen']] },
+      { key: 'align', label: 'Type alignment', type: 'select', options: [['left', 'Left'], ['center', 'Centred'], ['right', 'Right']] },
+      { key: 'scrim', label: 'Darkening over image', type: 'range', min: 0, max: 90, step: 5 },
+      { key: 'showWindow', label: 'Show the time window', type: 'bool' },
+      { key: 'showBlurb', label: 'Show the blurb', type: 'bool' },
+      { key: 'edge', label: 'Edge treatment', type: 'select', options: EDGES, controls: true },
+      { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
+      { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
+      { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
+      ...TYPE_FIELDS,
+    ],
+    render(sec, ctx) {
+      const c = ctx.challenge;
+      const cover = c.cover || media({ ratio: 'auto', frame: 'none', shadow: false });
+      return sectionShell(sec, `
+        <div class="hero hero-${sec.height || 'short'} hero-${sec.align || 'left'}">
+          ${backdrop(cover, { seed: c.id })}
+          <span class="hero-scrim" style="--scrim:${Number(sec.scrim == null ? 50 : sec.scrim) / 100}"></span>
+          <div class="hero-type">
+            ${sec.showWindow !== false ? kicker(describeWindow(c.window)) : ''}
+            <h1 class="hero-title">${esc(c.name)}</h1>
+            ${sec.showBlurb !== false && c.blurb ? `<p class="hero-sub">${esc(c.blurb)}</p>` : ''}
+          </div>
+        </div>`, 'ed-bleed');
+    },
+  },
+
+  /* 14. Challenge — the bookmarks it yields -------------------------------- */
+  challengeMarks: {
+    label: 'Challenge — bookmarks',
+    blurb: 'The bookmarks this challenge yields, and how many are collected.',
+    needs: 'challenge',
+    create: () => ({
+      kicker: 'The collection',
+      title: 'Bookmarks',
+      showFilter: true,
+      showBar: true,
+      showStanding: true,
+    }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'text' },
+      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'showFilter', label: 'Show what counts', type: 'bool' },
+      { key: 'showBar', label: 'Show the progress bar', type: 'bool' },
+      { key: 'showStanding', label: 'Show the tally underneath', type: 'bool' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec, ctx) {
+      const { challenge: c, result: r, have } = ctx;
+      const labels = bookmarkLabels(c);
+      const ids = r.allBookmarkIds;
+      const earned = ids.filter((id) => have.has(id)).length;
+      const pct = ids.length ? Math.round((earned / ids.length) * 100) : 0;
+      const standing = r.recurring
+        ? `${r.count} of ${r.target} periods complete`
+        : (r.targetUnset ? `${r.count} books matching` : `${r.count} of ${r.target} books read`);
+
+      if (!ids.length) {
+        return sectionShell(sec, `<p class="hint center">${esc(standing)}</p>`);
+      }
+      return sectionShell(sec, `
+        <div class="ed-head ed-head-split">
+          <div>
+            ${kicker(sec.kicker)}
+            ${sec.title ? `<h2 class="ed-title">${esc(sec.title)}</h2>` : ''}
+          </div>
+          ${sec.showFilter !== false ? `<p class="ed-meta">${esc(describeFilter(c.filter))}</p>` : ''}
+        </div>
+        ${sec.showBar !== false
+          ? progressLine(`${earned} of ${ids.length} collected`, pct, { tone: 'apricot', done: earned === ids.length })
+          : ''}
+        <div class="bm-grid">
+          ${ids.map((id) => {
+            const meta = labels.get(id);
+            const unlocked = have.has(id);
+            const img = state.images.get(id);
+            return `<a class="bm${unlocked ? '' : ' locked'}" href="#/bookmarks?focus=${encodeURIComponent(id)}">
+              ${markVisual(id, { unlocked, bonus: !!(meta && meta.bonus), dataUrl: img ? img.dataUrl : null })}
+              ${unlocked ? checkBadge() : ''}
+              <span class="bm-label">${esc(meta ? meta.title : id)}</span>
+              ${meta && meta.bonus ? '<span class="bm-sub">bonus</span>' : ''}
+            </a>`;
+          }).join('')}
+        </div>
+        ${sec.showStanding !== false ? `<p class="marginalia center">${esc(standing)}</p>` : ''}`);
+    },
+  },
+
+  /* 15. Challenge — the working record ------------------------------------- */
+  challengeRecord: {
+    label: 'Challenge — the record',
+    blurb: 'Period by period for a recurring challenge, or the books counted.',
+    needs: 'challenge',
+    create: () => ({
+      kicker: 'The record',
+      title: '',
+      tone: 'sage',
+    }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'text' },
+      { key: 'title', label: 'Heading', type: 'text', hint: 'Left empty, it names itself to suit the challenge.' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec, ctx) {
+      const { challenge: c, result: r, have } = ctx;
+      const auto = r.recurring ? 'Each period' : 'Books counted';
+      const head = `<div class="ed-head">${kicker(sec.kicker)}
+        <h2 class="ed-title">${esc(sec.title || auto)}</h2></div>`;
+
+      if (r.recurring) {
+        return sectionShell(sec, `${head}
+          <div class="ticks">
+            ${r.periods.map((p) => periodTick(p, have)).join('')}
+            ${c.bonusBookmark ? `<div class="tick${r.bonus.complete ? ' done' : ''}">
+               <span class="tick-mark" aria-hidden="true">${checkGlyph()}</span>
+               <span class="tick-body">
+                 <span class="tick-title">Bonus — every period complete</span>
+                 <span class="tick-note">${have.has(c.bonusBookmark) ? 'Collected' : 'Locked'}</span>
+               </span>
+             </div>` : ''}
+          </div>`);
+      }
+      return sectionShell(sec, `${head}
+        ${r.books.length
+          ? `<div class="shelf">${r.books.map((b) => `
+              <a class="shelf-item" href="#/book/${encodeURIComponent(b.id)}">
+                ${coverImg(b, { big: true })}
+                <span class="shelf-title">${esc(b.title)}</span>
+                <span class="shelf-meta">${esc(formatDate(b.dateFinished))}</span>
+              </a>`).join('')}</div>`
+          : '<p class="muted italic">No books match this challenge yet.</p>'}`);
+    },
+  },
+
+
 };
 
 /* -------------------------------------------------- shared sub-renderers -- */
@@ -737,21 +1039,28 @@ export function challengeSpread(c, index = 0) {
 
 /* ----------------------------------------------------------- rendering --- */
 
-export function renderSection(raw) {
+// Some sections belong to one particular thing — a challenge spread's own
+// blocks need the challenge they are drawn for. The page passes it in as
+// context rather than each section digging it out of the URL, so the same
+// section type can be previewed, reordered and restyled like any other.
+export function renderSection(raw, ctx = null) {
   const sec = migrateSection(raw);
   if (!sec || sec.visible === false) return '';
   const type = SECTION_TYPES[sec.type];
   if (!type) return '';
+  // `needs` names the page a context-bound section belongs to. It gates the
+  // add menu; here it only has to know the page handed us its context.
+  if (type.needs && !ctx) return '';
   try {
-    return type.render(sec) || '';
+    return type.render(sec, ctx) || '';
   } catch (err) {
     console.error('[lit-picks] section failed to render', sec.type, err);
     return '';
   }
 }
 
-export function renderSections(sections) {
-  return (sections || []).map(renderSection).join('');
+export function renderSections(sections, ctx = null) {
+  return (sections || []).map((sec) => renderSection(sec, ctx)).join('');
 }
 
 export function createSection(type) {
@@ -760,6 +1069,13 @@ export function createSection(type) {
   return { id: uid('sec'), type, ...SECTION_BASE, ...def.create() };
 }
 
-export function typeList() {
-  return Object.entries(SECTION_TYPES).map(([value, def]) => ({ value, label: def.label, blurb: def.blurb }));
+/** Section types offered for a page: context-bound blocks only where they fit. */
+export function typeList(pageId = '') {
+  const base = String(pageId || '').split(':')[0];
+  return allTypes().filter((t) => !t.needs || t.needs === base);
+}
+
+function allTypes() {
+  return Object.entries(SECTION_TYPES)
+    .map(([value, def]) => ({ value, label: def.label, blurb: def.blurb, needs: def.needs }));
 }
