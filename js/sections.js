@@ -168,14 +168,18 @@ function sectionShell(sec, inner, extraClass = '') {
       const iw = Math.max(1, Number(sl.w) || 1);
       const ih = Math.max(1, Number(sl.h) || 1);
       const sideFrac = Math.max(0, Math.min(0.45, (Number(sl.left) || 0) / iw));
-      // The deepest the valance reaches, not where it happens to sit at the
-      // centre — that is what content has to clear.
-      const archPx = Number(sl.archMax) || Number(sl.top) || 0;
+      // Where the cloth visually stops over the text column — not the lowest
+      // stray tassel, which would reserve a field of empty page beneath it.
+      const archPx = Number(sl.archText) || Number(sl.archMax) || Number(sl.top) || 0;
       const archFrac = Math.max(0, Math.min(1, archPx / ih));
       styles.push(
         `--cur-img:url('${attr(url)}')`,
         `--cur-h:${drop}vw`,
         `--cur-side:${(sideFrac * 100).toFixed(2)}%`,
+        // Your own adjustment to the reserved space. The measurement below
+        // reads the hem from the picture, but how close text should sit to
+        // painted cloth is a judgement the picture cannot make.
+        `--cur-gap:${Math.max(-240, Math.min(160, Number(sec.curtainGap) || 0))}px`,
         `--cur-arch:calc(${drop}vw * ${archFrac.toFixed(4)})`,
       );
       curtain = '<span class="ed-curtain" aria-hidden="true"></span>';
@@ -323,6 +327,7 @@ const COMMON_FIELDS = [
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
   { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
   { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 
@@ -345,6 +350,7 @@ export const SECTION_BASE = {
   edgeSize: 0,
   curtainArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   curtainDrop: 30,
+  curtainGap: 0,
   edgeV: 3,
   fontDisplay: '',
   fontBody: '',
@@ -391,6 +397,7 @@ export const SECTION_TYPES = {
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
       { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
       ...TYPE_FIELDS,
@@ -1095,6 +1102,7 @@ export const SECTION_TYPES = {
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
       { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
       ...TYPE_FIELDS,
     ],
     render(sec, ctx) {

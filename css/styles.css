@@ -2448,8 +2448,9 @@ a.ed-meta:hover { color: var(--c-accent); }
      phone still overlaps, capped so a wide screen does not swallow the
      banner. Purely a position: the curtain's height is untouched. */
   --cur-lift: clamp(18px, 3.66vw, 96px);
-  /* Air between the valance's lowest point and the first line of text. */
-  --cur-clear: clamp(24px, 2vw, 32px);
+  /* Air between the hem and the first line of text: an editorial gap on a
+     wide screen, never less than 24px on a narrow one. */
+  --cur-clear: clamp(24px, 4.5vw, 70px);
   /* The curtain is hung wider than the window so its outer folds fall past
      both edges and it reads as cloth hanging outside the page rather than a
      picture cut to fit. Width and height both take this factor, so it is a
@@ -2466,7 +2467,7 @@ a.ed-meta:hover { color: var(--c-accent); }
      than the section's own spacing, for a shallow curtain or a big lift. */
   padding-block-start: max(
     calc(var(--cur-arch) * var(--cur-over) - var(--cur-lift) - var(--trim-bite, 3px)
-      + var(--cur-clear)),
+      + var(--cur-clear) + var(--cur-gap, 0px)),
     var(--sp-section));
 }
 .ed.has-curtain.sp-flush {
@@ -2526,7 +2527,7 @@ a.ed-meta:hover { color: var(--c-accent); }
     /* The curtain hangs at .62 here, so its arch lands proportionally higher. */
     padding-block-start: max(
       calc(var(--cur-arch) * var(--cur-over) * .62 - var(--cur-lift)
-        - var(--trim-bite, 3px) + var(--cur-clear)),
+        - var(--trim-bite, 3px) + var(--cur-clear) + var(--cur-gap, 0px)),
       calc(var(--sp-section) * .6));
   }
 }

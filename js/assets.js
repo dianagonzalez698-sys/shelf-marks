@@ -66,7 +66,8 @@ export async function backfillAlpha() {
     .filter((a) => a.hasAlpha === undefined || a.trimmed === undefined
       || a.frameSlice === undefined
       // measured before the valance's true depth was recorded
-      || (a.frameSlice && a.frameSlice.archMax === undefined));
+      || (a.frameSlice && (a.frameSlice.archMax === undefined
+        || a.frameSlice.archText === undefined)));
   if (!pending.length) return 0;
 
   for (const a of pending) {
@@ -82,7 +83,8 @@ export async function backfillAlpha() {
     }
     next.trimmed = true;
     if (next.frameSlice === undefined
-      || (next.frameSlice && next.frameSlice.archMax === undefined)) {
+      || (next.frameSlice && (next.frameSlice.archMax === undefined
+        || next.frameSlice.archText === undefined))) {
       next.frameSlice = await detectFrameSlice(next.dataUrl);
     }
     if (next.hasAlpha === undefined) next.hasAlpha = await detectAlpha(next.dataUrl);
@@ -286,6 +288,29 @@ export function detectFrameSlice(dataUrl) {
         }
         if (archMax < top) archMax = top;
 
+        // Where the cloth visually stops, as opposed to its lowest stray pixel.
+        //
+        // archMax is the deepest column anywhere in the opening, so a single
+        // tassel, cord or fringe hanging below the hem claims the whole
+        // reserve and leaves a field of empty page under the valance. Two
+        // corrections: look only across the middle, where text actually sits,
+        // and take a high percentile of those depths rather than the maximum,
+        // so a narrow ornament cannot speak for the hem it hangs from.
+        const span = (w - right) - left;
+        const inset = Math.floor(span * 0.15);
+        const from = left + inset;
+        const to = (w - right) - inset;
+        const depths = [];
+        for (let x = from; x < to; x += 1) {
+          let d = 0;
+          while (d < h - 1 && solid(x, d)) d += 1;
+          if (d < h - 1) depths.push(d);           // skip drape-like columns
+        }
+        depths.sort((m, n) => m - n);
+        const archText = depths.length
+          ? depths[Math.min(depths.length - 1, Math.floor(depths.length * 0.75))]
+          : archMax;
+
         // Keep a sliver of the opening in each slice so the stretched edges
         // never sample the hard cut line.
         const pad = 2;
@@ -295,6 +320,7 @@ export function detectFrameSlice(dataUrl) {
           bottom: Math.min(h - 1, bottom + pad),
           left: Math.min(w - 1, left + pad),
           archMax: Math.min(h - 1, archMax + pad),
+          archText: Math.min(h - 1, archText + pad),
           w,
           h,
         });

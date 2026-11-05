@@ -424,11 +424,19 @@ height take that factor together, so it is a uniform enlargement and the folds
 are never stretched sideways. The overhang is clipped at the section, so it
 never causes sideways scrolling.
 
-Content starts just below the valance's **lowest** point, with 24–32px of air.
-That depth is measured across the whole opening when the picture is added, not
-sampled down the middle: a scalloped pelmet is usually at its highest in the
-centre, between two swags, so a centre reading says the cloth stops far higher
-than it does and text ends up underneath it.
+Content starts just below where the cloth visually stops, with an editorial gap
+— about 70px on a wide screen, never less than 24px on a narrow one.
+
+That depth is read from the picture when you add it, and read carefully. A
+centre sample is wrong, because a scalloped pelmet is usually at its highest in
+the middle between two swags. The lowest pixel anywhere is also wrong, because
+one tassel or cord hanging below the hem then claims the whole reserve and
+leaves a field of empty page. So it takes a high percentile of the depths
+across the middle of the opening: deep enough to clear the hem, not hostage to
+a narrow ornament.
+
+**Space below the curtain** adjusts that gap by eye, ±, if your artwork wants
+more or less air than the measurement gives it.
 
 A picture with no see-through centre cannot be a curtain, and the editor says
 so rather than drawing nothing. On a phone the whole thing hangs shallower,
