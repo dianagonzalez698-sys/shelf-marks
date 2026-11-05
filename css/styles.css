@@ -2444,6 +2444,11 @@ a.ed-meta:hover { color: var(--c-accent); }
     calc(var(--cur-side) + 1.6rem),
     var(--sp-page-x));
   padding-block-start: calc(var(--cur-arch) + var(--sp-section) * .75);
+  /* How far the curtain rides up over the section above, so it covers the
+     seam rather than meeting it. ~75px at a 2048px viewport; floored so a
+     phone still overlaps, capped so a wide screen does not swallow the
+     banner. Purely a position: the curtain's height is untouched. */
+  --cur-lift: clamp(18px, 3.66vw, 96px);
 }
 .ed.has-curtain.sp-flush { padding-block-start: calc(var(--cur-arch) + 1rem); }
 
@@ -2457,7 +2462,9 @@ a.ed-meta:hover { color: var(--c-accent); }
    the seam leaves a hairline of page. */
 .ed-curtain {
   position: absolute;
-  top: calc(var(--trim-bite, 3px) * -1);
+  /* Lifted over the section above, plus the hairline bite. Nothing here
+     changes how tall the curtain is — only where it sits. */
+  top: calc((var(--cur-lift, 0px) + var(--trim-bite, 3px)) * -1);
   left: 0; right: 0;
   height: var(--cur-h);
   z-index: 6; pointer-events: none;
@@ -2466,6 +2473,14 @@ a.ed-meta:hover { color: var(--c-accent); }
   background-position: top center;
   background-size: 100% 100%;
 }
+
+/* A curtained section's own stacking context must not trap the overlay below
+   the banner above it: the banner isolates (it carries a photo ground), so the
+   curtain's section is lifted as a whole and the overlay rides inside it. */
+.ed.has-curtain { z-index: 2; }
+/* And the banner must not crop what hangs over it. A photo ground clips to
+   keep its own backdrop tidy; that would cut the curtain off at the seam. */
+.ed.has-bg:has(+ .ed.has-curtain) { overflow: visible; }
 
 /* A hero is already full bleed and its type is centred in the banner, so it
    needs no block inset — only enough side room to clear the drapes. */

@@ -413,6 +413,12 @@ continues below it, the way a real curtain hangs from above rather than lining
 a doorway top to bottom. Content is inset past the drapes and below the lowest
 point of the arch, both measured from the picture itself.
 
+The curtain rides up over whatever is above it so it covers the seam rather
+than meeting it — about **75px at a 2048px window**, scaling with the width and
+floored so a phone still overlaps. That is a position only: the curtain's
+height and proportions are untouched, and the content below stays where it
+was.
+
 A picture with no see-through centre cannot be a curtain, and the editor says
 so rather than drawing nothing. On a phone the whole thing hangs shallower,
 since a narrow screen cannot spare a third of its width on cloth.
