@@ -2433,6 +2433,14 @@ a.ed-meta:hover { color: var(--c-accent); }
 .ed.has-curtain .hero-type {
   padding-inline: calc(var(--cur-l) * .82);
 }
+/* The valance hangs over the top of the section, so a heading that starts at
+   the top would sit behind it. Push the content down past it — but not a
+   hero's type, which is centred in the banner and already clear. */
+.ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero) {
+  padding-block-start: calc(var(--cur-t) * .8);
+  padding-block-end: calc(var(--cur-b) * .8);
+}
+.ed.has-curtain > * ~ *:not(.ed-curtain) { padding-block-start: 0; }
 
 .ed-curtain {
   position: absolute; inset: 0;
@@ -2464,5 +2472,8 @@ a.ed-meta:hover { color: var(--c-accent); }
   .ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero),
   .ed.has-curtain .hero-type {
     padding-inline: calc(var(--cur-l) * .62);
+  }
+  .ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero) {
+    padding-block-start: calc(var(--cur-t) * .56);
   }
 }

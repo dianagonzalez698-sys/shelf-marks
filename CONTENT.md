@@ -315,7 +315,15 @@ is **how wide the drapes hang** — everything else keeps the curtain's own
 proportions. A picture with no transparent centre can't be a frame, and the
 editor says so rather than drawing nothing.
 
-Text inside the section is inset so it clears the drapes. On a phone the whole
+**Put it on the section you want framed — not on the banner above it.** The
+valance is the top of the frame, so the section it belongs to is the one whose
+sides the drapes run down. To get a valance under the hero with drapes
+continuing down the page, set the curtain on the section *below* the hero and
+set the hero's own edge back to **None**, or you end up with two valances
+stacked.
+
+Content inside the section is pushed in from the drapes and down past the
+valance, so nothing sits behind the curtain. On a phone the whole
 frame comes in by a third, since a narrow screen can't spare that much width
 on both sides.
 
