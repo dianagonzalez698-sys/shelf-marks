@@ -265,6 +265,26 @@ colours; an explicit colour overrides that, because you asked for it by name.
 If a section goes hard to read over its background, that is the usual cause —
 clear the colour and the automatic behaviour comes back.
 
+### Your phone is a separate journal until you move it there
+
+Everything — books, layouts, pictures, typography, palette — is stored **on the
+device you made it on**. Nothing syncs by itself; there is no account and no
+server, which is what keeps the journal private and free. A phone that has
+never been given your data shows the stock templates, and that looks exactly
+like the site failing to update.
+
+To put your journal on another device:
+
+1. On the device you have been designing on: **Settings → Export backup**.
+   One `.json` file; your design, pictures and books all ride along.
+2. Get the file to the other device — AirDrop, iCloud Drive, or email it to
+   yourself.
+3. On the phone: **Settings → Import backup**, and pick the file.
+
+Items merge by id and the more recently edited copy wins, so importing is safe
+in either direction and can be repeated whenever the two drift apart. A device
+with nothing on it yet says so, right above those buttons.
+
 ### Light and dark
 
 The sun/moon in the top right switches the journal between them, one tap, and

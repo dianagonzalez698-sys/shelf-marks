@@ -5,6 +5,8 @@ import { esc, attr, toast, openSheet, confirmSheet } from './ui.js';
 import { exportBackup, importBackup, readFile } from './backup.js';
 import { quarters, formatDateTime } from './periods.js';
 import { estimate } from './store.js';
+import * as layout from './layout.js';
+import * as assets from './assets.js';
 
 function numberField(id, label, value, { min = 0, max = 9999, hint = '' } = {}) {
   return `<div class="field">
@@ -12,6 +14,15 @@ function numberField(id, label, value, { min = 0, max = 9999, hint = '' } = {}) 
     <input id="${attr(id)}" type="number" inputmode="numeric" min="${min}" max="${max}" value="${attr(value)}">
     ${hint ? `<p class="hint">${esc(hint)}</p>` : ''}
   </div>`;
+}
+
+// A device nobody has designed on yet shows the stock templates, which looks
+// like the app failing to update rather than a second device with its own
+// store. Say so where the fix is.
+function untouchedDevice() {
+  try {
+    return layout.snapshot().length === 0 && assets.list().length === 0;
+  } catch (_) { return false; }
 }
 
 export function settingsView() {
@@ -51,6 +62,11 @@ export function settingsView() {
 
       <h2 class="form-heading">Sync between devices</h2>
       <section class="panel">
+        ${untouchedDevice() ? `<div class="notice" style="margin-top:0">
+          <strong>This device is showing the default journal.</strong>
+          Your layouts, pictures and design live on whichever device you built them on —
+          nothing travels between devices on its own. Export there, then import the file here.
+        </div>` : ''}
         <p class="small muted" style="margin-top:0">
           Export on one device, then import that file on the other. Items are merged by id,
           and whichever copy was edited more recently wins. Your design settings travel too.
