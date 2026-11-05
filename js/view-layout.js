@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList } from './sections.js';
+import { SECTION_TYPES, typeList, FONT_CHOICES } from './sections.js';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state } from './state.js';
@@ -235,6 +235,24 @@ function warningsHtml(sec) {
   return list.map((w) => `<p class="notice">${w}</p>`).join('');
 }
 
+// The palette tokens worth setting type in. Resolved against the live theme so
+// the swatches are this design's colours, not a generic picker's.
+const INK_TOKENS = [
+  ['--c-ink', 'Primary text'], ['--c-ink-soft', 'Secondary text'],
+  ['--c-ink-faint', 'Captions'], ['--c-accent', 'Accent'],
+  ['--c-sage', 'Sage'], ['--c-rose-ink', 'Rose'], ['--c-blue-ink', 'Blue'],
+  ['--c-gold-ink', 'Gold'], ['--c-bg', 'Page ground'],
+];
+
+let INK_SWATCHES = [];
+function refreshInkSwatches() {
+  const cs = getComputedStyle(document.documentElement);
+  const seen = new Set();
+  INK_SWATCHES = INK_TOKENS
+    .map(([v, l]) => [cs.getPropertyValue(v).trim(), l])
+    .filter(([v]) => v && !seen.has(v) && seen.add(v));
+}
+
 function fieldControl(f, value, secId) {
   const id = `f-${secId}-${f.key}`;
   switch (f.type) {
@@ -244,6 +262,47 @@ function fieldControl(f, value, secId) {
     case 'bool':
       return `<label class="switch-row"><input type="checkbox" id="${id}" data-field="${attr(f.key)}" ${value ? 'checked' : ''}>
         <span class="switch-text">${esc(f.label)}</span></label>`;
+    case 'ink': {
+      // Swatches come from the live palette, so a section's type is recoloured
+      // from the colours the design already uses — and "Match" hands it back.
+      const cur = String(value || '');
+      const swatch = (v, label) => `<button type="button" class="ink-sw${v === cur ? ' is-on' : ''}"
+        data-ink="${attr(v)}" style="--sw:${attr(v)}" title="${attr(label)}"
+        aria-label="${attr(label)}" aria-pressed="${v === cur}"></button>`;
+      return `<div class="field" data-inkfield="${attr(f.key)}">
+        <span class="field-label">${esc(f.label)}</span>
+        <div class="ink-pick">
+          <button type="button" class="ink-sw ink-auto${cur ? '' : ' is-on'}" data-ink=""
+            title="Match the site" aria-label="Match the site" aria-pressed="${!cur}"></button>
+          ${INK_SWATCHES.map(([v, l]) => swatch(v, l)).join('')}
+          <label class="ink-sw ink-custom" title="Any other colour">
+            <input type="color" data-inkcustom value="${attr(cur || '#000000')}">
+          </label>
+        </div>
+        <input type="hidden" data-field="${attr(f.key)}" value="${attr(cur)}">
+      </div>`;
+    }
+    case 'font': {
+      // Each option is drawn in its own face, so the list is a specimen sheet
+      // rather than twenty names you have to audition one at a time.
+      const cur = String(value || '');
+      let out = '';
+      let group = null;
+      for (const f of FONT_CHOICES) {
+        const g = f.group || '';
+        if (g !== group) {
+          if (group !== null && group !== '') out += '</optgroup>';
+          if (g) out += `<optgroup label="${attr(g)}">`;
+          group = g;
+        }
+        out += `<option value="${attr(f.value)}" style="font-family:${attr(f.value || 'inherit')}"`
+          + `${f.value === cur ? ' selected' : ''}>${esc(f.label)}</option>`;
+      }
+      if (group) out += '</optgroup>';
+      return `<div class="field"><label for="${id}">${esc(f.label)}</label>
+        <select class="font-pick" id="${id}" data-field="${attr(f.key)}"
+          style="font-family:${attr(cur || 'inherit')}">${out}</select></div>`;
+    }
     case 'select':
       return `<div class="field"><label for="${id}">${esc(f.label)}</label>
         <select id="${id}" data-field="${attr(f.key)}">
@@ -280,6 +339,7 @@ function visibleFields(def, sec) {
 }
 
 function fieldsHtml(def, sec) {
+  refreshInkSwatches();
   return visibleFields(def, sec).map((f) => fieldControl(f, sec[f.key], sec.id)).join('');
 }
 
@@ -356,8 +416,29 @@ export function openSectionEditor(pageId, sectionId) {
               const out = el.closest('.field').querySelector('[data-readout]');
               if (out) out.textContent = v;
             } else v = el.value;
+            if (fieldDef.type === 'font') el.style.fontFamily = v || 'inherit';
             await commit({ [key]: v }, { rebuild: !!fieldDef.controls });
           });
+        });
+
+        // Swatch and custom-colour clicks write through the hidden field, so
+        // every control still commits down the one path above.
+        sheet.querySelectorAll('[data-inkfield]').forEach((box) => {
+          const hidden = box.querySelector('[data-field]');
+          const set = (v) => {
+            hidden.value = v;
+            box.querySelectorAll('.ink-sw').forEach((b) => {
+              const on = (b.dataset.ink || '') === v;
+              b.classList.toggle('is-on', b.matches('[data-ink]') && on);
+              if (b.matches('[data-ink]')) b.setAttribute('aria-pressed', String(on));
+            });
+            hidden.dispatchEvent(new Event('input', { bubbles: true }));
+          };
+          box.querySelectorAll('[data-ink]').forEach((b) => {
+            b.onclick = () => set(b.dataset.ink || '');
+          });
+          const custom = box.querySelector('[data-inkcustom]');
+          if (custom) custom.addEventListener('input', () => set(custom.value));
         });
 
         sheet.querySelectorAll('[data-media]').forEach((btn) => {

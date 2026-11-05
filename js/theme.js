@@ -60,13 +60,32 @@ export const CONTENT_SCHEMA = [
 /* -------------------------------------------------------- font stacks ---- */
 
 export const FONT_STACKS = [
-  { label: 'Cormorant Garamond', value: "'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif" },
-  { label: 'EB Garamond', value: "'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif" },
-  { label: 'Bodoni Moda', value: "'Bodoni Moda', 'Didot', 'Times New Roman', serif" },
-  { label: 'Pinyon Script', value: "'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive" },
-  { label: 'Jost (sans)', value: "'Jost', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
-  { label: 'System serif', value: "'Iowan Old Style', Palatino, Georgia, 'Times New Roman', serif" },
-  { label: 'System sans', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" },
+  // Grouped so a long list still reads as a shelf rather than a heap.
+  { group: 'Old-style serif', label: 'Cormorant Garamond', value: "'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif" },
+  { group: 'Old-style serif', label: 'EB Garamond', value: "'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif" },
+  { group: 'Old-style serif', label: 'Lora', value: "'Lora', 'Iowan Old Style', Palatino, Georgia, serif" },
+  { group: 'Old-style serif', label: 'Libre Baskerville', value: "'Libre Baskerville', Baskerville, Georgia, serif" },
+  { group: 'Old-style serif', label: 'System serif', value: "'Iowan Old Style', Palatino, Georgia, 'Times New Roman', serif" },
+
+  { group: 'Display serif', label: 'Bodoni Moda', value: "'Bodoni Moda', 'Didot', 'Times New Roman', serif" },
+  { group: 'Display serif', label: 'Playfair Display', value: "'Playfair Display', 'Didot', Georgia, serif" },
+  { group: 'Display serif', label: 'DM Serif Display', value: "'DM Serif Display', Didot, Georgia, serif" },
+  { group: 'Display serif', label: 'Marcellus', value: "'Marcellus', 'Trajan Pro', Palatino, serif" },
+  { group: 'Display serif', label: 'Italiana', value: "'Italiana', 'Didot', Palatino, serif" },
+
+  { group: 'Script', label: 'Pinyon Script', value: "'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Script', label: 'Great Vibes', value: "'Great Vibes', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Script', label: 'Parisienne', value: "'Parisienne', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Script', label: 'Petit Formal Script', value: "'Petit Formal Script', 'Snell Roundhand', cursive" },
+
+  { group: 'Sans serif', label: 'Jost', value: "'Jost', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
+  { group: 'Sans serif', label: 'Josefin Sans', value: "'Josefin Sans', 'Futura', -apple-system, Arial, sans-serif" },
+  { group: 'Sans serif', label: 'Karla', value: "'Karla', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
+  { group: 'Sans serif', label: 'Work Sans', value: "'Work Sans', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
+  { group: 'Sans serif', label: 'System sans', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" },
+
+  { group: 'Typewriter', label: 'Special Elite', value: "'Special Elite', 'Courier New', monospace" },
+  { group: 'Typewriter', label: 'Courier Prime', value: "'Courier Prime', 'Courier New', monospace" },
 ];
 
 /* ------------------------------------------------------ token schema ----- */

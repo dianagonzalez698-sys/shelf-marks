@@ -15,7 +15,25 @@ import {
 } from './state.js';
 import { evaluate, describeFilter, describeWindow, bookmarkLabels } from './rules.js';
 import { focusQuarter, focusBimonth, daysLeftLabel, formatDate, yearPeriod, inPeriod } from './periods.js';
-import { t } from './theme.js';
+import { t, FONT_STACKS } from './theme.js';
+
+// Per-section overrides, written as the very tokens the whole design reads.
+// Setting one on a <section> re-points everything inside it; leaving it empty
+// lets the Design Studio's value cascade down untouched.
+const SECTION_VARS = [
+  ['fontDisplay', '--f-display'],
+  ['fontBody', '--f-body'],
+  ['fontUi', '--f-ui'],
+  ['fontScript', '--f-script'],
+  // Each ink sets a role variable the type rules read first, plus the plain
+  // palette token so anything inside the section that isn't a heading, label
+  // or body line follows along. The role variable is what makes a colour stick
+  // over a photograph or a deep tone, where a different family normally wins.
+  ['inkDisplay', '--c-title-ink'], ['inkDisplay', '--c-ink'],
+  ['inkBody', '--c-body-ink'], ['inkBody', '--c-ink-soft'],
+  ['inkUi', '--c-label-ink'], ['inkUi', '--c-ink-faint'],
+  ['inkScript', '--c-script-ink'],
+];
 
 const uid = (p) => `${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -45,6 +63,23 @@ function sectionShell(sec, inner, extraClass = '') {
   const cut = (want && !isArt && hasGround) ? want : '';
 
   const styles = [];
+
+  // Typefaces and ink are set as the same tokens the whole design uses, scoped
+  // to this one <section>. Everything inside it — headings, body, labels, the
+  // swash initial — already reads those tokens, so nothing else has to know.
+  // Being inline on the section, an explicit colour also outranks the
+  // light-on-dark flip below, which is the right way round: you asked for it.
+  for (const [key, cssVar] of SECTION_VARS) {
+    if (sec[key]) styles.push(`${cssVar}:${sec[key]}`);
+  }
+
+  // Running text mostly inherits rather than naming a token, and inheritance
+  // carries the parent's *resolved* font and colour — so re-pointing the token
+  // alone would leave ordinary paragraphs behind. Set both outright; headings
+  // and labels name their own tokens, so they still win where they apply.
+  if (sec.fontBody) styles.push(`font-family:${sec.fontBody}`);
+  if (sec.inkBody) styles.push(`color:${sec.inkBody}`);
+
   if (cut && Number(sec.edgeSize) > 0) styles.push(`--edge-h:${Number(sec.edgeSize)}px`);
 
   let band = '';
@@ -156,6 +191,26 @@ export function migrateSection(sec) {
   return next;
 }
 
+/* ---------------------------------------------------------------- type --- */
+// Per-section typefaces. Empty means "match the site", so a section only
+// departs from the Design Studio where you deliberately send it elsewhere —
+// and setting one back to "match the site" hands it straight back.
+export const FONT_CHOICES = [
+  { group: '', label: 'Match the site', value: '' },
+  ...FONT_STACKS,
+];
+
+const TYPE_FIELDS = [
+  { key: 'fontDisplay', label: 'Headings', type: 'font' },
+  { key: 'inkDisplay', label: 'Heading colour', type: 'ink' },
+  { key: 'fontBody', label: 'Body text', type: 'font' },
+  { key: 'inkBody', label: 'Body colour', type: 'ink' },
+  { key: 'fontUi', label: 'Small labels', type: 'font' },
+  { key: 'inkUi', label: 'Label colour', type: 'ink' },
+  { key: 'fontScript', label: 'Script initial', type: 'font' },
+  { key: 'inkScript', label: 'Script colour', type: 'ink' },
+];
+
 const COMMON_FIELDS = [
   { key: 'tone', label: 'Background colour', type: 'select', options: TONES },
   { key: 'bgImage', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
@@ -168,6 +223,8 @@ const COMMON_FIELDS = [
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
+
+  ...TYPE_FIELDS,
 ];
 
 // Defaults every section carries, whatever its type.
@@ -185,6 +242,14 @@ export const SECTION_BASE = {
   edgeWhere: 'bottom',
   edgeSize: 0,
   edgeV: 3,
+  fontDisplay: '',
+  fontBody: '',
+  fontUi: '',
+  fontScript: '',
+  inkDisplay: '',
+  inkBody: '',
+  inkUi: '',
+  inkScript: '',
 };
 
 /* -------------------------------------------------------------- types ---- */
@@ -220,8 +285,9 @@ export const SECTION_TYPES = {
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
-          { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
+      { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
+      ...TYPE_FIELDS,
     ],
     render(sec) {
       const year = state.settings.year;

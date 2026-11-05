@@ -210,6 +210,34 @@ For two plain paper sections meeting, use a **Decorative interlude** between
 them — its **Lace band** and **Vine band** modes draw an ornamental divider,
 and **Image strip** takes your own band.
 
+### Type and colour, section by section
+
+The Design Studio sets the typography for the whole journal. Every section can
+then depart from it on its own, without touching the rest — open a section's
+**Edit** panel and scroll to the bottom:
+
+| Control | What it re-types |
+|---|---|
+| **Headings** / **Heading colour** | The big display line, and any subheading |
+| **Body text** / **Body colour** | Running text, captions, metadata |
+| **Small labels** / **Label colour** | The letterspaced eyebrow above a heading |
+| **Script initial** / **Script colour** | The swash first letter, where one is on |
+
+Both halves start at **Match the site**, so a section looks exactly as it does
+now until you move something. The typeface list shows each face drawn in
+itself, grouped into old-style serifs, display serifs, scripts, sans serifs and
+typewriters — 21 in all. The colour swatches are your own palette, pulled live
+from the Design Studio, with a custom picker at the end for anything else.
+
+To hand a section back to the site's design, pick **Match the site** (the
+crossed swatch, first in the row). Nothing is remembered once it is cleared.
+
+**A colour you set here wins over the automatic light-on-dark flip.** A section
+over a photograph or a deep tone normally switches its type to the pale banner
+colours; an explicit colour overrides that, because you asked for it by name.
+If a section goes hard to read over its background, that is the usual cause —
+clear the colour and the automatic behaviour comes back.
+
 ---
 
 ## 4. Changing things in code
