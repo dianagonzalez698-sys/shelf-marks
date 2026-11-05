@@ -285,6 +285,17 @@ Items merge by id and the more recently edited copy wins, so importing is safe
 in either direction and can be repeated whenever the two drift apart. A device
 with nothing on it yet says so, right above those buttons.
 
+## Bookmarks sit on one line
+
+A challenge's bookmarks are one set, so they are drawn as one row rather than
+wrapping onto a second line. They take their natural width when there is room
+and shrink when there is not; below **44px** each the row scrolls sideways
+instead of shrinking further, which is what happens to a six- or seven-mark
+challenge on a phone.
+
+Two tokens in the Design Studio govern it: **--bm-w** (a bookmark's natural
+width) and **--bm-min** (how small one may get before the row scrolls).
+
 ## A challenge's cover picture
 
 The picture on a challenge — the one filling its card on the index and backing
@@ -394,6 +405,17 @@ point of the arch, both measured from the picture itself.
 A picture with no see-through centre cannot be a curtain, and the editor says
 so rather than drawing nothing. On a phone the whole thing hangs shallower,
 since a narrow screen cannot spare a third of its width on cloth.
+
+## Bookmarks sit on one line
+
+A challenge's bookmarks are one set, so they are drawn as one row rather than
+wrapping onto a second line. They take their natural width when there is room
+and shrink when there is not; below **44px** each the row scrolls sideways
+instead of shrinking further, which is what happens to a six- or seven-mark
+challenge on a phone.
+
+Two tokens in the Design Studio govern it: **--bm-w** (a bookmark's natural
+width) and **--bm-min** (how small one may get before the row scrolls).
 
 ## A challenge's cover picture
 

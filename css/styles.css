@@ -196,7 +196,8 @@
   --bm-gap-y:      2.1rem;
   --bm-radius:     2px;
   --bm-border-w:   1px;
-  --bm-row-max:    100%;   /* cap the grid to force fewer per row */
+  --bm-row-max:    100%;   /* cap the grid's width */
+  --bm-min:        44px;   /* a bookmark never shrinks below this; the row scrolls */
   --bm-cord-show:  block;  /* `none` hides the hanging cord */
   --bm-cord-h:     18px;
   --bm-label-gap:  .62rem;
@@ -624,11 +625,21 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
 
 .bm-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, calc(var(--bm-w) * var(--bm-scale))));
-  justify-content: center;
+  /* One row, always. Columns take their natural width when there is room and
+     shrink down to --bm-min when there is not; past that the row scrolls
+     rather than wrapping, so a set of bookmarks always reads as one set. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(var(--bm-min), calc(var(--bm-w) * var(--bm-scale)));
+  /* `safe` keeps the first bookmark reachable when the row does overflow —
+     plain centring pushes the start out of the scrollable area. */
+  justify-content: safe center;
   gap: var(--bm-gap-y) var(--bm-gap-x);
   max-width: var(--bm-row-max);
   margin: 1.8rem auto 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-bottom: .3rem;
+  overscroll-behavior-x: contain;
 }
 /* left-aligned variant for dense secondary listings */
 .bm-grid-start { justify-content: start; margin-left: 0; margin-right: 0; }
