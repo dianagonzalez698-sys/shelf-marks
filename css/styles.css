@@ -2831,3 +2831,21 @@ a.ed-meta:hover { color: var(--c-accent); }
 
 /* Script set at a size needs its leading opened or the flourishes collide. */
 .marginalia.big { line-height: 1.45; padding-block: .1em; }
+
+/* A role's controls shown with the field they style: no second label, and
+   tucked under the input so the pairing reads at a glance. */
+.type-row.is-inline {
+  display: block;
+  margin-top: .4rem;
+  padding: 0;
+  border-top: 0;
+}
+.type-row.is-inline .type-row-ctl { gap: .4rem; }
+.type-row.is-inline .face-btn {
+  padding: .34rem .6rem;
+  font-size: .9rem;
+}
+.type-row.is-inline .ink-dot { inline-size: 28px; block-size: 28px; }
+@media (pointer: coarse) {
+  .type-row.is-inline .ink-dot { inline-size: 36px; block-size: 36px; }
+}

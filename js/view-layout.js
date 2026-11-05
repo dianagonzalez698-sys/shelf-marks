@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList, FONT_CHOICES } from './sections.js';
+import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES } from './sections.js';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
@@ -192,6 +192,33 @@ function facePickerHtml(current) {
     </button>`;
   }
   return `<div class="face-list">${rows}</div>`;
+}
+
+/** One role's face + colour, shown with the field it styles. */
+function roleControlHtml(r, secId, fieldLabel) {
+  const cur = (k) => (k ? String(sec_ink(secId, k) || '') : '');
+  const face = cur(r.font);
+  const ink = cur(r.ink);
+  const weight = cur(r.weight);
+  const italic = cur(r.italic) === 'italic';
+  const name = (FONT_CHOICES.find((x) => x.value === face) || {}).label || 'Match the site';
+  const hidden = [r.font, r.ink, r.weight, r.italic, r.size, r.track, r.transform]
+    .filter(Boolean)
+    .map((k) => `<input type="hidden" data-field="${attr(k)}" value="${attr(cur(k))}">`)
+    .join('');
+  return `<div class="type-row is-inline" data-rolekey="${attr(r.role)}">
+    <div class="type-row-ctl">
+      <button type="button" class="face-btn" data-face="${attr(r.font)}"
+        style="font-family:${attr(face || 'inherit')};font-weight:${attr(weight || 'inherit')};font-style:${italic ? 'italic' : 'normal'}"
+        >${esc(name)}</button>
+      <button type="button" class="ink-dot${ink ? '' : ' is-auto'}" data-inkopen="${attr(r.ink)}"
+        style="--sw:${attr(ink || 'transparent')}" title="Colour"
+        aria-label="${esc(fieldLabel)} colour"></button>
+    </div>
+    ${hidden}
+    <div class="type-pop" data-pop="face" hidden>${stylePanelHtml(face, r, secId, cur)}</div>
+    <div class="type-pop" data-pop="ink" hidden>${inkPickerHtml(ink, `hex-${secId}-${r.ink}`)}</div>
+  </div>`;
 }
 
 const WEIGHT_NAMES = {
@@ -399,8 +426,10 @@ function fieldControl(f, value, secId) {
       return `<label class="switch-row"><input type="checkbox" id="${id}" data-field="${attr(f.key)}" ${value ? 'checked' : ''}>
         <span class="switch-text">${esc(f.label)}</span></label>`;
     case 'rich': {
-      // Emphasis on a word, not on the whole line: a contenteditable holding
-      // the same restricted subset the renderer will allow back out.
+      // The field carries the styling for the role it is drawn in, so you
+      // choose a face while looking at the words it will set — rather than
+      // deciding for "headings" in the abstract at the foot of the panel.
+      const r = TYPE_ROLES.find((x) => x.role === f.styleRole) || null;
       return `<div class="field">
         <label for="${id}">${esc(f.label)}</label>
         <div class="rich-bar" role="group" aria-label="Formatting">
@@ -411,6 +440,7 @@ function fieldControl(f, value, secId) {
         <div class="rich-input" id="${id}" data-rich-field="${attr(f.key)}"
              contenteditable="true" role="textbox" aria-multiline="${f.multiline ? 'true' : 'false'}"
              >${rich(value)}</div>
+        ${r ? roleControlHtml(r, secId, f.label) : ''}
         <p class="hint">Select a word and press <b>⌘B</b> or <b>⌘I</b> to emphasise just that part.</p>
       </div>`;
     }
@@ -479,7 +509,12 @@ function fieldControl(f, value, secId) {
 
 /** Fields that apply to this section as currently configured. */
 function visibleFields(def, sec) {
-  return def.fields.filter((f) => typeof f.when !== 'function' || f.when(sec));
+  const shown = def.fields.filter((f) => typeof f.when !== 'function' || f.when(sec));
+  // A role already shown beside its own text field does not need repeating in
+  // the block at the foot of the panel — that grouping is what made choosing a
+  // face feel like a decision about nothing in particular.
+  const claimed = new Set(shown.filter((f) => f.styleRole).map((f) => f.styleRole));
+  return shown.filter((f) => f.type !== 'typeface' || !claimed.has((f.role || {}).role));
 }
 
 function fieldsHtml(def, sec) {
@@ -584,10 +619,11 @@ export function openSectionEditor(pageId, sectionId) {
 
         const faceName = (v) => (FONT_CHOICES.find((x) => x.value === v) || {}).label || 'Match the site';
 
-        sheet.querySelectorAll('.type-row').forEach((row, rowIndex) => {
-          const r = (visibleFields(def, layout.getSection(pageId, sectionId) || sec)
-            .filter((x) => x.type === 'typeface')[rowIndex] || {}).role || {};
+        sheet.querySelectorAll('.type-row').forEach((row) => {
           const faceBtn = row.querySelector('[data-face]');
+          // The role is read off the control itself, so a row beside a field
+          // and a row in the foot block bind the same way.
+          const r = TYPE_ROLES.find((x) => x.font === faceBtn.dataset.face) || {};
           const inkBtn = row.querySelector('[data-inkopen]');
           const facePop = row.querySelector('[data-pop="face"]');
           const inkPop = row.querySelector('[data-pop="ink"]');
