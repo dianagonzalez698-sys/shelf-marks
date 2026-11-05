@@ -16,6 +16,7 @@ import { t } from './theme.js';
 import { renderSections, renderSection } from './sections.js';
 import { figure, backdrop, media } from './media.js';
 import * as layout from './layout.js';
+import { openMediaEditor } from './view-layout.js';
 
 /* ----------------------------------------------------------------- list ---- */
 
@@ -121,7 +122,8 @@ export function challengeDetailView(params) {
     // A challenge spread is long, and saving from a sheet re-renders it.
     // Without this you are thrown back to the top every time you tick a book.
     keepScroll: true,
-    actions: canEdit ? '<button class="btn btn-quiet" type="button" id="edit-top">Edit</button>' : '',
+    actions: `<button class="btn btn-quiet" type="button" id="cover-top">Cover</button>`
+      + (canEdit ? '<button class="btn btn-quiet" type="button" id="edit-top">Edit</button>' : ''),
     html: `
       ${spread}
       ${unsetNotice}
@@ -150,6 +152,26 @@ export function challengeDetailView(params) {
       if (top) top.onclick = open;
       const inline = root.querySelector('#edit-challenge');
       if (inline) inline.onclick = open;
+
+      // The cover is the challenge's own artwork: it backs the spread's
+      // opening and fills its card on the index. It lives on the challenge
+      // rather than on a section, because two different sections draw it.
+      const coverBtn = document.getElementById('cover-top');
+      if (coverBtn) {
+        coverBtn.onclick = () => openMediaEditor(
+          challenge.cover || media({ ratio: 'auto', frame: 'none', shadow: false }),
+          async (next) => {
+            try {
+              await saveChallenge({ id: challenge.id, custom: !!challenge.custom, cover: next });
+              toast('Cover saved.');
+              render();
+            } catch (_) {
+              toast('Could not save that change.', 'bad');
+            }
+          },
+          { role: 'backdrop', size: '1800 × 1100 px' },
+        );
+      }
 
       const pick = root.querySelector('#pick-eligible');
       if (pick) pick.onclick = () => openEligiblePicker(challenge);

@@ -285,6 +285,17 @@ Items merge by id and the more recently edited copy wins, so importing is safe
 in either direction and can be repeated whenever the two drift apart. A device
 with nothing on it yet says so, right above those buttons.
 
+## A challenge's cover picture
+
+The picture on a challenge — the one filling its card on the index and backing
+its spread's opening — is set on the challenge itself: **open the challenge,
+then Cover** in the top bar. Best around **1800 × 1100 px**.
+
+It lives on the challenge rather than on a section because two different
+sections draw it: the card in the index and the spread's own opening. Setting
+it once fills both. Preset challenges take a cover the same way as ones you
+made yourself.
+
 ## Eligible books
 
 Every challenge spread carries an **Eligible books** section: which of your
@@ -383,6 +394,17 @@ point of the arch, both measured from the picture itself.
 A picture with no see-through centre cannot be a curtain, and the editor says
 so rather than drawing nothing. On a phone the whole thing hangs shallower,
 since a narrow screen cannot spare a third of its width on cloth.
+
+## A challenge's cover picture
+
+The picture on a challenge — the one filling its card on the index and backing
+its spread's opening — is set on the challenge itself: **open the challenge,
+then Cover** in the top bar. Best around **1800 × 1100 px**.
+
+It lives on the challenge rather than on a section because two different
+sections draw it: the card in the index and the spread's own opening. Setting
+it once fills both. Preset challenges take a cover the same way as ones you
+made yourself.
 
 ## Eligible books
 
