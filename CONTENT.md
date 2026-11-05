@@ -190,6 +190,17 @@ For artwork, use a **transparent PNG, 1800 × 200 px**, added to the library as
 a **Cutout** so the page shows through around it. A picture with no
 transparency will draw as a solid block; the editor says so if it spots one.
 
+**Empty margins are trimmed automatically.** Decorative PNGs usually come
+drawn inside a larger canvas with transparent space around them. That space is
+still part of the picture, so the artwork would float in the middle of its band
+rather than filling it — which looks like the band is in the wrong place.
+Cut-outs are cropped to their drawing when added, and anything already in the
+library is cropped the next time the app opens.
+
+**Hang over the edge** then does what it says: 0 keeps the band inside the
+section, half the **Size** drapes it across the seam, and the full Size puts it
+entirely onto the section below.
+
 For two plain paper sections meeting, use a **Decorative interlude** between
 them — its **Lace band** and **Vine band** modes draw an ornamental divider,
 and **Image strip** takes your own band.

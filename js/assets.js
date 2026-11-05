@@ -57,13 +57,28 @@ export function src(id) {
 
 export function isLoaded() { return loaded; }
 
-/** Fill in hasAlpha for anything added before it was recorded. */
+/**
+ * Bring older pictures up to date: record whether they carry transparency, and
+ * trim the empty margins off cut-outs added before trimming existed.
+ */
 export async function backfillAlpha() {
-  const pending = [...cache.values()].filter((a) => a.hasAlpha === undefined);
+  const pending = [...cache.values()]
+    .filter((a) => a.hasAlpha === undefined || a.trimmed === undefined);
   if (!pending.length) return 0;
+
   for (const a of pending) {
-    const hasAlpha = await detectAlpha(a.dataUrl);
-    const next = { ...a, hasAlpha };
+    const next = { ...a };
+    if ((a.kind === 'cutout' || a.kind === 'ornament') && a.trimmed === undefined) {
+      const tight = await trimTransparent(a.dataUrl);
+      if (tight) {
+        next.dataUrl = tight.dataUrl;
+        next.w = tight.w;
+        next.h = tight.h;
+        next.bytes = Math.round(tight.dataUrl.length * 0.75);
+      }
+    }
+    next.trimmed = true;
+    if (next.hasAlpha === undefined) next.hasAlpha = await detectAlpha(next.dataUrl);
     cache.set(a.id, next);
     try { await store.put('assets', next); } catch (_) { /* cache still right */ }
   }
@@ -153,8 +168,64 @@ export function detectAlpha(dataUrl) {
   });
 }
 
+/**
+ * Crop fully transparent margins off a cut-out.
+ *
+ * Decorative PNGs are usually drawn inside a larger canvas with empty space
+ * around them. Laid across a section edge that empty space is still part of
+ * the image, so the artwork floats in the middle of its band instead of
+ * filling it — which reads as the band being positioned wrongly.
+ *
+ * Returns null when there is nothing to trim.
+ */
+export function trimTransparent(dataUrl) {
+  return new Promise((resolve) => {
+    if (!dataUrl || !/^data:image\/(png|webp|gif)/.test(dataUrl)) { resolve(null); return; }
+    const img = new Image();
+    img.onerror = () => resolve(null);
+    img.onload = () => {
+      try {
+        const w = img.width;
+        const h = img.height;
+        if (!w || !h) { resolve(null); return; }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        const { data } = ctx.getImageData(0, 0, w, h);
+
+        let top = h; let left = w; let right = -1; let bottom = -1;
+        for (let y = 0; y < h; y += 1) {
+          for (let x = 0; x < w; x += 1) {
+            if (data[(y * w + x) * 4 + 3] > 8) {
+              if (y < top) top = y;
+              if (y > bottom) bottom = y;
+              if (x < left) left = x;
+              if (x > right) right = x;
+            }
+          }
+        }
+        if (right < 0) { resolve(null); return; }               // nothing drawn
+        const nw = right - left + 1;
+        const nh = bottom - top + 1;
+        if (nw === w && nh === h) { resolve(null); return; }    // already tight
+        const out = document.createElement('canvas');
+        out.width = nw; out.height = nh;
+        out.getContext('2d').drawImage(c, left, top, nw, nh, 0, 0, nw, nh);
+        resolve({ dataUrl: out.toDataURL('image/png'), w: nw, h: nh });
+      } catch (_) { resolve(null); }
+    };
+    img.src = dataUrl;
+  });
+}
+
 export async function add(file, { kind = 'photo', name = '', alt = '' } = {}) {
-  const { dataUrl, w, h } = await toDataUrl(file, kind);
+  let { dataUrl, w, h } = await toDataUrl(file, kind);
+  // Cut-outs are trimmed to their drawing so they sit where they are placed.
+  if (kind === 'cutout' || kind === 'ornament') {
+    const tight = await trimTransparent(dataUrl);
+    if (tight) { dataUrl = tight.dataUrl; w = tight.w; h = tight.h; }
+  }
   const record = {
     id: uid(),
     name: (name || file.name || 'Untitled').replace(/\.[a-z0-9]+$/i, '').slice(0, 80),
@@ -164,6 +235,7 @@ export async function add(file, { kind = 'photo', name = '', alt = '' } = {}) {
     w, h,
     bytes: Math.round(dataUrl.length * 0.75),
     hasAlpha: await detectAlpha(dataUrl),
+    trimmed: true,
     addedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
