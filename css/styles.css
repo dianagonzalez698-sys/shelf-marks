@@ -124,30 +124,53 @@
   /* A high-contrast Didone for display, a geometric sans for the letterspaced
      small caps, a formal script for the wordmark and the swash initial, and a
      warm serif for anything you actually have to read at length. */
-  --f-script:  'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive;
-  --f-display: 'Bodoni Moda', 'Didot', 'Playfair Display', 'Times New Roman', serif;
-  --f-body:    'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
+  /* The Illustrated Literary Salon.
+     Script: extravagant copperplate with long entrance and exit strokes.
+     Display: sculptural high-contrast serif with a true italic.
+     Body: a book serif cut to be set large and airy.
+     UI: a quiet geometric sans that stays out of the way. */
+  --f-script:  'Monsieur La Doulaise', 'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive;
+  --f-display: 'Playfair Display', 'Bodoni Moda', 'Didot', Georgia, serif;
+  --f-body:    'Cormorant Garamond', 'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
   --f-ui:      'Jost', 'Futura', -apple-system, 'Helvetica Neue', Arial, sans-serif;
 
-  --fs-wordmark:       clamp(1.42rem, 3.4vw, 1.9rem);
+  /* The script is a fine copperplate: it needs size to show its strokes. */
+  --fs-wordmark:       clamp(1.95rem, 4.4vw, 2.75rem);
   --fs-nav:            0.70rem;
   --fs-banner-eyebrow: 0.70rem;
   --fs-banner-title:   clamp(2rem, 6.6vw, 4.6rem);
-  --fs-banner-sub:     clamp(0.95rem, 1.7vw, 1.12rem);
+  --fs-banner-sub:     clamp(1.05rem, 1.9vw, 1.28rem);
   --fs-display:        clamp(1.5rem, 3.6vw, 2.3rem);  /* section headline */
-  --fs-h2:             1.42rem;
-  --fs-h3:             1.08rem;
-  --fs-body:           1.02rem;
-  --fs-small:          0.90rem;
-  --fs-tiny:           0.78rem;
+  --fs-h2:             1.58rem;
+  --fs-h3:             1.2rem;
+  /* Cormorant is cut to be set large; these are its sizes, not Garamond's. */
+  --fs-body:           1.18rem;
+  --fs-small:          1.02rem;
+  --fs-tiny:           0.86rem;
   --fs-label:          0.70rem;   /* letterspaced small caps */
   --fs-stat:           clamp(1.7rem, 3.4vw, 2.05rem); /* big numerals */
 
   --tt-display:  uppercase;  /* `none` returns display headings to mixed case */
+  /* Playfair carries weight well; Cormorant needs 500 to hold a page. */
   --fw-display:  500;
   --fw-heading:  600;
-  --fw-body:     400;
+  --fw-body:     500;
   --fw-label:    600;
+  --fw-script:   400;
+
+  /* Per-role style, so weight and italic are independent of one another and
+     of the family. A section can override any of these on itself; the rules
+     below read them rather than hard-coding a value. */
+  --fi-display:  normal;   /* font-style for headings */
+  --fi-body:     normal;
+  --fi-ui:       normal;
+  --fi-script:   normal;
+  --fz-display:  1;        /* size multipliers, applied over the scale above */
+  --fz-body:     1;
+  --fz-ui:       1;
+  --fz-script:   1;
+  --ls-script:   0;
+  --tt-body:     none;
 
   --ls-wordmark: 0.01em;
   --ls-nav:      0.18em;
@@ -156,9 +179,9 @@
   --ls-display:  0.045em;   /* caps need air */
   --ls-body:     0.002em;
 
-  --lh-display:  1.04;
-  --lh-heading:  1.18;
-  --lh-body:     1.58;
+  --lh-display:  1.06;
+  --lh-heading:  1.2;
+  --lh-body:     1.5;     /* a larger body size wants a tighter leading ratio */
   --lh-tight:    1.3;
 
   --tt-label: uppercase;   /* flip to `none` for sentence-case labels */
@@ -421,8 +444,9 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
   position: relative;
   margin: .1em 0 .12em;
   font-family: var(--f-display);
-  font-size: var(--fs-banner-title);
+  font-size: calc(var(--fs-banner-title) * var(--fz-display, 1));
   font-weight: var(--fw-display);
+  font-style: var(--fi-display, normal);
   line-height: var(--lh-display);
   letter-spacing: var(--ls-display);
   text-transform: var(--tt-display);
@@ -1309,8 +1333,9 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .ed-kicker {
   margin: 0 0 .5rem;
   font-family: var(--f-ui);
-  font-size: var(--fs-label);
+  font-size: calc(var(--fs-label) * var(--fz-ui, 1));
   font-weight: var(--fw-label);
+  font-style: var(--fi-ui, normal);
   letter-spacing: var(--ls-eyebrow);
   text-transform: var(--tt-label);
   color: var(--c-label-ink, var(--c-ink-faint));
@@ -1318,8 +1343,9 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .ed-title {
   margin: 0;
   font-family: var(--f-display);
-  font-size: var(--fs-display);
+  font-size: calc(var(--fs-display) * var(--fz-display, 1));
   font-weight: var(--fw-display);
+  font-style: var(--fi-display, normal);
   line-height: var(--lh-heading);
   letter-spacing: var(--ls-display);
   text-transform: var(--tt-display);
@@ -1329,24 +1355,34 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .ed-title.has-script { text-transform: none; }
 .ed-script {
   font-family: var(--f-script);
-  font-size: 1.5em;
+  font-size: calc(1.5em * var(--fz-script, 1));
+  font-weight: var(--fw-script, 400);
+  font-style: var(--fi-script, normal);
   line-height: .7;
-  letter-spacing: 0;
+  letter-spacing: var(--ls-script, 0);
   text-transform: none;
   color: var(--c-script-ink, var(--c-accent));
   margin-right: .06em;
+  /* A copperplate's entrance stroke reaches well left of its glyph box. */
+  padding-inline: .06em;
 }
 .ed-dark .ed-script { color: var(--c-script-ink, var(--c-banner-accent)); }
 .ed-subtitle {
   margin: 0;
   font-family: var(--f-display);
-  font-size: var(--fs-h2);
+  font-size: calc(var(--fs-h2) * var(--fz-display, 1));
   font-weight: var(--fw-heading);
+  font-style: var(--fi-display, normal);
   text-transform: var(--tt-display);
   letter-spacing: var(--ls-display);
   color: var(--c-title-ink, var(--c-ink));
 }
-.ed-sub { margin: .35rem 0 0; font-style: italic; color: var(--c-body-ink, var(--c-ink-soft)); }
+.ed-sub {
+  margin: .35rem 0 0;
+  font-size: calc(1em * var(--fz-body, 1));
+  font-style: italic;
+  color: var(--c-body-ink, var(--c-ink-soft));
+}
 .ed-meta {
   font-family: var(--f-ui); font-size: var(--fs-label);
   letter-spacing: var(--ls-label); text-transform: var(--tt-label);
@@ -1417,8 +1453,9 @@ a.ed-meta:hover { color: var(--c-accent); }
 .hero-title {
   margin: 0;
   font-family: var(--f-display);
-  font-size: var(--fs-banner-title);
+  font-size: calc(var(--fs-banner-title) * var(--fz-display, 1));
   font-weight: var(--fw-display);
+  font-style: var(--fi-display, normal);
   line-height: var(--lh-display);
   letter-spacing: var(--ls-display);
   text-transform: var(--tt-display);
@@ -2672,3 +2709,125 @@ a.ed-meta:hover { color: var(--c-accent); }
 }
 .sheet-back:hover { color: var(--c-accent-deep); }
 @media (pointer: coarse) { .sheet-back { padding: .6rem 1rem .6rem 0; min-block-size: 44px; } }
+
+/* ------------------------------------------------- type style controls ---
+   Weight, style, size, tracking and case for one role, inside the panel its
+   face button opens. Four roles stay four rows; the depth is on demand. */
+
+.sty-block { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--c-rule); }
+.sty-head {
+  margin: .9rem 0 .4rem;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--c-ink-faint);
+}
+.sty-head:first-child { margin-top: 0; }
+.sty-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+.sty-chip {
+  padding: .34rem .66rem;
+  font-family: var(--f-ui); font-size: .78rem;
+  color: var(--c-ink-soft);
+  background: var(--c-bg-raised);
+  border: 1px solid var(--c-rule-strong); border-radius: 2px;
+  cursor: pointer;
+}
+.sty-chip:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-ink); }
+.sty-chip.is-on {
+  background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink);
+}
+.sty-chip:disabled { opacity: .4; cursor: not-allowed; }
+
+.sty-slider { margin-top: .8rem; }
+.sty-slider label {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--c-ink-faint);
+}
+.sty-slider input { inline-size: 100%; margin-top: .3rem; }
+
+@media (pointer: coarse) { .sty-chip { padding: .5rem .8rem; } }
+
+/* -------------------------------------------------------- rich text field --
+   Emphasis on a phrase rather than a whole element. */
+.rich-bar { display: flex; gap: .3rem; margin: .3rem 0; }
+.rich-btn {
+  inline-size: 30px; block-size: 28px; padding: 0;
+  font-family: var(--f-body); font-size: .95rem;
+  color: var(--c-ink-soft);
+  background: var(--c-bg-raised);
+  border: 1px solid var(--c-rule-strong); border-radius: 2px;
+  cursor: pointer;
+}
+.rich-btn:hover { border-color: var(--c-accent); color: var(--c-accent); }
+.rich-clear { font-size: .85rem; }
+.rich-input {
+  min-block-size: 2.6rem;
+  padding: .55rem .7rem;
+  font-family: var(--f-body); font-size: var(--fs-body);
+  color: var(--c-ink);
+  background: var(--c-bg-raised);
+  border: 1px solid var(--c-rule-strong); border-radius: 3px;
+  white-space: pre-wrap; overflow-wrap: break-word;
+}
+.rich-input:focus { outline: 2px solid var(--c-accent); outline-offset: 1px; }
+.rich-input b { font-weight: 700; }
+.rich-input i { font-style: italic; }
+@media (pointer: coarse) { .rich-btn { inline-size: 40px; block-size: 40px; } }
+
+/* ========================================================================
+   THE ILLUSTRATED LITERARY SALON — typographic finish
+   Delicate rules, editorial navigation, restrained buttons. Everything here
+   reads the role tokens, so a section override still wins over it.
+   ===================================================================== */
+
+/* A copperplate's entrance and exit strokes reach outside the glyph box; the
+   wordmark needs room for them and must never clip or force a page scroll. */
+.wordmark {
+  padding-inline: .14em;
+  padding-block: .06em;
+  overflow: visible;
+  line-height: 1.5;
+}
+.masthead, .masthead-inner { overflow: visible; }
+.ed-script, .marginalia.big { overflow-wrap: normal; }
+
+/* Navigation: small, widely spaced, with a hairline that draws on approach
+   rather than a block of colour. */
+.masthead-link {
+  position: relative;
+  font-weight: 500;
+  letter-spacing: var(--ls-nav);
+}
+.masthead-link::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -.38em;
+  block-size: 1px; background: currentColor;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .22s ease;
+}
+.masthead-link:hover::after,
+.masthead-link[aria-current]::after { transform: scaleX(1); }
+
+/* Buttons read as editorial labels, not as interface chrome. */
+.btn {
+  font-family: var(--f-ui);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: var(--tt-label);
+}
+
+/* Metadata and captions share one quiet treatment. */
+.ed-meta, .shelf-meta, .entry-meta, .hint, .marginalia {
+  font-feature-settings: 'onum' 1, 'liga' 1;
+}
+
+/* Old-style figures wherever numerals sit inside running text; lining figures
+   where they are a measurement and want to align. */
+.ed-body, .ed-sub, .statement, .marginalia { font-variant-numeric: oldstyle-nums; }
+.wstat-n, .measure-stat, .tick .tag { font-variant-numeric: lining-nums tabular-nums; }
+
+/* A hairline above a section heading, the editorial equivalent of a breath. */
+.ed-head { position: relative; }
+
+/* Script set at a size needs its leading opened or the flourishes collide. */
+.marginalia.big { line-height: 1.45; padding-block: .1em; }

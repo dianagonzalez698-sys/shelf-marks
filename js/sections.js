@@ -6,7 +6,7 @@
 // bookmarks, this period) read live app state — they are real features wearing
 // editorial clothes, not decoration.
 
-import { esc, attr, progressBar, progressLine, markVisual, checkBadge, checkGlyph, coverImg } from './ui.js';
+import { esc, attr, rich, progressBar, progressLine, markVisual, checkBadge, checkGlyph, coverImg } from './ui.js';
 import { figure, backdrop, media, hasAsset } from './media.js';
 import { src as assetSrc, get as getAsset } from './assets.js';
 import {
@@ -34,6 +34,40 @@ const SECTION_VARS = [
   ['inkBody', '--c-body-ink'], ['inkBody', '--c-ink-soft'],
   ['inkUi', '--c-label-ink'], ['inkUi', '--c-ink-faint'],
   ['inkScript', '--c-script-ink'],
+
+  // Weight and italic are separate variables on purpose: changing one must
+  // never reset the other, and a bold italic is simply both set at once.
+  ['wtDisplay', '--fw-display'], ['wtDisplay', '--fw-heading'],
+  ['wtBody', '--fw-body'],
+  ['wtUi', '--fw-label'],
+  ['wtScript', '--fw-script'],
+  ['itDisplay', '--fi-display'],
+  ['itBody', '--fi-body'],
+  ['itUi', '--fi-ui'],
+  ['itScript', '--fi-script'],
+  ['szDisplay', '--fz-display'],
+  ['szBody', '--fz-body'],
+  ['szUi', '--fz-ui'],
+  ['szScript', '--fz-script'],
+  ['lsDisplay', '--ls-display'],
+  ['lsBody', '--ls-body'],
+  ['lsUi', '--ls-label'], ['lsUi', '--ls-eyebrow'],
+  ['ttDisplay', '--tt-display'],
+  ['ttUi', '--tt-label'],
+];
+
+/** The four type roles a section can restyle, and the keys each one owns. */
+export const TYPE_ROLES = [
+  { role: 'Display', label: 'Headings', font: 'fontDisplay', ink: 'inkDisplay',
+    weight: 'wtDisplay', italic: 'itDisplay', size: 'szDisplay',
+    track: 'lsDisplay', transform: 'ttDisplay' },
+  { role: 'Body', label: 'Body text', font: 'fontBody', ink: 'inkBody',
+    weight: 'wtBody', italic: 'itBody', size: 'szBody', track: 'lsBody' },
+  { role: 'Ui', label: 'Small labels', font: 'fontUi', ink: 'inkUi',
+    weight: 'wtUi', italic: 'itUi', size: 'szUi', track: 'lsUi',
+    transform: 'ttUi' },
+  { role: 'Script', label: 'Script initial', font: 'fontScript', ink: 'inkScript',
+    weight: 'wtScript', italic: 'itScript', size: 'szScript' },
 ];
 
 // One period's line in a recurring challenge's record.
@@ -222,17 +256,23 @@ function sectionShell(sec, inner, extraClass = '') {
 }
 
 function kicker(text) {
-  return text ? `<p class="ed-kicker">${esc(text)}</p>` : '';
+  return text ? `<p class="ed-kicker">${rich(text)}</p>` : '';
 }
 
 /** Headline with an optional script-set first word, as on the banner. */
 function headline(text, { script = false, tag = 'h2', cls = 'ed-title' } = {}) {
   if (!text) return '';
-  if (!script) return `<${tag} class="${cls}">${esc(text)}</${tag}>`;
-  const words = String(text).trim().split(/\s+/);
-  const first = words.shift();
+  if (!script) return `<${tag} class="${cls}">${rich(text)}</${tag}>`;
+  // The swash initial takes the first word. Emphasis inside the heading has to
+  // survive that split, so the rest is cleaned as rich text and only the first
+  // word — which the script face draws — is taken as plain.
+  const plain = String(text).replace(/<[^>]*>/g, ' ').trim();
+  const first = plain.split(/\s+/)[0] || '';
+  const restRaw = String(text).trim();
+  const cut = restRaw.replace(/^(\s*<[^>]*>\s*)*/, '');
+  const rest = cut.slice(first.length);
   return `<${tag} class="${cls} has-script"><span class="ed-script">${esc(first)}</span>${
-    words.length ? ` ${esc(words.join(' '))}` : ''}</${tag}>`;
+    rest.trim() ? ` ${rich(rest)}` : ''}</${tag}>`;
 }
 
 const TONES = [
@@ -308,12 +348,9 @@ export const FONT_CHOICES = [
 // One row per role — the face and its colour together, since nobody thinks
 // about them separately. Eight stacked controls read as a wall; four rows of
 // two read as a list of four decisions.
-const TYPE_FIELDS = [
-  { key: 'fontDisplay', inkKey: 'inkDisplay', label: 'Headings', type: 'typeface' },
-  { key: 'fontBody', inkKey: 'inkBody', label: 'Body text', type: 'typeface' },
-  { key: 'fontUi', inkKey: 'inkUi', label: 'Small labels', type: 'typeface' },
-  { key: 'fontScript', inkKey: 'inkScript', label: 'Script initial', type: 'typeface' },
-];
+const TYPE_FIELDS = TYPE_ROLES.map((r) => ({
+  key: r.font, inkKey: r.ink, label: r.label, type: 'typeface', role: r,
+}));
 
 const COMMON_FIELDS = [
   { key: 'tone', label: 'Background colour', type: 'select', options: TONES },
@@ -360,6 +397,11 @@ export const SECTION_BASE = {
   inkBody: '',
   inkUi: '',
   inkScript: '',
+  wtDisplay: '', wtBody: '', wtUi: '', wtScript: '',
+  itDisplay: '', itBody: '', itUi: '', itScript: '',
+  szDisplay: '', szBody: '', szUi: '', szScript: '',
+  lsDisplay: '', lsBody: '', lsUi: '',
+  ttDisplay: '', ttUi: '',
 };
 
 /* -------------------------------------------------------------- types ---- */
@@ -383,9 +425,9 @@ export const SECTION_TYPES = {
       showInset: false,
     }),
     fields: [
-      { key: 'eyebrow', label: 'Eyebrow', type: 'text' },
-      { key: 'title', label: 'Title', type: 'text' },
-      { key: 'subtitle', label: 'Subtitle', type: 'text' },
+      { key: 'eyebrow', label: 'Eyebrow', type: 'rich' },
+      { key: 'title', label: 'Title', type: 'rich' },
+      { key: 'subtitle', label: 'Subtitle', type: 'rich' },
       { key: 'script', label: 'Script first word', type: 'bool' },
       { key: 'height', label: 'Height', type: 'select', options: [['short', 'Short'], ['tall', 'Tall'], ['full', 'Full screen']] },
       { key: 'align', label: 'Type alignment', type: 'select', options: [['center', 'Centred'], ['left', 'Left'], ['right', 'Right']] },
@@ -412,7 +454,7 @@ export const SECTION_TYPES = {
           <div class="hero-type">
             ${kicker(sub(sec.eyebrow))}
             ${headline(sub(sec.title), { script: sec.script, tag: 'h1', cls: 'hero-title' })}
-            ${sec.subtitle ? `<p class="hero-sub">${esc(sub(sec.subtitle))}</p>` : ''}
+            ${sec.subtitle ? `<p class="hero-sub">${rich(sub(sec.subtitle))}</p>` : ''}
           </div>
           ${sec.showInset ? `<div class="hero-inset">${figure(sec.inset, { seed: `${sec.id}i`, eager: true })}</div>` : ''}
         </div>`, 'ed-bleed');
@@ -434,9 +476,9 @@ export const SECTION_TYPES = {
       picture: media({ ratio: '4/5', frame: 'plate' }),
     }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
-      { key: 'body', label: 'Text', type: 'textarea' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
+      { key: 'body', label: 'Text', type: 'rich', multiline: true },
       { key: 'flip', label: 'Picture on the right', type: 'bool' },
       { key: 'dropcap', label: 'Drop capital', type: 'bool' },
       { key: 'ratio', label: 'Proportions', type: 'select', options: [['balanced', 'Even'], ['wide-image', 'Wider picture'], ['wide-text', 'Wider text']] },
@@ -451,7 +493,7 @@ export const SECTION_TYPES = {
             ${kicker(sec.kicker)}
             ${headline(sec.title)}
             ${sec.body ? `<div class="ed-prose${sec.dropcap ? ' has-dropcap' : ''}">${
-              esc(sec.body).split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('')
+              rich(sec.body).split(/\n{2,}/).map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('')
             }</div>` : ''}
           </div>
         </div>`);
@@ -474,9 +516,9 @@ export const SECTION_TYPES = {
       ],
     }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
-      { key: 'note', label: 'Handwritten note', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
+      { key: 'note', label: 'Handwritten note', type: 'rich' },
       { key: 'height', label: 'Height', type: 'select', options: [['short', 'Short'], ['tall', 'Tall'], ['taller', 'Taller']] },
       { key: 'items', label: 'Pictures', type: 'medialist', size: '1000 × 1250 px' },
       ...COMMON_FIELDS,
@@ -487,7 +529,7 @@ export const SECTION_TYPES = {
         ${sec.kicker || sec.title ? `<div class="ed-head">${kicker(sec.kicker)}${headline(sec.title)}</div>` : ''}
         <div class="collage collage-${sec.height || 'tall'}">
           ${items.map((m, i) => `<div class="collage-item">${figure(m, { seed: `${sec.id}-${i}` })}</div>`).join('')}
-          ${sec.note ? `<p class="marginalia">${esc(sec.note)}</p>` : ''}
+          ${sec.note ? `<p class="marginalia">${rich(sec.note)}</p>` : ''}
         </div>`);
     },
   },
@@ -504,8 +546,8 @@ export const SECTION_TYPES = {
       items: [media({ ratio: '3/4' }), media({ ratio: '3/4' }), media({ ratio: '3/4' })],
     }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
       { key: 'columns', label: 'Columns', type: 'range', min: 2, max: 5, step: 1 },
       { key: 'stagger', label: 'Stagger vertically', type: 'bool' },
       { key: 'items', label: 'Pictures', type: 'medialist', size: '800 × 1000 px' },
@@ -532,7 +574,7 @@ export const SECTION_TYPES = {
       style: 'quote',
     }),
     fields: [
-      { key: 'text', label: 'Text', type: 'textarea' },
+      { key: 'text', label: 'Text', type: 'rich', multiline: true },
       { key: 'attribution', label: 'Attribution', type: 'text' },
       { key: 'size', label: 'Size', type: 'select', options: [['medium', 'Medium'], ['large', 'Large'], ['huge', 'Huge']] },
       { key: 'style', label: 'Treatment', type: 'select', options: [['quote', 'Pull quote'], ['caps', 'Letterspaced caps'], ['script', 'Script']] },
@@ -541,7 +583,7 @@ export const SECTION_TYPES = {
     render(sec) {
       return sectionShell(sec, `
         <blockquote class="statement st-${sec.size || 'large'} st-${sec.style || 'quote'}">
-          <p>${esc(sec.text || '')}</p>
+          <p>${rich(sec.text || '')}</p>
           ${sec.attribution ? `<cite>${esc(sec.attribution)}</cite>` : ''}
         </blockquote>`);
     },
@@ -558,7 +600,7 @@ export const SECTION_TYPES = {
     }),
     fields: [
       { key: 'mode', label: 'Kind', type: 'select', options: [['ornament', 'Ornament rule'], ['lace', 'Lace band'], ['vine', 'Vine band'], ['strip', 'Image strip'], ['rule', 'Plain rule']] },
-      { key: 'note', label: 'Handwritten note', type: 'text' },
+      { key: 'note', label: 'Handwritten note', type: 'rich' },
       { key: 'strip', label: 'Strip image', type: 'media', size: '1800 × 260 px' },
       ...COMMON_FIELDS,
     ],
@@ -575,7 +617,7 @@ export const SECTION_TYPES = {
                <svg viewBox="0 0 48 48"><path d="M24 7.5c1.3 9.2 3.1 11 12.3 12.3C27.1 21.1 25.3 22.9 24 32.1c-1.3-9.2-3.1-11-12.3-12.3C20.9 18.5 22.7 16.7 24 7.5z"/></svg>
                <span class="ornament-line"></span>
              </div>`;
-      return sectionShell(sec, `${body}${sec.note ? `<p class="marginalia center">${esc(sec.note)}</p>` : ''}`);
+      return sectionShell(sec, `${body}${sec.note ? `<p class="marginalia center">${rich(sec.note)}</p>` : ''}`);
     },
   },
 
@@ -585,13 +627,13 @@ export const SECTION_TYPES = {
     blurb: 'A short line in the script face, set at an angle.',
     create: () => ({ text: 'reading is the only souvenir I keep', align: 'center', rotate: -2 }),
     fields: [
-      { key: 'text', label: 'Text', type: 'text' },
+      { key: 'text', label: 'Text', type: 'rich' },
       { key: 'align', label: 'Alignment', type: 'select', options: [['left', 'Left'], ['center', 'Centred'], ['right', 'Right']] },
       { key: 'rotate', label: 'Tilt', type: 'range', min: -8, max: 8, step: 1 },
       ...COMMON_FIELDS,
     ],
     render(sec) {
-      return sectionShell(sec, `<p class="marginalia big" style="text-align:${sec.align || 'center'};--m-rot:${Number(sec.rotate) || 0}deg">${esc(sec.text || '')}</p>`);
+      return sectionShell(sec, `<p class="marginalia big" style="text-align:${sec.align || 'center'};--m-rot:${Number(sec.rotate) || 0}deg">${rich(sec.text || '')}</p>`);
     },
   },
 
@@ -601,9 +643,9 @@ export const SECTION_TYPES = {
     blurb: 'The year, the quarter and the nonfiction share. Live data.',
     create: () => ({ kicker: '', title: 'The Year So Far', subtitle: 'Everything finished, counted and kept.', showPeriod: true }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
-      { key: 'subtitle', label: 'Subtitle', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
+      { key: 'subtitle', label: 'Subtitle', type: 'rich' },
       { key: 'showPeriod', label: 'Show date range', type: 'bool' },
       ...COMMON_FIELDS,
     ],
@@ -626,7 +668,7 @@ export const SECTION_TYPES = {
       return sectionShell(sec, `
         <div class="ed-head ed-head-split">
           <div>${kicker(sec.kicker)}${headline(sec.title)}
-            ${sec.subtitle ? `<p class="ed-sub">${esc(sec.subtitle)}</p>` : ''}</div>
+            ${sec.subtitle ? `<p class="ed-sub">${rich(sec.subtitle)}</p>` : ''}</div>
           ${sec.showPeriod ? `<p class="ed-meta">January — December ${year}</p>` : ''}
         </div>
         <div class="measures">
@@ -652,8 +694,8 @@ export const SECTION_TYPES = {
     blurb: 'Whether this quarter’s classic, re-read and TBR book are done.',
     create: () => ({ kicker: '', title: 'This Period' }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
       ...COMMON_FIELDS,
     ],
     render(sec) {
@@ -692,9 +734,9 @@ export const SECTION_TYPES = {
     blurb: 'Your challenges, each as its own small publication.',
     create: () => ({ kicker: '', title: 'Reading Challenges', subtitle: 'Little projects to read against, all year long.', limit: 0, layout: 'editorial' }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
-      { key: 'subtitle', label: 'Subtitle', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
+      { key: 'subtitle', label: 'Subtitle', type: 'rich' },
       { key: 'layout', label: 'Arrangement', type: 'select', options: [['editorial', 'Alternating spreads'], ['list', 'Compact list']] },
       { key: 'limit', label: 'How many (0 = all)', type: 'range', min: 0, max: 12, step: 1 },
       ...COMMON_FIELDS,
@@ -718,7 +760,7 @@ export const SECTION_TYPES = {
       const head = (sec.kicker || sec.title || sec.subtitle)
         ? `<div class="ed-head">
              <div>${kicker(sec.kicker)}${headline(sec.title)}
-               ${sec.subtitle ? `<p class="ed-sub">${esc(sec.subtitle)}</p>` : ''}</div>
+               ${sec.subtitle ? `<p class="ed-sub">${rich(sec.subtitle)}</p>` : ''}</div>
            </div>`
         : '';
       return sectionShell(sec, `${head}${body}`);
@@ -731,9 +773,9 @@ export const SECTION_TYPES = {
     blurb: 'The bookmarks you have earned, laid out as a collection.',
     create: () => ({ kicker: '', title: 'The Bookmark Archive', subtitle: 'Earned one at a time, kept for good.', mode: 'recent', limit: 10 }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
-      { key: 'subtitle', label: 'Subtitle', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
+      { key: 'subtitle', label: 'Subtitle', type: 'rich' },
       { key: 'mode', label: 'Show', type: 'select', options: [['recent', 'Recently earned'], ['all', 'Everything, by challenge']] },
       { key: 'limit', label: 'How many', type: 'range', min: 4, max: 24, step: 1 },
       ...COMMON_FIELDS,
@@ -755,7 +797,7 @@ export const SECTION_TYPES = {
         return sectionShell(sec, `
           <div class="ed-head ed-head-split">
             <div>${kicker(sec.kicker)}${headline(sec.title)}
-              ${sec.subtitle ? `<p class="ed-sub">${esc(sec.subtitle)}</p>` : ''}</div>
+              ${sec.subtitle ? `<p class="ed-sub">${rich(sec.subtitle)}</p>` : ''}</div>
             <p class="ed-meta">${collected} of ${total}</p>
           </div>${groups}`);
       }
@@ -769,7 +811,7 @@ export const SECTION_TYPES = {
       return sectionShell(sec, `
         <div class="ed-head ed-head-split">
           <div>${kicker(sec.kicker)}${headline(sec.title)}
-            ${sec.subtitle ? `<p class="ed-sub">${esc(sec.subtitle)}</p>` : ''}</div>
+            ${sec.subtitle ? `<p class="ed-sub">${rich(sec.subtitle)}</p>` : ''}</div>
           <a class="ed-meta" href="#/bookmarks">${collected} of ${total} collected &rarr;</a>
         </div>
         <div class="bm-grid">${tiles}</div>`);
@@ -782,8 +824,8 @@ export const SECTION_TYPES = {
     blurb: 'The latest books finished, with their covers.',
     create: () => ({ kicker: 'Lately', title: 'Recently Finished', limit: 5 }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
       { key: 'limit', label: 'How many', type: 'range', min: 2, max: 12, step: 1 },
       ...COMMON_FIELDS,
     ],
@@ -824,8 +866,8 @@ export const SECTION_TYPES = {
       showCount: true,
     }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
       { key: 'showFilters', label: 'Show the filter chips', type: 'bool' },
       { key: 'showCount', label: 'Show the tally', type: 'bool' },
       ...COMMON_FIELDS,
@@ -862,8 +904,8 @@ export const SECTION_TYPES = {
     needs: 'bookmarks',
     create: () => ({ kicker: '', title: '', showCount: true }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
       { key: 'showCount', label: 'Show each tally', type: 'bool' },
       ...COMMON_FIELDS,
     ],
@@ -947,7 +989,7 @@ export const SECTION_TYPES = {
       const type = `<div class="word-type">
         ${sec.showLabel !== false ? kicker(`${w.label || 'Word of the Year'}${w.period ? ` · ${w.period}` : ''}`) : ''}
         <p class="word-word">${esc(w.word)}</p>
-        ${sec.showNote !== false && w.note ? `<p class="word-note">${esc(w.note)}</p>` : ''}
+        ${sec.showNote !== false && w.note ? `<p class="word-note">${rich(w.note)}</p>` : ''}
         ${sec.showCount !== false ? `<p class="word-tally"><a class="word-link" href="${href}">${esc(tally)} &rarr;</a></p>` : ''}
       </div>`;
 
@@ -967,8 +1009,8 @@ export const SECTION_TYPES = {
     needs: 'word',
     create: () => ({ kicker: 'The record', title: 'Where you met it', showStats: true }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
       { key: 'showStats', label: 'Show the summary figures', type: 'bool' },
       ...COMMON_FIELDS,
     ],
@@ -1024,8 +1066,8 @@ export const SECTION_TYPES = {
       tone: 'none',
     }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
       { key: 'showWhy', label: 'Show why each one counts', type: 'bool' },
       { key: 'showOutside', label: 'Include ones outside the dates', type: 'bool' },
       ...COMMON_FIELDS,
@@ -1136,8 +1178,8 @@ export const SECTION_TYPES = {
       showStanding: true,
     }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich' },
       { key: 'showFilter', label: 'Show what counts', type: 'bool' },
       { key: 'showBar', label: 'Show the progress bar', type: 'bool' },
       { key: 'showStanding', label: 'Show the tally underneath', type: 'bool' },
@@ -1195,8 +1237,8 @@ export const SECTION_TYPES = {
       tone: 'sage',
     }),
     fields: [
-      { key: 'kicker', label: 'Small label', type: 'text' },
-      { key: 'title', label: 'Heading', type: 'text', hint: 'Left empty, it names itself to suit the challenge.' },
+      { key: 'kicker', label: 'Small label', type: 'rich' },
+      { key: 'title', label: 'Heading', type: 'rich', hint: 'Left empty, it names itself to suit the challenge.' },
       ...COMMON_FIELDS,
     ],
     render(sec, ctx) {

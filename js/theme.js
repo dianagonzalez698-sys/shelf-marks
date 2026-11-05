@@ -60,33 +60,111 @@ export const CONTENT_SCHEMA = [
 /* -------------------------------------------------------- font stacks ---- */
 
 export const FONT_STACKS = [
-  // Grouped so a long list still reads as a shelf rather than a heap.
-  { group: 'Old-style serif', label: 'Cormorant Garamond', value: "'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif" },
-  { group: 'Old-style serif', label: 'EB Garamond', value: "'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif" },
-  { group: 'Old-style serif', label: 'Lora', value: "'Lora', 'Iowan Old Style', Palatino, Georgia, serif" },
-  { group: 'Old-style serif', label: 'Libre Baskerville', value: "'Libre Baskerville', Baskerville, Georgia, serif" },
-  { group: 'Old-style serif', label: 'System serif', value: "'Iowan Old Style', Palatino, Georgia, 'Times New Roman', serif" },
+  // Each family records the weights and italics it actually ships, so the
+  // styling controls can offer what exists and say plainly what does not.
+  // Synthetic bolding and machine-slanted calligraphy are the thing this
+  // metadata exists to prevent.
 
-  { group: 'Display serif', label: 'Bodoni Moda', value: "'Bodoni Moda', 'Didot', 'Times New Roman', serif" },
-  { group: 'Display serif', label: 'Playfair Display', value: "'Playfair Display', 'Didot', Georgia, serif" },
-  { group: 'Display serif', label: 'DM Serif Display', value: "'DM Serif Display', Didot, Georgia, serif" },
-  { group: 'Display serif', label: 'Marcellus', value: "'Marcellus', 'Trajan Pro', Palatino, serif" },
-  { group: 'Display serif', label: 'Italiana', value: "'Italiana', 'Didot', Palatino, serif" },
+  /* ------- ornamental display script ------- */
+  { group: 'Ornamental script', label: 'Monsieur La Doulaise', weights: [400], italic: false,
+    value: "'Monsieur La Doulaise', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Ornamental script', label: 'Mrs Saint Delafield', weights: [400], italic: false,
+    value: "'Mrs Saint Delafield', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Ornamental script', label: 'Herr Von Muellerhoff', weights: [400], italic: false,
+    value: "'Herr Von Muellerhoff', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Ornamental script', label: 'Imperial Script', weights: [400], italic: false,
+    value: "'Imperial Script', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Ornamental script', label: 'Corinthia', weights: [400, 700], italic: false,
+    value: "'Corinthia', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Ornamental script', label: 'Italianno', weights: [400], italic: false,
+    value: "'Italianno', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Ornamental script', label: 'Pinyon Script', weights: [400], italic: false,
+    value: "'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive" },
+  { group: 'Ornamental script', label: 'Tangerine', weights: [400, 700], italic: false,
+    value: "'Tangerine', 'Snell Roundhand', 'Apple Chancery', cursive" },
 
-  { group: 'Script', label: 'Pinyon Script', value: "'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive" },
-  { group: 'Script', label: 'Great Vibes', value: "'Great Vibes', 'Snell Roundhand', 'Apple Chancery', cursive" },
-  { group: 'Script', label: 'Parisienne', value: "'Parisienne', 'Snell Roundhand', 'Apple Chancery', cursive" },
-  { group: 'Script', label: 'Petit Formal Script', value: "'Petit Formal Script', 'Snell Roundhand', cursive" },
+  /* ------- formal script ------- */
+  { group: 'Formal script', label: 'Petit Formal Script', weights: [400], italic: false,
+    value: "'Petit Formal Script', 'Snell Roundhand', cursive" },
+  { group: 'Formal script', label: 'Parisienne', weights: [400], italic: false,
+    value: "'Parisienne', 'Snell Roundhand', cursive" },
+  { group: 'Formal script', label: 'Great Vibes', weights: [400], italic: false,
+    value: "'Great Vibes', 'Snell Roundhand', cursive" },
 
-  { group: 'Sans serif', label: 'Jost', value: "'Jost', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
-  { group: 'Sans serif', label: 'Josefin Sans', value: "'Josefin Sans', 'Futura', -apple-system, Arial, sans-serif" },
-  { group: 'Sans serif', label: 'Karla', value: "'Karla', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
-  { group: 'Sans serif', label: 'Work Sans', value: "'Work Sans', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
-  { group: 'Sans serif', label: 'System sans', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" },
+  /* ------- high-contrast editorial serif ------- */
+  { group: 'Editorial serif', label: 'Playfair Display', weights: [400, 500, 600, 700, 800, 900], italic: true,
+    value: "'Playfair Display', 'Didot', Georgia, serif" },
+  { group: 'Editorial serif', label: 'Bodoni Moda', weights: [400, 500, 600, 700, 800, 900], italic: true,
+    value: "'Bodoni Moda', 'Didot', 'Times New Roman', serif" },
+  { group: 'Editorial serif', label: 'Noto Serif Display', weights: [400, 500, 600, 700, 800, 900], italic: true,
+    value: "'Noto Serif Display', 'Didot', Georgia, serif" },
+  { group: 'Editorial serif', label: 'DM Serif Display', weights: [400], italic: true,
+    value: "'DM Serif Display', Didot, Georgia, serif" },
+  { group: 'Editorial serif', label: 'Prata', weights: [400], italic: false,
+    value: "'Prata', Didot, Georgia, serif" },
+  { group: 'Editorial serif', label: 'Gilda Display', weights: [400], italic: false,
+    value: "'Gilda Display', Didot, Georgia, serif" },
+  { group: 'Editorial serif', label: 'Antic Didone', weights: [400], italic: false,
+    value: "'Antic Didone', Didot, Georgia, serif" },
+  { group: 'Editorial serif', label: 'Marcellus', weights: [400], italic: false,
+    value: "'Marcellus', 'Trajan Pro', Palatino, serif" },
+  { group: 'Editorial serif', label: 'Italiana', weights: [400], italic: false,
+    value: "'Italiana', Didot, Palatino, serif" },
 
-  { group: 'Typewriter', label: 'Special Elite', value: "'Special Elite', 'Courier New', monospace" },
-  { group: 'Typewriter', label: 'Courier Prime', value: "'Courier Prime', 'Courier New', monospace" },
+  /* ------- classical book serif ------- */
+  { group: 'Book serif', label: 'Cormorant Garamond', weights: [300, 400, 500, 600, 700], italic: true,
+    value: "'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif" },
+  { group: 'Book serif', label: 'EB Garamond', weights: [400, 500, 600, 700, 800], italic: true,
+    value: "'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif" },
+  { group: 'Book serif', label: 'Crimson Pro', weights: [300, 400, 500, 600, 700, 800], italic: true,
+    value: "'Crimson Pro', 'Iowan Old Style', Palatino, Georgia, serif" },
+  { group: 'Book serif', label: 'Lora', weights: [400, 500, 600, 700], italic: true,
+    value: "'Lora', 'Iowan Old Style', Palatino, Georgia, serif" },
+  { group: 'Book serif', label: 'Libre Baskerville', weights: [400, 700], italic: true,
+    value: "'Libre Baskerville', Baskerville, Georgia, serif" },
+  { group: 'Book serif', label: 'Spectral', weights: [300, 400, 500, 600, 700, 800], italic: true,
+    value: "'Spectral', 'Iowan Old Style', Palatino, Georgia, serif" },
+  { group: 'Book serif', label: 'System serif', weights: [400, 700], italic: true,
+    value: "'Iowan Old Style', Palatino, Georgia, 'Times New Roman', serif" },
+
+  /* ------- supporting sans ------- */
+  { group: 'Supporting sans', label: 'Jost', weights: [300, 400, 500, 600, 700], italic: true,
+    value: "'Jost', 'Futura', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
+  { group: 'Supporting sans', label: 'Karla', weights: [300, 400, 500, 600, 700, 800], italic: true,
+    value: "'Karla', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
+  { group: 'Supporting sans', label: 'Work Sans', weights: [300, 400, 500, 600, 700, 800], italic: true,
+    value: "'Work Sans', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
+  { group: 'Supporting sans', label: 'Josefin Sans', weights: [300, 400, 500, 600, 700], italic: true,
+    value: "'Josefin Sans', 'Futura', -apple-system, Arial, sans-serif" },
+  { group: 'Supporting sans', label: 'Figtree', weights: [300, 400, 500, 600, 700, 800], italic: true,
+    value: "'Figtree', -apple-system, 'Helvetica Neue', Arial, sans-serif" },
+  { group: 'Supporting sans', label: 'System sans', weights: [400, 600, 700], italic: true,
+    value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" },
+
+  /* ------- typewriter ------- */
+  { group: 'Typewriter', label: 'Special Elite', weights: [400], italic: false,
+    value: "'Special Elite', 'Courier New', monospace" },
+  { group: 'Typewriter', label: 'Courier Prime', weights: [400, 700], italic: true,
+    value: "'Courier Prime', 'Courier New', monospace" },
 ];
+
+/** The library entry for a stack, so callers can ask what it supports. */
+export function fontFace(stack) {
+  const v = String(stack || '').trim();
+  return FONT_STACKS.find((f) => f.value === v) || null;
+}
+
+/** Weights a stack actually ships; a sensible default when it is unknown. */
+export function fontWeights(stack) {
+  const f = fontFace(stack);
+  return f ? f.weights : [400, 500, 600, 700];
+}
+
+/** Whether a stack ships a true italic. Scripts generally do not. */
+export function fontHasItalic(stack) {
+  const f = fontFace(stack);
+  return f ? !!f.italic : true;
+}
 
 /* ------------------------------------------------------ token schema ----- */
 // type: color | font | length | number | select | ratio
@@ -147,7 +225,14 @@ export const THEME_SCHEMA = [
       { var: '--fs-body', label: 'Body size', type: 'length', min: .85, max: 1.4, step: .01, unit: 'rem' },
       { var: '--fs-label', label: 'Label size', type: 'length', min: .55, max: 1, step: .01, unit: 'rem' },
       { var: '--fs-nav', label: 'Navigation size', type: 'length', min: .55, max: 1.1, step: .01, unit: 'rem' },
-      { var: '--fw-display', label: 'Display weight', type: 'select', options: [['300', 'Light'], ['400', 'Regular'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']] },
+      { var: '--fw-display', label: 'Display weight', type: 'select', options: [['300', 'Light'], ['400', 'Regular'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold'], ['800', 'Extrabold'], ['900', 'Black']] },
+      { var: '--fi-display', label: 'Display style', type: 'select', options: [['normal', 'Normal'], ['italic', 'Italic']] },
+      { var: '--fw-body', label: 'Body weight', type: 'select', options: [['300', 'Light'], ['400', 'Regular'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']] },
+      { var: '--fi-body', label: 'Body style', type: 'select', options: [['normal', 'Normal'], ['italic', 'Italic']] },
+      { var: '--fw-label', label: 'Label weight', type: 'select', options: [['400', 'Regular'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']] },
+      { var: '--fi-ui', label: 'Label style', type: 'select', options: [['normal', 'Normal'], ['italic', 'Italic']] },
+      { var: '--fz-display', label: 'Display size', type: 'number', min: .6, max: 1.8, step: .05 },
+      { var: '--fz-body', label: 'Body size', type: 'number', min: .7, max: 1.6, step: .05 },
       { var: '--fw-heading', label: 'Heading weight', type: 'select', options: [['400', 'Regular'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']] },
       { var: '--ls-nav', label: 'Nav letterspacing', type: 'length', min: 0, max: .4, step: .01, unit: 'em' },
       { var: '--ls-label', label: 'Label letterspacing', type: 'length', min: 0, max: .4, step: .01, unit: 'em' },

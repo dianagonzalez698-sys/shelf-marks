@@ -88,6 +88,59 @@ function popSheet() {
   paintSheet();
 }
 
+/* ------------------------------------------------------------ rich text --- */
+//
+// Displayed text may carry emphasis on a word or phrase. Only bold, italic and
+// a line break survive: everything else — tags, attributes, URLs, scripts — is
+// escaped to plain text. Sanitising happens at *render* time rather than only
+// on save, because a backup file is editable and arrives from outside.
+
+const RICH_OK = { B: 'b', STRONG: 'b', I: 'i', EM: 'i', BR: 'br' };
+
+function cleanRich(root, out) {
+  for (const node of root.childNodes) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      out.appendChild(document.createTextNode(node.nodeValue));
+      continue;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) continue;
+    const keep = RICH_OK[node.tagName];
+    if (!keep) {                      // unknown element: keep its words, drop it
+      cleanRich(node, out);
+      continue;
+    }
+    const el = document.createElement(keep);   // rebuilt, so no attributes carry
+    if (keep !== 'br') cleanRich(node, el);
+    out.appendChild(el);
+  }
+}
+
+/** A stored string rendered as safe inline HTML. */
+export function rich(value) {
+  const raw = String(value == null ? '' : value);
+  if (!raw) return '';
+  if (!/[<&]/.test(raw)) return esc(raw);     // plain text, the common case
+  const doc = new DOMParser().parseFromString(`<body>${raw}</body>`, 'text/html');
+  const frag = document.createElement('div');
+  cleanRich(doc.body, frag);
+  return frag.innerHTML;
+}
+
+/** The same cleaning, for storing what a contenteditable produced. */
+export function richValue(html) {
+  const doc = new DOMParser().parseFromString(`<body>${String(html || '')}</body>`, 'text/html');
+  const frag = document.createElement('div');
+  cleanRich(doc.body, frag);
+  const out = frag.innerHTML.replace(/(<br>)+$/, '').trim();
+  return /^(<b><\/b>|<i><\/i>|\s)*$/.test(out) ? '' : out;
+}
+
+/** Plain text of a rich string, for titles and other attribute contexts. */
+export function richPlain(value) {
+  const doc = new DOMParser().parseFromString(`<body>${String(value || '')}</body>`, 'text/html');
+  return doc.body.textContent || '';
+}
+
 export function openSheet(innerHtml, { onMount, reopen } = {}) {
   const host = document.getElementById('sheet-host');
   if (!host) return () => {};

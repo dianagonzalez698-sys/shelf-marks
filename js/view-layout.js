@@ -6,7 +6,8 @@ import { SECTION_TYPES, typeList, FONT_CHOICES } from './sections.js';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
-import { esc, attr, toast, openSheet, confirmSheet, navigate, render } from './ui.js';
+import { fontWeights, fontHasItalic } from './theme.js';
+import { esc, attr, toast, openSheet, confirmSheet, navigate, render, rich, richValue } from './ui.js';
 import { studioNav } from './studio-nav.js';
 
 /* ------------------------------------------------------------- pages ---- */
@@ -193,6 +194,67 @@ function facePickerHtml(current) {
   return `<div class="face-list">${rows}</div>`;
 }
 
+const WEIGHT_NAMES = {
+  300: 'Light', 400: 'Regular', 500: 'Medium', 600: 'Semibold',
+  700: 'Bold', 800: 'Extrabold', 900: 'Black',
+};
+
+/**
+ * Everything about one type role: the face, then how it is set.
+ *
+ * Weight and italic are offered from what the chosen family actually ships,
+ * so the panel never promises a bold that would be faked by the browser or an
+ * italic that would be a machine slant of a copperplate.
+ */
+function stylePanelHtml(face, r, secId, cur) {
+  const weights = fontWeights(face);
+  const canItalic = fontHasItalic(face);
+  const w = cur(r.weight);
+  const ital = cur(r.italic) === 'italic';
+
+  const chip = (key, val, label, on, disabled = false) => `<button type="button"
+    class="sty-chip${on ? ' is-on' : ''}" data-sty="${attr(key)}" data-val="${attr(val)}"
+    ${disabled ? 'disabled' : ''}>${esc(label)}</button>`;
+
+  const slider = (key, label, min, max, step, val, unit) => (key ? `<div class="sty-slider">
+      <label>${esc(label)} <span data-styout="${attr(key)}">${esc(val === '' ? 'auto' : val + unit)}</span></label>
+      <input type="range" data-sty="${attr(key)}" data-unit="${attr(unit)}"
+        min="${min}" max="${max}" step="${step}" value="${attr(val === '' ? '' : val)}">
+    </div>` : '');
+
+  return `<div class="face-list">${facePickerHtml(face)}</div>
+    <div class="sty-block">
+      <p class="sty-head">Weight</p>
+      <div class="sty-chips">
+        ${chip(r.weight, '', 'Default', w === '')}
+        ${weights.map((n) => chip(r.weight, String(n), WEIGHT_NAMES[n] || String(n), w === String(n))).join('')}
+      </div>
+
+      <p class="sty-head">Style</p>
+      <div class="sty-chips">
+        ${chip(r.italic, '', 'Normal', !ital)}
+        ${chip(r.italic, 'italic', 'Italic', ital, !canItalic)}
+      </div>
+      ${canItalic ? '' : '<p class="hint">This family has no true italic, so the option is off rather than faked by slanting it.</p>'}
+
+      ${slider(r.size, 'Size', 60, 180, 5, cur(r.size) ? Math.round(Number(cur(r.size)) * 100) : '', '%')}
+      ${slider(r.track, 'Letter spacing', -4, 40, 1, cur(r.track) ? Math.round(parseFloat(cur(r.track)) * 100) : '', '')}
+
+      ${r.transform ? `<p class="sty-head">Case</p>
+        <div class="sty-chips">
+          ${chip(r.transform, '', 'Default', cur(r.transform) === '')}
+          ${chip(r.transform, 'none', 'As typed', cur(r.transform) === 'none')}
+          ${chip(r.transform, 'uppercase', 'UPPER', cur(r.transform) === 'uppercase')}
+          ${chip(r.transform, 'lowercase', 'lower', cur(r.transform) === 'lowercase')}
+          ${chip(r.transform, 'capitalize', 'Title', cur(r.transform) === 'capitalize')}
+        </div>` : ''}
+
+      <div class="btn-row" style="margin-top:.9rem">
+        <button class="btn btn-sm btn-block" type="button" data-styreset>Reset this role</button>
+      </div>
+    </div>`;
+}
+
 // Palette first, then a wheel and a hex box for anything else.
 function inkPickerHtml(current, id) {
   const cur = String(current || '');
@@ -336,25 +398,50 @@ function fieldControl(f, value, secId) {
     case 'bool':
       return `<label class="switch-row"><input type="checkbox" id="${id}" data-field="${attr(f.key)}" ${value ? 'checked' : ''}>
         <span class="switch-text">${esc(f.label)}</span></label>`;
+    case 'rich': {
+      // Emphasis on a word, not on the whole line: a contenteditable holding
+      // the same restricted subset the renderer will allow back out.
+      return `<div class="field">
+        <label for="${id}">${esc(f.label)}</label>
+        <div class="rich-bar" role="group" aria-label="Formatting">
+          <button type="button" class="rich-btn" data-rich="bold" title="Bold (⌘B)"><b>B</b></button>
+          <button type="button" class="rich-btn" data-rich="italic" title="Italic (⌘I)"><i>I</i></button>
+          <button type="button" class="rich-btn rich-clear" data-rich="clear" title="Plain">⦸</button>
+        </div>
+        <div class="rich-input" id="${id}" data-rich-field="${attr(f.key)}"
+             contenteditable="true" role="textbox" aria-multiline="${f.multiline ? 'true' : 'false'}"
+             >${rich(value)}</div>
+        <p class="hint">Select a word and press <b>⌘B</b> or <b>⌘I</b> to emphasise just that part.</p>
+      </div>`;
+    }
     case 'typeface': {
-      // Face and colour on one line. Both open a proper picker rather than a
-      // native menu, because a native <option> cannot show its own typeface —
-      // which is the whole point of choosing one.
+      // Face and colour on one line; everything else about this role lives in
+      // the panel the face button opens, so four roles stay four rows.
+      const r = f.role || {};
       const face = String(value || '');
       const ink = String(sec_ink(secId, f.inkKey) || '');
       const name = (FONT_CHOICES.find((x) => x.value === face) || {}).label || 'Match the site';
+      const cur = (k) => (k ? String(sec_ink(secId, k) || '') : '');
+      const weight = cur(r.weight);
+      const italic = cur(r.italic) === 'italic';
+      const extra = ['weight', 'italic', 'size', 'track', 'transform']
+        .filter((k) => r[k])
+        .map((k) => `<input type="hidden" data-field="${attr(r[k])}" value="${attr(cur(r[k]))}">`)
+        .join('');
       return `<div class="type-row">
         <span class="type-row-label">${esc(f.label)}</span>
         <div class="type-row-ctl">
           <button type="button" class="face-btn" data-face="${attr(f.key)}"
-            style="font-family:${attr(face || 'inherit')}">${esc(name)}</button>
+            style="font-family:${attr(face || 'inherit')};font-weight:${attr(weight || 'inherit')};font-style:${italic ? 'italic' : 'normal'}"
+            >${esc(name)}</button>
           <button type="button" class="ink-dot${ink ? '' : ' is-auto'}" data-inkopen="${attr(f.inkKey)}"
             style="--sw:${attr(ink || 'transparent')}" title="Colour"
             aria-label="${esc(f.label)} colour"></button>
         </div>
         <input type="hidden" data-field="${attr(f.key)}" value="${attr(face)}">
         <input type="hidden" data-field="${attr(f.inkKey)}" value="${attr(ink)}">
-        <div class="type-pop" data-pop="face" hidden>${facePickerHtml(face)}</div>
+        ${extra}
+        <div class="type-pop" data-pop="face" hidden>${stylePanelHtml(face, r, secId, cur)}</div>
         <div class="type-pop" data-pop="ink" hidden>${inkPickerHtml(ink, `hex-${secId}-${f.inkKey}`)}</div>
       </div>`;
     }
@@ -497,7 +584,9 @@ export function openSectionEditor(pageId, sectionId) {
 
         const faceName = (v) => (FONT_CHOICES.find((x) => x.value === v) || {}).label || 'Match the site';
 
-        sheet.querySelectorAll('.type-row').forEach((row) => {
+        sheet.querySelectorAll('.type-row').forEach((row, rowIndex) => {
+          const r = (visibleFields(def, layout.getSection(pageId, sectionId) || sec)
+            .filter((x) => x.type === 'typeface')[rowIndex] || {}).role || {};
           const faceBtn = row.querySelector('[data-face]');
           const inkBtn = row.querySelector('[data-inkopen]');
           const facePop = row.querySelector('[data-pop="face"]');
@@ -514,16 +603,80 @@ export function openSectionEditor(pageId, sectionId) {
           faceBtn.onclick = () => toggle(facePop);
           inkBtn.onclick = () => toggle(inkPop);
 
+          const repaintBtn = () => {
+            const fv = row.querySelector(`[data-field="${faceKey}"]`).value;
+            const wv = r.weight ? row.querySelector(`[data-field="${r.weight}"]`).value : '';
+            const iv = r.italic ? row.querySelector(`[data-field="${r.italic}"]`).value : '';
+            faceBtn.style.fontFamily = fv || 'inherit';
+            faceBtn.style.fontWeight = wv || 'inherit';
+            faceBtn.style.fontStyle = iv === 'italic' ? 'italic' : 'normal';
+            faceBtn.textContent = faceName(fv);
+          };
+
           facePop.querySelectorAll('.face-opt').forEach((o) => {
             o.onclick = () => {
               const v = o.dataset.val;
               writeField(faceKey, v);
-              faceBtn.style.fontFamily = v || 'inherit';
-              faceBtn.textContent = faceName(v);
               facePop.querySelectorAll('.face-opt').forEach((x) => x.classList.toggle('is-on', x === o));
-              facePop.hidden = true;
+              // The new family may not ship the weight or italic in force, so
+              // the panel is rebuilt against what it actually has.
+              facePop.innerHTML = stylePanelHtml(v, r, sec.id, (k) => (k
+                ? (row.querySelector(`[data-field="${k}"]`) || {}).value || '' : ''));
+              bindStyle();
+              repaintBtn();
             };
           });
+
+          // Chips and sliders inside the style panel.
+          function bindStyle() {
+            facePop.querySelectorAll('.face-opt').forEach((o) => {
+              o.onclick = () => {
+                const v = o.dataset.val;
+                writeField(faceKey, v);
+                facePop.innerHTML = stylePanelHtml(v, r, sec.id, (k) => (k
+                  ? (row.querySelector(`[data-field="${k}"]`) || {}).value || '' : ''));
+                bindStyle();
+                repaintBtn();
+              };
+            });
+            facePop.querySelectorAll('[data-sty]').forEach((el) => {
+              const key = el.dataset.sty;
+              if (el.tagName === 'BUTTON') {
+                el.onclick = () => {
+                  writeField(key, el.dataset.val);
+                  el.parentElement.querySelectorAll('.sty-chip').forEach((c) => {
+                    c.classList.toggle('is-on', c === el);
+                  });
+                  repaintBtn();
+                };
+              } else {
+                el.addEventListener('input', () => {
+                  const unit = el.dataset.unit || '';
+                  // Size is a multiplier; tracking is an em value.
+                  const v = unit === '%'
+                    ? String(Number(el.value) / 100)
+                    : `${(Number(el.value) / 100).toFixed(3)}em`;
+                  writeField(key, v);
+                  const out = facePop.querySelector(`[data-styout="${key}"]`);
+                  if (out) out.textContent = unit === '%' ? `${el.value}%` : el.value;
+                  repaintBtn();
+                });
+              }
+            });
+            const reset = facePop.querySelector('[data-styreset]');
+            if (reset) {
+              reset.onclick = () => {
+                [faceKey, r.weight, r.italic, r.size, r.track, r.transform, inkKey]
+                  .filter(Boolean).forEach((k) => writeField(k, ''));
+                facePop.innerHTML = stylePanelHtml('', r, sec.id, () => '');
+                bindStyle();
+                repaintBtn();
+                inkBtn.style.setProperty('--sw', 'transparent');
+                inkBtn.classList.add('is-auto');
+              };
+            }
+          }
+          bindStyle();
 
           const wheel = inkPop.querySelector('[data-wheel]');
           const hex = inkPop.querySelector('[data-hex]');
@@ -556,6 +709,52 @@ export function openSectionEditor(pageId, sectionId) {
                 if (wheel) wheel.value = v;
                 writeField(inkKey, v); paintDot(v);
               } else if (v === '') { writeField(inkKey, ''); paintDot(''); }
+            });
+          }
+        });
+
+        // Rich fields commit their cleaned HTML through the same path as
+        // every other control, so nothing special happens on save.
+        sheet.querySelectorAll('[data-rich-field]').forEach((box) => {
+          const key = box.dataset.richField;
+          const commitRich = () => commit({ [key]: richValue(box.innerHTML) });
+
+          box.addEventListener('input', commitRich);
+          box.addEventListener('blur', commitRich);
+
+          box.addEventListener('keydown', (e) => {
+            if (!(e.metaKey || e.ctrlKey)) {
+              // A single-line field should not take a paragraph break.
+              if (e.key === 'Enter' && box.getAttribute('aria-multiline') !== 'true') e.preventDefault();
+              return;
+            }
+            const k = e.key.toLowerCase();
+            if (k !== 'b' && k !== 'i') return;
+            e.preventDefault();
+            document.execCommand(k === 'b' ? 'bold' : 'italic');
+            commitRich();
+          });
+
+          // Paste arrives as plain text: formatting comes from the buttons,
+          // not from whatever was on the clipboard.
+          box.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            document.execCommand('insertText', false, text);
+          });
+
+          const bar = box.previousElementSibling;
+          if (bar) {
+            bar.querySelectorAll('[data-rich]').forEach((b) => {
+              // mousedown, not click: the selection is still live.
+              b.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                box.focus();
+                const act = b.dataset.rich;
+                if (act === 'clear') document.execCommand('removeFormat');
+                else document.execCommand(act);
+                commitRich();
+              });
             });
           }
         });
