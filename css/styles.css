@@ -2220,7 +2220,8 @@ a.ed-meta:hover { color: var(--c-accent); }
 .ed.has-trim { overflow: visible; }
 /* A band hanging below reserves its drop, so what follows clears it while the
    band still covers the gap — draped over the next section, not pushed off. */
-.ed.has-trim-bottom { margin-bottom: calc(var(--trim-render-h, 0px) * var(--trim-pct, 0) / 100); }
+.ed.has-trim-bottom { margin-bottom: var(--trim-render-h, 0px); }
+.ed.has-trim-top    { margin-top: var(--trim-render-h, 0px); }
 
 .ed {
   /* One rendered height drives the band, its offset and the space reserved
@@ -2242,8 +2243,10 @@ a.ed-meta:hover { color: var(--c-accent); }
   background-repeat: repeat-x;
   background-size: auto 100%;
 }
-.ed-trim-bottom { bottom: calc(var(--trim-render-h) * var(--trim-pct, 0) / -100); }
-.ed-trim-top    { top: calc(var(--trim-render-h) * var(--trim-pct, 0) / -100); }
+/* Flush against the edge it hangs from: the band's top edge lands exactly on
+   the section's bottom, so nothing of the section shows beneath it. */
+.ed-trim-bottom { bottom: calc(var(--trim-render-h) * -1); }
+.ed-trim-top    { top: calc(var(--trim-render-h) * -1); }
 
 /* A hero clips its own banner, so a band hanging off it needs room. */
 .ed-hero.has-trim .hero { overflow: visible; }

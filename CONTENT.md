@@ -182,9 +182,8 @@ One setting: **Edge treatment**.
 Choosing it reveals only what applies:
 
 - A preset shape adds **Size** (how deep the cut bites)
-- **My own artwork** adds **Artwork**, **Where it goes** (bottom, top or both),
-  **Size** (the band's height) and **Hang over the edge** (how far it drapes
-  onto the section below — this is what gives the layered, pasted-in look)
+- **My own artwork** adds **Artwork**, **Where it goes** (bottom, top or both)
+  and **Size** (the band's height)
 
 For artwork, use a **transparent PNG, 1800 × 200 px**, added to the library as
 a **Cutout** so the page shows through around it. A picture with no
@@ -197,16 +196,15 @@ rather than filling it — which looks like the band is in the wrong place.
 Cut-outs are cropped to their drawing when added, and anything already in the
 library is cropped the next time the app opens.
 
-**Hang below the edge** is a share of the band's own height, so it means the
-same thing whatever size you pick:
+**A band always hangs clear of its edge.** On the bottom, its top edge lands
+exactly on the section's bottom, and the whole band drapes onto the section
+below; on the top, its bottom edge lands on the section's top. Nothing of the
+section shows beneath a bottom band — that is the layered, pasted-in look, and
+it is the only placement, so there is no offset to get wrong.
 
-- **0%** — the band sits inside the section, over its own background
-- **50%** — it straddles the seam
-- **100%** — its top edge lands exactly on the section's bottom, and the whole
-  band hangs onto the section below
-
-At 100% the section reserves the drop, so the band drapes over the section
-beneath without covering its text — and the section's own height is unchanged.
+The section beneath reserves the drop, so the band drapes over it without
+covering its text — and the section's own height is unchanged, which is why
+**Size** never shortens your banner.
 
 For two plain paper sections meeting, use a **Decorative interlude** between
 them — its **Lace band** and **Vine band** modes draw an ornamental divider,

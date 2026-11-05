@@ -49,16 +49,17 @@ function sectionShell(sec, inner, extraClass = '') {
 
   let band = '';
   let bandBottom = false;
+  let bandTop = false;
   if (isArt) {
     const url = assetSrc((sec.edgeArt || {}).assetId);
     if (url) {
       const where = sec.edgeWhere || 'bottom';
-      // The size and the drop live on the section so both the band and the
-      // margin below it compute from one value — the band shrinks on a phone
-      // and its offset has to shrink with it.
+      // A band always hangs clear of the edge it is placed on: its top sits
+      // exactly on the section's bottom, or its bottom on the section's top.
+      // There is no partial setting — "somewhere near the edge" was the whole
+      // problem, and an offset nobody can see the effect of is not a control.
       const size = Number(sec.edgeSize) || 140;
-      const pct = Math.max(0, Math.min(100, Number(sec.edgeHang) || 0));
-      styles.push(`--trim-h:${size}px`, `--trim-pct:${pct}`);
+      styles.push(`--trim-h:${size}px`);
       const bs = `--trim-img:url('${attr(url)}')`;
       if (where === 'bottom' || where === 'both') {
         band += `<span class="ed-trim ed-trim-bottom" style="${bs}" aria-hidden="true"></span>`;
@@ -66,6 +67,7 @@ function sectionShell(sec, inner, extraClass = '') {
       }
       if (where === 'top' || where === 'both') {
         band += `<span class="ed-trim ed-trim-top" style="${bs}" aria-hidden="true"></span>`;
+        bandTop = true;
       }
     }
   }
@@ -75,7 +77,8 @@ function sectionShell(sec, inner, extraClass = '') {
   return `<section class="ed ed-${sec.type}${tone}${pad}`
     + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''}`
     + `${cut ? ` has-edge edge-${cut}` : ''}`
-    + `${band ? ' has-trim' : ''}${bandBottom ? ' has-trim-bottom' : ''} ${extraClass}"`
+    + `${band ? ' has-trim' : ''}${bandBottom ? ' has-trim-bottom' : ''}`
+    + `${bandTop ? ' has-trim-top' : ''} ${extraClass}"`
     + ` data-sec="${attr(sec.id)}"${style}>${bg}${band}${inner}</section>`;
 }
 
@@ -123,41 +126,32 @@ const EDGE_WHERE = [
 export function migrateSection(sec) {
   if (!sec) return sec;
 
-  // Already on the new edge model, but hang may still be stored in pixels.
+  // Already on the new edge model; drop any stored hang, which no longer exists.
   if (sec.edgeArt !== undefined) {
-    if (sec.edgeV === 2) return sec;
-    const size = Number(sec.edgeSize) || 140;
-    const px = Number(sec.edgeHang) || 0;
-    return {
-      ...sec,
-      edgeV: 2,
-      edgeHang: size > 0 ? Math.max(0, Math.min(100, Math.round((px / size) * 100))) : 0,
-    };
+    if (sec.edgeV === 3) return sec;
+    const next = { ...sec, edgeV: 3 };
+    delete next.edgeHang;
+    return next;
   }
 
-  const next = { ...sec, edgeV: 2 };
+  const next = { ...sec, edgeV: 3 };
 
   if (sec.trim && sec.trim !== 'none' && sec.trimImage && sec.trimImage.assetId) {
     next.edge = 'artwork';
     next.edgeArt = sec.trimImage;
     next.edgeWhere = sec.trim;
     next.edgeSize = Number(sec.trimHeight) || 140;
-    next.edgeHang = next.edgeSize > 0
-      ? Math.max(0, Math.min(100, Math.round((Number(sec.trimOverlap) || 0) / next.edgeSize * 100)))
-      : 0;
   } else if (sec.edge === 'custom' && sec.edgeImage && sec.edgeImage.assetId) {
     // A custom cut becomes shown artwork, which is what it was nearly always for.
     next.edge = 'artwork';
     next.edgeArt = sec.edgeImage;
     next.edgeWhere = 'bottom';
     next.edgeSize = Number(sec.edgeHeight) || 140;
-    next.edgeHang = 0;
   } else {
     next.edge = (sec.edge === 'custom') ? 'none' : (sec.edge || 'none');
     next.edgeArt = media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false });
     next.edgeWhere = 'bottom';
     next.edgeSize = Number(sec.edgeHeight) || 0;
-    next.edgeHang = 0;
   }
   return next;
 }
@@ -172,7 +166,6 @@ const COMMON_FIELDS = [
   { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
   { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
-  { key: 'edgeHang', label: 'Hang below the edge (%)', type: 'range', min: 0, max: 100, step: 5, when: (s) => s.edge === 'artwork' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 ];
@@ -191,8 +184,7 @@ export const SECTION_BASE = {
   edgeArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   edgeWhere: 'bottom',
   edgeSize: 0,
-  edgeHang: 100,   // a band normally hangs from the edge, not inside it
-  edgeV: 2,
+  edgeV: 3,
 };
 
 /* -------------------------------------------------------------- types ---- */
@@ -228,8 +220,7 @@ export const SECTION_TYPES = {
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
-      { key: 'edgeHang', label: 'Hang below the edge (%)', type: 'range', min: 0, max: 100, step: 5, when: (s) => s.edge === 'artwork' },
-      { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
+          { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
     ],
     render(sec) {
