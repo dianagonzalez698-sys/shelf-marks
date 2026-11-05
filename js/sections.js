@@ -158,7 +158,7 @@ function sectionShell(sec, inner, extraClass = '') {
     const asset = art.assetId ? getAsset(art.assetId) : null;
     const sl = (asset && asset.frameSlice) || null;
     if (url && sl) {
-      const side = Math.max(2, Math.min(45, Number(sec.curtainWidth) || 16));
+      const side = Math.max(2, Math.min(45, Number(sec.curtainWidth) || 10));
       // Keep the frame's own proportions: scale every slice by one factor.
       const r = (n) => Math.max(0, Number(n) || 0);
       const base = Math.max(1, r(sl.left));
@@ -166,10 +166,14 @@ function sectionShell(sec, inner, extraClass = '') {
       styles.push(
         `--cur-img:url('${attr(url)}')`,
         `--cur-slice:${r(sl.top)} ${r(sl.right)} ${r(sl.bottom)} ${r(sl.left)}`,
-        `--cur-l:${side}cqw`,
-        `--cur-r:calc(${side}cqw * ${k(sl.right)})`,
-        `--cur-t:calc(${side}cqw * ${k(sl.top)})`,
-        `--cur-b:calc(${side}cqw * ${k(sl.bottom)})`,
+        // vw, not cqw: a curtained section is full bleed, and the section's
+        // own padding is derived from this value — a container unit would
+        // resolve against the content box and so depend on the padding it is
+        // feeding, which silently stops scaling.
+        `--cur-l:${side}vw`,
+        `--cur-r:calc(${side}vw * ${k(sl.right)})`,
+        `--cur-t:calc(${side}vw * ${k(sl.top)})`,
+        `--cur-b:calc(${side}vw * ${k(sl.bottom)})`,
       );
       curtain = '<span class="ed-curtain" aria-hidden="true"></span>';
     }
@@ -315,7 +319,7 @@ const COMMON_FIELDS = [
   { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
   { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-  { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 6, max: 40, step: 1, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 4, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 
@@ -337,7 +341,7 @@ export const SECTION_BASE = {
   edgeWhere: 'bottom',
   edgeSize: 0,
   curtainArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
-  curtainWidth: 16,
+  curtainWidth: 10,
   edgeV: 3,
   fontDisplay: '',
   fontBody: '',
@@ -383,7 +387,7 @@ export const SECTION_TYPES = {
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 6, max: 40, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 4, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
       ...TYPE_FIELDS,
@@ -905,7 +909,7 @@ export const SECTION_TYPES = {
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 6, max: 40, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 4, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
       ...TYPE_FIELDS,
     ],
     render(sec, ctx) {

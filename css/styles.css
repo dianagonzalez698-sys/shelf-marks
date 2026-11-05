@@ -2422,25 +2422,24 @@ a.ed-meta:hover { color: var(--c-accent); }
    the only thing to choose is how wide the drapes hang. */
 
 .ed.has-curtain {
-  container-type: inline-size;
   position: relative;
+  /* A curtain hangs from the edges of the page, not the edges of the measure.
+     Penned inside the content column it floats with bare page either side,
+     which is the opposite of a stage. Same escape the photo grounds use. */
+  max-width: none;
+  /* One source of inset: whichever is wider — the measure's own gutter, or
+     enough room to clear the drapes. Content stays in a readable column and
+     never sits behind the cloth. */
+  /* The drape's full width plus a little air — a fraction of it leaves the
+     first letters sitting on the cloth. */
+  padding-inline: max(
+    calc((100% - var(--w-content)) / 2 + var(--sp-page-x)),
+    calc(var(--cur-l) + .8rem),
+    var(--sp-page-x));
+  /* The valance hangs over the top, so content starts below all of it. */
+  padding-block-start: calc(var(--cur-t) + var(--sp-section) * .5);
 }
-/* Content clears the drapes instead of running under them — but only the
-   content. A hero's artwork is inside .hero, so padding that wrapper would
-   inset the picture and leave the curtain sitting on bare page. Pad the type
-   instead and let the artwork run full width behind the drapes. */
-.ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero),
-.ed.has-curtain .hero-type {
-  padding-inline: calc(var(--cur-l) * .82);
-}
-/* The valance hangs over the top of the section, so a heading that starts at
-   the top would sit behind it. Push the content down past it — but not a
-   hero's type, which is centred in the banner and already clear. */
-.ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero) {
-  padding-block-start: calc(var(--cur-t) * .8);
-  padding-block-end: calc(var(--cur-b) * .8);
-}
-.ed.has-curtain > * ~ *:not(.ed-curtain) { padding-block-start: 0; }
+.ed.has-curtain.sp-flush { padding-block-start: calc(var(--cur-t) + .6rem); }
 
 .ed-curtain {
   position: absolute; inset: 0;
@@ -2456,9 +2455,11 @@ a.ed-meta:hover { color: var(--c-accent); }
      pixel sizes and ignore it. */
 }
 
-/* A hero fills its section edge to edge, so the curtain hangs over the
-   artwork rather than outside it. */
+/* A hero is already full bleed and its type is centred in the banner, so it
+   needs no block inset — only enough side room to clear the drapes. */
+.ed-hero.has-curtain { padding-block-start: 0; padding-inline: 0; }
 .ed-hero.has-curtain .hero { overflow: visible; }
+.ed-hero.has-curtain .hero-type { padding-inline: calc(var(--cur-l) * .9); }
 
 @media (max-width: 759px) {
   /* Narrow screens cannot spare 16% of the width on each side twice over, so
@@ -2469,11 +2470,8 @@ a.ed-meta:hover { color: var(--c-accent); }
       calc(var(--cur-t) * .7) calc(var(--cur-r) * .7)
       calc(var(--cur-b) * .7) calc(var(--cur-l) * .7);
   }
-  .ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero),
-  .ed.has-curtain .hero-type {
-    padding-inline: calc(var(--cur-l) * .62);
-  }
-  .ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero) {
-    padding-block-start: calc(var(--cur-t) * .56);
+  .ed.has-curtain {
+    padding-inline: max(calc(var(--cur-l) * .7 + .6rem), var(--sp-page-x));
+    padding-block-start: calc(var(--cur-t) * .7 + var(--sp-section) * .5);
   }
 }

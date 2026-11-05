@@ -17,7 +17,7 @@ export const KINDS = [
 ];
 
 // Bigger than any slot the design actually uses, small enough to keep backups sane.
-const MAX_EDGE = { artwork: 1800, photo: 1600, cutout: 1200, texture: 1200, ornament: 700 };
+const MAX_EDGE = { artwork: 1800, photo: 1600, cutout: 1800, texture: 1200, ornament: 700 };
 const JPEG_QUALITY = 0.84;
 export const SOFT_TOTAL_WARN = 18 * 1024 * 1024;   // nag past ~18MB of assets
 

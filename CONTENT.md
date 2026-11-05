@@ -322,8 +322,15 @@ continuing down the page, set the curtain on the section *below* the hero and
 set the hero's own edge back to **None**, or you end up with two valances
 stacked.
 
-Content inside the section is pushed in from the drapes and down past the
-valance, so nothing sits behind the curtain. On a phone the whole
+A curtained section runs the full width of the window — a curtain hangs off
+the edges of the page, not off the edges of the text column. Content inside it
+is pushed in from the drapes and down past the valance, so nothing sits behind
+the cloth.
+
+**How wide the drapes hang** is a share of the window, 4–28%, starting at 10.
+The valance's depth follows it, since both are locked to your picture's
+proportions: if the valance eats too much of the section, bring the drapes in.
+A curtain around 1800px wide stays crisp at any window size. On a phone the whole
 frame comes in by a third, since a narrow screen can't spare that much width
 on both sides.
 
