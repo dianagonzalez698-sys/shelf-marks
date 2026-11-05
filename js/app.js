@@ -78,9 +78,28 @@ async function boot() {
 
   theme.onThemeChange(() => {
     theme.applyContent(state.settings.year);
+    paintModeToggle();
     // The carved frame is generated from the gilt tokens, so it re-tints too.
     installOrnateFrame();
   });
+
+  // Light/dark has to be reachable in one tap. It lived only in the Design
+  // Studio, which is three taps deep — on a phone set to dark, following the
+  // device read as being stuck in it with no way out.
+  const modeBtn = document.getElementById('mode-toggle');
+  function paintModeToggle() {
+    if (!modeBtn) return;
+    const dark = theme.resolvedMode() === 'dark';
+    modeBtn.dataset.mode = dark ? 'dark' : 'light';
+    modeBtn.setAttribute('aria-pressed', String(dark));
+    modeBtn.title = dark ? 'Switch to light' : 'Switch to dark';
+  }
+  if (modeBtn) {
+    // Always land on an explicit choice, so one tap settles it even when the
+    // journal was following the device.
+    modeBtn.onclick = () => theme.setMode(theme.resolvedMode() === 'dark' ? 'light' : 'dark');
+  }
+  paintModeToggle();
 
   installOrnateFrame();
 

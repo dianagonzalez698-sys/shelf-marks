@@ -265,6 +265,14 @@ colours; an explicit colour overrides that, because you asked for it by name.
 If a section goes hard to read over its background, that is the usual cause —
 clear the colour and the automatic behaviour comes back.
 
+### Light and dark
+
+The sun/moon in the top right switches the journal between them, one tap, and
+it remembers. **Follow my device** (in the Design Studio, under Mode) is also
+available: on that setting a phone in dark mode shows the journal dark, which
+is easy to mistake for being stuck. Tapping the toggle always lands on an
+explicit light or dark, so one tap gets you out of it either way.
+
 ### Why edges overlap very slightly
 
 Every edge treatment — a hanging band, or a preset cut like torn or lace —

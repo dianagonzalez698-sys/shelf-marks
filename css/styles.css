@@ -2394,3 +2394,16 @@ a.ed-meta:hover { color: var(--c-accent); }
   .type-row { flex-wrap: wrap; gap: .4rem; }
   .type-row-label { flex: 1 0 100%; }
 }
+
+/* --------------------------------------------------------- mode toggle ---
+   One tap between light and dark, in the masthead where it can be found.
+   Whichever icon is showing is what a tap gives you. */
+.mode-toggle { flex: 0 0 auto; color: var(--c-ink-soft); }
+/* It sits last in the masthead, so the actions slot's auto margin carries it
+   to the right edge in both layouts without a second competing margin. */
+/* A primary control on a phone needs a thumb-sized target, whatever the icon. */
+@media (pointer: coarse) { .mode-toggle { min-inline-size: 44px; min-block-size: 44px; } }
+.mode-toggle:hover { color: var(--c-accent); }
+.mode-toggle .mode-moon { display: none; }
+.mode-toggle[data-mode="dark"] .mode-sun { display: none; }
+.mode-toggle[data-mode="dark"] .mode-moon { display: block; }
