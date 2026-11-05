@@ -358,10 +358,16 @@ function sectionWarnings(sec) {
   if (edge === 'curtain' && sec.curtainArt && sec.curtainArt.assetId) {
     const a = assets.get(sec.curtainArt.assetId);
     if (a && !a.frameSlice) {
-      out.push(`“${esc(a.name)}” has no see-through opening in the middle, so it `
-        + 'cannot be used as a frame — there is nothing for the section to show '
-        + 'through. Use a PNG of the whole curtain with the centre cut out, added '
-        + 'to the library as a <b>Cutout</b>.');
+      // Two different faults look identical on screen, and the fix differs.
+      const flattened = a.hasAlpha === false && !/^data:image\/png/.test(a.dataUrl || '');
+      out.push(flattened
+        ? `“${esc(a.name)}” has no transparency left: it was stored as a `
+          + 'photograph, which flattens a transparent centre to solid colour. '
+          + 'That happened on upload and cannot be undone here — <b>add the '
+          + 'original PNG again</b> and it will keep its see-through middle.'
+        : `“${esc(a.name)}” has no see-through opening in the middle, so there is `
+          + 'nothing for the section to show through. A curtain needs the whole '
+          + 'cloth in one picture with the <b>centre cut out</b>.');
     }
   }
 

@@ -107,11 +107,14 @@ function toDataUrl(file, kind) {
       reject(new Error('That is not an image file.'));
       return;
     }
-    // Only the kinds that are *meant* to be transparent stay PNG. Artwork,
-    // photographs and papers are opaque by definition, so a PNG scan of a
-    // painting becomes a JPEG — otherwise one upload can be several megabytes
-    // and the backup file becomes painful to move between devices.
-    const keepAlpha = kind === 'cutout' || kind === 'ornament';
+    // Transparency is kept whenever the file actually has it, whatever kind
+    // it was filed under.
+    //
+    // This used to depend on the kind alone, which quietly destroyed the thing
+    // that makes a picture usable as a frame: you choose the kind on upload,
+    // long before you know you will hang it as a curtain, and a wrong guess
+    // flattened the see-through centre to ivory with no way back. Opaque
+    // pictures still become JPEG — that is what keeps a backup portable.
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('Could not read that image.'));
     reader.onload = () => {
@@ -131,11 +134,24 @@ function toDataUrl(file, kind) {
           }
           const canvas = document.createElement('canvas');
           canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
           ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, w, h);
+
+          // Ask the decoded pixels rather than the filed kind.
+          let hasAlpha = false;
+          try {
+            const { data } = ctx.getImageData(0, 0, w, h);
+            const step = Math.max(4, Math.floor((data.length / 4) / 40000) * 4);
+            for (let i = 3; i < data.length; i += step) {
+              if (data[i] < 250) { hasAlpha = true; break; }
+            }
+          } catch (_) { hasAlpha = kind === 'cutout' || kind === 'ornament'; }
+
           resolve({
-            dataUrl: keepAlpha ? canvas.toDataURL('image/png') : canvas.toDataURL('image/jpeg', JPEG_QUALITY),
+            dataUrl: hasAlpha
+              ? canvas.toDataURL('image/png')
+              : canvas.toDataURL('image/jpeg', JPEG_QUALITY),
             w, h,
           });
         } catch (err) {
