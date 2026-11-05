@@ -293,6 +293,44 @@ available: on that setting a phone in dark mode shows the journal dark, which
 is easy to mistake for being stuck. Tapping the toggle always lands on an
 explicit light or dark, so one tap gets you out of it either way.
 
+### A curtain around a section
+
+**Edge treatment → Curtain / full frame** hangs a curtain from the top of a
+section: valance across the top, drapes down both sides, the page showing
+through the opening between them.
+
+Give it **one picture of the whole curtain**, centre cut out, added to the
+library as a **Cutout**. Wide suits the job — around **2400 × 1000 px**. Up to
+1800px on the long edge is kept at full resolution.
+
+One slider: **How far the curtain hangs**, 8–60% of the window's width. Nothing
+else to set — the drape width, the scalloped hem and the shape of the arch are
+all the picture's, and they are drawn exactly as painted.
+
+**The picture is drawn whole, not cut into a frame.** An earlier version sliced
+it into nine pieces so the drapes could stretch to any height. That is how CSS
+frames usually work, but a nine-slice's opening is a *rectangle* — straight
+inner edges, square corners — so an arched curtain came out as a box with the
+arch visible only along the top. Drawn whole, the silhouette is the one you
+painted.
+
+What follows from that: the curtain hangs as far as you set and the section
+continues below it, the way a real curtain hangs from above rather than lining
+a doorway top to bottom. Content is inset past the drapes and below the lowest
+point of the arch, both measured from the picture itself.
+
+A picture with no see-through centre cannot be a curtain, and the editor says
+so rather than drawing nothing. On a phone the whole thing hangs shallower,
+since a narrow screen cannot spare a third of its width on cloth.
+
+### Light and dark
+
+The sun/moon in the top right switches the journal between them, one tap, and
+it remembers. **Follow my device** (in the Design Studio, under Mode) is also
+available: on that setting a phone in dark mode shows the journal dark, which
+is easy to mistake for being stuck. Tapping the toggle always lands on an
+explicit light or dark, so one tap gets you out of it either way.
+
 ### A curtain around a whole section
 
 **Edge treatment → Curtain / full frame** wraps a section in a proscenium:

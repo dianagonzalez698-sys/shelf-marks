@@ -2423,59 +2423,51 @@ a.ed-meta:hover { color: var(--c-accent); }
 
 .ed.has-curtain {
   position: relative;
-  /* A curtain hangs from the edges of the page, not the edges of the measure.
-     Penned inside the content column it floats with bare page either side,
-     which is the opposite of a stage. Same escape the photo grounds use. */
+  /* A curtain hangs off the edges of the page, not off the edges of the text
+     column. Same escape the photo grounds use. */
   max-width: none;
-  /* One source of inset: whichever is wider — the measure's own gutter, or
-     enough room to clear the drapes. Content stays in a readable column and
-     never sits behind the cloth. */
-  /* The drape's full width plus a little air — a fraction of it leaves the
-     first letters sitting on the cloth. */
+  /* Content sits inside the opening: in past the drapes, down past the arch.
+     Both come from proportions measured in the picture itself. */
   padding-inline: max(
     calc((100% - var(--w-content)) / 2 + var(--sp-page-x)),
-    calc(var(--cur-l) + .8rem),
+    calc(var(--cur-side) + 1.6rem),
     var(--sp-page-x));
-  /* The valance hangs over the top, so content starts below all of it. */
-  padding-block-start: calc(var(--cur-t) + var(--sp-section) * .5);
+  padding-block-start: calc(var(--cur-arch) + var(--sp-section) * .75);
 }
-.ed.has-curtain.sp-flush { padding-block-start: calc(var(--cur-t) + .6rem); }
+.ed.has-curtain.sp-flush { padding-block-start: calc(var(--cur-arch) + 1rem); }
 
+/* One picture, drawn whole and hung from the top. Not a nine-slice: a
+   nine-slice's opening is a rectangle, so an arch came out as a box with
+   square corners. Drawn whole, the painted silhouette is what you see —
+   scalloped hem, tapering drapes, the page showing through the arch.
+
+   It reaches a few pixels up over the section above for the same reason the
+   hanging bands do: a section's height is fractional, and landing exactly on
+   the seam leaves a hairline of page. */
 .ed-curtain {
   position: absolute;
-  /* Reach a few pixels up over the section above. A section's height is
-     fractional, so a valance that starts exactly at the seam leaves the same
-     hairline of page the hanging bands did. Same cure, same size. */
-  inset: calc(var(--trim-bite, 3px) * -1) 0 0 0;
+  top: calc(var(--trim-bite, 3px) * -1);
+  left: 0; right: 0;
+  height: var(--cur-h);
   z-index: 6; pointer-events: none;
-  border-style: solid;
-  border-color: transparent;
-  border-width: var(--cur-t) var(--cur-r) var(--cur-b) var(--cur-l);
-  border-image-source: var(--cur-img);
-  border-image-slice: var(--cur-slice);
-  border-image-repeat: stretch;
-  /* Default (1) means "follow border-width", which is what carries the
-     drape thickness you chose. `auto` would snap back to the picture's own
-     pixel sizes and ignore it. */
+  background-image: var(--cur-img);
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% 100%;
 }
 
 /* A hero is already full bleed and its type is centred in the banner, so it
    needs no block inset — only enough side room to clear the drapes. */
 .ed-hero.has-curtain { padding-block-start: 0; padding-inline: 0; }
 .ed-hero.has-curtain .hero { overflow: visible; }
-.ed-hero.has-curtain .hero-type { padding-inline: calc(var(--cur-l) * .9); }
+.ed-hero.has-curtain .hero-type { padding-inline: calc(var(--cur-side) + 1.6rem); }
 
 @media (max-width: 759px) {
-  /* Narrow screens cannot spare 16% of the width on each side twice over, so
-     the whole frame comes in — the same way the bands do — and the content
-     keeps a little more clearance than the drape is wide. */
-  .ed-curtain {
-    border-width:
-      calc(var(--cur-t) * .7) calc(var(--cur-r) * .7)
-      calc(var(--cur-b) * .7) calc(var(--cur-l) * .7);
-  }
+  /* A phone cannot spare a third of its width on cloth, so the curtain hangs
+     shallower and the content keeps only the room it needs. */
+  .ed-curtain { height: calc(var(--cur-h) * .62); }
   .ed.has-curtain {
-    padding-inline: max(calc(var(--cur-l) * .7 + .6rem), var(--sp-page-x));
-    padding-block-start: calc(var(--cur-t) * .7 + var(--sp-section) * .5);
+    padding-inline: max(calc(var(--cur-side) * .9 + .6rem), var(--sp-page-x));
+    padding-block-start: calc(var(--cur-arch) * .62 + var(--sp-section) * .6);
   }
 }

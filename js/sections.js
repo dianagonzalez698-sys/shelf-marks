@@ -146,11 +146,16 @@ function sectionShell(sec, inner, extraClass = '') {
 
   if (cut && Number(sec.edgeSize) > 0) styles.push(`--edge-h:${Number(sec.edgeSize)}px`);
 
-  // A proscenium: valance across the top, drapes down both sides, drawn as a
-  // nine-slice so the sides stretch to any height while the valance and the
-  // tied-back corners keep their own proportions. The slices come from the
-  // picture itself — measured when it was added — so there is nothing to set
-  // but how wide you want the drapes to hang.
+  // The curtain is drawn as one whole picture, not as a nine-slice frame. A
+  // nine-slice's opening is a rectangle by construction — straight inner
+  // edges, square corners — so an arched curtain came out as a box with the
+  // arch only visible along the top. Drawn whole, the silhouette is exactly
+  // as painted: scalloped valance, tapering drapes, the arch between them.
+  //
+  // It hangs from the top of the section and the page shows through wherever
+  // the picture is transparent. The proportions measured from the file say how
+  // far in the drapes reach and how low the arch dips — which is all the
+  // content needs in order to clear it.
   let curtain = '';
   if (isCurtain) {
     const art = sec.curtainArt || {};
@@ -158,29 +163,16 @@ function sectionShell(sec, inner, extraClass = '') {
     const asset = art.assetId ? getAsset(art.assetId) : null;
     const sl = (asset && asset.frameSlice) || null;
     if (url && sl) {
-      const side = Math.max(2, Math.min(45, Number(sec.curtainWidth) || 10));
-      const depth = Math.max(0, Math.min(40, Number(sec.curtainTop) || 0));
-      // Keep the frame's own proportions: scale every slice by one factor.
-      const r = (n) => Math.max(0, Number(n) || 0);
-      const base = Math.max(1, r(sl.left));
-      const k = (n) => +(r(n) / base).toFixed(4);
+      const drop = Math.max(6, Math.min(70, Number(sec.curtainDrop) || 30));
+      const iw = Math.max(1, Number(sl.w) || 1);
+      const ih = Math.max(1, Number(sl.h) || 1);
+      const sideFrac = Math.max(0, Math.min(0.45, (Number(sl.left) || 0) / iw));
+      const archFrac = Math.max(0, Math.min(1, (Number(sl.top) || 0) / ih));
       styles.push(
         `--cur-img:url('${attr(url)}')`,
-        `--cur-slice:${r(sl.top)} ${r(sl.right)} ${r(sl.bottom)} ${r(sl.left)}`,
-        // vw, not cqw: a curtained section is full bleed, and the section's
-        // own padding is derived from this value — a container unit would
-        // resolve against the content box and so depend on the padding it is
-        // feeding, which silently stops scaling.
-        `--cur-l:${side}vw`,
-        `--cur-r:calc(${side}vw * ${k(sl.right)})`,
-        `--cur-b:calc(${side}vw * ${k(sl.bottom)})`,
-        // The valance can be set on its own. Tying its depth to the drape
-        // width keeps a picture's proportions honest, but a frame drawn for a
-        // squarish opening then puts an enormous pelmet across a wide, short
-        // section — so a nine-slice's independent edges are the point.
-        depth > 0
-          ? `--cur-t:${depth}vw`
-          : `--cur-t:calc(${side}vw * ${k(sl.top)})`,
+        `--cur-h:${drop}vw`,
+        `--cur-side:${(sideFrac * 100).toFixed(2)}%`,
+        `--cur-arch:calc(${drop}vw * ${archFrac.toFixed(4)})`,
       );
       curtain = '<span class="ed-curtain" aria-hidden="true"></span>';
     }
@@ -325,9 +317,8 @@ const COMMON_FIELDS = [
   { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
   { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
-  { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-  { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 3, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
-  { key: 'curtainTop', label: 'How deep the valance hangs (0 = match the picture)', type: 'range', min: 0, max: 26, step: 1, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
+  { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 
@@ -349,8 +340,7 @@ export const SECTION_BASE = {
   edgeWhere: 'bottom',
   edgeSize: 0,
   curtainArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
-  curtainWidth: 10,
-  curtainTop: 0,
+  curtainDrop: 30,
   edgeV: 3,
   fontDisplay: '',
   fontBody: '',
@@ -395,9 +385,8 @@ export const SECTION_TYPES = {
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
-      { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 3, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
-      { key: 'curtainTop', label: 'How deep the valance hangs (0 = match the picture)', type: 'range', min: 0, max: 26, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
+      { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
       ...TYPE_FIELDS,
@@ -918,9 +907,8 @@ export const SECTION_TYPES = {
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
-      { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 3, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
-      { key: 'curtainTop', label: 'How deep the valance hangs (0 = match the picture)', type: 'range', min: 0, max: 26, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
+      { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
       ...TYPE_FIELDS,
     ],
     render(sec, ctx) {
