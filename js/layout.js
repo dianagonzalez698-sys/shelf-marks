@@ -220,6 +220,19 @@ export async function moveSection(pageId, sectionId, delta) {
   return true;
 }
 
+/** Put a section at a given position, for dragging it there. */
+export async function reorderSection(pageId, sectionId, toIndex) {
+  const sections = [...get(pageId)];
+  const from = sections.findIndex((s) => s.id === sectionId);
+  if (from < 0) return false;
+  const to = Math.max(0, Math.min(sections.length - 1, toIndex));
+  if (from === to) return false;
+  const [moved] = sections.splice(from, 1);
+  sections.splice(to, 0, moved);
+  await save(pageId, sections);
+  return true;
+}
+
 export async function updateSection(pageId, sectionId, patch) {
   const sections = get(pageId).map((s) => (s.id === sectionId ? { ...s, ...patch } : s));
   await save(pageId, sections);

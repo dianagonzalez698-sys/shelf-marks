@@ -118,6 +118,7 @@ export function challengeDetailView(params) {
     tab: 'challenges',
     banner: false,
     editorial: true,
+    editPage: challengePageId(challenge.id),
     back: true,
     // A challenge spread is long, and saving from a sheet re-renders it.
     // Without this you are thrown back to the top every time you tick a book.

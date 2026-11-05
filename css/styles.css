@@ -2876,3 +2876,138 @@ a.ed-meta:hover { color: var(--c-accent); }
 @media (pointer: coarse) {
   .type-row.is-inline .ink-dot { inline-size: 36px; block-size: 36px; }
 }
+
+/* ------------------------------------------------------------- fine-tune --
+   The craft settings are all still here; they just do not greet you. */
+.fine {
+  margin-top: 1.1rem;
+  border-top: 1px solid var(--c-rule);
+  padding-top: .8rem;
+}
+.fine > summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--c-ink-faint);
+  padding: .35rem 0;
+}
+.fine > summary::-webkit-details-marker { display: none; }
+.fine > summary::before { content: '▸ '; display: inline-block; transition: transform .15s ease; }
+.fine[open] > summary::before { content: '▾ '; }
+.fine > summary:hover { color: var(--c-accent); }
+.fine-body { padding-top: .6rem; }
+
+/* ------------------------------------------------------ drag to reorder --- */
+.lay-row { cursor: default; }
+.lay-row[draggable="true"] .lay-grip {
+  display: block;
+  cursor: grab;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: var(--c-ink-faint);
+  text-align: center;
+  padding: .15rem 0 .25rem;
+  user-select: none;
+}
+.lay-row[draggable="true"] .lay-grip:active { cursor: grabbing; }
+.lay-row.is-dragging { opacity: .45; }
+.lay-row.is-over { box-shadow: inset 0 2px 0 var(--c-accent); }
+/* The arrows stay for keyboards and for a single step, just quieter. */
+.lay-nudge { opacity: .5; }
+.lay-row:hover .lay-nudge, .lay-nudge:focus-visible { opacity: 1; }
+
+/* ------------------------------------------------------- editing on page --
+   The page stays itself; editing just makes its words answer the cursor. */
+.edit-toggle[aria-pressed="true"] { color: var(--c-accent); }
+
+body.is-editing [data-edit] {
+  outline: 1px dashed color-mix(in srgb, var(--c-accent) 55%, transparent);
+  outline-offset: .22em;
+  border-radius: 2px;
+  cursor: text;
+  transition: background .15s ease;
+}
+body.is-editing [data-edit]:hover {
+  background: color-mix(in srgb, var(--c-accent) 8%, transparent);
+}
+body.is-editing [data-edit]:focus {
+  outline: 2px solid var(--c-accent);
+  background: color-mix(in srgb, var(--c-accent) 6%, transparent);
+}
+
+body.is-editing [data-sec] { position: relative; }
+.edit-tools {
+  position: absolute; top: .5rem; right: .5rem;
+  z-index: 20;
+  opacity: 0; transition: opacity .15s ease;
+}
+body.is-editing [data-sec]:hover > .edit-tools,
+.edit-tools:focus-within { opacity: 1; }
+.edit-chip {
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase;
+  padding: .36rem .7rem;
+  color: var(--c-accent-ink);
+  background: var(--c-accent);
+  border: 0; border-radius: 2px;
+  cursor: pointer;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .18);
+}
+.edit-chip:hover { background: var(--c-accent-deep); }
+@media (pointer: coarse) {
+  .edit-tools { opacity: 1; }
+  .edit-chip { padding: .5rem .9rem; }
+}
+
+/* ------------------------------------------------------------- type bar ---
+   Styling where the words are: bold and italic act on what is selected, the
+   rest belongs to the role this text is drawn in. */
+.type-bar {
+  position: fixed; z-index: 60;
+  display: flex; align-items: center; gap: .25rem;
+  padding: .35rem .45rem;
+  background: var(--c-bg-raised);
+  border: 1px solid var(--c-rule-strong);
+  border-radius: 4px;
+  box-shadow: 0 6px 22px rgba(28, 18, 14, .18);
+}
+.type-bar[hidden] { display: none; }
+.type-bar button {
+  min-inline-size: 30px; block-size: 28px; padding: 0 .4rem;
+  font-family: var(--f-body); font-size: .92rem;
+  color: var(--c-ink-soft);
+  background: none; border: 1px solid transparent; border-radius: 2px;
+  cursor: pointer;
+}
+.type-bar button:hover:not(:disabled) { background: var(--c-bg-sunk); color: var(--c-ink); }
+.type-bar button.is-on { background: var(--c-accent); color: var(--c-accent-ink); }
+.type-bar button:disabled { opacity: .35; cursor: not-allowed; }
+.type-bar select {
+  max-inline-size: 11rem; block-size: 28px;
+  font-family: var(--f-ui); font-size: .8rem;
+  padding: 0 .3rem;
+  border: 1px solid var(--c-rule-strong); border-radius: 2px;
+  background: var(--c-bg); color: var(--c-ink);
+}
+.tb-sep { inline-size: 1px; block-size: 18px; background: var(--c-rule); }
+.tb-ink { position: relative; display: grid; place-items: center; cursor: pointer; }
+.tb-ink.is-off { opacity: .35; pointer-events: none; }
+.tb-dot {
+  inline-size: 22px; block-size: 22px; border-radius: 50%;
+  border: 1px solid var(--c-rule-strong);
+  box-shadow: inset 0 0 0 2px var(--c-bg-raised);
+}
+.tb-dot.is-auto {
+  background:
+    linear-gradient(135deg, transparent 44%, var(--c-ink-faint) 44%,
+      var(--c-ink-faint) 56%, transparent 56%), var(--c-bg) !important;
+}
+.tb-ink input[type="color"] {
+  position: absolute; inset: 0; inline-size: 100%; block-size: 100%;
+  opacity: 0; border: 0; padding: 0; cursor: pointer;
+}
+@media (pointer: coarse) {
+  .type-bar button { min-inline-size: 40px; block-size: 38px; }
+  .type-bar select { block-size: 38px; }
+}

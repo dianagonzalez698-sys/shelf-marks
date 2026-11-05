@@ -41,10 +41,12 @@ export function layoutView(params = {}) {
     const def = SECTION_TYPES[sec.type] || { label: sec.type, blurb: '' };
     const summary = sec.title || sec.text || sec.kicker || def.blurb;
     const hidden = sec.visible === false;
-    return `<li class="lay-row${hidden ? ' is-hidden' : ''}" data-sec="${attr(sec.id)}">
+    return `<li class="lay-row${hidden ? ' is-hidden' : ''}" data-sec="${attr(sec.id)}"
+      draggable="true" aria-grabbed="false">
       <span class="lay-order">
-        <button class="icon-btn" type="button" data-move="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
-        <button class="icon-btn" type="button" data-move="1" ${i === sections.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button>
+        <span class="lay-grip" aria-hidden="true" title="Drag to reorder">⠿</span>
+        <button class="icon-btn lay-nudge" type="button" data-move="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
+        <button class="icon-btn lay-nudge" type="button" data-move="1" ${i === sections.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button>
       </span>
       <span class="lay-body">
         <span class="lay-type">${esc(def.label)}${hidden ? '<em class="lay-flag">hidden</em>' : ''}</span>
@@ -136,6 +138,45 @@ export function layoutView(params = {}) {
           toast('Page reset.');
           render();
         };
+      }
+
+      // Drag to reorder. The keyboard arrows stay — dragging is not reachable
+      // without a pointer, and they are also simply quicker for one step.
+      const list = root.querySelector('.lay-list') || root.querySelector('ul');
+      if (list) {
+        let dragId = null;
+        list.addEventListener('dragstart', (e) => {
+          const row = e.target.closest('.lay-row');
+          if (!row) return;
+          dragId = row.dataset.sec;
+          row.classList.add('is-dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          // Firefox needs something in the payload or no drag begins.
+          try { e.dataTransfer.setData('text/plain', dragId); } catch (_) { /* ignore */ }
+        });
+        list.addEventListener('dragend', () => {
+          dragId = null;
+          list.querySelectorAll('.lay-row').forEach((r) => {
+            r.classList.remove('is-dragging', 'is-over');
+          });
+        });
+        list.addEventListener('dragover', (e) => {
+          if (!dragId) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          const row = e.target.closest('.lay-row');
+          list.querySelectorAll('.lay-row').forEach((r) => r.classList.toggle('is-over', r === row));
+        });
+        list.addEventListener('drop', async (e) => {
+          if (!dragId) return;
+          e.preventDefault();
+          const row = e.target.closest('.lay-row');
+          if (!row || row.dataset.sec === dragId) return;
+          const order = [...list.querySelectorAll('.lay-row')].map((r) => r.dataset.sec);
+          await layout.reorderSection(pageId, dragId, order.indexOf(row.dataset.sec));
+          dragId = null;
+          render();
+        });
       }
 
       root.querySelectorAll('.lay-row').forEach((row) => {
@@ -523,10 +564,36 @@ function visibleFields(def, sec) {
   return shown.filter((f) => f.type !== 'typeface' || !claimed.has((f.role || {}).role));
 }
 
+// Settings that describe the section's *craft* rather than its content. They
+// are the ones that need you to know what a bite or a drop is, and they are
+// the reason the panel reads as a console. Kept in full, put out of the way.
+const FINE_KEYS = new Set([
+  'tone', 'bgImage', 'bgScrim', 'bgInk',
+  'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
+  'curtainArt', 'curtainDrop', 'curtainGap',
+  'spacing', 'scrim', 'rotate', 'flip', 'ratio', 'dropcap', 'stagger',
+  'showLabel', 'showNote', 'showCount', 'showWhy', 'showOutside',
+  'showStats', 'showFilter', 'showBar', 'showStanding', 'showFilters',
+  'showInset', 'inset',
+]);
+
+function isFine(f) {
+  return FINE_KEYS.has(f.key) || f.type === 'typeface';
+}
+
 function fieldsHtml(def, sec) {
   EDITING = sec;
   refreshInkSwatches();
-  return visibleFields(def, sec).map((f) => fieldControl(f, sec[f.key], sec.id)).join('');
+  const all = visibleFields(def, sec);
+  const plain = all.filter((f) => !isFine(f));
+  const fine = all.filter(isFine);
+  const draw = (f) => fieldControl(f, sec[f.key], sec.id);
+
+  return plain.map(draw).join('')
+    + (fine.length ? `<details class="fine">
+        <summary>Fine-tune — background, edges, spacing and type</summary>
+        <div class="fine-body">${fine.map(draw).join('')}</div>
+      </details>` : '');
 }
 
 function mediaButton(key, m, removable = false, role = '') {

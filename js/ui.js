@@ -393,6 +393,12 @@ export function currentRoute() {
   return current;
 }
 
+// Set by app.js once edit-page.js is loaded, so ui.js need not import it and
+// create a cycle between the router and the editor.
+let setEditPageId = () => {};
+let stopEditing = () => {};
+export function wireEditing(setPage, stop) { setEditPageId = setPage; stopEditing = stop; }
+
 export function render() {
   if (rendering) return;
   rendering = true;
@@ -423,6 +429,16 @@ export function render() {
 
     app.innerHTML = view.html || '';
     setChrome(view);
+
+    // The pencil only appears where the page is built from a layout, and it
+    // has to know which layout so an edit lands on the right page.
+    const editBtn = document.getElementById('edit-page');
+    if (editBtn) {
+      const pageId = view.editPage || null;
+      editBtn.hidden = !pageId;
+      if (pageId) setEditPageId(pageId);
+      else if (document.body.classList.contains('is-editing')) stopEditing();
+    }
     highlightTab(view.tab);
     // keepScroll only holds position across re-renders of the same screen;
     // arriving at a different screen always starts at the top.

@@ -16,6 +16,8 @@ import { customizeView } from './view-customize.js';
 import { assetsView } from './view-assets.js';
 import { layoutView } from './view-layout.js';
 import { wordsView, wordDetailView } from './view-words.js';
+import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js';
+import { wireEditing } from './ui.js';
 
 route('/', homeView);
 route('/books', booksView);
@@ -82,6 +84,14 @@ async function boot() {
   theme.onThemeChange(() => {
     theme.applyContent(state.settings.year);
     paintModeToggle();
+
+  // Editing happens on the page; the button only appears where there is a
+  // layout to edit, so it never offers to edit a form or the settings screen.
+  wireEditing(setEditPage, () => toggleEditing(false));
+  const editBtn = document.getElementById('edit-page');
+  if (editBtn) editBtn.onclick = () => toggleEditing();
+
+  onChange(() => { if (isEditing()) refreshEditing(); });
     // The carved frame is generated from the gilt tokens, so it re-tints too.
     installOrnateFrame();
   });
@@ -103,6 +113,14 @@ async function boot() {
     modeBtn.onclick = () => theme.setMode(theme.resolvedMode() === 'dark' ? 'light' : 'dark');
   }
   paintModeToggle();
+
+  // Editing happens on the page; the button only appears where there is a
+  // layout to edit, so it never offers to edit a form or the settings screen.
+  wireEditing(setEditPage, () => toggleEditing(false));
+  const editBtn = document.getElementById('edit-page');
+  if (editBtn) editBtn.onclick = () => toggleEditing();
+
+  onChange(() => { if (isEditing()) refreshEditing(); });
 
   installOrnateFrame();
 

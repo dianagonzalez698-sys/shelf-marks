@@ -15,6 +15,7 @@ export function homeView() {
     tab: 'home',
     banner: false,      // the hero section is the banner now
     editorial: true,
+    editPage: HOME_PAGE_ID,
     fab: true,
     html: sections.map((sec) => renderSection(sec)).join(''),
   };

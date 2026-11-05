@@ -78,6 +78,7 @@ export function wordDetailView(params) {
     tab: '',
     banner: false,
     editorial: true,
+    editPage: wordPageId(word.id),
     back: true,
     actions: '<button class="btn btn-quiet" type="button" id="edit-word">Edit</button>',
     html: renderSections(layout.get(wordPageId(word.id)), ctx),

@@ -21,7 +21,7 @@ import { t, FONT_STACKS } from './theme.js';
 // Per-section overrides, written as the very tokens the whole design reads.
 // Setting one on a <section> re-points everything inside it; leaving it empty
 // lets the Design Studio's value cascade down untouched.
-const SECTION_VARS = [
+export const SECTION_VARS = [
   ['fontDisplay', '--f-display'],
   ['fontBody', '--f-body'],
   ['fontUi', '--f-ui'],
@@ -55,6 +55,40 @@ const SECTION_VARS = [
   ['ttDisplay', '--tt-display'],
   ['ttUi', '--tt-label'],
 ];
+
+/**
+ * Put a section's own style overrides onto its element.
+ *
+ * Editing on the page changes the stored section, but the page is not
+ * re-rendered for every keystroke — that would take the cursor with it. The
+ * same variables sectionShell would have written are set directly instead, so
+ * what you see updates as you choose.
+ */
+export function applySectionVars(el, sec) {
+  if (!el || !sec) return;
+  for (const [key, cssVar] of SECTION_VARS) {
+    const v = sec[key];
+    if (v) el.style.setProperty(cssVar, v);
+    else el.style.removeProperty(cssVar);
+  }
+  if (sec.fontBody) el.style.fontFamily = sec.fontBody;
+  else el.style.removeProperty('font-family');
+  if (sec.inkBody) el.style.color = sec.inkBody;
+  else el.style.removeProperty('color');
+}
+
+/** Which type role a given text field is drawn in. */
+const ROLE_FOR_KEY = {
+  eyebrow: 'Ui', kicker: 'Ui',
+  title: 'Display',
+  subtitle: 'Body', body: 'Body', text: 'Body',
+  note: 'Body', caption: 'Body', quote: 'Body',
+};
+
+export function roleForKey(key) {
+  const name = ROLE_FOR_KEY[key];
+  return name ? TYPE_ROLES.find((r) => r.role === name) || null : null;
+}
 
 /** The four type roles a section can restyle, and the keys each one owns. */
 export const TYPE_ROLES = [
@@ -260,14 +294,15 @@ function sectionShell(sec, inner, extraClass = '') {
     + ` data-sec="${attr(sec.id)}"${style}>${bg}${curtain}${band}${inner}</section>`;
 }
 
-function kicker(text) {
-  return text ? `<p class="ed-kicker">${rich(text)}</p>` : '';
+function kicker(text, key = 'kicker') {
+  return text ? `<p class="ed-kicker" data-edit="${attr(key)}">${rich(text)}</p>` : '';
 }
 
 /** Headline with an optional script-set first word, as on the banner. */
-function headline(text, { script = false, tag = 'h2', cls = 'ed-title' } = {}) {
+function headline(text, { script = false, tag = 'h2', cls = 'ed-title', key = 'title' } = {}) {
   if (!text) return '';
-  if (!script) return `<${tag} class="${cls}">${rich(text)}</${tag}>`;
+  const ed = ` data-edit="${attr(key)}"`;
+  if (!script) return `<${tag} class="${cls}"${ed}>${rich(text)}</${tag}>`;
   // The swash initial takes the first word. Emphasis inside the heading has to
   // survive that split, so the rest is cleaned as rich text and only the first
   // word — which the script face draws — is taken as plain.
@@ -276,7 +311,7 @@ function headline(text, { script = false, tag = 'h2', cls = 'ed-title' } = {}) {
   const restRaw = String(text).trim();
   const cut = restRaw.replace(/^(\s*<[^>]*>\s*)*/, '');
   const rest = cut.slice(first.length);
-  return `<${tag} class="${cls} has-script"><span class="ed-script">${esc(first)}</span>${
+  return `<${tag} class="${cls} has-script"${ed}><span class="ed-script">${esc(first)}</span>${
     rest.trim() ? ` ${rich(rest)}` : ''}</${tag}>`;
 }
 
@@ -462,7 +497,7 @@ export const SECTION_TYPES = {
           <div class="hero-type">
             ${kicker(sub(sec.eyebrow))}
             ${headline(sub(sec.title), { script: sec.script, tag: 'h1', cls: 'hero-title' })}
-            ${sec.subtitle ? `<p class="hero-sub">${rich(sub(sec.subtitle))}</p>` : ''}
+            ${sec.subtitle ? `<p class="hero-sub" data-edit="subtitle">${rich(sub(sec.subtitle))}</p>` : ''}
           </div>
           ${sec.showInset ? `<div class="hero-inset">${figure(sec.inset, { seed: `${sec.id}i`, eager: true })}</div>` : ''}
         </div>`, 'ed-bleed');
@@ -537,7 +572,7 @@ export const SECTION_TYPES = {
         ${sec.kicker || sec.title ? `<div class="ed-head">${kicker(sec.kicker)}${headline(sec.title)}</div>` : ''}
         <div class="collage collage-${sec.height || 'tall'}">
           ${items.map((m, i) => `<div class="collage-item">${figure(m, { seed: `${sec.id}-${i}` })}</div>`).join('')}
-          ${sec.note ? `<p class="marginalia">${rich(sec.note)}</p>` : ''}
+          ${sec.note ? `<p class="marginalia" data-edit="note">${rich(sec.note)}</p>` : ''}
         </div>`);
     },
   },
@@ -591,7 +626,7 @@ export const SECTION_TYPES = {
     render(sec) {
       return sectionShell(sec, `
         <blockquote class="statement st-${sec.size || 'large'} st-${sec.style || 'quote'}">
-          <p>${rich(sec.text || '')}</p>
+          <p data-edit="text">${rich(sec.text || '')}</p>
           ${sec.attribution ? `<cite>${esc(sec.attribution)}</cite>` : ''}
         </blockquote>`);
     },
@@ -625,7 +660,7 @@ export const SECTION_TYPES = {
                <svg viewBox="0 0 48 48"><path d="M24 7.5c1.3 9.2 3.1 11 12.3 12.3C27.1 21.1 25.3 22.9 24 32.1c-1.3-9.2-3.1-11-12.3-12.3C20.9 18.5 22.7 16.7 24 7.5z"/></svg>
                <span class="ornament-line"></span>
              </div>`;
-      return sectionShell(sec, `${body}${sec.note ? `<p class="marginalia center">${rich(sec.note)}</p>` : ''}`);
+      return sectionShell(sec, `${body}${sec.note ? `<p class="marginalia center" data-edit="note">${rich(sec.note)}</p>` : ''}`);
     },
   },
 
@@ -641,7 +676,7 @@ export const SECTION_TYPES = {
       ...COMMON_FIELDS,
     ],
     render(sec) {
-      return sectionShell(sec, `<p class="marginalia big" style="text-align:${sec.align || 'center'};--m-rot:${Number(sec.rotate) || 0}deg">${rich(sec.text || '')}</p>`);
+      return sectionShell(sec, `<p class="marginalia big" style="text-align:${sec.align || 'center'};--m-rot:${Number(sec.rotate) || 0}deg" data-edit="text">${rich(sec.text || '')}</p>`);
     },
   },
 
@@ -676,7 +711,7 @@ export const SECTION_TYPES = {
       return sectionShell(sec, `
         <div class="ed-head ed-head-split">
           <div>${kicker(sec.kicker)}${headline(sec.title)}
-            ${sec.subtitle ? `<p class="ed-sub">${rich(sec.subtitle)}</p>` : ''}</div>
+            ${sec.subtitle ? `<p class="ed-sub" data-edit="subtitle">${rich(sec.subtitle)}</p>` : ''}</div>
           ${sec.showPeriod ? `<p class="ed-meta">January — December ${year}</p>` : ''}
         </div>
         <div class="measures">
@@ -768,7 +803,7 @@ export const SECTION_TYPES = {
       const head = (sec.kicker || sec.title || sec.subtitle)
         ? `<div class="ed-head">
              <div>${kicker(sec.kicker)}${headline(sec.title)}
-               ${sec.subtitle ? `<p class="ed-sub">${rich(sec.subtitle)}</p>` : ''}</div>
+               ${sec.subtitle ? `<p class="ed-sub" data-edit="subtitle">${rich(sec.subtitle)}</p>` : ''}</div>
            </div>`
         : '';
       return sectionShell(sec, `${head}${body}`);
@@ -805,7 +840,7 @@ export const SECTION_TYPES = {
         return sectionShell(sec, `
           <div class="ed-head ed-head-split">
             <div>${kicker(sec.kicker)}${headline(sec.title)}
-              ${sec.subtitle ? `<p class="ed-sub">${rich(sec.subtitle)}</p>` : ''}</div>
+              ${sec.subtitle ? `<p class="ed-sub" data-edit="subtitle">${rich(sec.subtitle)}</p>` : ''}</div>
             <p class="ed-meta">${collected} of ${total}</p>
           </div>${groups}`);
       }
@@ -819,7 +854,7 @@ export const SECTION_TYPES = {
       return sectionShell(sec, `
         <div class="ed-head ed-head-split">
           <div>${kicker(sec.kicker)}${headline(sec.title)}
-            ${sec.subtitle ? `<p class="ed-sub">${rich(sec.subtitle)}</p>` : ''}</div>
+            ${sec.subtitle ? `<p class="ed-sub" data-edit="subtitle">${rich(sec.subtitle)}</p>` : ''}</div>
           <a class="ed-meta" href="#/bookmarks">${collected} of ${total} collected &rarr;</a>
         </div>
         <div class="bm-grid">${tiles}</div>`);
