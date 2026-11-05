@@ -2285,7 +2285,16 @@ a.ed-meta:hover { color: var(--c-accent); }
 }
 .ed-trim {
   position: absolute;
-  left: 0; right: 0;
+  /* A band laid between two sections belongs to the page, not to the text
+     column — penned inside the measure it floats with bare paper either side.
+     Same escape the curtain makes: wider than the window, pulled back by half
+     the excess, so equal amounts fall past each edge and only the middle of
+     the cloth is seen. Centred on the section rather than inset by it, so the
+     section's own width and padding are untouched. */
+  left: 50%;
+  right: auto;
+  inline-size: calc(100vw * var(--trim-over, 1.1));
+  margin-inline-start: calc(100vw * var(--trim-over, 1.1) / -2);
   height: var(--trim-render-h);
   z-index: 5;
   pointer-events: none;
@@ -2540,6 +2549,12 @@ a.ed-meta:hover { color: var(--c-accent); }
   background-position: top center;
   background-size: 100% 100%;
 }
+
+/* The page clips sideways overhang — a band or a curtain hung wider than the
+   window must not make the page scrollable. `clip`, not `hidden`: the vertical
+   axis stays visible so a band still hangs into the section below, and no
+   scroll container is created to break the sticky masthead. */
+#app { overflow-x: clip; }
 
 /* A curtained section's own stacking context must not trap the overlay below
    the banner above it: the banner isolates (it carries a photo ground), so the
