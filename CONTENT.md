@@ -293,6 +293,32 @@ available: on that setting a phone in dark mode shows the journal dark, which
 is easy to mistake for being stuck. Tapping the toggle always lands on an
 explicit light or dark, so one tap gets you out of it either way.
 
+### A curtain around a whole section
+
+**Edge treatment → Curtain / full frame** wraps a section in a proscenium:
+valance across the top, drapes down both sides, tied-back bunches in the
+corners — the full stage-curtain look rather than a band along one edge.
+
+Give it **one picture of the whole curtain**, centre cut out, added to the
+library as a **Cutout**. Roughly **1600 × 1200 px**; the exact size doesn't
+matter, the proportions do.
+
+It is drawn as a nine-slice, which is what makes it work at any height: the
+corners stay put, the valance repeats along the top, and the drapes stretch
+down however far the section runs. A plain background image can't do this —
+it would squash the valance on a tall section and stretch it flat on a short
+one.
+
+**Where the drapes end and the opening begins is measured from your picture
+when you add it**, by finding the see-through middle. So the only thing to set
+is **how wide the drapes hang** — everything else keeps the curtain's own
+proportions. A picture with no transparent centre can't be a frame, and the
+editor says so rather than drawing nothing.
+
+Text inside the section is inset so it clears the drapes. On a phone the whole
+frame comes in by a third, since a narrow screen can't spare that much width
+on both sides.
+
 ### Why edges overlap very slightly
 
 Every edge treatment — a hanging band, or a preset cut like torn or lace —

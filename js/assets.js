@@ -63,7 +63,8 @@ export function isLoaded() { return loaded; }
  */
 export async function backfillAlpha() {
   const pending = [...cache.values()]
-    .filter((a) => a.hasAlpha === undefined || a.trimmed === undefined);
+    .filter((a) => a.hasAlpha === undefined || a.trimmed === undefined
+      || a.frameSlice === undefined);
   if (!pending.length) return 0;
 
   for (const a of pending) {
@@ -78,6 +79,7 @@ export async function backfillAlpha() {
       }
     }
     next.trimmed = true;
+    if (next.frameSlice === undefined) next.frameSlice = await detectFrameSlice(next.dataUrl);
     if (next.hasAlpha === undefined) next.hasAlpha = await detectAlpha(next.dataUrl);
     cache.set(a.id, next);
     try { await store.put('assets', next); } catch (_) { /* cache still right */ }
@@ -219,6 +221,64 @@ export function trimTransparent(dataUrl) {
   });
 }
 
+/**
+ * Where the opening sits inside a frame picture, in source pixels.
+ *
+ * A proscenium — a valance with drapes down each side — only scales right as a
+ * nine-slice: the top keeps its height, the sides stretch, the corners stay
+ * put. That needs to know how thick each side is, which is a property of the
+ * picture, not something anyone should be asked to measure. So we read it:
+ * walk in from the middle of each edge until the picture goes transparent,
+ * and that distance is the slice.
+ */
+export function detectFrameSlice(dataUrl) {
+  return new Promise((resolve) => {
+    if (!dataUrl) { resolve(null); return; }
+    const img = new Image();
+    img.onerror = () => resolve(null);
+    img.onload = () => {
+      try {
+        const w = img.width;
+        const h = img.height;
+        if (!w || !h) { resolve(null); return; }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        const { data } = ctx.getImageData(0, 0, w, h);
+        const solid = (x, y) => data[((y * w + x) * 4) + 3] > 24;
+
+        const midX = Math.floor(w / 2);
+        const midY = Math.floor(h / 2);
+        let top = 0;
+        while (top < h - 1 && solid(midX, top)) top += 1;
+        let bottom = 0;
+        while (bottom < h - 1 && solid(midX, h - 1 - bottom)) bottom += 1;
+        let left = 0;
+        while (left < w - 1 && solid(left, midY)) left += 1;
+        let right = 0;
+        while (right < w - 1 && solid(w - 1 - right, midY)) right += 1;
+
+        // No hole in the middle — not a frame. Caller falls back.
+        if (top + bottom >= h - 2 || left + right >= w - 2) { resolve(null); return; }
+
+        // Keep a sliver of the opening in each slice so the stretched edges
+        // never sample the hard cut line.
+        const pad = 2;
+        resolve({
+          top: Math.min(h - 1, top + pad),
+          right: Math.min(w - 1, right + pad),
+          bottom: Math.min(h - 1, bottom + pad),
+          left: Math.min(w - 1, left + pad),
+          w,
+          h,
+        });
+      } catch (_) { resolve(null); }
+    };
+    img.src = dataUrl;
+  });
+}
+
 export async function add(file, { kind = 'photo', name = '', alt = '' } = {}) {
   let { dataUrl, w, h } = await toDataUrl(file, kind);
   // Cut-outs are trimmed to their drawing so they sit where they are placed.
@@ -235,6 +295,7 @@ export async function add(file, { kind = 'photo', name = '', alt = '' } = {}) {
     w, h,
     bytes: Math.round(dataUrl.length * 0.75),
     hasAlpha: await detectAlpha(dataUrl),
+    frameSlice: await detectFrameSlice(dataUrl),
     trimmed: true,
     addedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

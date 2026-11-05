@@ -257,7 +257,20 @@ function sectionWarnings(sec) {
     || sec.type === 'hero';
   const edge = sec.edge && sec.edge !== 'none' ? sec.edge : '';
 
-  if (edge && edge !== 'artwork' && !hasGround) {
+  if (edge === 'curtain' && !(sec.curtainArt && sec.curtainArt.assetId)) {
+    out.push('Choose the curtain picture below, or nothing is drawn.');
+  }
+  if (edge === 'curtain' && sec.curtainArt && sec.curtainArt.assetId) {
+    const a = assets.get(sec.curtainArt.assetId);
+    if (a && !a.frameSlice) {
+      out.push(`“${esc(a.name)}” has no see-through opening in the middle, so it `
+        + 'cannot be used as a frame — there is nothing for the section to show '
+        + 'through. Use a PNG of the whole curtain with the centre cut out, added '
+        + 'to the library as a <b>Cutout</b>.');
+    }
+  }
+
+  if (edge && edge !== 'artwork' && edge !== 'curtain' && !hasGround) {
     out.push('This section sits on plain paper, so a shaped edge has nothing to '
       + 'cut into. Give it a background colour or photograph — or choose '
       + '<b>My own artwork</b>, which works on any section.');
@@ -351,7 +364,9 @@ function fieldControl(f, value, secId) {
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
         ${mediaButton(f.key, value, false, f.role)}
         ${f.size ? `<p class="hint">Best at <b>${esc(f.size)}</b>. Anything larger is scaled down on upload.</p>` : ''}
-        ${f.role === 'trim'
+        ${f.role === 'curtain'
+          ? '<p class="hint">The whole curtain in one picture — valance across the top, drapes down both sides, and the middle cut out so the section shows through. The drapes stretch to the section\u2019s height; the valance and the corners keep their shape.</p>'
+          : f.role === 'trim'
           ? '<p class="hint">Shown as it is, laid across the edge. Use a transparent PNG so the page shows through around the artwork.</p>'
           : f.role === 'backdrop'
             ? '<p class="hint">Fills the whole section, edge to edge. Frames and tilts don’t apply to a background — put those on a picture inside the section.</p>'

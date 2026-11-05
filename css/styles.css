@@ -2407,3 +2407,62 @@ a.ed-meta:hover { color: var(--c-accent); }
 .mode-toggle .mode-moon { display: none; }
 .mode-toggle[data-mode="dark"] .mode-sun { display: none; }
 .mode-toggle[data-mode="dark"] .mode-moon { display: block; }
+
+/* ------------------------------------------------------------- curtain ---
+   A proscenium around a whole section: valance across the top, drapes down
+   both sides, tied-back bunches in the corners.
+
+   Drawn as a nine-slice border-image on an overlay rather than a background,
+   because a background can only stretch the whole picture — which squashes
+   the valance on a tall section and stretches it flat on a short one. A
+   nine-slice keeps the corners fixed, repeats the valance along the top and
+   runs the drapes down however far the section goes.
+
+   The slices are measured from the picture when it is added (assets.js), so
+   the only thing to choose is how wide the drapes hang. */
+
+.ed.has-curtain {
+  container-type: inline-size;
+  position: relative;
+}
+/* Content clears the drapes instead of running under them — but only the
+   content. A hero's artwork is inside .hero, so padding that wrapper would
+   inset the picture and leave the curtain sitting on bare page. Pad the type
+   instead and let the artwork run full width behind the drapes. */
+.ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero),
+.ed.has-curtain .hero-type {
+  padding-inline: calc(var(--cur-l) * .82);
+}
+
+.ed-curtain {
+  position: absolute; inset: 0;
+  z-index: 6; pointer-events: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--cur-t) var(--cur-r) var(--cur-b) var(--cur-l);
+  border-image-source: var(--cur-img);
+  border-image-slice: var(--cur-slice);
+  border-image-repeat: stretch;
+  /* Default (1) means "follow border-width", which is what carries the
+     drape thickness you chose. `auto` would snap back to the picture's own
+     pixel sizes and ignore it. */
+}
+
+/* A hero fills its section edge to edge, so the curtain hangs over the
+   artwork rather than outside it. */
+.ed-hero.has-curtain .hero { overflow: visible; }
+
+@media (max-width: 759px) {
+  /* Narrow screens cannot spare 16% of the width on each side twice over, so
+     the whole frame comes in — the same way the bands do — and the content
+     keeps a little more clearance than the drape is wide. */
+  .ed-curtain {
+    border-width:
+      calc(var(--cur-t) * .7) calc(var(--cur-r) * .7)
+      calc(var(--cur-b) * .7) calc(var(--cur-l) * .7);
+  }
+  .ed.has-curtain > *:not(.ed-curtain):not(.m-backdrop):not(.ed-scrim):not(.hero),
+  .ed.has-curtain .hero-type {
+    padding-inline: calc(var(--cur-l) * .62);
+  }
+}
