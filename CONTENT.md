@@ -197,9 +197,16 @@ rather than filling it — which looks like the band is in the wrong place.
 Cut-outs are cropped to their drawing when added, and anything already in the
 library is cropped the next time the app opens.
 
-**Hang over the edge** then does what it says: 0 keeps the band inside the
-section, half the **Size** drapes it across the seam, and the full Size puts it
-entirely onto the section below.
+**Hang below the edge** is a share of the band's own height, so it means the
+same thing whatever size you pick:
+
+- **0%** — the band sits inside the section, over its own background
+- **50%** — it straddles the seam
+- **100%** — its top edge lands exactly on the section's bottom, and the whole
+  band hangs onto the section below
+
+At 100% the section reserves the drop, so the band drapes over the section
+beneath without covering its text — and the section's own height is unchanged.
 
 For two plain paper sections meeting, use a **Decorative interlude** between
 them — its **Lace band** and **Vine band** modes draw an ornamental divider,

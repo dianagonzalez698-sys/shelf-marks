@@ -48,27 +48,34 @@ function sectionShell(sec, inner, extraClass = '') {
   if (cut && Number(sec.edgeSize) > 0) styles.push(`--edge-h:${Number(sec.edgeSize)}px`);
 
   let band = '';
+  let bandBottom = false;
   if (isArt) {
     const url = assetSrc((sec.edgeArt || {}).assetId);
     if (url) {
       const where = sec.edgeWhere || 'bottom';
-      const bs = `--trim-img:url('${attr(url)}')`
-        + `;--trim-h:${Number(sec.edgeSize) || 140}px`
-        + `;--trim-over:${Number(sec.edgeHang) || 0}px`;
+      // The size and the drop live on the section so both the band and the
+      // margin below it compute from one value — the band shrinks on a phone
+      // and its offset has to shrink with it.
+      const size = Number(sec.edgeSize) || 140;
+      const pct = Math.max(0, Math.min(100, Number(sec.edgeHang) || 0));
+      styles.push(`--trim-h:${size}px`, `--trim-pct:${pct}`);
+      const bs = `--trim-img:url('${attr(url)}')`;
       if (where === 'bottom' || where === 'both') {
         band += `<span class="ed-trim ed-trim-bottom" style="${bs}" aria-hidden="true"></span>`;
+        bandBottom = true;
       }
       if (where === 'top' || where === 'both') {
         band += `<span class="ed-trim ed-trim-top" style="${bs}" aria-hidden="true"></span>`;
       }
     }
   }
+
   const style = styles.length ? ` style="${styles.join(';')}"` : '';
 
   return `<section class="ed ed-${sec.type}${tone}${pad}`
     + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''}`
     + `${cut ? ` has-edge edge-${cut}` : ''}`
-    + `${band ? ' has-trim' : ''} ${extraClass}"`
+    + `${band ? ' has-trim' : ''}${bandBottom ? ' has-trim-bottom' : ''} ${extraClass}"`
     + ` data-sec="${attr(sec.id)}"${style}>${bg}${band}${inner}</section>`;
 }
 
@@ -114,15 +121,30 @@ const EDGE_WHERE = [
  * working and the editor only ever shows one.
  */
 export function migrateSection(sec) {
-  if (!sec || sec.edgeArt !== undefined) return sec;
-  const next = { ...sec };
+  if (!sec) return sec;
+
+  // Already on the new edge model, but hang may still be stored in pixels.
+  if (sec.edgeArt !== undefined) {
+    if (sec.edgeV === 2) return sec;
+    const size = Number(sec.edgeSize) || 140;
+    const px = Number(sec.edgeHang) || 0;
+    return {
+      ...sec,
+      edgeV: 2,
+      edgeHang: size > 0 ? Math.max(0, Math.min(100, Math.round((px / size) * 100))) : 0,
+    };
+  }
+
+  const next = { ...sec, edgeV: 2 };
 
   if (sec.trim && sec.trim !== 'none' && sec.trimImage && sec.trimImage.assetId) {
     next.edge = 'artwork';
     next.edgeArt = sec.trimImage;
     next.edgeWhere = sec.trim;
     next.edgeSize = Number(sec.trimHeight) || 140;
-    next.edgeHang = Number(sec.trimOverlap) || 0;
+    next.edgeHang = next.edgeSize > 0
+      ? Math.max(0, Math.min(100, Math.round((Number(sec.trimOverlap) || 0) / next.edgeSize * 100)))
+      : 0;
   } else if (sec.edge === 'custom' && sec.edgeImage && sec.edgeImage.assetId) {
     // A custom cut becomes shown artwork, which is what it was nearly always for.
     next.edge = 'artwork';
@@ -150,7 +172,7 @@ const COMMON_FIELDS = [
   { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
   { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
-  { key: 'edgeHang', label: 'Hang over the edge', type: 'range', min: 0, max: 120, step: 2, when: (s) => s.edge === 'artwork' },
+  { key: 'edgeHang', label: 'Hang below the edge (%)', type: 'range', min: 0, max: 100, step: 5, when: (s) => s.edge === 'artwork' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 ];
@@ -169,7 +191,8 @@ export const SECTION_BASE = {
   edgeArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   edgeWhere: 'bottom',
   edgeSize: 0,
-  edgeHang: 0,
+  edgeHang: 100,   // a band normally hangs from the edge, not inside it
+  edgeV: 2,
 };
 
 /* -------------------------------------------------------------- types ---- */
@@ -205,7 +228,7 @@ export const SECTION_TYPES = {
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' },
-      { key: 'edgeHang', label: 'Hang over the edge', type: 'range', min: 0, max: 120, step: 2, when: (s) => s.edge === 'artwork' },
+      { key: 'edgeHang', label: 'Hang below the edge (%)', type: 'range', min: 0, max: 100, step: 5, when: (s) => s.edge === 'artwork' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
     ],

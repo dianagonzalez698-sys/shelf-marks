@@ -2218,11 +2218,19 @@ a.ed-meta:hover { color: var(--c-accent); }
    It hangs outside the section, so a section carrying one must not clip. */
 
 .ed.has-trim { overflow: visible; }
+/* A band hanging below reserves its drop, so what follows clears it while the
+   band still covers the gap — draped over the next section, not pushed off. */
+.ed.has-trim-bottom { margin-bottom: calc(var(--trim-render-h, 0px) * var(--trim-pct, 0) / 100); }
 
+.ed {
+  /* One rendered height drives the band, its offset and the space reserved
+     below it, so they can never disagree when the band scales down. */
+  --trim-render-h: var(--trim-h, 90px);
+}
 .ed-trim {
   position: absolute;
   left: 0; right: 0;
-  height: var(--trim-h, 90px);
+  height: var(--trim-render-h);
   z-index: 5;
   pointer-events: none;
   background-image: var(--trim-img);
@@ -2234,14 +2242,14 @@ a.ed-meta:hover { color: var(--c-accent); }
   background-repeat: repeat-x;
   background-size: auto 100%;
 }
-.ed-trim-bottom { bottom: calc(var(--trim-over, 0px) * -1); }
-.ed-trim-top    { top: calc(var(--trim-over, 0px) * -1); }
+.ed-trim-bottom { bottom: calc(var(--trim-render-h) * var(--trim-pct, 0) / -100); }
+.ed-trim-top    { top: calc(var(--trim-render-h) * var(--trim-pct, 0) / -100); }
 
 /* A hero clips its own banner, so a band hanging off it needs room. */
 .ed-hero.has-trim .hero { overflow: visible; }
 
 @media (max-width: 759px) {
-  /* Wide decorative bands become stamp-sized on a phone; let them keep their
-     drawing by repeating rather than squashing. */
-  .ed-trim { height: calc(var(--trim-h, 90px) * .62); }
+  /* Bands scale down on a phone. Scaling the shared height keeps the offset
+     and the reserved space in step with it. */
+  .ed { --trim-render-h: calc(var(--trim-h, 90px) * .62); }
 }
