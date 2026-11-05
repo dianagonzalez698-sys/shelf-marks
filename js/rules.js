@@ -158,7 +158,13 @@ export function evaluate(challenge, books) {
   const recurring = isRecurring(challenge);
   const periodsDef = windowPeriods(challenge.window);
   const perTarget = challenge.target == null ? null : Math.max(1, Number(challenge.target));
-  const matching = (books || []).filter((b) => matchesFilter(b, challenge.filter));
+  // The filter proposes; you dispose. A rule can say "marked Classic", but it
+  // cannot say "authors like Didion" — so a challenge may also name books that
+  // count whatever the rule thinks, and books that do not. Hand-picked wins.
+  const include = new Set(challenge.includeBooks || []);
+  const exclude = new Set(challenge.excludeBooks || []);
+  const matching = (books || []).filter((b) => !exclude.has(b.id)
+    && (include.has(b.id) || matchesFilter(b, challenge.filter)));
 
   const periods = periodsDef.map((p) => {
     const inner = matching
@@ -278,4 +284,18 @@ export function earnedBookmarks(challenges, books) {
     });
   });
   return out;
+}
+
+
+/**
+ * Why a book does or does not count toward a challenge.
+ *
+ * Three states, and the difference matters when you are looking at a list
+ * wondering why something is in it: the rule matched, you said so, or you
+ * said not.
+ */
+export function eligibility(book, challenge) {
+  if ((challenge.excludeBooks || []).includes(book.id)) return 'excluded';
+  if ((challenge.includeBooks || []).includes(book.id)) return 'picked';
+  return matchesFilter(book, challenge.filter) ? 'matched' : 'no';
 }

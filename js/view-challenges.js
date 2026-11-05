@@ -3,13 +3,13 @@
 
 import {
   state, allChallenges, getChallenge, saveChallenge, archiveChallenge,
-  unlockMap, knownTags, knownSeries, uid,
+  unlockMap, knownTags, knownSeries, uid, sortedBooks,
 } from './state.js';
 import {
   esc, attr, toast, progressBar, progressLine, markVisual, checkBadge, checkGlyph,
-  openSheet, navigate, confirmSheet, coverImg,
+  openSheet, navigate, confirmSheet, coverImg, render,
 } from './ui.js';
-import { evaluate, describeFilter, describeWindow, bookmarkLabels } from './rules.js';
+import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js';
 import { formatDate, quarters, YEAR } from './periods.js';
 import { FILTER_TYPES, WINDOW_TYPES } from './config.js';
 import { t } from './theme.js';
@@ -45,6 +45,10 @@ export function challengesView() {
     },
   };
 }
+
+// Which spread we have already scrolled to a section on, so a re-render does
+// not scroll again.
+let focusedFor = null;
 
 /* --------------------------------------------------------------- detail ---- */
 
@@ -114,6 +118,9 @@ export function challengeDetailView(params) {
     banner: false,
     editorial: true,
     back: true,
+    // A challenge spread is long, and saving from a sheet re-renders it.
+    // Without this you are thrown back to the top every time you tick a book.
+    keepScroll: true,
     actions: canEdit ? '<button class="btn btn-quiet" type="button" id="edit-top">Edit</button>' : '',
     html: `
       ${spread}
@@ -123,11 +130,29 @@ export function challengeDetailView(params) {
       </div></div>` : ''}
     `,
     onMount(root) {
+      // Arriving from a bookmark's "Go to eligible books": the section is well
+      // down a long spread, so land on it rather than at the top. Once per
+      // arrival — the page re-renders whenever anything is saved, and
+      // re-scrolling then would yank the page out from under you.
+      if (params.query && params.query.focus === 'eligible') {
+        const key = `${challenge.id}:eligible`;
+        if (focusedFor !== key) {
+          focusedFor = key;
+          const target = root.querySelector('.ed-challengeEligible');
+          if (target) setTimeout(() => target.scrollIntoView({ block: 'start' }), 60);
+        }
+      } else {
+        focusedFor = null;
+      }
+
       const open = () => openEditor(challenge);
       const top = document.getElementById('edit-top');
       if (top) top.onclick = open;
       const inline = root.querySelector('#edit-challenge');
       if (inline) inline.onclick = open;
+
+      const pick = root.querySelector('#pick-eligible');
+      if (pick) pick.onclick = () => openEligiblePicker(challenge);
 
       const archive = root.querySelector('#archive');
       if (archive) {
@@ -150,6 +175,92 @@ export function challengeDetailView(params) {
       }
     },
   };
+}
+
+/* ------------------------------------------------------ eligible books ---- */
+
+/**
+ * Choose which books count toward a challenge.
+ *
+ * The rule decides by default and the tick reflects that, so the sheet opens
+ * showing the truth rather than an empty list. Changing a tick records an
+ * override — "count this anyway", or "not this one" — and matching the rule
+ * again clears the override rather than leaving a redundant one behind.
+ */
+export function openEligiblePicker(challenge) {
+  const include = new Set(challenge.includeBooks || []);
+  const exclude = new Set(challenge.excludeBooks || []);
+  const books = sortedBooks();
+
+  const row = (b) => {
+    const state_ = eligibility(b, challenge);
+    const on = state_ === 'matched' || state_ === 'picked';
+    const note = state_ === 'picked' ? 'chosen by hand'
+      : state_ === 'excluded' ? 'ruled out by hand'
+        : state_ === 'matched' ? 'matches the rule' : '';
+    return `<label class="erow${on ? ' is-on' : ''}" data-book="${attr(b.id)}">
+      <input type="checkbox" data-pick="${attr(b.id)}" ${on ? 'checked' : ''}>
+      <span class="erow-body">
+        <span class="erow-title">${esc(b.title)}</span>
+        <span class="erow-meta">${esc(b.author || '')}${b.dateFinished ? ` · ${esc(formatDate(b.dateFinished))}` : ''}</span>
+        <span class="erow-why" data-why="${attr(b.id)}">${esc(note)}</span>
+      </span>
+    </label>`;
+  };
+
+  openSheet(`
+    <h2>Eligible books</h2>
+    <p class="small muted" style="margin-top:0">
+      ${esc(describeFilter(challenge.filter))} counts automatically. Tick anything else
+      that should, or untick one that shouldn't.
+    </p>
+    ${books.length
+      ? `<div class="elist">${books.map(row).join('')}</div>`
+      : '<p class="hint">No books logged yet.</p>'}
+    <div class="btn-row" style="margin-top:1.2rem">
+      <button class="btn btn-primary grow" type="button" data-save>Save</button>
+      <button class="btn" type="button" data-close>Cancel</button>
+    </div>
+  `, {
+    onMount(sheet, close) {
+      sheet.querySelectorAll('[data-pick]').forEach((box) => {
+        box.addEventListener('change', () => {
+          const id = box.dataset.pick;
+          const book = books.find((b) => b.id === id);
+          const byRule = matchesFilter(book, challenge.filter);
+          include.delete(id);
+          exclude.delete(id);
+          // Only record an override where it actually differs from the rule.
+          if (box.checked && !byRule) include.add(id);
+          if (!box.checked && byRule) exclude.add(id);
+
+          const why = sheet.querySelector(`[data-why="${CSS.escape(id)}"]`);
+          if (why) {
+            why.textContent = include.has(id) ? 'chosen by hand'
+              : exclude.has(id) ? 'ruled out by hand'
+                : byRule ? 'matches the rule' : '';
+          }
+          box.closest('.erow').classList.toggle('is-on', box.checked);
+        });
+      });
+
+      sheet.querySelector('[data-save]').onclick = async () => {
+        try {
+          await saveChallenge({
+            id: challenge.id,
+            custom: !!challenge.custom,
+            includeBooks: [...include],
+            excludeBooks: [...exclude],
+          });
+          close();
+          toast('Eligible books saved.');
+          render();
+        } catch (_) {
+          toast('Could not save that change.', 'bad');
+        }
+      };
+    },
+  });
 }
 
 /* --------------------------------------------------------------- editor ---- */

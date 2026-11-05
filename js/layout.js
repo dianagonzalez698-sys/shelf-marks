@@ -106,6 +106,7 @@ export function defaultLayout(pageId) {
       build('interlude', { mode: 'ornament', spacing: 'tight' }),
       build('challengeMarks', { kicker: 'The collection', title: 'Bookmarks' }),
       build('challengeRecord', { kicker: 'The record', title: '', tone: 'sage' }),
+      build('challengeEligible', { kicker: 'What counts', title: 'Eligible books' }),
     ].filter(Boolean);
   }
 
@@ -128,21 +129,25 @@ export async function load() {
 // front of layouts saved before they became sections — otherwise upgrading
 // would silently empty the page of everything except what you had added.
 // Marked once, so deleting a block afterwards sticks.
-const CHALLENGE_BLOCKS = ['challengeHero', 'challengeMarks', 'challengeRecord'];
+const CHALLENGE_BLOCKS = ['challengeHero', 'challengeMarks', 'challengeRecord', 'challengeEligible'];
 
 async function adoptChallengeBlocks() {
   for (const [id, row] of [...cache]) {
     if (!id.startsWith('challenge')) continue;
-    if (row.specV >= 1 || !Array.isArray(row.sections)) continue;
+    if (row.specV >= 2 || !Array.isArray(row.sections)) continue;
     const present = new Set(row.sections.map((x) => x && x.type));
     const missing = CHALLENGE_BLOCKS
       .filter((type) => !present.has(type))
       .map((type) => build(type, type === 'challengeRecord' ? { tone: 'sage' } : {}))
       .filter(Boolean);
+    // The eligible list reads as a footnote to the record, so it goes last;
+    // the opening blocks belong at the front.
+    const tail = missing.filter((x) => x.type === 'challengeEligible');
+    const head = missing.filter((x) => x.type !== 'challengeEligible');
     const record = {
       ...row,
-      sections: [...missing, ...row.sections],
-      specV: 1,
+      sections: [...head, ...row.sections, ...tail],
+      specV: 2,
       updatedAt: new Date().toISOString(),
     };
     await store.put('layouts', record);
@@ -177,7 +182,7 @@ export function isCustomised(pageId) {
 export async function save(pageId, sections) {
   // specV marks the layout as current, so the one-time block adoption above
   // never runs again — deleting a block you don't want has to stick.
-  const record = { id: pageId, sections, specV: 1, updatedAt: new Date().toISOString() };
+  const record = { id: pageId, sections, specV: 2, updatedAt: new Date().toISOString() };
   await store.put('layouts', record);
   cache.set(pageId, record);
   return record;

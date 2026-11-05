@@ -91,7 +91,6 @@ function openBookmark(id) {
           <dt>Status</dt><dd>${unlocked ? 'Collected' : 'Not yet collected'}</dd>
           ${unlocked ? `<dt>Earned</dt><dd>${esc(formatDateTime(unlock.unlockedAt))}</dd>` : ''}
           ${!unlocked ? `<dt>To earn</dt><dd>${esc(requirement)}</dd>` : ''}
-          <dt>Reference</dt><dd><code>${esc(id)}</code></dd>
         </dl>
       </span>
     </div>
@@ -103,11 +102,18 @@ function openBookmark(id) {
         ${img ? '<button class="btn btn-danger" type="button" id="bm-remove">Remove photo</button>' : ''}
       </div>
       <p class="hint">Photos stay on this device and travel inside your backup file.</p>
-    ` : `
-      <a class="btn btn-block" style="margin-top:1.3rem" href="#/challenge/${encodeURIComponent(challenge ? challenge.id : '')}" data-close>
-        Open ${esc(challenge ? challenge.name : 'challenge')}
+    ` : ''}
+
+    ${challenge ? `
+      <a class="btn btn-block" style="margin-top:${unlocked ? '.7rem' : '1.3rem'}"
+         href="#/challenge/${encodeURIComponent(challenge.id)}?focus=eligible" data-close>
+        Go to eligible books
       </a>
-    `}
+      <a class="btn btn-block" style="margin-top:.7rem"
+         href="#/challenge/${encodeURIComponent(challenge.id)}" data-close>
+        Open ${esc(challenge.name)}
+      </a>
+    ` : ''}
 
     <div class="btn-row" style="margin-top:.7rem">
       <button class="btn btn-block" type="button" data-close>Close</button>

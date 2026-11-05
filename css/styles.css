@@ -2578,3 +2578,25 @@ a.ed-meta:hover { color: var(--c-accent); }
      to nothing. */
   .word-pic { inline-size: 100%; max-inline-size: 320px; justify-self: center; }
 }
+
+/* The eligible-books picker: the tick shows what counts now, whether the rule
+   decided it or you did. */
+.elist { max-height: 50vh; overflow-y: auto; margin-top: .6rem; }
+.erow {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  align-items: start; gap: .7rem;
+  padding: .6rem;
+  border-bottom: 1px solid var(--c-rule);
+  cursor: pointer;
+}
+.erow.is-on { background: var(--c-accent-soft); }
+.erow input { margin-top: .25rem; }
+.erow-body { display: block; min-width: 0; }
+.erow-title { display: block; font-weight: 500; }
+.erow-meta { display: block; font-size: .85em; color: var(--c-ink-faint); }
+.erow-why {
+  display: block; margin-top: .15rem;
+  font-family: var(--f-ui); font-size: .72em;
+  letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--c-accent);
+}

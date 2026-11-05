@@ -14,7 +14,7 @@ import {
   bookmarkStats, allChallenges, getChallenge, sortedBooks, unlockMap,
   allWords, getWord, wordStats,
 } from './state.js';
-import { evaluate, describeFilter, describeWindow, bookmarkLabels } from './rules.js';
+import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility } from './rules.js';
 import { focusQuarter, focusBimonth, daysLeftLabel, formatDate, yearPeriod, inPeriod } from './periods.js';
 import { t, FONT_STACKS } from './theme.js';
 
@@ -995,6 +995,72 @@ export const SECTION_TYPES = {
         <div class="ed-head"><div>${kicker(sec.kicker)}${headline(sec.title)}</div></div>
         ${figures}
         ${list}`);
+    },
+  },
+
+
+  /* 20. Challenge — the books that qualify -------------------------------- */
+  challengeEligible: {
+    label: 'Challenge — eligible books',
+    blurb: 'Which of your books count toward this challenge, and why.',
+    needs: 'challenge',
+    create: () => ({
+      kicker: 'What counts',
+      title: 'Eligible books',
+      showWhy: true,
+      showOutside: true,
+      tone: 'none',
+    }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'text' },
+      { key: 'title', label: 'Heading', type: 'text' },
+      { key: 'showWhy', label: 'Show why each one counts', type: 'bool' },
+      { key: 'showOutside', label: 'Include ones outside the dates', type: 'bool' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec, ctx) {
+      const { challenge: c, result: r } = ctx;
+      const period = yearPeriod(state.settings.year);
+      const inWindow = new Set(r.periods.flatMap((p) => p.books.map((b) => b.id)));
+
+      const rows = r.books
+        .filter((b) => sec.showOutside !== false || inWindow.has(b.id))
+        .sort((a, b) => String(b.dateFinished || '').localeCompare(String(a.dateFinished || '')));
+
+      const why = (b) => {
+        const e = eligibility(b, c);
+        if (e === 'picked') return '<span class="tag tag-gold">Chosen by hand</span>';
+        return '<span class="tag tag-sage">Matches the rule</span>';
+      };
+
+      return sectionShell(sec, `
+        <div class="ed-head ed-head-split">
+          <div>${kicker(sec.kicker)}${headline(sec.title)}</div>
+          <button class="btn btn-sm" type="button" id="pick-eligible">Choose books</button>
+        </div>
+        <p class="hint" style="margin-top:0">${esc(describeFilter(c.filter))} — ${esc(describeWindow(c.window))}.
+          Anything else you want to count, add it by hand.</p>
+        ${rows.length
+          ? `<div class="list">${rows.map((b) => `
+              <article class="list-row">
+                <a class="list-row-link" href="#/book/${encodeURIComponent(b.id)}">
+                  ${coverImg(b)}
+                  <span class="grow">
+                    <span class="entry-title">${esc(b.title)}</span>
+                    <span class="entry-meta">${esc(b.author || '')}</span>
+                    <span class="entry-meta">Finished ${esc(formatDate(b.dateFinished))}</span>
+                    <span class="tags">
+                      ${sec.showWhy !== false ? why(b) : ''}
+                      ${inWindow.has(b.id)
+                        ? ''
+                        : `<span class="tag tag-plain">Outside ${esc(describeWindow(c.window))}</span>`}
+                    </span>
+                  </span>
+                </a>
+              </article>`).join('')}</div>`
+          : `<div class="empty"><h3>Nothing qualifies yet</h3>
+               <p>No book matches this challenge's rule. Use <b>Choose books</b> to name
+                  the ones that should count anyway.</p></div>`}`);
     },
   },
 

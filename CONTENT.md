@@ -285,6 +285,32 @@ Items merge by id and the more recently edited copy wins, so importing is safe
 in either direction and can be repeated whenever the two drift apart. A device
 with nothing on it yet says so, right above those buttons.
 
+## Eligible books
+
+Every challenge spread carries an **Eligible books** section: which of your
+books count toward it, and why.
+
+A challenge's rule decides by default — *marked Classic*, *re-read*, *physical
+TBR*. But some things a rule cannot say. "Joan Didion and authors like her" is
+not a checkbox, so that challenge could never count anything on its own.
+
+**Choose books** opens a list of everything you have logged, ticked to show
+what counts now. Tick one the rule misses and it counts anyway; untick one the
+rule caught and it stops. Each book in the section says which it was —
+*matches the rule* or *chosen by hand*.
+
+Hand-picking only records a difference. Tick a book that already matches and no
+override is stored; untick it later and the rule simply applies again. So a
+challenge whose rule works needs no maintenance, and one whose rule cannot
+work is still usable.
+
+Books that qualify but fall outside the challenge's dates are listed too,
+marked as outside — they are eligible, they just are not counting this time.
+Turn that off in the section's settings if you would rather not see them.
+
+A bookmark in the archive links straight here: **Go to eligible books** opens
+the challenge and lands on the section.
+
 ## Word of the year
 
 A word you kept meeting — *pantomime* for 2026 — gets a section and a page of
@@ -357,6 +383,32 @@ point of the arch, both measured from the picture itself.
 A picture with no see-through centre cannot be a curtain, and the editor says
 so rather than drawing nothing. On a phone the whole thing hangs shallower,
 since a narrow screen cannot spare a third of its width on cloth.
+
+## Eligible books
+
+Every challenge spread carries an **Eligible books** section: which of your
+books count toward it, and why.
+
+A challenge's rule decides by default — *marked Classic*, *re-read*, *physical
+TBR*. But some things a rule cannot say. "Joan Didion and authors like her" is
+not a checkbox, so that challenge could never count anything on its own.
+
+**Choose books** opens a list of everything you have logged, ticked to show
+what counts now. Tick one the rule misses and it counts anyway; untick one the
+rule caught and it stops. Each book in the section says which it was —
+*matches the rule* or *chosen by hand*.
+
+Hand-picking only records a difference. Tick a book that already matches and no
+override is stored; untick it later and the rule simply applies again. So a
+challenge whose rule works needs no maintenance, and one whose rule cannot
+work is still usable.
+
+Books that qualify but fall outside the challenge's dates are listed too,
+marked as outside — they are eligible, they just are not counting this time.
+Turn that off in the section's settings if you would rather not see them.
+
+A bookmark in the archive links straight here: **Go to eligible books** opens
+the challenge and lands on the section.
 
 ## Word of the year
 
