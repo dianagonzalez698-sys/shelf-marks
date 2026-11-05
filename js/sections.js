@@ -159,6 +159,7 @@ function sectionShell(sec, inner, extraClass = '') {
     const sl = (asset && asset.frameSlice) || null;
     if (url && sl) {
       const side = Math.max(2, Math.min(45, Number(sec.curtainWidth) || 10));
+      const depth = Math.max(0, Math.min(40, Number(sec.curtainTop) || 0));
       // Keep the frame's own proportions: scale every slice by one factor.
       const r = (n) => Math.max(0, Number(n) || 0);
       const base = Math.max(1, r(sl.left));
@@ -172,8 +173,14 @@ function sectionShell(sec, inner, extraClass = '') {
         // feeding, which silently stops scaling.
         `--cur-l:${side}vw`,
         `--cur-r:calc(${side}vw * ${k(sl.right)})`,
-        `--cur-t:calc(${side}vw * ${k(sl.top)})`,
         `--cur-b:calc(${side}vw * ${k(sl.bottom)})`,
+        // The valance can be set on its own. Tying its depth to the drape
+        // width keeps a picture's proportions honest, but a frame drawn for a
+        // squarish opening then puts an enormous pelmet across a wide, short
+        // section — so a nine-slice's independent edges are the point.
+        depth > 0
+          ? `--cur-t:${depth}vw`
+          : `--cur-t:calc(${side}vw * ${k(sl.top)})`,
       );
       curtain = '<span class="ed-curtain" aria-hidden="true"></span>';
     }
@@ -319,7 +326,8 @@ const COMMON_FIELDS = [
   { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
   { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-  { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 4, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 3, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainTop', label: 'How deep the valance hangs (0 = match the picture)', type: 'range', min: 0, max: 26, step: 1, when: (s) => s.edge === 'curtain' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 
@@ -342,6 +350,7 @@ export const SECTION_BASE = {
   edgeSize: 0,
   curtainArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   curtainWidth: 10,
+  curtainTop: 0,
   edgeV: 3,
   fontDisplay: '',
   fontBody: '',
@@ -387,7 +396,8 @@ export const SECTION_TYPES = {
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 4, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 3, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainTop', label: 'How deep the valance hangs (0 = match the picture)', type: 'range', min: 0, max: 26, step: 1, when: (s) => s.edge === 'curtain' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
       ...TYPE_FIELDS,
@@ -909,7 +919,8 @@ export const SECTION_TYPES = {
       { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '1600 × 1200 px, transparent PNG', when: (s) => s.edge === 'curtain' },
-      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 4, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainWidth', label: 'How wide the drapes hang', type: 'range', min: 3, max: 28, step: 1, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainTop', label: 'How deep the valance hangs (0 = match the picture)', type: 'range', min: 0, max: 26, step: 1, when: (s) => s.edge === 'curtain' },
       ...TYPE_FIELDS,
     ],
     render(sec, ctx) {

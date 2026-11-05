@@ -2442,7 +2442,11 @@ a.ed-meta:hover { color: var(--c-accent); }
 .ed.has-curtain.sp-flush { padding-block-start: calc(var(--cur-t) + .6rem); }
 
 .ed-curtain {
-  position: absolute; inset: 0;
+  position: absolute;
+  /* Reach a few pixels up over the section above. A section's height is
+     fractional, so a valance that starts exactly at the seam leaves the same
+     hairline of page the hanging bands did. Same cure, same size. */
+  inset: calc(var(--trim-bite, 3px) * -1) 0 0 0;
   z-index: 6; pointer-events: none;
   border-style: solid;
   border-color: transparent;

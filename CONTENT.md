@@ -327,10 +327,23 @@ the edges of the page, not off the edges of the text column. Content inside it
 is pushed in from the drapes and down past the valance, so nothing sits behind
 the cloth.
 
-**How wide the drapes hang** is a share of the window, 4–28%, starting at 10.
-The valance's depth follows it, since both are locked to your picture's
-proportions: if the valance eats too much of the section, bring the drapes in.
-A curtain around 1800px wide stays crisp at any window size. On a phone the whole
+Two sliders, both a share of the window's width:
+
+- **How wide the drapes hang** — 3–28%, starting at 10.
+- **How deep the valance hangs** — 0–26%. At **0** it follows the picture's own
+  proportions; set it and the valance is yours to control.
+
+They are separate on purpose. Keeping them locked is honest to the picture, but
+a curtain drawn around a squarish opening then throws an enormous pelmet across
+a wide, short section. A nine-slice's edges are independent, so yours are too.
+
+**What makes a good curtain picture.** Draw it for the shape it has to fill: a
+web section is wide and not very tall, so a **wide** source works far better
+than a square one — around **2400 × 1000 px**, with the valance shallow
+relative to the width and the drapes occupying roughly the outer sixth on each
+side. Up to 1800px on the long edge is kept at full resolution. A squarish
+frame can be made to fit with the two sliders, but its drapes are being
+stretched a long way to cover a tall section, and that shows as softness. On a phone the whole
 frame comes in by a third, since a narrow screen can't spare that much width
 on both sides.
 
