@@ -418,6 +418,12 @@ than meeting it — about **75px at a 2048px window**, scaling with the width an
 floored so a phone still overlaps. That is a position only: the curtain's
 height and proportions are untouched.
 
+The curtain also hangs **wider than the window** — 110% of it, pulled back 5%
+so equal amounts fall past each edge and only the inner folds show. Width and
+height take that factor together, so it is a uniform enlargement and the folds
+are never stretched sideways. The overhang is clipped at the section, so it
+never causes sideways scrolling.
+
 Content starts just below the valance's **lowest** point, with 24–32px of air.
 That depth is measured across the whole opening when the picture is added, not
 sampled down the middle: a scalloped pelmet is usually at its highest in the

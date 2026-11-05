@@ -2450,17 +2450,29 @@ a.ed-meta:hover { color: var(--c-accent); }
   --cur-lift: clamp(18px, 3.66vw, 96px);
   /* Air between the valance's lowest point and the first line of text. */
   --cur-clear: clamp(24px, 2vw, 32px);
+  /* The curtain is hung wider than the window so its outer folds fall past
+     both edges and it reads as cloth hanging outside the page rather than a
+     picture cut to fit. Width and height both take this factor, so it is a
+     uniform enlargement — the folds are never stretched sideways. */
+  --cur-over: 1.1;
+  /* Its overhang is clipped here rather than on a page-level container:
+     `clip` (not `hidden`) leaves the vertical axis alone, so the curtain
+     still hangs up over the banner, and no scroll container is created to
+     break the sticky masthead. */
+  overflow-x: clip;
   /* Where the valance's deepest point lands, measured from the section's top:
      its depth in the picture, less however far the curtain was lifted over
      the section above. Reserve to there plus breathing room — and never less
      than the section's own spacing, for a shallow curtain or a big lift. */
   padding-block-start: max(
-    calc(var(--cur-arch) - var(--cur-lift) - var(--trim-bite, 3px) + var(--cur-clear)),
+    calc(var(--cur-arch) * var(--cur-over) - var(--cur-lift) - var(--trim-bite, 3px)
+      + var(--cur-clear)),
     var(--sp-section));
 }
 .ed.has-curtain.sp-flush {
   padding-block-start: max(
-    calc(var(--cur-arch) - var(--cur-lift) - var(--trim-bite, 3px) + var(--cur-clear)),
+    calc(var(--cur-arch) * var(--cur-over) - var(--cur-lift) - var(--trim-bite, 3px)
+      + var(--cur-clear)),
     1rem);
 }
 
@@ -2477,8 +2489,13 @@ a.ed-meta:hover { color: var(--c-accent); }
   /* Lifted over the section above, plus the hairline bite. Nothing here
      changes how tall the curtain is — only where it sits. */
   top: calc((var(--cur-lift, 0px) + var(--trim-bite, 3px)) * -1);
-  left: 0; right: 0;
-  height: var(--cur-h);
+  /* Wider than its section and pulled back by half the excess, so equal
+     amounts fall past each edge. Percentages resolve against the section's
+     padding box, which is the full width of the window. */
+  left: calc((var(--cur-over, 1) - 1) / -2 * 100%);
+  right: auto;
+  width: calc(100% * var(--cur-over, 1));
+  height: calc(var(--cur-h) * var(--cur-over, 1));
   z-index: 6; pointer-events: none;
   background-image: var(--cur-img);
   background-repeat: no-repeat;
@@ -2503,12 +2520,13 @@ a.ed-meta:hover { color: var(--c-accent); }
 @media (max-width: 759px) {
   /* A phone cannot spare a third of its width on cloth, so the curtain hangs
      shallower and the content keeps only the room it needs. */
-  .ed-curtain { height: calc(var(--cur-h) * .62); }
+  .ed-curtain { height: calc(var(--cur-h) * var(--cur-over, 1) * .62); }
   .ed.has-curtain {
     padding-inline: max(calc(var(--cur-side) * .9 + .6rem), var(--sp-page-x));
     /* The curtain hangs at .62 here, so its arch lands proportionally higher. */
     padding-block-start: max(
-      calc(var(--cur-arch) * .62 - var(--cur-lift) - var(--trim-bite, 3px) + var(--cur-clear)),
+      calc(var(--cur-arch) * var(--cur-over) * .62 - var(--cur-lift)
+        - var(--trim-bite, 3px) + var(--cur-clear)),
       calc(var(--sp-section) * .6));
   }
 }
