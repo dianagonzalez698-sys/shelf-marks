@@ -3,7 +3,7 @@
 // UI can show a banner instead of silently losing a book.
 
 const DB_NAME = 'shelf-marks';
-const DB_VERSION = 3;   // 2 added: assets, layouts; 3 added: words
+const DB_VERSION = 4;   // 4 added: freeform canvas items (non-destructive upgrade)
 // The upgrade handler creates any store missing from this list, so adding a
 // name here plus bumping DB_VERSION is a safe, data-preserving migration.
 export const STORES = [
@@ -11,6 +11,7 @@ export const STORES = [
   'assets',   // your uploaded photographs, paintings, textures and cutouts
   'layouts',  // the editorial section arrangement for each page
   'words',    // a word of the year/season, and where you met it
+  'canvas',   // independent, movable text and artwork on each editorial page
 ];
 
 let dbPromise = null;

@@ -15,6 +15,7 @@ import { openSectionEditor } from './view-layout.js';
 import { HOME_PAGE_ID } from './view-home.js';
 import { roleForKey, applySectionVars } from './sections.js';
 import { FONT_STACKS, fontWeights, fontHasItalic } from './theme.js';
+import * as canvas from './canvas.js';
 
 let on = false;
 let pageId = HOME_PAGE_ID;
@@ -22,7 +23,7 @@ let pageId = HOME_PAGE_ID;
 export function isEditing() { return on; }
 
 /** Which layout a rendered page belongs to, so edits are saved to it. */
-export function setEditPage(id) { pageId = id || HOME_PAGE_ID; }
+export function setEditPage(id) { pageId = id || HOME_PAGE_ID; canvas.setPage(pageId); }
 
 export function toggleEditing(next) {
   on = next === undefined ? !on : !!next;
@@ -33,6 +34,7 @@ export function toggleEditing(next) {
     btn.title = on ? 'Finish editing' : 'Edit this page';
   }
   if (on) attach(); else detach();
+  canvas.setEditing(on);
   return on;
 }
 
@@ -312,6 +314,7 @@ function detach() {
 
 /** Re-apply after a re-render, since the DOM it decorated has been replaced. */
 export function refreshEditing() {
+  canvas.refresh();
   if (!on) return;
   detach();
   attach();

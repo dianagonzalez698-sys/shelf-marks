@@ -4,6 +4,7 @@ import { load, onChange, state } from './state.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
+import * as canvas from './canvas.js';
 import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
 import { homeView } from './view-home.js';
@@ -66,7 +67,7 @@ async function boot() {
   // Your pictures and your page arrangements. Both fall back to sensible
   // defaults, so a failure here costs decoration, never data.
   try {
-    await Promise.all([assets.load(), layout.load()]);
+    await Promise.all([assets.load(), layout.load(), canvas.load()]);
   } catch (_) { /* default layouts and empty library still render */ }
 
   // Pictures added before transparency was recorded get the flag filled in,
@@ -85,13 +86,6 @@ async function boot() {
     theme.applyContent(state.settings.year);
     paintModeToggle();
 
-  // Editing happens on the page; the button only appears where there is a
-  // layout to edit, so it never offers to edit a form or the settings screen.
-  wireEditing(setEditPage, () => toggleEditing(false));
-  const editBtn = document.getElementById('edit-page');
-  if (editBtn) editBtn.onclick = () => toggleEditing();
-
-  onChange(() => { if (isEditing()) refreshEditing(); });
     // The carved frame is generated from the gilt tokens, so it re-tints too.
     installOrnateFrame();
   });
@@ -116,7 +110,7 @@ async function boot() {
 
   // Editing happens on the page; the button only appears where there is a
   // layout to edit, so it never offers to edit a form or the settings screen.
-  wireEditing(setEditPage, () => toggleEditing(false));
+  wireEditing(setEditPage, () => toggleEditing(false), refreshEditing);
   const editBtn = document.getElementById('edit-page');
   if (editBtn) editBtn.onclick = () => toggleEditing();
 

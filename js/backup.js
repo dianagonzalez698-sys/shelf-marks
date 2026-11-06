@@ -8,6 +8,7 @@ import { todayISO } from './periods.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
+import * as canvas from './canvas.js';
 
 export const SCHEMA = 1;
 
@@ -28,6 +29,7 @@ export function buildBackup() {
     // …as do your pictures and the way your pages are arranged.
     assets: assets.snapshot(),
     layouts: layout.snapshot(),
+    canvas: canvas.snapshot(),
     words: state.words.map((w) => ({ ...w })),
   };
 }
@@ -58,6 +60,7 @@ function countsOf(payload) {
     images: (payload.images || []).length,
     assets: (payload.assets || []).length,
     layouts: (payload.layouts || []).length,
+    canvas: (payload.canvas || []).length,
     words: (payload.words || []).length,
   };
 }
@@ -126,17 +129,19 @@ export async function importBackup(text) {
 
   const assetRows = mergeCollection(data.assets, assets.snapshot(), 'assets');
   const layoutRows = mergeCollection(data.layouts, layout.snapshot(), 'layouts');
+  const canvasRows = mergeCollection(data.canvas, canvas.snapshot(), 'canvas');
   const words = mergeCollection(data.words, state.words, 'words');
   const books = mergeCollection(data.books, state.books, 'books');
   const challenges = mergeCollection(data.challenges, state.challengeRecords, 'challenges');
   const unlocks = mergeCollection(data.unlocks, state.unlocks, 'unlocks');
   const images = mergeCollection(data.images, [...state.images.values()], 'images');
 
-  for (const group of [books, challenges, unlocks, images, assetRows, layoutRows, words]) {
+  for (const group of [books, challenges, unlocks, images, assetRows, layoutRows, canvasRows, words]) {
     if (group.writes.length) await store.putMany(group.storeName, group.writes);
   }
   assets.adoptMany(assetRows.merged);
   layout.adoptMany(layoutRows.merged);
+  canvas.adoptMany(canvasRows.merged);
 
   state.books = books.merged.filter((b) => !b.deleted);
   state.challengeRecords = challenges.merged;
@@ -174,6 +179,7 @@ export async function importBackup(text) {
     images: pick(images),
     assets: pick(assetRows),
     layouts: pick(layoutRows),
+    canvas: pick(canvasRows),
     settingsChanged,
     themeChanged,
     newlyUnlocked: unlockedNow.length,
