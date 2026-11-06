@@ -51,7 +51,7 @@ export function settingsView() {
               <select id="set-mode"><option value="system" ${theme.getMode() === 'system' ? 'selected' : ''}>Follow my device (recommended)</option>
                 <option value="light" ${theme.getMode() === 'light' ? 'selected' : ''}>Always light</option>
                 <option value="dark" ${theme.getMode() === 'dark' ? 'selected' : ''}>Always dark</option></select>
-              <p class="hint">When following your device, Shelf Marks switches automatically as your system appearance changes.</p>
+              <p class="hint">When following your device, Shelf Marks uses the browser's reported system appearance. <span id="system-appearance-report"></span></p>
             </div>
           </section>
           <section class="settings-card settings-goals-card">
@@ -96,6 +96,13 @@ export function settingsView() {
     },
 
     onMount(root) {
+      const report = root.querySelector('#system-appearance-report');
+      const showDetectedMode = () => {
+        if (!report) return;
+        const detected = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        report.textContent = `This browser currently reports ${detected} mode.${window.self !== window.top ? ' Embedded previews may use the host app’s appearance instead of your computer’s.' : ''}`;
+      };
+      showDetectedMode();
       root.querySelector('#set-mode').onchange = async (e) => {
         await theme.setMode(e.target.value);
         toast('Appearance preference saved.', 'good');
