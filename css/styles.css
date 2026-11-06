@@ -233,59 +233,65 @@
   --safe-r: env(safe-area-inset-right, 0px);
 }
 
-/* Dark mode re-tints the same tokens; component CSS never changes. */
-/* The dark palette. JS resolves the viewer's preference — light, dark, or
-   follow-the-system — and stamps data-theme on <html>, so this is a single
-   plain rule rather than a media query duplicated for each case.
-   No attribute means light: Porcelain is the house ground. */
+/* Dark mode is a cool midnight folio: blue-black, lavender, silver and rose.
+   It deliberately avoids the light palette's brown and terracotta. */
 :root[data-theme="dark"] {
-  --c-bg:            #231a18;   /* Mahogany, taken down to near-black */
-  --c-bg-sunk:       #2c211e;
-  --c-bg-raised:     #2e2320;
-  --c-bg-field:      #31241f;
-  --c-ink:           #f6ede0;   /* Porcelain */
-  --c-ink-soft:      #d3c2b4;
-  --c-ink-faint:     #a28b7e;
-  --c-rule:          #3d2f2a;
-  --c-rule-strong:   #54423b;
-  --c-banner-bg:     #3e5440;   /* Olive Velvet, deepened */
-  --c-banner-ink:    #f3efe2;
-  --c-banner-ink-dim:#c6d2be;
-    /* On a dark ground Burnt Apricot reads at its true value. */
-  --c-accent:        #d4763c;
-  --c-accent-ink:    #231a18;
-  --c-accent-soft:   #3a251b;
-  --c-accent-deep:   #e89155;
-  --c-sage:          #8fa58b;   /* Wallpaper Sage carries better here */
-  --c-success:       #8fa58b;
-  /* On the dark ground the palette reads at full strength. */
-  --c-rose-ink:      #c9787e;
-  --c-blue-ink:      #7d9fcf;
-  --c-gold-ink:      #e0b35a;
-  --c-gilt-light:    #e4cd9c;
-  --c-gilt-mid:      #ab8c4b;
-  --c-gilt-deep:     #7a5c2e;
-  --c-gilt-shadow:   #3f2d14;
-  --c-bronze-light:  #b8945b;
-  --c-bronze-mid:    #7a5d33;
-  --c-bronze-deep:   #4d3a20;
-  --c-bronze-dark:   #241a10;
-  --c-bronze-patina: #3f4937;
-  --tone-sage:       #2a322a;
-  --tone-rose:       #352525;
-  --tone-blue:       #23292f;
-  --tone-apricot:    #332520;
-  --tone-gold:       #332c1f;
-  --tone-olive:      #3e5440;
-  --tone-ink:        #341d1d;
-  --tone-deep-ink:   #f6ede0;
-  --c-danger:        #e08880;
-  --c-danger-soft:   #3a2220;
-  --c-bm-empty-bg:   #281e1b;
-  --c-bm-empty-rule: #54423b;
-  --c-bm-cord:       #d4763c;
-  --paper-texture-opacity: .22;
-  --shadow-sheet: 0 -8px 40px rgba(0, 0, 0, .55);
+  --c-bg:            #141d2c;
+  --c-bg-sunk:       #101726;
+  --c-bg-raised:     #1c293b;
+  --c-bg-field:      #213149;
+  --c-ink:           #f3f5fa;
+  --c-ink-soft:      #ccd5e4;
+  --c-ink-faint:     #aebed3;
+  --c-rule:          #334359;
+  --c-rule-strong:   #50637e;
+  --c-banner-bg:     #283e60;
+  --c-banner-ink:    #f5f6ff;
+  --c-banner-ink-dim:#dae2f7;
+  --c-banner-accent: #f5cbe2;
+  --c-accent:        #cfb4f3;
+  --c-accent-ink:    #172032;
+  --c-accent-soft:   #303851;
+  --c-accent-deep:   #e5d4fa;
+  --c-sage:          #74b2b0;
+  --c-success:       #8bc6b3;
+  --c-rose:          #e2a8ca;
+  --c-blue:          #91baf0;
+  --c-terracotta:    #b79ad6;
+  --c-gold:          #ded3b7;
+  --c-rose-ink:      #f1c0db;
+  --c-blue-ink:      #b5d1ff;
+  --c-gold-ink:      #e6dac0;
+  --c-gilt-light:    #e1e9f4;
+  --c-gilt-mid:      #a8b6ca;
+  --c-gilt-deep:     #7186a4;
+  --c-gilt-shadow:   #25344e;
+  --c-bronze-light:  #c7d1e3;
+  --c-bronze-mid:    #92a5be;
+  --c-bronze-deep:   #536981;
+  --c-bronze-dark:   #1b283d;
+  --c-bronze-patina: #538888;
+  --tone-sage:       #223c43;
+  --tone-rose:       #3f2b48;
+  --tone-blue:       #253753;
+  --tone-apricot:    #39304d;
+  --tone-gold:       #393a51;
+  --tone-olive:      #2a4c55;
+  --tone-ink:        #1a2239;
+  --tone-deep-ink:   #f3f5fa;
+  --c-danger:        #f3a0b5;
+  --c-danger-soft:   #482a40;
+  --c-bm1-bg: #538e98; --c-bm1-ink: #f3f5fa;
+  --c-bm2-bg: #454677; --c-bm2-ink: #f3e6ff;
+  --c-bm3-bg: #9a6ba5; --c-bm3-ink: #f3f5fa;
+  --c-bm4-bg: #6489bc; --c-bm4-ink: #f3f5fa;
+  --c-bm5-bg: #a56a92; --c-bm5-ink: #f3f5fa;
+  --c-bm6-bg: #a0a8c8; --c-bm6-ink: #101726;
+  --c-bm-empty-bg:   #1b2840;
+  --c-bm-empty-rule: #50637e;
+  --c-bm-cord:       #cfb4f3;
+  --paper-texture-opacity: .08;
+  --shadow-sheet: 0 -8px 40px rgba(3, 9, 22, .7);
 }
 
 /* =========================================================== base ======= */
@@ -3297,4 +3303,46 @@ body.is-editing [data-sec]:hover > .edit-tools,
   .lit-optional-progress-number { justify-content: start; }
   .lit-optional-progress-number span { text-align: left; }
   .canvas-section-options { grid-template-columns: 1fr; }
+}
+
+/* Settings is a small editorial dashboard, not a stack of unrelated forms. */
+.settings-dashboard { width: min(1190px,100%); margin: 0 auto; padding: clamp(36px,6vw,88px) clamp(20px,5vw,65px) 90px; }
+.settings-heading { border-bottom: 1px solid var(--c-rule-strong); padding-bottom: 34px; margin-bottom: 35px; }
+.settings-heading h1 { font: 400 clamp(3.6rem,7vw,7rem)/1 var(--f-display); letter-spacing: -.045em; margin: 14px 0 18px; }
+.settings-heading h1 em { font-family: var(--f-body); font-weight: 400; }
+.settings-heading>p:last-child { color: var(--c-ink-soft); font: 1.35rem/1.4 var(--f-body); }
+.settings-top-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; margin-bottom: 22px; }
+.settings-card { padding: clamp(23px,3vw,40px); background: var(--c-bg-raised); border: 1px solid var(--c-rule); margin-bottom: 22px; min-width: 0; }
+.settings-top-grid .settings-card { margin-bottom: 0; }
+.settings-card-head { margin-bottom: 25px; }
+.settings-card-head>span { color: var(--c-accent); font: 600 .67rem var(--f-ui); letter-spacing: .17em; }
+.settings-card-head h2 { font: 400 clamp(2rem,3vw,3.35rem)/1.1 var(--f-display); margin: 10px 0 0; }
+.settings-card>p { font: 1.15rem/1.45 var(--f-body); color: var(--c-ink-soft); max-width: 62ch; }
+.settings-design-card>.lit-primary-action { display: inline-flex; margin: 20px 0 18px; }
+.settings-link-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 26px; margin-top: 8px; }
+.settings-link-grid a { display: flex; justify-content: space-between; gap: 10px; padding: 14px 0; border-bottom: 1px solid var(--c-rule); color: var(--c-ink); text-decoration: none; font: 600 .78rem/1.3 var(--f-ui); }
+.settings-link-grid a:hover { color: var(--c-accent); }
+.settings-mode-field { margin-top: 28px; padding-top: 23px; border-top: 1px solid var(--c-rule); }
+.settings-mode-field>label { display: block; font: 600 .66rem var(--f-ui); color: var(--c-ink-faint); letter-spacing: .14em; margin-bottom: 11px; }
+.settings-mode-field select, .settings-goals-card input { width: 100%; max-width: 100%; background: var(--c-bg-field); border: 1px solid var(--c-rule-strong); color: var(--c-ink); padding: 11px 12px; border-radius: 2px; }
+.settings-mode-field .hint { margin: 11px 0 0; font: .76rem/1.5 var(--f-ui); color: var(--c-ink-faint); }
+.settings-goals-card>.field { margin: 0 0 20px; }
+.settings-goals-card .field>label { display: block; margin-bottom: 8px; }
+.settings-disclosure { border-top: 1px solid var(--c-rule-strong); margin-top: 20px; padding-top: 16px; }
+.settings-disclosure summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; cursor: pointer; list-style: none; font: 600 .76rem var(--f-ui); color: var(--c-ink); }
+.settings-disclosure summary::-webkit-details-marker { display: none; }
+.settings-disclosure summary span { font: 1.5rem var(--f-body); color: var(--c-accent); }
+.settings-disclosure[open] summary span { transform: rotate(45deg); }
+.settings-disclosure>div, .settings-disclosure>.kv { margin-top: 23px; }
+.settings-disclosure>.hint { margin-top: 15px; }
+.settings-backup-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 10px; }
+.settings-backup-card .notice { margin-bottom: 18px; }
+.settings-footnote { max-width: 760px; margin: 35px 0 0; font: .73rem/1.65 var(--f-ui); color: var(--c-ink-faint); }
+.settings-footnote a { color: inherit; }
+/* Appearance is chosen in Settings, leaving the reading masthead uncluttered. */
+#mode-toggle { display: none !important; }
+@media (max-width: 780px) {
+  .settings-top-grid { grid-template-columns: 1fr; }
+  .settings-link-grid { grid-template-columns: 1fr; }
+  .settings-heading h1 { font-size: clamp(3.2rem,13vw,5rem); }
 }

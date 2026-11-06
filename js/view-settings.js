@@ -7,6 +7,7 @@ import { quarters, formatDateTime } from './periods.js';
 import { estimate } from './store.js';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
+import * as theme from './theme.js';
 
 function numberField(id, label, value, { min = 0, max = 9999, hint = '' } = {}) {
   return `<div class="field">
@@ -36,110 +37,56 @@ export function settingsView() {
     tab: 'settings',
     live: false,
     html: `
-      <section class="section form-wrap">
-      <div class="section-head" style="margin-bottom:1.4rem"><div>
-        <h2 class="section-title">Settings</h2>
-        <p class="section-sub">Goals, syncing, and the look of the journal.</p>
-      </div></div>
-      <h2 class="form-heading">Goals</h2>
-      <section class="panel">
-        ${numberField('set-annual', `Books in ${s.year}`, s.annualGoal, { min: 1, max: 2000 })}
-        <span class="field-label">Each quarter</span>
-        <div class="grid-2">
-          ${qs.map((q) => `<div class="field" style="margin-bottom:.4rem">
-            <label for="set-${attr(q.key)}">${esc(q.label)}</label>
-            <input id="set-${attr(q.key)}" data-quarter="${attr(q.key)}" type="number"
-                   inputmode="numeric" min="0" max="2000" value="${attr(s.quarterGoals[q.key])}">
-          </div>`).join('')}
+      <section class="settings-dashboard">
+        <header class="settings-heading"><p class="lit-overline">THE JOURNAL / PREFERENCES</p>
+          <h1>Your <em>Settings</em></h1><p>A quieter place to manage your reading, appearance, and saved work.</p>
+        </header>
+        <div class="settings-top-grid">
+          <section class="settings-card settings-design-card">
+            <div class="settings-card-head"><span>01 / THE LOOK</span><h2>Design & appearance</h2></div>
+            <p>Make the journal your own, from a single heading to the whole composition.</p>
+            <a class="lit-primary-action" href="#/?design=1">Enter Design Mode <span>↗</span></a>
+            <div class="settings-link-grid"><a href="#/customize">Typography & colors ↗</a><a href="#/layout">Page layouts ↗</a><a href="#/assets">Picture library ↗</a></div>
+            <div class="settings-mode-field"><label for="set-mode">COLOR APPEARANCE</label>
+              <select id="set-mode"><option value="system" ${theme.getMode() === 'system' ? 'selected' : ''}>Follow my device (recommended)</option>
+                <option value="light" ${theme.getMode() === 'light' ? 'selected' : ''}>Always light</option>
+                <option value="dark" ${theme.getMode() === 'dark' ? 'selected' : ''}>Always dark</option></select>
+              <p class="hint">When following your device, Shelf Marks switches automatically as your system appearance changes.</p>
+            </div>
+          </section>
+          <section class="settings-card settings-goals-card">
+            <div class="settings-card-head"><span>02 / THE READING PLAN</span><h2>Reading goals</h2></div>
+            ${numberField('set-annual', `Books to finish in ${s.year}`, s.annualGoal, { min: 1, max: 2000 })}
+            ${numberField('set-nf', 'Nonfiction goal (%)', s.nonfictionTargetPct, { min: 0, max: 100, hint: 'Share of finished books that should be nonfiction.' })}
+            <details class="settings-disclosure"><summary>Quarterly targets <span>+</span></summary>
+              <div class="grid-2">${qs.map((q) => `<div class="field"><label for="set-${attr(q.key)}">${esc(q.label)}</label>
+                <input id="set-${attr(q.key)}" data-quarter="${attr(q.key)}" type="number" inputmode="numeric" min="0" max="2000" value="${attr(s.quarterGoals[q.key])}"></div>`).join('')}</div>
+              <p class="hint" id="quarter-sum">Quarters add up to ${quarterTotal} of ${s.annualGoal} for the year.</p>
+            </details>
+          </section>
         </div>
-        <p class="hint" id="quarter-sum">Quarters add up to ${quarterTotal} of ${s.annualGoal} for the year.</p>
-      </section>
 
-      <h2 class="form-heading">Nonfiction</h2>
-      <section class="panel">
-        ${numberField('set-nf', 'Share of books read that should be nonfiction (%)', s.nonfictionTargetPct, { min: 0, max: 100, hint: 'The nonfiction bar on Home measures against this percentage.' })}
-      </section>
+        <section class="settings-card settings-library-card">
+          <div class="settings-card-head"><span>03 / YOUR COLLECTIONS</span><h2>Literary projects</h2></div>
+          <div class="settings-link-grid"><a href="#/notebook">The Notebook ↗</a><a href="#/words">Words of the year ↗</a><a href="#/challenges">Reading challenges ↗</a><a href="#/bookmarks">Bookmark archive ↗</a></div>
+        </section>
 
-      <h2 class="form-heading">Words</h2>
-      <section class="panel">
-        <p class="small muted" style="margin-top:0">
-          A word you kept meeting — one for the year, or one a season.
-          Record the books you met it in and it keeps its own tally.
-        </p>
-        <div class="btn-row"><a class="btn grow" href="#/words">Words of the year</a></div>
-      </section>
-
-      <h2 class="form-heading">Sync between devices</h2>
-      <section class="panel">
-        ${untouchedDevice() ? `<div class="notice" style="margin-top:0">
-          <strong>This device is showing the default journal.</strong>
-          Your layouts, pictures and design live on whichever device you built them on —
-          nothing travels between devices on its own. Export there, then import the file here.
-        </div>` : ''}
-        <p class="small muted" style="margin-top:0">
-          Export on one device, then import that file on the other. Items are merged by id,
-          and whichever copy was edited more recently wins. Your design settings travel too.
-        </p>
-        <div class="btn-row">
-          <button class="btn btn-primary grow" type="button" id="do-export">Export backup</button>
-          <button class="btn grow" type="button" id="do-import">Import backup</button>
-        </div>
-        <input type="file" id="import-file" accept="application/json,.json" class="visually-hidden">
-        <p class="hint" id="last-exported">Last exported: ${esc(formatDateTime(s.lastExportedAt))}</p>
-      </section>
-
-      <h2 class="form-heading">Appearance</h2>
-      <section class="panel">
-        <div class="row-between" style="gap:1rem; margin-bottom:1.1rem">
-          <div class="grow">
-            <p class="h3" style="margin:0">Design your pages</p>
-            <p class="hint" style="margin:.2rem 0 0">
-              Open the visual editor to move artwork, add text, and customize your journal directly.
-            </p>
-          </div>
-          <a class="btn btn-primary btn-sm nowrap" href="#/?design=1">Enter Design Mode</a>
-        </div>
-        <div class="divider" style="border-top:1px solid var(--c-rule); margin-bottom:1rem"></div>
-        <div class="row-between" style="gap:1rem">
-          <div class="grow">
-            <p class="h3" style="margin:0">Design studio</p>
-            <p class="hint" style="margin:.2rem 0 0">
-              Colours, typefaces, bookmark proportions and the wording on every page.
-            </p>
-          </div>
-          <a class="btn btn-sm nowrap" href="#/customize">Open</a>
-        </div>
-        <div class="btn-row" style="margin-top:.9rem">
-          <a class="btn btn-sm" href="#/layout">Page layouts</a>
-          <a class="btn btn-sm" href="#/assets">Picture library</a>
-        </div>
-      </section>
-
-      <h2 class="form-heading">This device</h2>
-      <section class="panel">
-        <dl class="kv">
-          <dt>Books logged</dt><dd>${state.books.length}</dd>
-          <dt>Bookmarks</dt><dd>${collected} of ${total}</dd>
-          <dt>Bookmark photos</dt><dd>${state.images.size}</dd>
-          <dt>Storage used</dt><dd id="storage-used">checking…</dd>
-        </dl>
-        <div class="btn-row" style="margin-top:.9rem">
-          <button class="btn btn-block" type="button" id="recheck">Re-check unlocks</button>
-        </div>
-        <p class="hint">
-          Bookmarks stay collected even if you later delete the book that earned one.
-          Re-checking drops any bookmark your current books no longer justify.
-        </p>
-      </section>
-
-      <h2 class="form-heading">About</h2>
-      <section class="panel">
-        <p class="small muted" style="margin:0">
-          Shelf Marks keeps everything in this browser's local database — nothing is uploaded anywhere.
-          Book details come from <a href="https://openlibrary.org" rel="noopener">Open Library</a>.
-          Clearing Safari's website data for this site erases your log, so export a backup now and then.
-        </p>
-      </section>
+        <section class="settings-card settings-backup-card">
+          <div class="settings-card-head"><span>04 / SAFEKEEPING</span><h2>Data & backups</h2></div>
+          ${untouchedDevice() ? `<div class="notice"><strong>This device is using the default journal.</strong> Layouts and images don't sync automatically between browsers. Import a backup from the device where you customized them.</div>` : ''}
+          <p>Your books, Notebook, artwork and design settings live in this browser. Export a backup regularly, especially before switching devices.</p>
+          <div class="settings-backup-actions"><button class="btn btn-primary" type="button" id="do-export">Export backup</button>
+            <button class="btn" type="button" id="do-import">Import backup</button></div>
+          <input type="file" id="import-file" accept="application/json,.json" class="visually-hidden">
+          <p class="hint" id="last-exported">Last exported: ${esc(formatDateTime(s.lastExportedAt))}</p>
+          <details class="settings-disclosure"><summary>Storage & maintenance <span>+</span></summary>
+            <dl class="kv"><dt>Books logged</dt><dd>${state.books.length}</dd><dt>Bookmarks</dt><dd>${collected} of ${total}</dd>
+              <dt>Bookmark photos</dt><dd>${state.images.size}</dd><dt>Storage used</dt><dd id="storage-used">checking…</dd></dl>
+            <button class="btn btn-block" type="button" id="recheck">Re-check bookmark unlocks</button>
+            <p class="hint">This removes collected bookmarks that your current finished books no longer justify. Photos stay saved.</p>
+          </details>
+        </section>
+        <p class="settings-footnote">Shelf Marks is a private, browser-stored reading journal. Book details come from <a href="https://openlibrary.org" rel="noopener">Open Library</a>. Clearing browser website data can erase locally saved entries unless you have exported a backup.</p>
       </section>
     `,
 
@@ -149,6 +96,10 @@ export function settingsView() {
     },
 
     onMount(root) {
+      root.querySelector('#set-mode').onchange = async (e) => {
+        await theme.setMode(e.target.value);
+        toast('Appearance preference saved.', 'good');
+      };
       /* storage estimate */
       estimate().then((e) => {
         const el = root.querySelector('#storage-used');

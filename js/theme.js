@@ -432,7 +432,7 @@ export const MODES = [
   ['dark', 'Always dark'],
   ['system', 'Follow my device'],
 ];
-export const DEFAULT_MODE = 'light';
+export const DEFAULT_MODE = 'system';
 
 const state = {
   tokens: {},
