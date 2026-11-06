@@ -2,12 +2,14 @@
 // Items belong to a section, so artwork travels with that section when reordered.
 import * as store from './store.js';
 import * as assets from './assets.js';
+import * as theme from './theme.js';
 import { esc, toast } from './ui.js';
 
 const records = new Map();
 let activePage = null;
 let editing = false;
 let selected = null;
+let panelMode = 'add';
 let history = [];
 let future = [];
 let saveQueue = Promise.resolve();
@@ -68,6 +70,7 @@ function add(type, assetId = null) {
     font: "'Bodoni Moda', serif", weight: 400, italic: false, opacity: 1, rotate: 0,
   };
   change([...data(), item]);
+  panelMode = 'selected';
   select(item.id);
   sec.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
@@ -165,15 +168,33 @@ function render() {
   paintPanel();
 }
 
-function select(id) { selected = id; render(); }
+function select(id) { selected = id; panelMode = id ? 'selected' : 'add'; render(); }
 function paintPanel() {
   const panel = document.getElementById('canvas-panel');
   if (!panel || !editing) return;
   const item = data().find((i) => i.id === selected);
-  if (!item) { panel.hidden = true; return; }
   panel.hidden = false;
-  panel.innerHTML = `
-    <div class="canvas-panel-head"><strong>${item.type === 'text' ? 'Edit text' : 'Edit artwork'}</strong><button type="button" data-canvas="deselect" aria-label="Close properties">×</button></div>
+  const tabs = `<div class="canvas-panel-tabs">
+      <button type="button" data-canvas="tab-add" class="${panelMode === 'add' ? 'active' : ''}">Add</button>
+      <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
+      <button type="button" data-canvas="tab-site" class="${panelMode === 'site' ? 'active' : ''}">Site</button>
+    </div>`;
+  if (panelMode !== 'selected' || !item) {
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>DESIGN STUDIO</strong><span class="canvas-live-dot">● Editing</span></div>${tabs}` +
+      (panelMode === 'site' ? `<h3>Site identity</h3><p class="canvas-panel-hint">Change your wordmark without editing code.</p>
+        <label>Website name<input id="canvas-site-name" value="${esc(theme.getContent().siteName || theme.CONTENT_DEFAULTS.siteName)}"></label>
+        <button type="button" data-canvas="save-site">Save website name</button>
+        <div class="canvas-panel-links"><a href="#/customize">Colors & typography</a><a href="#/layout">Page layout</a></div>`
+      : panelMode === 'layers' ? `<h3>Elements on this page</h3><p class="canvas-panel-hint">Select a layer to style or move it.</p>
+        <div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p>No freeform elements yet.</p>'}</div>`
+      : `<h3>Make this page yours</h3><p class="canvas-panel-hint">Add something, then drag it anywhere within its section. Click any heading on the page to edit the words directly.</p>
+        <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>Headings, notes, labels & quotes</span></button>
+        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Transparent PNGs, illustrations & photos</span></button>
+        <div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Add or arrange sections</a><a href="#/customize">Global colors & fonts</a></div>
+        <p class="canvas-panel-hint">Your changes save on this device. Use Settings → Export backup to keep a copy.</p>`);
+    return;
+  }
+  panel.innerHTML = `<div class="canvas-panel-head"><strong>${item.type === 'text' ? 'EDIT TEXT' : 'EDIT ARTWORK'}</strong><button type="button" data-canvas="deselect" aria-label="Back to tools">← Back</button></div>
     ${item.type === 'text' ? `<label>Text<textarea data-prop="text" rows="2">${esc(item.text)}</textarea></label>
       <label>Font<select data-prop="font">
       ${["'Bodoni Moda', serif", "'Cormorant Garamond', serif", "'EB Garamond', serif", "'Playfair Display', serif", "'Pinyon Script', cursive", "'Imperial Script', cursive", "'Jost', sans-serif"].map((f) => `<option value="${f}" ${f === item.font ? 'selected' : ''}>${f.split("'")[1]}</option>`).join('')}
@@ -220,12 +241,11 @@ function ensureTools() {
   if (document.getElementById('canvas-toolbar')) return;
   const bar = document.createElement('div');
   bar.id = 'canvas-toolbar'; bar.className = 'canvas-toolbar';
-  bar.innerHTML = `<span class="canvas-toolbar-title">Canvas</span>
-    <button type="button" data-canvas="text">+ Text</button>
-    <button type="button" data-canvas="image">+ Artwork</button>
+  bar.innerHTML = `<span class="canvas-toolbar-title">DESIGN MODE</span>
+    <span class="canvas-save-state">Editing this page · Saved locally</span>
     <button type="button" data-canvas="undo" title="Undo">↶</button>
     <button type="button" data-canvas="redo" title="Redo">↷</button>
-    <span class="canvas-save-state">Saved on this device</span>`;
+    <button type="button" data-canvas="finish">Done</button>`;
   const panel = document.createElement('aside');
   panel.id = 'canvas-panel'; panel.className = 'canvas-panel'; panel.hidden = true;
   document.body.append(bar, panel);
@@ -236,8 +256,20 @@ function ensureTools() {
     if (action === 'image') picker();
     if (action === 'undo') undo();
     if (action === 'redo') redo();
+    if (action === 'tab-add') { panelMode = 'add'; selected = null; render(); }
+    if (action === 'tab-layers') { panelMode = 'layers'; selected = null; render(); }
+    if (action === 'tab-site') { panelMode = 'site'; selected = null; render(); }
+    if (action === 'save-site') {
+      const name = document.getElementById('canvas-site-name')?.value.trim();
+      if (name) theme.setContent('siteName', name).then(() => toast('Site name saved.', 'good'));
+    }
+    if (action === 'finish') document.getElementById('edit-page')?.click();
     if (action === 'remove' && selected) { checkpoint(); change(data().filter((i) => i.id !== selected)); selected = null; render(); }
     if (action === 'deselect') select(null);
+  });
+  document.addEventListener('click', (e) => {
+    const id = e.target.closest('[data-canvas-select]')?.dataset.canvasSelect;
+    if (editing && id) select(id);
   });
   document.addEventListener('keydown', (e) => {
     if (!editing || !(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return;
@@ -249,6 +281,7 @@ function ensureTools() {
 export function setPage(pageId) { activePage = pageId; selected = null; history = []; future = []; render(); }
 export function setEditing(next) {
   editing = next;
+  if (next) panelMode = 'add';
   ensureTools();
   document.body.classList.toggle('canvas-editing', next);
   if (!next) selected = null;

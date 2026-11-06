@@ -32,6 +32,8 @@ export function toggleEditing(next) {
   if (btn) {
     btn.setAttribute('aria-pressed', String(on));
     btn.title = on ? 'Finish editing' : 'Edit this page';
+    const label = btn.querySelector('.edit-toggle-label');
+    if (label) label.textContent = on ? 'Done editing' : 'Design page';
   }
   if (on) attach(); else detach();
   canvas.setEditing(on);
