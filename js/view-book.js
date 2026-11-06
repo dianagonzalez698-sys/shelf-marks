@@ -113,7 +113,7 @@ export function addView() {
 /* ------------------------------------------------------------ form view ---- */
 
 function prefillToBook(doc) {
-  if (!doc) return newBook({ dateFinished: todayISO() });
+  if (!doc) return newBook();
   return newBook({
     title: doc.title || '',
     author: doc.author || '',
@@ -125,7 +125,8 @@ function prefillToBook(doc) {
     firstPublishYear: doc.firstPublishYear || null,
     subjects: doc.subjects || [],
     format: guessFormat(doc.subjects) || '',
-    dateFinished: todayISO(),
+    dateFinished: '',
+    status: 'want',
   });
 }
 
@@ -211,13 +212,19 @@ export function bookFormView(params = {}) {
           </div>
         </section>
 
-        <h2 class="form-heading">When I read it</h2>
+        <h2 class="form-heading">On my shelf</h2>
         <section class="panel">
+          <div class="field">
+            <label for="f-status">Reading status</label>
+            <select id="f-status" name="status" class="shelf-status-select">
+              ${[['want','Want to read'],['reading','Currently reading'],['read','Read'],['dnf','Did not finish']].map(([key,label]) => `<option value="${key}" ${(draft.status || (draft.dateFinished ? 'read' : 'want')) === key ? 'selected' : ''}>${label}</option>`).join('')}
+            </select>
+          </div>
           <div class="grid-2">
             <div class="field" style="margin-bottom:0">
-              <label for="f-finished">Date finished</label>
-              <input id="f-finished" name="dateFinished" type="date" required
-                     value="${attr(draft.dateFinished || todayISO())}">
+              <label for="f-finished">Date finished <span class="muted">(optional)</span></label>
+              <input id="f-finished" name="dateFinished" type="date"
+                     value="${attr(draft.dateFinished || '')}">
             </div>
             <div class="field" style="margin-bottom:0">
               <label for="f-started">Date started <span class="muted">(optional)</span></label>
@@ -225,6 +232,7 @@ export function bookFormView(params = {}) {
             </div>
           </div>
           <p class="hint" id="period-hint"></p>
+          <p class="hint">Save books at any stage. Only books marked Read with a finish date count toward dated reading challenges.</p>
         </section>
 
         <h2 class="form-heading">How it counts</h2>
@@ -326,10 +334,12 @@ export function bookFormView(params = {}) {
 
       /* which period the finish date lands in */
       const finished = root.querySelector('#f-finished');
+      const readingStatus = root.querySelector('#f-status');
       const hint = root.querySelector('#period-hint');
       const repaintPeriod = () => {
         const v = finished.value;
-        if (!isValidISO(v)) { hint.textContent = ''; return; }
+        if (readingStatus.value !== 'read') { hint.textContent = 'On your shelf, not counted as finished.'; return; }
+        if (!isValidISO(v)) { hint.textContent = 'Add a finish date whenever you want to count this book toward dated reading goals.'; return; }
         const year = Number(v.slice(0, 4));
         if (year !== state.settings.year) {
           hint.innerHTML = `<b>${formatDate(v)}</b> is outside ${state.settings.year}, so this book will not count toward your goals.`;
@@ -339,6 +349,7 @@ export function bookFormView(params = {}) {
         hint.textContent = `Counts toward ${q} ${year}.`;
       };
       finished.addEventListener('change', repaintPeriod);
+      readingStatus.addEventListener('change', repaintPeriod);
       repaintPeriod();
 
       /* series chips */
@@ -412,19 +423,13 @@ export function bookFormView(params = {}) {
           root.querySelector('#f-title').focus();
           return;
         }
-        if (!isValidISO(dateFinished)) {
-          toast('Pick the date you finished it.', 'bad');
+        if (dateFinished && !isValidISO(dateFinished)) {
+          toast('Check the finish date.', 'bad');
           finished.focus();
           return;
         }
-        if (!format) {
-          toast('Choose Fiction or Nonfiction.', 'bad');
-          seg.classList.add('unset');
-          seg.scrollIntoView({ block: 'center', behavior: 'smooth' });
-          return;
-        }
         const started = root.querySelector('#f-started').value;
-        if (started && isValidISO(started) && started > dateFinished) {
+        if (started && dateFinished && isValidISO(started) && started > dateFinished) {
           toast('The start date is after the finish date.', 'bad');
           return;
         }
@@ -443,7 +448,9 @@ export function bookFormView(params = {}) {
           coverUrl: coverField.value.trim() || null,
           subjects: root.querySelector('#f-subjects').value
             .split(',').map((s) => s.trim()).filter(Boolean),
-          dateFinished,
+          status: readingStatus.value,
+          previousFinishDate: readingStatus.value === 'read' ? (draft.previousFinishDate || '') : (dateFinished || draft.previousFinishDate || ''),
+          dateFinished: readingStatus.value === 'read' ? dateFinished : '',
           dateStarted: started && isValidISO(started) ? started : null,
           format,
           isClassic: root.querySelector('#f-classic').checked,

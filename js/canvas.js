@@ -3,7 +3,9 @@
 import * as store from './store.js';
 import * as assets from './assets.js';
 import * as theme from './theme.js';
-import { esc, toast } from './ui.js';
+import * as layout from './layout.js';
+import { typeList } from './sections.js';
+import { esc, toast, refresh as refreshPage } from './ui.js';
 
 const records = new Map();
 let activePage = null;
@@ -188,6 +190,7 @@ function paintPanel() {
       : panelMode === 'layers' ? `<h3>Elements on this page</h3><p class="canvas-panel-hint">Select a layer to style or move it.</p>
         <div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p>No freeform elements yet.</p>'}</div>`
       : `<h3>Make this page yours</h3><p class="canvas-panel-hint">Add something, then drag it anywhere within its section. Click any heading on the page to edit the words directly.</p>
+        <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
         <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>Headings, notes, labels & quotes</span></button>
         <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Transparent PNGs, illustrations & photos</span></button>
         <div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Add or arrange sections</a><a href="#/customize">Global colors & fonts</a></div>
@@ -237,6 +240,35 @@ function picker() {
   document.body.appendChild(modal);
 }
 
+function sectionPicker() {
+  const types = typeList(activePage);
+  const modal = document.createElement('div');
+  modal.className = 'canvas-picker';
+  modal.innerHTML = `<div class="canvas-picker-dialog" role="dialog" aria-modal="true" aria-label="Add a section">
+    <div class="canvas-panel-head"><strong>Add a section</strong><button type="button" data-close>×</button></div>
+    <p class="canvas-panel-hint">Choose a starting point. Every section can be rearranged and edited later.</p>
+    <div class="canvas-section-options"></div></div>`;
+  const options = modal.querySelector('.canvas-section-options');
+  types.forEach((type) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = `<strong>${esc(type.label)}</strong><span>${esc(type.blurb || '')}</span>`;
+    b.onclick = async () => {
+      b.disabled = true;
+      try {
+        await layout.addSection(activePage, type.value);
+        modal.remove();
+        refreshPage();
+        toast('Section added. Select Settings on the section to customize it.', 'good');
+      } catch (_) { b.disabled = false; toast('Could not add this section.', 'bad'); }
+    };
+    options.appendChild(b);
+  });
+  modal.querySelector('[data-close]').onclick = () => modal.remove();
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
 function ensureTools() {
   if (document.getElementById('canvas-toolbar')) return;
   const bar = document.createElement('div');
@@ -254,6 +286,7 @@ function ensureTools() {
     if (!action || !editing) return;
     if (action === 'text') add('text');
     if (action === 'image') picker();
+    if (action === 'section') sectionPicker();
     if (action === 'undo') undo();
     if (action === 'redo') redo();
     if (action === 'tab-add') { panelMode = 'add'; selected = null; render(); }

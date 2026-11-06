@@ -173,7 +173,6 @@ export async function importBackup(text) {
       themeChanged = true;
     }
   }
-
   const unlockedNow = await syncUnlocks();
   emitChange();
 

@@ -1,96 +1,70 @@
-// My Books: everything finished in the challenge year, newest first, filterable.
-
-import { state, sortedBooks, deleteBook } from './state.js';
-import { esc, toast, confirmSheet } from './ui.js';
-import { quarters, inPeriod, yearPeriod } from './periods.js';
-import { renderSections, SHELF_FLAGS as FLAGS } from './sections.js';
-import * as layout from './layout.js';
+// The Library is a collection first; reading goals are a separate lens.
+import { state, sortedBooks, saveBook } from './state.js';
+import { esc, attr, toast } from './ui.js';
 
 export const BOOKS_PAGE_ID = 'books';
+export const STATUS = [
+  ['all', 'All books'], ['want', 'Want to read'], ['reading', 'Currently reading'],
+  ['read', 'Read'], ['dnf', 'Did not finish'],
+];
+const statusOf = (b) => b.status || (b.dateFinished ? 'read' : 'want');
 
-function chipRow(items, currentValue, paramName, query) {
-  return `<div class="filters" role="group">${items.map((it) => {
-    const next = { ...query };
-    if (it.value === 'all') delete next[paramName]; else next[paramName] = it.value;
-    const qs = new URLSearchParams(next).toString();
-    const on = currentValue === it.value;
-    return `<a class="chip${on ? ' on' : ''}" href="#/books${qs ? `?${qs}` : ''}"
-      aria-pressed="${on}">${esc(it.label)}</a>`;
-  }).join('')}</div>`;
-}
-
-function flagRow(activeFlags, query) {
-  return `<div class="filters" role="group">${FLAGS.map((f) => {
-    const on = activeFlags.includes(f.key);
-    const nextFlags = on ? activeFlags.filter((x) => x !== f.key) : [...activeFlags, f.key];
-    const next = { ...query };
-    if (nextFlags.length) next.flags = nextFlags.join(','); else delete next.flags;
-    const qs = new URLSearchParams(next).toString();
-    return `<a class="chip${on ? ' on' : ''}" href="#/books${qs ? `?${qs}` : ''}"
-      aria-pressed="${on}">${esc(f.label)}</a>`;
-  }).join('')}</div>`;
+function filterLink(status, query) {
+  const next = {...query};
+  if (status === 'all') delete next.shelf; else next.shelf = status;
+  const qs = new URLSearchParams(next).toString();
+  return `#/books${qs ? `?${qs}` : ''}`;
 }
 
 export function booksView(params = {}) {
   const query = params.query || {};
-  const year = state.settings.year;
-  const qKey = query.q || 'all';
-  const format = query.format || 'all';
-  const flags = String(query.flags || '').split(',').filter(Boolean);
-
-  const qs = quarters(year);
-  let books = sortedBooks().filter((b) => inPeriod(b.dateFinished, yearPeriod(year)));
-  const totalThisYear = books.length;
-
-  if (qKey !== 'all') {
-    const p = qs.find((x) => x.key === qKey);
-    if (p) books = books.filter((b) => inPeriod(b.dateFinished, p));
-  }
-  if (format !== 'all') books = books.filter((b) => b.format === format);
-  for (const key of flags) {
-    const f = FLAGS.find((x) => x.key === key);
-    if (f) books = books.filter((b) => !!b[f.field]);
-  }
-
-  const filtered = flags.length || qKey !== 'all' || format !== 'all';
-  const outside = state.books.length - totalThisYear;
-
-  // The page is its layout: the shelf, the filters and the tally are one
-  // section, so the Layouts editor lists exactly what renders here.
-  const chips = `<div style="margin-top:1.4rem">
-    ${chipRow([{ value: 'all', label: 'All year' }, ...qs.map((q) => ({ value: q.key, label: q.key }))], qKey, 'q', query)}
-    ${chipRow([{ value: 'all', label: 'Fiction + nonfiction' }, { value: 'fiction', label: 'Fiction' }, { value: 'nonfiction', label: 'Nonfiction' }], format, 'format', query)}
-    ${flagRow(flags, query)}
-  </div>`;
-
-  const ctx = { books, totalThisYear, outside, filtered, year, chips };
+  const shelf = STATUS.some(([s]) => s === query.shelf) ? query.shelf : 'all';
+  const search = String(query.search || '').trim().toLowerCase();
+  const sort = query.sort === 'title' ? 'title' : 'recent';
+  const all = sortedBooks();
+  const counts = Object.fromEntries(STATUS.map(([key]) => [key, key === 'all' ? all.length : all.filter(b => statusOf(b) === key).length]));
+  let shown = all.filter((b) => (shelf === 'all' || statusOf(b) === shelf)
+    && (!search || `${b.title} ${b.author} ${(b.tags || []).join(' ')}`.toLowerCase().includes(search)));
+  if (sort === 'title') shown.sort((a,b) => a.title.localeCompare(b.title));
 
   return {
-    title: '',
-    tab: 'books',
-    fab: true,
-    editorial: true,
-    keepScroll: true,
-    html: renderSections(layout.get(BOOKS_PAGE_ID), ctx),
+    title: 'My Library', tab: 'books', fab: true, editorial: true, keepScroll: true,
+    html: `<div class="literary-shelf">
+      <header class="lit-shelf-header"><div><p class="lit-overline">THE PERSONAL LIBRARY / ${state.settings.year}</p>
+        <h1>My <em>Bookshelf</em></h1><p>Every book has a place here, whether read, reading, or still waiting.</p></div>
+        <a class="lit-primary-action" href="#/add">+ Add a book <span>↗</span></a>
+      </header>
+      <nav class="lit-shelf-tabs" aria-label="Reading shelves">${STATUS.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${label}<span>${counts[key]}</span></a>`).join('')}</nav>
+      <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search">⌕</button></form>
+        <label>Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
+      <div class="lit-shelf-count">${shown.length} ${shown.length === 1 ? 'BOOK' : 'BOOKS'} ON THIS SHELF</div>
+      ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b)=>`<article class="lit-shelf-book">
+        <a href="#/book/${encodeURIComponent(b.id)}" class="lit-shelf-cover">${b.coverUrl ? `<img src="${attr(b.coverUrl)}" alt="Cover of ${attr(b.title)}" loading="lazy">` : `<span>${esc(b.title.slice(0,1))}</span>`}</a>
+        <div class="lit-shelf-info"><a href="#/book/${encodeURIComponent(b.id)}"><h2>${esc(b.title)}</h2></a><p>${esc(b.author || 'Author unknown')}</p>
+          <label class="visually-hidden" for="shelf-status-${attr(b.id)}">Reading status for ${esc(b.title)}</label>
+          <select id="shelf-status-${attr(b.id)}" class="lit-shelf-status" data-book-status="${attr(b.id)}">${STATUS.filter(([s])=>s !== 'all').map(([s,label])=>`<option value="${s}" ${statusOf(b) === s ? 'selected' : ''}>${label}</option>`).join('')}</select>
+        </div></article>`).join('')}</div>` : `<div class="lit-empty-shelf"><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>${search ? 'No books matched that search.' : 'A lovely shelf waiting to be filled.'}</p><a href="#/add">ADD A BOOK ↗</a></div>`}
+    </div>`,
     onMount(root) {
-      root.querySelectorAll('[data-del]').forEach((btn) => {
-        btn.onclick = async () => {
-          const id = btn.dataset.del;
-          const book = state.books.find((b) => b.id === id);
+      const form = root.querySelector('#shelf-search');
+      const move = (patch) => {
+        const next = {...query,...patch};
+        Object.keys(next).forEach(k => { if (!next[k]) delete next[k]; });
+        const qs = new URLSearchParams(next).toString();
+        location.hash = `#/books${qs ? `?${qs}` : ''}`;
+      };
+      form.onsubmit = (e) => { e.preventDefault(); move({search:root.querySelector('#shelf-query').value.trim()}); };
+      root.querySelector('#shelf-sort').onchange = (e) => move({sort:e.target.value === 'recent' ? '' : 'title'});
+      root.querySelectorAll('[data-book-status]').forEach(select => {
+        select.onchange = async () => {
+          const book = state.books.find(b => b.id === select.dataset.bookStatus);
           if (!book) return;
-          const yes = await confirmSheet({
-            title: `Delete “${book.title}”?`,
-            body: 'It is removed from your list and your goal counts. Bookmarks you already collected stay collected.',
-            confirm: 'Delete',
-            danger: true,
-          });
-          if (!yes) return;
           try {
-            await deleteBook(id);
-            toast('Book deleted.');
-          } catch (_) {
-            toast('Could not delete that book — storage is unavailable.', 'bad');
-          }
+            await saveBook({...book,status:select.value,
+              previousFinishDate: select.value === 'read' ? (book.previousFinishDate || '') : (book.dateFinished || book.previousFinishDate || ''),
+              dateFinished: select.value === 'read' ? (book.dateFinished || book.previousFinishDate || '') : ''});
+            toast('Shelf updated.', 'good');
+          } catch (_) { toast('Could not update this book.', 'bad'); }
         };
       });
     },
