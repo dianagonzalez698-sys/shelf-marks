@@ -31,12 +31,12 @@
    the last known values from localStorage. */
 (function () {
   var root = document.documentElement;
-  var mode = 'light';   // Porcelain is the default ground
+  var mode = 'system';   // follow the operating system on first visit
   try {
     var raw = localStorage.getItem('lit-picks-theme');
     if (raw) {
       var saved = JSON.parse(raw);
-      if (saved.mode === 'dark' || saved.mode === 'system') mode = saved.mode;
+      if (saved.mode === 'light' || saved.mode === 'dark' || saved.mode === 'system') mode = saved.mode;
       Object.keys(saved.tokens || {}).forEach(function (k) {
         var v = saved.tokens[k];
         if (typeof v === 'string' && v) root.style.setProperty(k, v);
