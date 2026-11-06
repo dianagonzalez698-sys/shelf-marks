@@ -53,6 +53,7 @@ function paintSheet() {
     host.hidden = true;
     host.innerHTML = '';
     host.onclick = null;
+    document.body.classList.remove('sheet-open');
     document.body.style.overflow = '';
     document.removeEventListener('keydown', onSheetKey);
     return;
@@ -71,6 +72,7 @@ function paintSheet() {
     + `&larr; ${nested ? 'Back' : 'Done'}</button>`
     + `${html}</div>`;
   host.hidden = false;
+  document.body.classList.add('sheet-open');
   document.body.style.overflow = 'hidden';
 
   const sheet = host.querySelector('.sheet');
