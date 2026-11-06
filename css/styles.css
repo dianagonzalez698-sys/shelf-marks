@@ -129,9 +129,9 @@
      Display: sculptural high-contrast serif with a true italic.
      Body: a book serif cut to be set large and airy.
      UI: a quiet geometric sans that stays out of the way. */
-  --f-script:  'Monsieur La Doulaise', 'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive;
-  --f-display: 'Playfair Display', 'Bodoni Moda', 'Didot', Georgia, serif;
-  --f-body:    'Cormorant Garamond', 'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
+  --f-script:  'Mrs Saint Delafield', 'Imperial Script', 'Snell Roundhand', 'Apple Chancery', cursive;
+  --f-display: 'Bodoni Moda', 'Didot', 'Playfair Display', Georgia, serif;
+  --f-body:    'EB Garamond', 'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
   --f-ui:      'Jost', 'Futura', -apple-system, 'Helvetica Neue', Arial, sans-serif;
 
   /* The script is a fine copperplate: it needs size to show its strokes. */
@@ -150,11 +150,11 @@
   --fs-label:          0.70rem;   /* letterspaced small caps */
   --fs-stat:           clamp(1.7rem, 3.4vw, 2.05rem); /* big numerals */
 
-  --tt-display:  uppercase;  /* `none` returns display headings to mixed case */
+  --tt-display:  none;  /* mixed-case literary headlines by default */
   /* Playfair carries weight well; Cormorant needs 500 to hold a page. */
-  --fw-display:  500;
-  --fw-heading:  600;
-  --fw-body:     500;
+  --fw-display:  400;
+  --fw-heading:  500;
+  --fw-body:     400;
   --fw-label:    600;
   --fw-script:   400;
 
@@ -249,10 +249,10 @@
   --c-banner-ink:    #f5f6ff;
   --c-banner-ink-dim:#dae2f7;
   --c-banner-accent: #f5cbe2;
-  --c-accent:        #cfb4f3;
+  --c-accent:        #eeb9da;
   --c-accent-ink:    #172032;
-  --c-accent-soft:   #303851;
-  --c-accent-deep:   #e5d4fa;
+  --c-accent-soft:   #3b334d;
+  --c-accent-deep:   #f7d7ec;
   --c-sage:          #74b2b0;
   --c-success:       #8bc6b3;
   --c-rose:          #e2a8ca;
@@ -3339,6 +3339,38 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .settings-backup-card .notice { margin-bottom: 18px; }
 .settings-footnote { max-width: 760px; margin: 35px 0 0; font: .73rem/1.65 var(--f-ui); color: var(--c-ink-faint); }
 .settings-footnote a { color: inherit; }
+/* A typography direction rather than a competing full-site theme. */
+.type-direction { margin: 35px 0 28px; padding: clamp(26px,5vw,48px); border: 1px solid var(--c-rule-strong); background: var(--c-bg-raised); }
+.type-direction h2 { font: 400 clamp(2.8rem,5vw,5rem)/1.02 'Bodoni Moda',Didot,serif; letter-spacing: -.045em; margin: 14px 0 12px; }
+.type-direction h2 em { font: italic 400 1em 'EB Garamond',Georgia,serif; }
+.type-direction-sample { font: 400 clamp(1.7rem,3vw,2.8rem)/1.15 'Mrs Saint Delafield',cursive; color: var(--c-accent); margin: 10px 0 28px; }
+.type-direction>p:not(.lit-overline):not(.type-direction-sample):not(.hint) { max-width: 55ch; color: var(--c-ink-soft); font: 1.16rem/1.55 'EB Garamond',Georgia,serif; }
+.type-direction button { margin: 19px 0 9px; }
+.canvas-item.is-full-width { max-width: none; }
+.canvas-item.is-full-width .canvas-resize { display: none; }
+.canvas-upload-choice { display: block !important; cursor: pointer; text-align: center; border: 1px dashed var(--c-rule-strong); padding: 18px 12px !important; margin: 16px 0 20px !important; font: 600 .85rem var(--f-ui); color: var(--c-accent); background: var(--c-bg-raised); }
+.canvas-upload-choice:hover { border-color: var(--c-accent); }
+.canvas-check { display: flex !important; flex-direction: row !important; align-items: flex-start; gap: 9px !important; line-height: 1.45; }
+.canvas-check input { margin-top: 3px; flex: none; }
+/* Editor chrome follows the nocturne palette instead of retaining terracotta. */
+:root[data-theme="dark"] .canvas-editing .canvas-panel,
+:root[data-theme="dark"] .canvas-panel,
+:root[data-theme="dark"] .canvas-picker-dialog { background: var(--c-bg-raised); color: var(--c-ink); border-color: var(--c-rule-strong); }
+:root[data-theme="dark"] .canvas-panel button,
+:root[data-theme="dark"] .canvas-panel input,
+:root[data-theme="dark"] .canvas-panel select,
+:root[data-theme="dark"] .canvas-panel textarea,
+:root[data-theme="dark"] .canvas-picker-grid button,
+:root[data-theme="dark"] .canvas-add-card { background: var(--c-bg-field) !important; color: var(--c-ink); border-color: var(--c-rule-strong) !important; }
+:root[data-theme="dark"] .canvas-panel-hint,
+:root[data-theme="dark"] .canvas-add-card span,
+:root[data-theme="dark"] .canvas-panel-tabs button { color: var(--c-ink-soft); }
+:root[data-theme="dark"] .canvas-panel-links a,
+:root[data-theme="dark"] .canvas-panel-tabs button.active { color: var(--c-accent); }
+:root[data-theme="dark"] .canvas-panel-tabs,
+:root[data-theme="dark"] .canvas-panel-links { border-color: var(--c-rule); }
+:root[data-theme="dark"] .canvas-editing .canvas-item:hover,
+:root[data-theme="dark"] .canvas-editing .canvas-item.is-selected { outline-color: var(--c-accent); }
 /* Appearance is chosen in Settings, leaving the reading masthead uncluttered. */
 #mode-toggle { display: none !important; }
 @media (max-width: 780px) {

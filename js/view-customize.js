@@ -4,7 +4,7 @@
 
 import {
   THEME_SCHEMA, CONTENT_SCHEMA, FONT_STACKS, PRESETS, MODES,
-  getToken, isOverridden, setToken, setContent, getContent,
+  getToken, isOverridden, setToken, setTokens, setContent, getContent,
   getMode, setMode, resolvedMode,
   applyPreset, reset, download, importJson, exportJson,
 } from './theme.js';
@@ -124,18 +124,26 @@ export function customizeView() {
             aria-pressed="${getMode() === v}">${esc(label)}</button>`).join('')}
         </div>
         <p class="hint">
-          The journal is light by default. “Follow my device” hands the choice to your
-          system setting. Showing <b id="mode-now">${esc(resolvedMode())}</b> right now.
+          “Follow my device” changes automatically with your system setting.
+          Showing <b id="mode-now">${esc(resolvedMode())}</b> right now.
         </p>
 
         ${preview()}
 
-        <h2 class="form-heading">Starting points</h2>
-        <div class="btn-row" id="presets">
-          ${Object.entries(PRESETS).map(([id, p]) =>
-            `<button class="btn btn-sm" type="button" data-preset="${attr(id)}" title="${attr(p.note || '')}">${esc(p.label)}</button>`).join('')}
-        </div>
-        <p class="hint">A preset replaces every colour and type override. Your writing and books are untouched.</p>
+        <section class="type-direction">
+          <p class="lit-overline">THE NEW HOUSE STYLE</p>
+          <h2>Something a little <em>romantic.</em></h2>
+          <p class="type-direction-sample">The art of reading <em>beautifully</em></p>
+          <p>Mrs Saint Delafield calligraphy, Bodoni Moda headlines, EB Garamond for reading and understated Jost for navigation. This is the new default—not another full-site preset.</p>
+          <button class="btn btn-primary" type="button" id="use-editorial-type">Use this typography</button>
+          <p class="hint">Changes typography only. Your artwork, colors, page composition and books stay as they are.</p>
+        </section>
+        <details class="studio-group"><summary>Other saved style starting points (optional)</summary>
+          <div class="studio-body"><div class="btn-row" id="presets">
+            ${Object.entries(PRESETS).map(([id, p]) =>
+              `<button class="btn btn-sm" type="button" data-preset="${attr(id)}" title="${attr(p.note || '')}">${esc(p.label)}</button>`).join('')}
+          </div><p class="hint">These replace color and typography overrides together.</p></div>
+        </details>
 
         <div style="margin-top:var(--sp-section)">
           ${THEME_SCHEMA.map(group).join('')}
@@ -172,6 +180,18 @@ export function customizeView() {
 
     onMount(root) {
       const year = state.settings.year;
+      root.querySelector('#use-editorial-type').onclick = async () => {
+        await setTokens({
+          '--f-script': "'Mrs Saint Delafield', 'Imperial Script', 'Snell Roundhand', cursive",
+          '--f-display': "'Bodoni Moda', 'Didot', Georgia, serif",
+          '--f-body': "'EB Garamond', 'Cormorant Garamond', Georgia, serif",
+          '--f-ui': "'Jost', 'Futura', Arial, sans-serif",
+          '--fw-display': '400', '--fw-heading': '500', '--fw-body': '400',
+          '--tt-display': 'none',
+        });
+        toast('New editorial typography applied. You can refine each font below.', 'good');
+        navigateReload();
+      };
 
       const repaintPreview = () => {
         const host = root.querySelector('#studio-preview');

@@ -65,10 +65,13 @@ function add(type, assetId = null) {
   const sec = targetSection();
   if (!sec) { toast('This page has no editable sections.', 'bad'); return; }
   checkpoint();
+  const artwork = type === 'image' ? assets.get(assetId) : null;
+  const isWideDecoration = !!(artwork && (artwork.w > artwork.h * 2 || /curtain|cloud|valance|banner|drape/i.test(artwork.name)));
   const item = {
     id: uid(), sectionId: sec.dataset.sec, type, assetId,
-    text: type === 'text' ? 'Your text here' : '', x: 25, y: 35,
-    width: type === 'text' ? 260 : 240, size: 34, color: '#4b2828',
+    text: type === 'text' ? 'Your text here' : '', x: isWideDecoration ? 0 : 25, y: isWideDecoration ? 0 : 35,
+    width: type === 'text' ? 260 : 240, fullWidth: isWideDecoration,
+    size: 34, color: '#4b2828',
     font: "'Bodoni Moda', serif", weight: 400, italic: false, opacity: 1, rotate: 0,
   };
   change([...data(), item]);
@@ -81,7 +84,8 @@ function elFor(item) {
   const node = document.createElement('div');
   node.className = `canvas-item canvas-${item.type}`;
   node.dataset.canvasId = item.id;
-  node.style.cssText = `left:${clamp(item.x, 0, 100)}%;top:${clamp(item.y, 0, 100)}%;width:${clamp(item.width, 60, 1200)}px;opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
+  node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${clamp(item.y, 0, 100)}%;width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
+  node.classList.toggle('is-full-width', !!item.fullWidth);
   if (item.type === 'image') {
     const src = assets.src(item.assetId);
     if (src) {
@@ -128,7 +132,7 @@ function startPointer(e, node, item) {
   checkpoint();
   const host = node.parentElement;
   const bounds = host.getBoundingClientRect();
-  const resize = e.target.classList.contains('canvas-resize');
+  const resize = !item.fullWidth && e.target.classList.contains('canvas-resize');
   const startX = e.clientX, startY = e.clientY;
   const origin = { x: item.x, y: item.y, width: item.width };
   node.setPointerCapture(e.pointerId);
@@ -192,7 +196,7 @@ function paintPanel() {
       : `<h3>Make this page yours</h3><p class="canvas-panel-hint">Add something, then drag it anywhere within its section. Click any heading on the page to edit the words directly.</p>
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
         <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>Headings, notes, labels & quotes</span></button>
-        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Transparent PNGs, illustrations & photos</span></button>
+        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Choose a saved picture, or upload a curtain, clouds or a transparent PNG directly</span></button>
         <div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Add or arrange sections</a><a href="#/customize">Global colors & fonts</a></div>
         <p class="canvas-panel-hint">Your changes save on this device. Use Settings → Export backup to keep a copy.</p>`);
     return;
@@ -204,7 +208,8 @@ function paintPanel() {
       </select></label>
       <div class="canvas-panel-row"><label>Size<input data-prop="size" type="number" min="10" max="150" value="${item.size}"></label><label>Color<input data-prop="color" type="color" value="${item.color}"></label></div>
       <div class="canvas-panel-row"><label>Bold<input data-prop="weight" type="checkbox" ${item.weight >= 700 ? 'checked' : ''}></label><label>Italic<input data-prop="italic" type="checkbox" ${item.italic ? 'checked' : ''}></label></div>` : ''}
-    <div class="canvas-panel-row"><label>Width<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label><label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label></div>
+    ${item.type === 'image' ? `<label class="canvas-check"><input data-prop="fullWidth" type="checkbox" ${item.fullWidth ? 'checked' : ''}> Stretch artwork across the full section (great for curtains and cloud borders)</label>` : ''}
+    <div class="canvas-panel-row">${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}<label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label></div>
     <label>Opacity<input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity}"></label>
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
   panel.querySelectorAll('[data-prop]').forEach((input) => {
@@ -212,20 +217,32 @@ function paintPanel() {
       const key = input.dataset.prop;
       const value = input.type === 'checkbox' ? (key === 'weight' ? (input.checked ? 700 : 400) : input.checked)
         : input.type === 'number' || input.type === 'range' ? Number(input.value) : input.value;
-      update(item.id, { [key]: value });
+      update(item.id, key === 'fullWidth' && value ? { fullWidth: true, x: 0 } : { [key]: value });
     });
   });
 }
 
 function picker() {
   const list = assets.list();
-  if (!list.length) { toast('Add artwork in Picture Library first.', 'bad'); return; }
   const modal = document.createElement('div');
   modal.className = 'canvas-picker';
   modal.innerHTML = `<div class="canvas-picker-dialog" role="dialog" aria-modal="true" aria-label="Choose artwork">
     <div class="canvas-panel-head"><strong>Choose artwork</strong><button type="button" data-close>×</button></div>
+    <p class="canvas-panel-hint">Your own PNGs stay transparent. Wide curtains and cloud trims are placed across the section automatically; resize or reposition them afterward.</p>
+    <label class="canvas-upload-choice">＋ Upload new artwork<input type="file" accept="image/*" class="visually-hidden" data-upload-art></label>
     <div class="canvas-picker-grid"></div></div>`;
   const grid = modal.querySelector('.canvas-picker-grid');
+  if (!list.length) grid.innerHTML = '<p class="canvas-panel-hint">No saved artwork yet. Upload an image above to place it immediately.</p>';
+  modal.querySelector('[data-upload-art]').onchange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const saved = await assets.add(file, { kind: 'cutout', name: file.name });
+      modal.remove();
+      add('image', saved.id);
+      toast('Artwork saved to your picture library and placed on this page.', 'good');
+    } catch (err) { toast(err.message || 'Could not add that artwork.', 'bad'); }
+  };
   for (const asset of list) {
     const b = document.createElement('button');
     b.type = 'button'; b.title = asset.name || 'Artwork';
