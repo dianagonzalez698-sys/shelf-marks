@@ -90,6 +90,16 @@ export function settingsView() {
 
       <h2 class="form-heading">Appearance</h2>
       <section class="panel">
+        <div class="row-between" style="gap:1rem; margin-bottom:1.1rem">
+          <div class="grow">
+            <p class="h3" style="margin:0">Design your pages</p>
+            <p class="hint" style="margin:.2rem 0 0">
+              Open the visual editor to move artwork, add text, and customize your journal directly.
+            </p>
+          </div>
+          <a class="btn btn-primary btn-sm nowrap" href="#/?design=1">Enter Design Mode</a>
+        </div>
+        <div class="divider" style="border-top:1px solid var(--c-rule); margin-bottom:1rem"></div>
         <div class="row-between" style="gap:1rem">
           <div class="grow">
             <p class="h3" style="margin:0">Design studio</p>
