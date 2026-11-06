@@ -4,13 +4,15 @@ import * as store from './store.js';
 import * as assets from './assets.js';
 import * as theme from './theme.js';
 import * as layout from './layout.js';
-import { typeList } from './sections.js';
+import { typeList, SECTION_TYPES } from './sections.js';
+import { openSectionEditor } from './view-layout.js';
 import { esc, toast, refresh as refreshPage } from './ui.js';
 
 const records = new Map();
 let activePage = null;
 let editing = false;
 let selected = null;
+let selectedSectionId = null;
 let panelMode = 'add';
 let history = [];
 let future = [];
@@ -157,9 +159,12 @@ function startPointer(e, node, item) {
   node.addEventListener('pointercancel', stop);
 }
 
-function render() {
+function render({ preservePanel = false } = {}) {
   document.querySelectorAll('.canvas-layer').forEach((el) => el.remove());
   if (!activePage) return;
+  document.querySelectorAll('#app [data-sec]').forEach((el) => {
+    el.classList.toggle('canvas-section-selected', editing && panelMode === 'section' && el.dataset.sec === selectedSectionId);
+  });
   for (const item of data()) {
     const sec = section(item.sectionId);
     if (!sec) continue;
@@ -171,15 +176,35 @@ function render() {
     }
     layer.appendChild(elFor(item));
   }
-  paintPanel();
+  if (!preservePanel) paintPanel();
 }
 
 function select(id) { selected = id; panelMode = id ? 'selected' : 'add'; render(); }
+export function inspectSection(id) {
+  if (!editing || !id || !layout.getSection(activePage, id)) return;
+  selectedSectionId = id;
+  selected = null;
+  panelMode = 'section';
+  render();
+}
 function paintPanel() {
   const panel = document.getElementById('canvas-panel');
   if (!panel || !editing) return;
   const item = data().find((i) => i.id === selected);
   panel.hidden = false;
+  if (panelMode === 'section' && selectedSectionId) {
+    const sec = layout.getSection(activePage, selectedSectionId);
+    if (!sec) { panelMode = 'add'; selectedSectionId = null; render(); return; }
+    const sections = layout.get(activePage).filter((s) => s.visible !== false);
+    const order = sections.findIndex((s) => s.id === selectedSectionId) + 1;
+    const label = SECTION_TYPES[sec.type]?.label || 'Section';
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>SECTION ${order} OF ${sections.length}</strong><button type="button" data-canvas="section-back">← Back</button></div>
+      <p class="canvas-section-label">Editing: <strong>${esc(label)}</strong></p>
+      <p class="canvas-panel-hint">The highlighted area on the page is the section you're changing. Text can also be edited directly on the page.</p>
+      <div class="canvas-section-inspector"></div>`;
+    openSectionEditor(activePage, selectedSectionId, { mountIn: panel.querySelector('.canvas-section-inspector') });
+    return;
+  }
   const tabs = `<div class="canvas-panel-tabs">
       <button type="button" data-canvas="tab-add" class="${panelMode === 'add' ? 'active' : ''}">Add</button>
       <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
@@ -195,6 +220,7 @@ function paintPanel() {
         <div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p>No freeform elements yet.</p>'}</div>`
       : `<h3>Make this page yours</h3><p class="canvas-panel-hint">Add something, then drag it anywhere within its section. Click any heading on the page to edit the words directly.</p>
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
+        <p class="canvas-panel-hint">To edit an existing section, select its Settings button on the page. The section stays visible and highlighted.</p>
         <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>Headings, notes, labels & quotes</span></button>
         <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Choose a saved picture, or upload a curtain, clouds or a transparent PNG directly</span></button>
         <div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Add or arrange sections</a><a href="#/customize">Global colors & fonts</a></div>
@@ -316,6 +342,7 @@ function ensureTools() {
     if (action === 'finish') document.getElementById('edit-page')?.click();
     if (action === 'remove' && selected) { checkpoint(); change(data().filter((i) => i.id !== selected)); selected = null; render(); }
     if (action === 'deselect') select(null);
+    if (action === 'section-back') { selectedSectionId = null; panelMode = 'add'; render(); }
   });
   document.addEventListener('click', (e) => {
     const id = e.target.closest('[data-canvas-select]')?.dataset.canvasSelect;
@@ -328,13 +355,13 @@ function ensureTools() {
   });
 }
 
-export function setPage(pageId) { activePage = pageId; selected = null; history = []; future = []; render(); }
+export function setPage(pageId) { activePage = pageId; selected = null; selectedSectionId = null; history = []; future = []; render(); }
 export function setEditing(next) {
   editing = next;
-  if (next) panelMode = 'add';
+  if (next) { panelMode = 'add'; selectedSectionId = null; }
   ensureTools();
   document.body.classList.toggle('canvas-editing', next);
   if (!next) selected = null;
   render();
 }
-export function refresh() { if (activePage) render(); }
+export function refresh() { if (activePage) render({ preservePanel: panelMode === 'section' }); }
