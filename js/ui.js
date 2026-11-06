@@ -397,7 +397,10 @@ export function currentRoute() {
 // create a cycle between the router and the editor.
 let setEditPageId = () => {};
 let stopEditing = () => {};
-export function wireEditing(setPage, stop) { setEditPageId = setPage; stopEditing = stop; }
+let refreshEditLayer = () => {};
+export function wireEditing(setPage, stop, refreshLayer = () => {}) {
+  setEditPageId = setPage; stopEditing = stop; refreshEditLayer = refreshLayer;
+}
 
 export function render() {
   if (rendering) return;
@@ -453,6 +456,7 @@ export function render() {
       });
     });
     if (typeof view.onMount === 'function') view.onMount(app);
+    refreshEditLayer();
   } finally {
     rendering = false;
   }
