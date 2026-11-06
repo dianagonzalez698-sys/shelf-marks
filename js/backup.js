@@ -9,6 +9,7 @@ import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
 import * as canvas from './canvas.js';
+import * as notebook from './notebook.js';
 
 export const SCHEMA = 1;
 
@@ -30,6 +31,7 @@ export function buildBackup() {
     assets: assets.snapshot(),
     layouts: layout.snapshot(),
     canvas: canvas.snapshot(),
+    notebook: notebook.snapshot(),
     words: state.words.map((w) => ({ ...w })),
   };
 }
@@ -61,6 +63,7 @@ function countsOf(payload) {
     assets: (payload.assets || []).length,
     layouts: (payload.layouts || []).length,
     canvas: (payload.canvas || []).length,
+    notebook: (payload.notebook || []).length,
     words: (payload.words || []).length,
   };
 }
@@ -130,18 +133,20 @@ export async function importBackup(text) {
   const assetRows = mergeCollection(data.assets, assets.snapshot(), 'assets');
   const layoutRows = mergeCollection(data.layouts, layout.snapshot(), 'layouts');
   const canvasRows = mergeCollection(data.canvas, canvas.snapshot(), 'canvas');
+  const notebookRows = mergeCollection(data.notebook, notebook.snapshot(), 'notebook');
   const words = mergeCollection(data.words, state.words, 'words');
   const books = mergeCollection(data.books, state.books, 'books');
   const challenges = mergeCollection(data.challenges, state.challengeRecords, 'challenges');
   const unlocks = mergeCollection(data.unlocks, state.unlocks, 'unlocks');
   const images = mergeCollection(data.images, [...state.images.values()], 'images');
 
-  for (const group of [books, challenges, unlocks, images, assetRows, layoutRows, canvasRows, words]) {
+  for (const group of [books, challenges, unlocks, images, assetRows, layoutRows, canvasRows, notebookRows, words]) {
     if (group.writes.length) await store.putMany(group.storeName, group.writes);
   }
   assets.adoptMany(assetRows.merged);
   layout.adoptMany(layoutRows.merged);
   canvas.adoptMany(canvasRows.merged);
+  notebook.adoptMany(notebookRows.merged);
 
   state.books = books.merged.filter((b) => !b.deleted);
   state.challengeRecords = challenges.merged;
@@ -180,6 +185,7 @@ export async function importBackup(text) {
     assets: pick(assetRows),
     layouts: pick(layoutRows),
     canvas: pick(canvasRows),
+    notebook: pick(notebookRows),
     settingsChanged,
     themeChanged,
     newlyUnlocked: unlockedNow.length,

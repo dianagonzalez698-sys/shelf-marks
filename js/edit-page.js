@@ -265,6 +265,7 @@ function hideBar() {
 
 function addSectionTools(root) {
   root.querySelectorAll('[data-sec]').forEach((sec) => {
+    if (sec.hasAttribute('data-editorial-static')) return;
     if (sec.querySelector(':scope > .edit-tools')) return;
     const tools = document.createElement('div');
     tools.className = 'edit-tools';
