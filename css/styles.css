@@ -3382,6 +3382,29 @@ body.is-editing [data-sec]:hover > .edit-tools,
   .canvas-editing .sheet-host { padding-left: 0; padding-top: 0; }
   .canvas-editing .sheet { max-height: 86dvh; width: 100%; }
 }
+
+/* One contextual inspector: the selected section remains visible in the page. */
+@media (min-width: 851px) {
+  .canvas-editing .canvas-panel { width: 355px; }
+  .canvas-editing #app { margin-left: 355px; }
+}
+.canvas-editing [data-sec].canvas-section-selected { outline: 3px solid var(--c-accent); outline-offset: -4px; }
+.canvas-editing [data-sec].canvas-section-selected > .edit-tools { opacity: 1; }
+.canvas-editing .edit-tools { opacity: .75; }
+.canvas-section-label { background: var(--c-accent-soft); padding: 14px; border-left: 3px solid var(--c-accent); font: .78rem/1.6 var(--f-ui); margin: 6px 0 15px; }
+.canvas-section-label strong { display: block; font: 500 1.65rem/1.15 var(--f-display); color: var(--c-ink); margin-top: 3px; }
+.canvas-section-inspector { border-top: 1px solid var(--c-rule); padding-top: 16px; }
+.canvas-section-inspector h2 { font: 500 1.6rem/1.1 var(--f-display); margin: 0 0 8px; }
+.canvas-section-inspector #sec-fields { margin-top: 16px; }
+.canvas-section-inspector .field { margin-bottom: 15px; }
+.canvas-section-inspector .field>label { font-size: .75rem; }
+.canvas-section-inspector input,
+.canvas-section-inspector textarea,
+.canvas-section-inspector select { max-width: 100%; }
+.canvas-section-inspector .token-row { display: block; }
+.canvas-section-inspector .token-control { display: block; width: 100%; }
+.canvas-section-inspector .type-pop { max-width: 100%; }
+.canvas-section-inspector .small.muted { font-size: .78rem; }
 /* Appearance is chosen in Settings, leaving the reading masthead uncluttered. */
 #mode-toggle { display: none !important; }
 @media (max-width: 780px) {

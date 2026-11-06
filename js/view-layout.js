@@ -617,7 +617,7 @@ function mediaButton(key, m, removable = false, role = '') {
   </span>`;
 }
 
-export function openSectionEditor(pageId, sectionId) {
+export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
   const sec = layout.getSection(pageId, sectionId);
   if (!sec) return;
   const def = SECTION_TYPES[sec.type];
@@ -637,7 +637,7 @@ export function openSectionEditor(pageId, sectionId) {
     </div>`;
   };
 
-  openSheet(build(), {
+  const editor = {
     reopen: build,
     onMount(sheet) {
       const warnBox = sheet.querySelector('#sec-warnings');
@@ -915,7 +915,14 @@ export function openSectionEditor(pageId, sectionId) {
 
       bind();
     },
-  });
+  };
+  if (mountIn) {
+    mountIn.innerHTML = build();
+    mountIn.querySelectorAll('[data-close]').forEach((el) => el.remove());
+    editor.onMount(mountIn);
+    return;
+  }
+  openSheet(build(), editor);
 }
 
 /* ------------------------------------------------------ media editor ---- */

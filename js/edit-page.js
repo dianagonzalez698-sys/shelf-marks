@@ -269,10 +269,11 @@ function addSectionTools(root) {
     if (sec.querySelector(':scope > .edit-tools')) return;
     const tools = document.createElement('div');
     tools.className = 'edit-tools';
-    tools.innerHTML = '<button type="button" class="edit-chip" data-edit-open>Settings</button>';
+    tools.innerHTML = '<button type="button" class="edit-chip" data-edit-open>Edit this section</button>';
     tools.querySelector('[data-edit-open]').onclick = (e) => {
       e.preventDefault();
-      openSectionEditor(pageId, sec.dataset.sec);
+      if (on) canvas.inspectSection(sec.dataset.sec);
+      else openSectionEditor(pageId, sec.dataset.sec);
     };
     sec.appendChild(tools);
   });
