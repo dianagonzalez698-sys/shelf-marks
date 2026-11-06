@@ -5,6 +5,7 @@ import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
 import * as canvas from './canvas.js';
+import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
 import { homeView } from './view-home.js';
@@ -17,6 +18,8 @@ import { customizeView } from './view-customize.js';
 import { assetsView } from './view-assets.js';
 import { layoutView } from './view-layout.js';
 import { wordsView, wordDetailView } from './view-words.js';
+import { notebookView, notebookEntryView } from './view-notebook.js';
+import { collectionsView } from './view-collections.js';
 import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js';
 import { wireEditing } from './ui.js';
 
@@ -34,6 +37,9 @@ route('/assets', assetsView);
 route('/layout', layoutView);
 route('/words', wordsView);
 route('/word/:id', wordDetailView);
+route('/notebook', notebookView);
+route('/notebook/:id', notebookEntryView);
+route('/collections', collectionsView);
 
 function paintStorageBanner() {
   const banner = document.getElementById('storage-banner');
@@ -67,7 +73,7 @@ async function boot() {
   // Your pictures and your page arrangements. Both fall back to sensible
   // defaults, so a failure here costs decoration, never data.
   try {
-    await Promise.all([assets.load(), layout.load(), canvas.load()]);
+    await Promise.all([assets.load(), layout.load(), canvas.load(), notebook.load()]);
   } catch (_) { /* default layouts and empty library still render */ }
 
   // Pictures added before transparency was recorded get the flag filled in,

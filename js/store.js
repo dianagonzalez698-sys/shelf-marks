@@ -3,7 +3,7 @@
 // UI can show a banner instead of silently losing a book.
 
 const DB_NAME = 'shelf-marks';
-const DB_VERSION = 4;   // 4 added: freeform canvas items (non-destructive upgrade)
+const DB_VERSION = 5;   // 5 added: literary notebook entries
 // The upgrade handler creates any store missing from this list, so adding a
 // name here plus bumping DB_VERSION is a safe, data-preserving migration.
 export const STORES = [
@@ -12,6 +12,7 @@ export const STORES = [
   'layouts',  // the editorial section arrangement for each page
   'words',    // a word of the year/season, and where you met it
   'canvas',   // independent, movable text and artwork on each editorial page
+  'notebook', // essays, quotations and reflections separate from book metadata
 ];
 
 let dbPromise = null;
