@@ -324,6 +324,30 @@ export const ALL_TOKENS = THEME_SCHEMA.flatMap((g) => g.tokens);
 /* --------------------------------------------------------- presets ------- */
 
 export const PRESETS = {
+  'literary-whimsy': {
+    label: 'Literary Whimsy',
+    note: 'More expressive type with warm burgundy, a brighter apricot and richer green.',
+    tokens: {
+      '--f-script': "'Imperial Script', 'Snell Roundhand', 'Apple Chancery', cursive",
+      '--f-display': "'Noto Serif Display', 'Didot', Georgia, serif",
+      '--f-body': "'Cormorant Garamond', Georgia, serif",
+      '--f-ui': "'Jost', -apple-system, 'Helvetica Neue', Arial, sans-serif",
+      '--c-ink': '#51262f', '--c-ink-soft': '#72434a', '--c-ink-faint': '#8b5a62',
+      '--c-accent': '#a13c35', '--c-accent-deep': '#812923', '--c-accent-soft': '#f5dfd7',
+      '--c-banner-bg': '#47674d', '--c-banner-accent': '#f3ce8c',
+      '--c-rose': '#d06d83', '--c-blue': '#6c9fc7', '--c-terracotta': '#df7849',
+    },
+  },
+  'burgundy-gallery': {
+    label: 'Burgundy Gallery',
+    note: 'The original editorial type with a slightly richer, more saturated gallery palette.',
+    tokens: {
+      '--c-ink': '#47212b', '--c-ink-soft': '#713f48', '--c-ink-faint': '#895461',
+      '--c-banner-bg': '#6d283d', '--c-banner-ink': '#fff2e5', '--c-banner-ink-dim': '#f5dddc',
+      '--c-accent': '#a44741', '--c-accent-deep': '#82312e', '--c-accent-soft': '#f5dfdc',
+      '--c-sage': '#486c53', '--c-rose': '#d16a78', '--c-blue': '#679ac6',
+    },
+  },
   'reading-room': {
     label: 'A Reading Room',
     note: 'The house style — Porcelain, Olive Velvet and Burnt Apricot.',

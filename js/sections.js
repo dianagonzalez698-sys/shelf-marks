@@ -17,6 +17,7 @@ import {
 import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility } from './rules.js';
 import { focusQuarter, focusBimonth, daysLeftLabel, formatDate, yearPeriod, inPeriod } from './periods.js';
 import { t, FONT_STACKS } from './theme.js';
+import * as notebook from './notebook.js';
 
 // Per-section overrides, written as the very tokens the whole design reads.
 // Setting one on a <section> re-points everything inside it; leaving it empty
@@ -449,6 +450,49 @@ export const SECTION_BASE = {
 /* -------------------------------------------------------------- types ---- */
 
 export const SECTION_TYPES = {
+
+  /* Optional literary writing feature, never forced onto the homepage. */
+  notebookFeature: {
+    label: 'The writing desk',
+    blurb: 'Feature your latest literary reflections, essays, reviews or quotations.',
+    create: () => ({ kicker: 'Collected thoughts', title: 'The Notebook',
+      subtitle: 'For everything worth keeping after the final page.', limit: 2, tone: 'paper' }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'rich', styleRole: 'Ui' },
+      { key: 'title', label: 'Heading', type: 'rich', styleRole: 'Display' },
+      { key: 'subtitle', label: 'Introduction', type: 'rich', multiline: true, styleRole: 'Body' },
+      { key: 'limit', label: 'Entries to show', type: 'range', min: 1, max: 6, step: 1 },
+      ...COMMON_FIELDS,
+    ],
+    render(sec) {
+      const entries = notebook.list().slice(0, Number(sec.limit) || 2);
+      return sectionShell(sec, `<div class="lit-optional-notebook">
+        <div class="lit-optional-intro">${kicker(sec.kicker)}${headline(sec.title)}
+          <p data-edit="subtitle">${rich(sec.subtitle || '')}</p><a href="#/notebook/new">Write something new ↗</a></div>
+        <div class="lit-optional-entries">${entries.length ? entries.map(e => `<a href="#/notebook/${encodeURIComponent(e.id)}" class="lit-optional-entry"><span>${esc(e.kind.toUpperCase())}</span><h3>${esc(e.title || 'Untitled entry')}</h3><p>${esc(String(e.body || '').replace(/\s+/g,' ').slice(0,180))}</p><small>READ ENTRY ↗</small></a>`).join('') : `<div class="lit-optional-empty"><span>❧</span><h3>Your first page awaits.</h3><p>Start with a passage, a review, or a passing thought.</p><a href="#/notebook/new">OPEN THE NOTEBOOK ↗</a></div>`}</div>
+      </div>`);
+    },
+  },
+
+  readingNote: {
+    label: 'A note on the year',
+    blurb: 'An understated editorial reading-goal feature with a progress rule.',
+    create: () => ({ kicker: 'The year so far', title: 'A note on the year' }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'rich', styleRole: 'Ui' },
+      { key: 'title', label: 'Heading', type: 'rich', styleRole: 'Display' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec) {
+      const p = annualProgress();
+      return sectionShell(sec, `<div class="lit-optional-progress">
+        <div>${kicker(sec.kicker)}${headline(sec.title)}</div>
+        <div class="lit-optional-progress-number"><strong>${p.read}</strong><em>of</em><strong>${p.goal}</strong><span>BOOKS READ IN ${state.settings.year}</span></div>
+        <div class="lit-optional-progress-bar"><span style="width:${Math.min(100,p.pct)}%"></span></div>
+        <a href="#/challenges">READING CHALLENGES ↗</a>
+      </div>`);
+    },
+  },
 
   /* 1. Full-bleed image hero ---------------------------------------------- */
   hero: {

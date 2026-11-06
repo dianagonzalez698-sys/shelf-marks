@@ -98,6 +98,7 @@ export function newBook(fields = {}) {
     firstPublishYear: null,
     subjects: [],
     dateFinished: '',
+    status: 'want', // want | reading | read | dnf; older entries infer read from finish date
     dateStarted: null,
     format: '',
     isClassic: false,
@@ -113,7 +114,7 @@ export function newBook(fields = {}) {
 }
 
 export async function saveBook(book) {
-  const record = { ...book, updatedAt: nowISO() };
+  const record = { ...book, status: book.status || (book.dateFinished ? 'read' : 'want'), updatedAt: nowISO() };
   if (!record.createdAt) record.createdAt = record.updatedAt;
   await store.put('books', record);
   const i = state.books.findIndex((b) => b.id === record.id);
