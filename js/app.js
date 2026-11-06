@@ -110,7 +110,7 @@ async function boot() {
 
   // Editing happens on the page; the button only appears where there is a
   // layout to edit, so it never offers to edit a form or the settings screen.
-  wireEditing(setEditPage, () => toggleEditing(false), refreshEditing);
+  wireEditing(setEditPage, () => toggleEditing(false), refreshEditing, () => toggleEditing(true));
   const editBtn = document.getElementById('edit-page');
   if (editBtn) editBtn.onclick = () => toggleEditing();
 

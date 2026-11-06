@@ -3053,6 +3053,8 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .edit-toggle { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--c-ink, #4b2828); color: var(--c-ink, #4b2828); background: transparent; border-radius: 5px; padding: 9px 12px; font: 600 11px Jost, sans-serif; letter-spacing: .05em; white-space: nowrap; cursor: pointer; }
 .edit-toggle[hidden] { display: none; }
 .edit-toggle[aria-pressed="true"] { background: #4b2828; color: #fff5e9; }
+/* The editing entry point now lives under Settings → Appearance. */
+#edit-page { display: none !important; }
 .canvas-editing #app { margin-left: 300px; transition: margin-left .2s ease; }
 .canvas-editing .masthead { z-index: 1005; }
 .canvas-editing .canvas-toolbar { display: flex; left: 0; right: 0; top: var(--h-masthead, 68px); bottom: auto; width: auto; max-width: none; transform: none; justify-content: flex-end; border-radius: 0; box-shadow: 0 3px 10px #0001; padding: 9px 18px; background: #4b2828; color: #fff5e9; border: 0; }

@@ -398,8 +398,10 @@ export function currentRoute() {
 let setEditPageId = () => {};
 let stopEditing = () => {};
 let refreshEditLayer = () => {};
-export function wireEditing(setPage, stop, refreshLayer = () => {}) {
+let startEditing = () => {};
+export function wireEditing(setPage, stop, refreshLayer = () => {}, start = () => {}) {
   setEditPageId = setPage; stopEditing = stop; refreshEditLayer = refreshLayer;
+  startEditing = start;
 }
 
 export function render() {
@@ -457,6 +459,7 @@ export function render() {
     });
     if (typeof view.onMount === 'function') view.onMount(app);
     refreshEditLayer();
+    if (query.design === '1' && path !== previousPath && view.editPage) startEditing();
   } finally {
     rendering = false;
   }
