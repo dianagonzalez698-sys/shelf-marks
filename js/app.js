@@ -10,7 +10,7 @@ import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
 import { homeView } from './view-home.js';
 import { booksView } from './view-books.js';
-import { addView, bookFormView, rememberQuickLogPosition } from './view-book.js';
+import { addView, bookFormView, rememberAddOrigin } from './view-book.js';
 import { bookDetailView } from './view-book-detail.js';
 import { challengesView, challengeDetailView } from './view-challenges.js';
 import { bookmarksView } from './view-bookmarks.js';
@@ -126,8 +126,9 @@ async function boot() {
 
   onChange(() => { if (isEditing()) refreshEditing(); });
 
-  document.getElementById('app')?.addEventListener('click', (event) => {
-    if (event.target.closest('a[data-quick-log]')) rememberQuickLogPosition(window.scrollY);
+  document.addEventListener('click', (event) => {
+    const addLink = event.target.closest('a[href^="#/add"]');
+    if (addLink) rememberAddOrigin(location.hash || '#/', window.scrollY);
   });
 
   // The journal's period circles are actual checkboxes, independent of the
