@@ -35,7 +35,7 @@ export function bookDetailView({ id } = {}) {
         <a class="book-archive-edit" href="#/book/${encodeURIComponent(book.id)}/edit">Edit book details ↗</a></div>
 
       <header class="book-archive-hero">
-        <div class="book-archive-cover">${coverImg(book, { big: true })}</div>
+        <div class="book-archive-cover"><div class="book-archive-cover-art">${coverImg(book, { big: true })}</div><p class="book-archive-cover-caption">A BOOK FROM MY SHELVES <span>✦</span></p></div>
         <div class="book-archive-intro">
           <p class="lit-overline">FROM MY PERSONAL LIBRARY <span>✦</span> ${esc(STATUS[status] || 'On my shelf')}</p>
           <h1>${esc(book.title)}</h1>
@@ -48,6 +48,7 @@ export function bookDetailView({ id } = {}) {
             ${book.format ? `<span>${esc(book.format)}</span>` : ''}
             ${book.series ? `<span>${esc(book.series)}</span>` : ''}
           </div>
+          <div class="book-archive-ornamental-rule" aria-hidden="true"><span>❦</span></div>
           <div class="book-archive-next-step">
             <p>${hasWriting ? 'Your words and artwork live together on this page.' : status === 'want' ? 'On your to-read shelf. Start collecting thoughts whenever you’re ready.' : 'This is your space for thoughts, passages, and artwork.'}</p>
             <button class="book-archive-primary" type="button" id="book-journal-toggle" aria-expanded="false">${hasWriting ? '✎ Edit my journal' : '✎ Write in my journal'}</button>
