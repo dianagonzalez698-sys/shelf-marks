@@ -26,12 +26,17 @@ export function bookDetailView({ id } = {}) {
   const readingDates = [book.dateStarted && `Started ${formatDate(book.dateStarted)}`,
     book.dateFinished && `Finished ${formatDate(book.dateFinished)}`].filter(Boolean);
   const hasWriting = !!(book.review || book.favoriteQuote || book.notes || book.journalArtworkId || (book.journalDecorations || []).length);
+  let libraryReturn = '#/books';
+  try {
+    const saved = sessionStorage.getItem('dlp:last-library-view') || '';
+    if (/^#\/books(?:\?[^#]*)?$/.test(saved)) libraryReturn = saved;
+  } catch (_) { /* library fallback is always available */ }
 
   return {
     title: book.title, tab: 'books', editorial: true, back: true, live: false,
     html: `<article class="book-archive-page">
       ${bookDecorMarkup(book)}
-      <div class="book-archive-nav"><a href="#/books">← Back to the Library</a>
+      <div class="book-archive-nav"><a href="${attr(libraryReturn)}">← Back to the Library</a>
         <a class="book-archive-edit" href="#/book/${encodeURIComponent(book.id)}/edit">Edit book details ↗</a></div>
 
       <header class="book-archive-hero">

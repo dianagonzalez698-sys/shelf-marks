@@ -40,7 +40,7 @@ export function booksView(params = {}) {
       </header>
       <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
       <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search">⌕</button></form>
-        <a class="lit-shelf-add-link" href="#/add">＋ Add book</a>
+        ${search ? `<a class="lit-shelf-clear" href="${filterLink(shelf, {...query, search: ''})}">Clear search ×</a>` : ''}
         <details class="lit-shelf-manage-control" id="shelf-manager"><summary>✧ Edit shelves</summary>
           <div class="lit-shelf-manage-panel">
             <form id="shelf-create"><label for="shelf-name">New shelf name</label><div><input id="shelf-name" maxlength="45" placeholder="e.g. Cozy mysteries" required><button type="submit">Create shelf</button></div></form>
@@ -50,7 +50,7 @@ export function booksView(params = {}) {
         <label>Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
       <div class="lit-shelf-count"><span>THE CATALOGUE</span><span>${String(shown.length).padStart(2,'0')} ${shown.length === 1 ? 'VOLUME' : 'VOLUMES'}</span></div>
       ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b,i)=>`<article class="lit-shelf-book">
-        <div class="lit-shelf-folio"><span>№ ${String(i + 1).padStart(2,'0')}</span><span>${esc(statusOf(b) === 'read' ? 'FINISHED' : statusOf(b) === 'reading' ? 'IN PROGRESS' : statusOf(b) === 'dnf' ? 'SET ASIDE' : 'TO BE READ')}</span></div>
+        <div class="lit-shelf-folio"><span>№ ${String(i + 1).padStart(2,'0')}</span><span data-book-folio-status="${attr(b.id)}">${esc(statusOf(b) === 'read' ? 'FINISHED' : statusOf(b) === 'reading' ? 'IN PROGRESS' : statusOf(b) === 'dnf' ? 'SET ASIDE' : 'TO BE READ')}</span></div>
         <a href="#/book/${encodeURIComponent(b.id)}" class="lit-shelf-cover">${assets.src(b.customCoverAssetId) || b.coverUrl ? `<img src="${attr(assets.src(b.customCoverAssetId) || b.coverUrl)}" alt="Cover of ${attr(b.title)}" loading="lazy">` : `<span>${esc(b.title.slice(0,1))}</span>`}</a>
         <div class="lit-shelf-info">
           <div class="lit-shelf-bibliography"><a href="#/book/${encodeURIComponent(b.id)}"><h2>${esc(b.title)}</h2></a><p>${esc(b.author || 'Author unknown')}</p></div>
@@ -64,6 +64,12 @@ export function booksView(params = {}) {
         </div></article>`).join('')}</div>` : `<div class="lit-empty-shelf"><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>${search ? 'No books matched that search.' : 'A lovely shelf waiting to be filled.'}</p></div>`}
     </div>`,
     onMount(root) {
+      // Keep the reader's exact shelf, search, and sort context when opening a journal.
+      root.querySelectorAll('a[href^="#/book/"]').forEach(link => {
+        link.addEventListener('click', () => {
+          try { sessionStorage.setItem('dlp:last-library-view', location.hash); } catch (_) { /* optional */ }
+        });
+      });
       const form = root.querySelector('#shelf-search');
       const shelfManager = root.querySelector('#shelf-manager');
       root.addEventListener('pointerdown', (event) => {
@@ -88,6 +94,8 @@ export function booksView(params = {}) {
             await saveBook({...book,status:select.value,
               previousFinishDate: select.value === 'read' ? (book.previousFinishDate || '') : (book.dateFinished || book.previousFinishDate || ''),
               dateFinished: select.value === 'read' ? (book.dateFinished || book.previousFinishDate || '') : ''});
+            const folio = root.querySelectorAll('[data-book-folio-status]');
+            [...folio].find(node => node.dataset.bookFolioStatus === book.id)?.replaceChildren(document.createTextNode({read:'FINISHED',reading:'IN PROGRESS',dnf:'SET ASIDE',want:'TO BE READ'}[select.value] || 'TO BE READ'));
             toast('Shelf updated.', 'good');
           } catch (_) { toast('Could not update this book.', 'bad'); }
         };
