@@ -24,10 +24,10 @@
      from Porcelain and Mahogany so the whole page stays in one family. */
 
   /* surfaces — Porcelain and two neighbours */
-  --c-bg:            #f8f0e4;   /* Porcelain */
-  --c-bg-sunk:       #efe3d2;   /* a shade deeper, for recesses */
-  --c-bg-raised:     #fdf8f0;   /* a shade lighter, for panels */
-  --c-bg-field:      #fdf8f0;
+  --c-bg:            #f5f5f1;   /* cool ivory paper */
+  --c-bg-sunk:       #e9eae4;   /* a shade deeper, for recesses */
+  --c-bg-raised:     #fcfcf9;   /* a shade lighter, for panels */
+  --c-bg-field:      #fcfcf9;
 
   /* ink — Mahogany, lightened twice */
   --c-ink:           #4b2828;   /* Mahogany */
@@ -118,7 +118,7 @@
 
   --shadow-soft: 0 1px 2px rgba(75, 40, 40, .05);
   --shadow-sheet: 0 -8px 40px rgba(50, 26, 26, .20);
-  --paper-texture-opacity: .5;
+  --paper-texture-opacity: .8;
 
   /* --- 2. TYPOGRAPHY ---------------------------------------------------- */
   /* A high-contrast Didone for display, a geometric sans for the letterspaced
@@ -319,7 +319,7 @@ body::before {
   z-index: 0;
   pointer-events: none;
   /* Visible like fine uncoated book paper, not a distressed parchment print. */
-  opacity: calc(var(--paper-texture-opacity) * .22);
+  opacity: calc(var(--paper-texture-opacity) * .34);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 body > * { position: relative; z-index: 1; }
@@ -3265,6 +3265,16 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .lit-writing-form textarea:focus { background-image: none; }
 .lit-writing-form #linked-journal-hint { margin: -14px 0 0; font: italic 1rem/1.35 var(--f-body); color: var(--c-ink-soft); }
 .lit-writing-form #linked-journal-hint a { color: var(--c-accent); }
+/* Light, opaque panels otherwise hide the body's grain completely. Tint the
+   noise itself with mostly cool ivory so it remains visible on the hero and
+   masthead without tinting decorative images or dark section backgrounds. */
+html:not([data-theme="dark"]) .masthead,
+html:not([data-theme="dark"]) .lit-hero {
+  background-color: var(--c-bg);
+  background-image:
+    linear-gradient(rgba(245, 245, 241, .84), rgba(245, 245, 241, .84)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
 .lit-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .lit-form-actions { display: flex; gap: 20px; justify-content: space-between; align-items: center; color: var(--c-ink-faint); font: .76rem var(--f-ui); }
 .lit-collection-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }

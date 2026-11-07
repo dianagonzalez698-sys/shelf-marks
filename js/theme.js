@@ -602,6 +602,18 @@ function adopt(payload) {
   for (const [key, previous] of Object.entries(oldDefaultFonts)) {
     if (previous.includes(state.tokens[key])) delete state.tokens[key];
   }
+  // The earlier porcelain values were sometimes persisted by the design
+  // panel as explicit overrides. Let the new cool-ivory house paper show while
+  // retaining any genuinely customised palette values.
+  const oldPaper = {
+    '--c-bg': '#f8f0e4',
+    '--c-bg-sunk': '#efe3d2',
+    '--c-bg-raised': '#fdf8f0',
+    '--c-bg-field': '#fdf8f0',
+  };
+  for (const [key, value] of Object.entries(oldPaper)) {
+    if (state.tokens[key]?.toLowerCase() === value) delete state.tokens[key];
+  }
   state.content = { ...CONTENT_DEFAULTS, ...(payload.content || {}) };
   state.mode = MODES.some(([v]) => v === payload.mode) ? payload.mode : DEFAULT_MODE;
   return true;
