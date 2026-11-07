@@ -376,7 +376,7 @@ function paintPanel() {
     <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
       <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label>
       <label class="canvas-opacity-field">Opacity<input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity}"></label>
-      ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" value="${item.x}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" value="${item.y}"></label></div>
+      ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}"></label></div>
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
     </details>
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
