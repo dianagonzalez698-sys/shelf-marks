@@ -9,6 +9,7 @@ import { searchBooks, debounce, guessFormat } from './openlibrary.js';
 import { AUTHOR_SERIES_HINTS } from './config.js';
 import { todayISO, isValidISO, formatDate } from './periods.js';
 import { bookmarkCatalog } from './rules.js';
+import * as assets from './assets.js';
 
 // Handed from the search screen to the form screen.
 let pendingPrefill = null;
@@ -33,6 +34,10 @@ export function addView() {
                enterkeyhint="search" placeholder="Title, author, ISBN…" autofocus>
         <p class="hint">Results fill in the cover, page count, year and subjects — all editable afterwards.</p>
       </div>
+      <div class="book-search-filters" aria-label="Search filters">
+        <label>Search by <select id="ol-by"><option value="all">Title or author</option><option value="title">Title only</option><option value="author">Author only</option><option value="isbn">ISBN</option></select></label>
+        <label>Language <select id="ol-language"><option value="en">English preferred</option><option value="all">All languages</option></select></label>
+      </div>
       <div id="ol-status" class="muted small" aria-live="polite"></div>
       <div id="ol-results"></div>
       <div class="panel" style="margin-top:1rem">
@@ -56,11 +61,11 @@ export function addView() {
       function show(docs) {
         if (!docs.length) {
           results.innerHTML = '';
-          status.textContent = 'No matches. Try fewer words, or add it manually below.';
+          status.textContent = 'No matches. Try All languages, search by title, or add it manually below.';
           return;
         }
-        status.textContent = '';
-        results.innerHTML = docs.map((d, i) => `
+        status.textContent = `${docs.length} possible matches · best title matches first`;
+        results.innerHTML = docs.slice(0, 15).map((d, i) => `
           <button class="result" type="button" data-i="${i}">
             ${coverImg(d, { lazy: false })}
             <span class="grow">
@@ -84,7 +89,11 @@ export function addView() {
         status.textContent = 'Searching…';
         results.innerHTML = '';
         try {
-          const docs = await searchBooks(q, { signal: controller.signal });
+          const docs = await searchBooks(q, {
+            signal: controller.signal,
+            by: root.querySelector('#ol-by').value,
+            language: root.querySelector('#ol-language').value,
+          });
           show(docs);
         } catch (err) {
           if (err && err.name === 'AbortError') return;
@@ -105,6 +114,11 @@ export function addView() {
         run(q);
       });
       input.addEventListener('search', () => { if (input.value.trim().length >= 2) run(input.value.trim()); });
+      root.querySelectorAll('#ol-by, #ol-language').forEach(filter => {
+        filter.onchange = () => {
+          if (input.value.trim().length >= 2) run(input.value.trim());
+        };
+      });
       setTimeout(() => input.focus(), 60);
     },
   };
@@ -203,6 +217,12 @@ export function bookFormView(params = {}) {
             <label for="f-cover">Cover image URL</label>
             <input id="f-cover" name="coverUrl" type="text" inputmode="url" autocomplete="off"
                    value="${attr(draft.coverUrl || '')}" placeholder="https://covers.openlibrary.org/…">
+          </div>
+          <div class="book-cover-upload">
+            <label class="btn" for="f-cover-upload">Upload your own cover
+              <input type="file" id="f-cover-upload" accept="image/*" class="visually-hidden"></label>
+            <button type="button" id="f-cover-original" ${draft.customCoverAssetId ? '' : 'hidden'}>Use original cover</button>
+            <p class="hint">Your uploaded cover replaces the catalog image only for this book.</p>
           </div>
 
           <div class="field" style="margin-bottom:0">
@@ -327,11 +347,29 @@ export function bookFormView(params = {}) {
       /* live cover preview */
       const coverField = root.querySelector('#f-cover');
       const preview = root.querySelector('#cover-preview');
+      let customCoverAssetId = draft.customCoverAssetId || null;
       const repaintCover = () => {
         preview.innerHTML = coverImg({
           title: root.querySelector('#f-title').value,
           coverUrl: coverField.value.trim() || null,
+          customCoverAssetId,
         }, { big: true, lazy: false });
+      };
+      root.querySelector('#f-cover-upload').onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const uploaded = await assets.add(file, {kind:'artwork',name:`Cover · ${draft.title || file.name}`});
+          customCoverAssetId = uploaded.id;
+          root.querySelector('#f-cover-original').hidden = false;
+          repaintCover();
+          toast('Cover uploaded. Save the book to keep it.', 'good');
+        } catch (_) { toast('Could not upload this cover image.', 'bad'); }
+      };
+      root.querySelector('#f-cover-original').onclick = () => {
+        customCoverAssetId = null;
+        root.querySelector('#f-cover-original').hidden = true;
+        repaintCover();
       };
       coverField.addEventListener('change', repaintCover);
       root.querySelector('#f-title').addEventListener('change', repaintCover);
@@ -450,6 +488,7 @@ export function bookFormView(params = {}) {
           pages: Number.isFinite(pages) && pages > 0 ? pages : null,
           firstPublishYear: Number.isFinite(year) && year !== 0 ? year : null,
           coverUrl: coverField.value.trim() || null,
+          customCoverAssetId,
           subjects: root.querySelector('#f-subjects').value
             .split(',').map((s) => s.trim()).filter(Boolean),
           status: readingStatus.value,

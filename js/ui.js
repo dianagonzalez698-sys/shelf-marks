@@ -1,5 +1,6 @@
 // UI plumbing: escaping, toasts, bottom sheets, the hash router, and the
 // generated bookmark artwork.
+import * as assets from './assets.js';
 
 export function esc(value) {
   return String(value == null ? '' : value)
@@ -323,9 +324,10 @@ export function initArtFallback() {
 export function coverImg(book, { big = false, lazy = true } = {}) {
   const cls = `cover${big ? ' cover-lg' : ''}`;
   const initial = (book.title || '?').trim().slice(0, 1) || '?';
-  if (book.coverUrl) {
+  const selectedCover = assets.src(book.customCoverAssetId) || book.coverUrl;
+  if (selectedCover) {
     // If the cover 404s, swap in the initial rather than leaving a blank box.
-    return `<img class="${cls}" src="${attr(book.coverUrl)}" alt=""
+    return `<img class="${cls}" src="${attr(selectedCover)}" alt=""
             ${lazy ? 'loading="lazy"' : ''} decoding="async"
             onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${cls} cover-ph',textContent:'${attr(initial)}'}))">`;
   }

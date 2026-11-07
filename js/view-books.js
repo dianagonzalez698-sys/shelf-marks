@@ -1,6 +1,7 @@
 // The Library is a collection first; reading goals are a separate lens.
 import { state, sortedBooks, saveBook, saveSettings, uid } from './state.js';
 import { esc, attr, toast, confirmSheet } from './ui.js';
+import * as assets from './assets.js';
 
 export const BOOKS_PAGE_ID = 'books';
 export const STATUS = [
@@ -47,7 +48,7 @@ export function booksView(params = {}) {
         <label>Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
       <div class="lit-shelf-count">${shown.length} ${shown.length === 1 ? 'BOOK' : 'BOOKS'} ON THIS SHELF</div>
       ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b)=>`<article class="lit-shelf-book">
-        <a href="#/book/${encodeURIComponent(b.id)}" class="lit-shelf-cover">${b.coverUrl ? `<img src="${attr(b.coverUrl)}" alt="Cover of ${attr(b.title)}" loading="lazy">` : `<span>${esc(b.title.slice(0,1))}</span>`}</a>
+        <a href="#/book/${encodeURIComponent(b.id)}" class="lit-shelf-cover">${assets.src(b.customCoverAssetId) || b.coverUrl ? `<img src="${attr(assets.src(b.customCoverAssetId) || b.coverUrl)}" alt="Cover of ${attr(b.title)}" loading="lazy">` : `<span>${esc(b.title.slice(0,1))}</span>`}</a>
         <div class="lit-shelf-info"><a href="#/book/${encodeURIComponent(b.id)}"><h2>${esc(b.title)}</h2></a><p>${esc(b.author || 'Author unknown')}</p>
           <label class="visually-hidden" for="shelf-status-${attr(b.id)}">Reading status for ${esc(b.title)}</label>
           <select id="shelf-status-${attr(b.id)}" class="lit-shelf-status" data-book-status="${attr(b.id)}">${STATUS.filter(([s])=>s !== 'all').map(([s,label])=>`<option value="${s}" ${statusOf(b) === s ? 'selected' : ''}>${label}</option>`).join('')}</select>
