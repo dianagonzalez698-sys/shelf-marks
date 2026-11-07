@@ -14,7 +14,7 @@ export function notebookView() {
     html: `<div class="literary-notebook">
       <header class="lit-page-heading"><p class="lit-overline">THE WRITING DESK / ${state.settings.year}</p>
         <h1>The <em>Notebook</em></h1>
-        <p>For everything worth keeping after the last page.</p>
+        <p>For loose thoughts, passages and little essays. Your notes about a specific book live in its <a href="#/books">reading journal</a>.</p>
         <a class="lit-primary-action" href="#/notebook/new">+ New entry <span>↗</span></a>
       </header>
       <div class="lit-notebook-index"><span>THE ARCHIVE</span><span>${entries.length} ${entries.length === 1 ? 'ENTRY' : 'ENTRIES'}</span></div>
@@ -42,11 +42,26 @@ export function notebookEntryView({id}) {
       <form id="lit-entry-form">
         <div class="lit-form-row"><label>ENTRY TYPE<select name="kind">${notebook.KINDS.map(([key,name]) => `<option value="${key}" ${item.kind === key ? 'selected' : ''}>${name}</option>`).join('')}</select></label>
         <label>BOOK (OPTIONAL)<select name="bookId"><option value="">Not tied to a book</option>${state.books.map(b => `<option value="${attr(b.id)}" ${item.bookId === b.id ? 'selected' : ''}>${esc(b.title)}</option>`).join('')}</select></label></div>
+        <p class="hint" id="linked-journal-hint">${item.bookId ? `Writing about this book? <a href="#/book/${encodeURIComponent(item.bookId)}">Open its reading journal ↗</a>` : 'Writing a book review or tracking a reading challenge? You can do that in the book’s reading journal.'}</p>
         <label>TITLE<input name="title" required maxlength="180" placeholder="Give this piece a title…" value="${attr(item.title)}"></label>
         <label>YOUR WORDS<textarea name="body" rows="14" placeholder="Start writing…">${esc(item.body)}</textarea></label>
         <div class="lit-form-actions"><span>Saved privately on this device</span><button class="lit-primary-action" type="submit">Save entry ↗</button></div>
       </form></div>`,
     onMount(root) {
+      const bookPicker = root.querySelector('[name="bookId"]');
+      const linkedHint = root.querySelector('#linked-journal-hint');
+      bookPicker.addEventListener('change', () => {
+        linkedHint.replaceChildren();
+        if (!bookPicker.value) {
+          linkedHint.textContent = 'Writing a book review or tracking a reading challenge? You can do that in the book’s reading journal.';
+          return;
+        }
+        linkedHint.append('Writing about this book? ');
+        const link = document.createElement('a');
+        link.href = `#/book/${encodeURIComponent(bookPicker.value)}`;
+        link.textContent = 'Open its reading journal ↗';
+        linkedHint.append(link);
+      });
       root.querySelector('#lit-entry-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const form = e.currentTarget;
