@@ -582,9 +582,11 @@ function isFine(f) {
 }
 
 const STYLE_KEYS = new Set([
-  'tone', 'bgImage', 'bgScrim', 'bgInk', 'edge', 'edgeArt', 'edgeWhere',
-  'edgeSize', 'edgeShift', 'curtainArt', 'curtainDrop', 'curtainGap',
-  'scrim', 'ink', 'color', 'background',
+  'tone', 'bgScrim', 'bgInk', 'scrim', 'ink', 'color', 'background',
+]);
+const ARTWORK_KEYS = new Set([
+  'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
+  'curtainArt', 'curtainDrop', 'curtainGap',
 ]);
 
 function fieldsHtml(def, sec, mode = 'all') {
@@ -595,9 +597,11 @@ function fieldsHtml(def, sec, mode = 'all') {
     const content = (f) => ['rich', 'textarea', 'text'].includes(f.type)
       || (!f.type && /title|heading|subtitle|body|text|kicker|label|intro|caption|note|eyebrow|description/i.test(f.key));
     const style = (f) => f.type === 'typeface' || STYLE_KEYS.has(f.key);
+    const artwork = (f) => f.type === 'media' || f.type === 'medialist' || ARTWORK_KEYS.has(f.key);
     const chosen = all.filter((f) => mode === 'content' ? content(f)
-      : mode === 'style' ? style(f) : !content(f) && !style(f));
-    if (!chosen.length) return `<p class="canvas-panel-hint">${mode === 'content' ? 'This section draws its words from your reading records, so there is no text to rewrite here.' : mode === 'style' ? 'This section uses the journal’s shared visual style.' : 'No additional options for this section.'}</p>`;
+      : mode === 'style' ? style(f)
+      : mode === 'artwork' ? artwork(f) : !content(f) && !style(f) && !artwork(f));
+    if (!chosen.length && mode !== 'artwork') return `<p class="canvas-panel-hint">${mode === 'content' ? 'This section draws its words from your reading records, so there is no text to rewrite here.' : mode === 'style' ? 'This section uses the journal’s shared visual style.' : 'No additional options for this section.'}</p>`;
     const draw = (f) => fieldControl(f, sec[f.key], sec.id, { inlineStyle: false });
     if (mode === 'style') {
       const appearance = chosen.filter((f) => f.type !== 'typeface');
@@ -605,6 +609,9 @@ function fieldsHtml(def, sec, mode = 'all') {
       return `${appearance.length ? '<p class="canvas-field-group">Background & decoration</p>' + appearance.map(draw).join('') : ''}
         ${typography.length ? '<p class="canvas-field-group">Typography & text color</p>' + typography.map(draw).join('') : ''}`;
     }
+    if (mode === 'artwork') return `${chosen.length ? chosen.map(draw).join('') : '<p class="canvas-panel-hint">No built-in picture slots in this section.</p>'}
+      <div class="canvas-artwork-cta"><p>Add freeform artwork—curtains, cloud borders, illustrations or decorative cutouts—and position it anywhere in this section.</p>
+      <button type="button" data-canvas="image">＋ Place artwork here</button></div>`;
     return chosen.map(draw).join('');
   }
   const all = visibleFields(def, sec);
@@ -658,6 +665,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
     ${mountIn ? `<div class="canvas-inspector-tabs" role="group" aria-label="Section settings">
       <button type="button" data-inspector-tab="content" class="${editingTab === 'content' ? 'active' : ''}">Content</button>
       <button type="button" data-inspector-tab="style" class="${editingTab === 'style' ? 'active' : ''}">Style</button>
+      <button type="button" data-inspector-tab="artwork" class="${editingTab === 'artwork' ? 'active' : ''}">Artwork</button>
       <button type="button" data-inspector-tab="more" class="${editingTab === 'more' ? 'active' : ''}">More</button>
     </div>` : ''}
     <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, fresh, editingTab)}</div>
@@ -987,6 +995,8 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
     ${size ? `<p class="hint" style="margin-top:-.3rem">This slot looks best at <b>${esc(size)}</b>.
       Bigger is fine — it is scaled down when you add it to the library.</p>` : ''}
 
+    <label class="canvas-upload-choice">＋ Upload a new picture
+      <input type="file" data-media-upload accept="image/*" class="visually-hidden"></label>
     <div class="asset-picker">
       <button class="asset-opt${!m.assetId ? ' is-on' : ''}" type="button" data-pick="">
         <span class="asset-opt-thumb asset-opt-none">none</span></button>
@@ -994,7 +1004,7 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
         <span class="asset-opt-thumb"><img src="${attr(a.dataUrl)}" alt=""></span>
         <span class="asset-opt-name">${esc(a.name)}</span></button>`).join('')}
     </div>
-    ${library.length ? '' : '<p class="hint">Your library is empty — <a href="#/assets" data-close>add some pictures</a> first. An empty slot still renders as a tinted plate.</p>'}
+    ${library.length ? '' : '<p class="hint">No pictures saved yet. Upload one above to use it here.</p>'}
 
     ${isTrim ? `<p class="notice" style="margin-top:1.1rem">
       <strong>This is a decorative band.</strong>
@@ -1064,6 +1074,36 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
   `, {
     onMount(sheet, close) {
       const draft = { ...m };
+
+      sheet.querySelector('[data-media-upload]').onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+          const asset = await assets.add(file, { kind: isTrim || role === 'curtain' ? 'cutout' : 'photo' });
+          draft.assetId = asset.id;
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'asset-opt is-on';
+          button.dataset.pick = asset.id;
+          const thumb = document.createElement('span');
+          thumb.className = 'asset-opt-thumb';
+          const image = document.createElement('img');
+          image.src = asset.dataUrl;
+          image.alt = asset.name;
+          thumb.appendChild(image);
+          const name = document.createElement('span');
+          name.className = 'asset-opt-name';
+          name.textContent = asset.name;
+          button.append(thumb, name);
+          sheet.querySelectorAll('[data-pick]').forEach((b) => b.classList.remove('is-on'));
+          sheet.querySelector('.asset-picker').appendChild(button);
+          button.onclick = () => {
+            draft.assetId = asset.id;
+            sheet.querySelectorAll('[data-pick]').forEach((b) => b.classList.toggle('is-on', b === button));
+          };
+          toast('Picture uploaded. Choose Save picture to place it.', 'good');
+        } catch (err) { toast(err.message || 'Could not upload that picture.', 'bad'); }
+      };
 
       sheet.querySelectorAll('[data-pick]').forEach((btn) => {
         btn.onclick = () => {
