@@ -3715,6 +3715,11 @@ html:not([data-theme="dark"]) .lit-hero {
 .canvas-inspector-tabs button { border: 0 !important; border-bottom: 2px solid transparent !important; border-radius: 0 !important; background: transparent !important; color: var(--c-ink-soft) !important; padding: 11px 4px !important; font: 600 .78rem var(--f-ui) !important; }
 .canvas-inspector-tabs button.active { color: var(--c-accent) !important; border-bottom-color: var(--c-accent) !important; }
 .canvas-field-group { font: 600 .65rem var(--f-ui); letter-spacing: .15em; text-transform: uppercase; color: var(--c-accent); margin: 24px 0 12px; }
+.canvas-more-tools { margin: 15px 0; border-top: 1px solid var(--c-rule); border-bottom: 1px solid var(--c-rule); padding: 11px 0; }
+.canvas-more-tools summary { cursor: pointer; font: 600 .73rem/1.45 var(--f-ui); letter-spacing: .035em; color: var(--c-ink-soft); padding: 4px 1px; }
+.canvas-more-tools[open] summary { color: var(--c-accent); margin-bottom: 15px; }
+.canvas-more-tools .canvas-panel-links { margin-top: 8px; }
+.canvas-more-tools .canvas-panel-row { align-items: end; }
 .canvas-section-inspector .rich-input { min-height: 52px; padding: 12px; }
 .canvas-section-inspector .rich-bar { margin-bottom: 6px; }
 .canvas-section-inspector .type-row { border-bottom: 1px solid var(--c-rule); padding-bottom: 15px; margin-bottom: 12px; }
