@@ -46,8 +46,9 @@ export function booksView(params = {}) {
       </details></div>
       <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search">⌕</button></form>
         <label>Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
-      <div class="lit-shelf-count">${shown.length} ${shown.length === 1 ? 'BOOK' : 'BOOKS'} ON THIS SHELF</div>
-      ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b)=>`<article class="lit-shelf-book">
+      <div class="lit-shelf-count"><span>THE CATALOGUE</span><span>${String(shown.length).padStart(2,'0')} ${shown.length === 1 ? 'VOLUME' : 'VOLUMES'}</span></div>
+      ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b,i)=>`<article class="lit-shelf-book">
+        <div class="lit-shelf-folio"><span>№ ${String(i + 1).padStart(2,'0')}</span><span>${esc(statusOf(b) === 'read' ? 'FINISHED' : statusOf(b) === 'reading' ? 'IN PROGRESS' : statusOf(b) === 'dnf' ? 'SET ASIDE' : 'TO BE READ')}</span></div>
         <a href="#/book/${encodeURIComponent(b.id)}" class="lit-shelf-cover">${assets.src(b.customCoverAssetId) || b.coverUrl ? `<img src="${attr(assets.src(b.customCoverAssetId) || b.coverUrl)}" alt="Cover of ${attr(b.title)}" loading="lazy">` : `<span>${esc(b.title.slice(0,1))}</span>`}</a>
         <div class="lit-shelf-info"><a href="#/book/${encodeURIComponent(b.id)}"><h2>${esc(b.title)}</h2></a><p>${esc(b.author || 'Author unknown')}</p>
           <label class="visually-hidden" for="shelf-status-${attr(b.id)}">Reading status for ${esc(b.title)}</label>
