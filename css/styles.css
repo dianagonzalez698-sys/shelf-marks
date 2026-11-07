@@ -318,7 +318,8 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: calc(var(--paper-texture-opacity) * .11);
+  /* Visible like fine uncoated book paper, not a distressed parchment print. */
+  opacity: calc(var(--paper-texture-opacity) * .22);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 body > * { position: relative; z-index: 1; }
@@ -3231,6 +3232,39 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .lit-writing-form label { display: grid; gap: 8px; font: 600 .68rem var(--f-ui); letter-spacing: .12em; }
 .lit-writing-form input, .lit-writing-form select, .lit-writing-form textarea { background: var(--c-bg-raised); color: var(--c-ink); border: 1px solid var(--c-rule-strong); border-radius: 0; padding: 14px; font: 1.2rem var(--f-body); width: 100%; }
 .lit-writing-form textarea { line-height: 1.65; resize: vertical; min-height: 300px; }
+/* The Notebook is a collection of loose literary papers, not a dashboard.
+   Paper edges, handwritten marginal marks and a quiet writing sheet add
+   character without requiring any new design controls. */
+.literary-notebook:not(.lit-collections) .lit-page-heading { position: relative; }
+.literary-notebook:not(.lit-collections) .lit-page-heading::before {
+  content: '✳'; display: block; width: fit-content; margin: 0 auto 10px;
+  font: 400 1.15rem var(--f-body); color: var(--c-gilt-mid);
+}
+.literary-notebook .lit-writing-card {
+  position: relative; isolation: isolate; min-height: 290px;
+  border-color: var(--c-rule); box-shadow: 5px 6px 0 var(--c-bg-sunk), 6px 7px 0 var(--c-rule);
+  background: var(--c-bg-raised);
+}
+.literary-notebook .lit-writing-card:nth-child(even) { box-shadow: -5px 6px 0 var(--c-bg-sunk), -6px 7px 0 var(--c-rule); }
+.literary-notebook .lit-writing-card::before {
+  content: '❦'; position: absolute; right: 26px; top: 19px;
+  font: 1.4rem var(--f-body); color: var(--c-gilt-mid); opacity: .7;
+}
+.literary-notebook .lit-writing-card h2 { max-width: 90%; }
+.literary-notebook .lit-writing-card:hover { transform: translateY(-3px) rotate(-.25deg); }
+.lit-writing-form form {
+  padding: clamp(20px, 5vw, 52px); border: 1px solid var(--c-rule);
+  background: var(--c-bg-raised);
+  box-shadow: 8px 8px 0 var(--c-bg-sunk), 9px 9px 0 var(--c-rule);
+}
+.lit-writing-form textarea {
+  background-color: var(--c-bg-raised);
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 2.04rem, var(--c-rule) calc(2.04rem + 1px), transparent calc(2.04rem + 2px));
+  line-height: 2.1rem; padding-top: 12px; border-color: var(--c-rule);
+}
+.lit-writing-form textarea:focus { background-image: none; }
+.lit-writing-form #linked-journal-hint { margin: -14px 0 0; font: italic 1rem/1.35 var(--f-body); color: var(--c-ink-soft); }
+.lit-writing-form #linked-journal-hint a { color: var(--c-accent); }
 .lit-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .lit-form-actions { display: flex; gap: 20px; justify-content: space-between; align-items: center; color: var(--c-ink-faint); font: .76rem var(--f-ui); }
 .lit-collection-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
