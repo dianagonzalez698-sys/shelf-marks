@@ -45,11 +45,16 @@ export function bookDetailView({ id } = {}) {
             ${book.format ? `<span>${esc(book.format)}</span>` : ''}
             ${book.series ? `<span>${esc(book.series)}</span>` : ''}
           </div>
+          <div class="book-archive-next-step">
+            <p>${hasWriting ? 'Your reading journal is below.' : status === 'want' ? 'On your to-read shelf. When you begin, this is where you can track your reading and collect your thoughts.' : 'Your journal is ready for a rating, a favorite passage, or a few thoughts.'}</p>
+            <a class="book-archive-primary" href="#/book/${encodeURIComponent(book.id)}/edit">${hasWriting ? 'Update my journal' : 'Add notes or update this book'} →</a>
+            ${hasWriting ? '<a class="book-archive-jump" href="#book-journal">Read my notes ↓</a>' : ''}
+          </div>
         </div>
       </header>
 
       <div class="book-archive-body">
-        <main class="book-archive-writing">
+        <main class="book-archive-writing" id="book-journal">
           ${book.review ? `<section class="book-archive-review"><p class="lit-overline">MY READING JOURNAL / REVIEW</p><h2>What I thought</h2><div class="book-archive-prose">${paragraph(book.review)}</div></section>` : ''}
           ${book.favoriteQuote ? `<section class="book-archive-passage"><p class="lit-overline">A PASSAGE TO KEEP</p><blockquote>“${paragraph(book.favoriteQuote)}”</blockquote></section>` : ''}
           ${book.notes ? `<section class="book-archive-notes"><p class="lit-overline">MARGINALIA</p><h2>Notes to remember</h2><div class="book-archive-prose">${paragraph(book.notes)}</div></section>` : ''}
