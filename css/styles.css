@@ -3532,7 +3532,9 @@ html:not([data-theme="dark"]) .lit-hero {
 .book-draft-state { margin: 14px 0 0; color: var(--c-ink-faint); font: italic .88rem/1.4 var(--f-body); }
 .book-inline-journal textarea { resize: vertical; min-height: 95px; }
 .book-inline-journal label[for="bj-review"] { margin-top: 32px; }
-.book-archive-next-step .book-decor-toolbar { margin: 16px 0 0; padding: 0; border: 0; }
+.book-archive-next-step .book-decor-toolbar { display: inline; margin: 0 0 0 14px; padding: 0; border: 0; }
+.book-archive-next-step #book-decor-toggle { width: auto; padding: 5px 0; border: 0; border-bottom: 1px solid var(--c-rule-strong); border-radius: 0; background: transparent; box-shadow: none; color: var(--c-ink-soft); font: 500 .77rem/1.4 var(--f-ui); letter-spacing: .035em; text-transform: none; vertical-align: middle; }
+.book-archive-next-step #book-decor-toggle:hover, .book-archive-next-step #book-decor-toggle:focus-visible { color: var(--c-accent); border-bottom-color: var(--c-accent); }
 .book-archive-next-step .book-decor-tools { position: relative; z-index: 3; margin-top: 10px; padding: 16px; }
 .book-inline-preview { margin-top: 32px; padding: 25px clamp(18px,3vw,34px); border: 1px solid var(--c-rule-strong); background: var(--c-bg); }
 .book-inline-preview > .lit-overline { margin: 0 0 18px; }
