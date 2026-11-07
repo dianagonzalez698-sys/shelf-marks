@@ -8,7 +8,7 @@ export const HOME_PAGE_ID = 'home';
 export function homeView() {
   return {
     title: '', tab: 'home', banner: false, editorial: true,
-    editPage: HOME_PAGE_ID, fab: true,
+    editPage: HOME_PAGE_ID,
     html: layout.get(HOME_PAGE_ID).map((sec) => renderSection(sec)).join(''),
   };
 }
