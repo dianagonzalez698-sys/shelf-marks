@@ -12,6 +12,9 @@ import { esc, attr } from './ui.js';
 export const FRAMES = [
   ['none', 'None'],
   ['ornate', 'Carved gilt (baroque)'],
+  ['gilded-real', 'Antique carved gilt · rectangular'],
+  ['gilded-round', 'Antique carved gilt · round'],
+  ['gilded-oval', 'Antique carved gilt · oval'],
   ['gilt', 'Gilt museum frame'],
   ['gilt-oval', 'Gilt oval'],
   ['bronze', 'Antique bronze'],

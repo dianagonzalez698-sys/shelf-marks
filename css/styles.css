@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 46084)
-Total output lines: 3667
+Warning: truncated output (original token count: 46780)
+Total output lines: 3697
 
 /* ===========================================================================
    Diana's Lit Picks — editorial reading journal
@@ -1732,6 +1732,27 @@ a.ed-meta:hover { color: var(--c-accent); }
 .mf-oval .m-box { border-radius: 50% / 50%; }
 .mf-arch .m-box { border-radius: 50% 50% var(--bm-radius) var(--bm-radius) / 36% 36% var(--bm-radius) var(--bm-radius); }
 
+/* Photographic carved-gold frames: the rectangular border scales by nine-slice,
+   while the round and oval mounts retain their entire sculpted silhouette. */
+.mf-gilded-real .m-mount {
+  border: clamp(13px, 2.8vw, 32px) solid transparent;
+  border-image-source: url('../assets/frames/antique-gilt-rectangle.webp');
+  border-image-slice: 175;
+  border-image-repeat: stretch;
+  filter: drop-shadow(0 5px 8px rgba(40, 27, 10, .28));
+}
+.mf-gilded-real .m-box { box-shadow: inset 0 0 7px rgba(28,18,5,.35); }
+.mf-gilded-round .m-mount, .mf-gilded-oval .m-mount { position: relative; padding: 0; filter: drop-shadow(0 7px 9px rgba(40,27,10,.25)); }
+.mf-gilded-round .m-mount { aspect-ratio: 1; }
+.mf-gilded-oval .m-mount { aspect-ratio: 3 / 4; }
+.mf-gilded-round .m-mount::after, .mf-gilded-oval .m-mount::after { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; background-size: 100% 100%; background-repeat: no-repeat; }
+.mf-gilded-round .m-mount::after { background-image: url('../assets/frames/antique-gilt-round.webp'); }
+.mf-gilded-oval .m-mount::after { background-image: url('../assets/frames/antique-gilt-oval.webp'); }
+.mf-gilded-round .m-box, .mf-gilded-oval .m-box { position: absolute; width: auto; height: auto; overflow: hidden; border-radius: 50%; }
+.mf-gilded-round .m-box { inset: 18%; aspect-ratio: 1 !important; }
+.mf-gilded-oval .m-box { inset: 17% 18%; aspect-ratio: 3 / 4 !important; }
+.mf-gilded-round .m-img, .mf-gilded-oval .m-img, .mf-gilded-round.m-auto .m-img, .mf-gilded-oval.m-auto .m-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover !important; }
+
 .mf-polaroid .m-mount {
   background: var(--c-bg-raised);
   padding: 9px 9px 42px;
@@ -1748,72 +1769,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 /* A torn deckle edge, cut with a mask so it works over any ground. */
 .mf-deckle .m-box {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 100'%3E%3Cpath d='M2.5,1.2 Q12,0.2 22,1.6 Q33,3 44,1 Q56,-0.6 67,1.4 Q79,3.2 89,1.2 Q97,0.2 98.6,2.4 L98.4,97.2 Q89,99.4 78,97.6 Q66,95.8 55,98 Q43,100 32,98 Q20,95.8 10,97.8 Q3,99 1.4,96.8 Z' fill='black'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 100'%3E%3Cpath d='M2.5,1.2 Q12,0.2 22,1.6 Q33,3 44,1 Q56,-0.6 67,1.4 Q79,3.2 89,1.2 Q97,0.2 98.6,2.4 L98.4,97.2 Q89,99.4 78,97.6 Q66,95.8 55,98 Q43,100 32,98 Q20,95.8 10,97.8 Q3,99 1.4,96.8 Z' fill='black'/%3E%3C/svg%3E");
-  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
-}
-
-/* A postage stamp. The perforation mask is applied to the white backing only —
-   masking the mount itself punched holes straight through the picture. */
-.mf-stamp .m-mount { position: relative; padding: 11px; }
-.mf-stamp .m-mount::before {
-  content: '';
-  position: absolute; inset: 0; z-index: 0;
-  background: var(--c-bg-raised);
-  filter: drop-shadow(0 6px 14px rgba(60, 36, 28, .18));
-  -webkit-mask: radial-gradient(circle 5px at 5px 5px, transparent 97%, #000) -5px -5px / 10px 10px;
-  mask: radial-gradient(circle 5px at 5px 5px, transparent 97%, #000) -5px -5px / 10px 10px;
-}
-.mf-stamp .m-box { z-index: 1; }
-
-/* Washi tape holding a picture to the page. */
-.mf-tape-top .m-mount::before,
-.mf-tape-corners .m-mount::before,
-.mf-tape-corners .m-mount::after {
-  content: '';
-  position: absolute; z-index: 4;
-  width: 92px; height: 26px;
-  background: linear-gradient(100deg, rgba(224,179,90,.62), rgba(212,118,60,.5));
-  box-shadow: 0 1px 3px rgba(60,36,28,.14);
-  opacity: .9;
-}
-.mf-tape-top .m-mount::before { top: -11px; left: 50%; transform: translateX(-50%) rotate(-2.5deg); }
-.mf-tape-corners .m-mount::before { top: -12px; left: -16px; transform: rotate(-38deg); }
-.mf-tape-corners .m-mount::after  { top: -12px; right: -16px; transform: rotate(38deg); }
-
-/* Full-bleed backdrop behind a hero. */
-.m-backdrop {
-  position: absolute; inset: 0; z-index: 0;
-  background-size: cover;
-  background-repeat: no-repeat;…11084 tokens truncated…er: coarse) { .sty-chip { padding: .5rem .8rem; } }
-
-/* -------------------------------------------------------- rich text field --
-   Emphasis on a phrase rather than a whole element. */
-.rich-bar { display: flex; gap: .3rem; margin: .3rem 0; }
-.rich-btn {
-  inline-size: 30px; block-size: 28px; padding: 0;
-  font-family: var(--f-body); font-size: .95rem;
-  color: var(--c-ink-soft);
-  background: var(--c-bg-raised);
-  border: 1px solid var(--c-rule-strong); border-radius: 2px;
-  cursor: pointer;
-}
-.rich-btn:hover { border-color: var(--c-accent); color: var(--c-accent); }
-.rich-clear { font-size: .85rem; }
-.rich-input {
-  min-block-size: 2.6rem;
-  padding: .55rem .7rem;
-  font-family: var(--f-body); font-size: var(--fs-body);
-  color: var(--c-ink);
-  background: var(--c-bg-raised);
-  border: 1px solid var(--c-rule-strong); border-radius: 3px;
-  white-space: pre-wrap; overflow-wrap: break-word;
-}
-.rich-input:focus { outline: 2px solid var(--c-accent); outline-offset: 1px; }
-.rich-input b { font-weight: 700; }
-.rich-input i { font-style: italic; }
-@media (pointer: coarse) { .rich-btn { inline-size: 40px; block-size: 40px; } }
-
-/* ========================================================================
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 100'%3E%3Cpath d='M2.5,1.2 Q12,0.2 22,1.6 Q33,3 44,1 Q56,-0.6 67,1.4 Q79,3.2 …11780 tokens truncated…=====================================================================
    THE ILLUSTRATED LITERARY SALON — typographic finish
    Delicate rules, editorial navigation, restrained buttons. Everything here
    reads the role tokens, so a section override still wins over it.
@@ -2353,7 +2309,16 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-decor-piece { position: absolute; display: block; height: auto; max-width: 75%; transform: translate(-50%, -50%); pointer-events: none; user-select: none; touch-action: none; filter: drop-shadow(3px 7px 5px rgba(0,0,0,.1)); }
 .book-decor-piece > img { display: block; width: 100%; height: auto; user-select: none; pointer-events: none; }
 .book-decor-piece.frame-fine { background: var(--c-bg); padding: 6px; border: 1px solid #b6a48d; box-shadow: inset 0 0 0 2px var(--c-bg), inset 0 0 0 3px #b6a48d; }
-.book-decor-piece.frame-ornate { background: #ece0c5; padding: 11px; border: 5px ridge #ab8950; box-shadow: 0 3px 12px rgba(44,28,16,.16), inset 0 0 0 2px #6e542e; }
+.book-decor-piece.frame-ornate { border: 23px solid transparent; border-image-source: url('../assets/frames/antique-gilt-rectangle.webp'); border-image-slice: 175; border-image-repeat: stretch; filter: drop-shadow(0 6px 10px rgba(44,28,16,.24)); }
+.book-decor-piece.frame-gilded-round, .book-decor-piece.frame-gilded-oval { position: absolute; padding: 0; filter: drop-shadow(0 6px 10px rgba(44,28,16,.24)); }
+.book-decor-piece.frame-gilded-round { aspect-ratio: 1 / 1; }
+.book-decor-piece.frame-gilded-oval { aspect-ratio: 3 / 4; }
+.book-decor-piece.frame-gilded-round > img, .book-decor-piece.frame-gilded-oval > img { position: absolute; width: 64%; height: 64%; inset: 18%; border-radius: 50%; object-fit: cover; }
+.book-decor-piece.frame-gilded-oval > img { width: 64%; height: 66%; inset: 17% 18%; }
+.book-decor-piece.frame-gilded-round::after, .book-decor-piece.frame-gilded-oval::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background-size: 100% 100%; background-repeat: no-repeat; }
+.book-decor-piece.frame-gilded-round::after { background-image: url('../assets/frames/antique-gilt-round.webp'); }
+.book-decor-piece.frame-gilded-oval::after { background-image: url('../assets/frames/antique-gilt-oval.webp'); }
+.book-decor-piece .book-decor-resize { z-index: 5; }
 .book-decor-piece.frame-polaroid { background: #fffaf0; padding: 10px 10px 28px; box-shadow: 0 4px 12px rgba(44,28,16,.18); }
 .book-decor-resize { display: none; position: absolute; bottom: -13px; right: -13px; width: 28px; height: 28px; padding: 0; border: 1px solid var(--c-accent); border-radius: 50%; background: var(--c-bg); color: var(--c-accent); font: 700 17px var(--f-ui); cursor: nwse-resize; pointer-events: auto; touch-action: none; }
 .book-decor-editing .book-decor-layer { pointer-events: none; }
