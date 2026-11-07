@@ -6,7 +6,7 @@ import * as theme from './theme.js';
 import * as layout from './layout.js';
 import { typeList, SECTION_TYPES } from './sections.js';
 import { openSectionEditor } from './view-layout.js';
-import { esc, rich, richValue, toast, refresh as refreshPage } from './ui.js';
+import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } from './ui.js';
 
 const records = new Map();
 let activePage = null;
@@ -239,8 +239,9 @@ function paintPanel() {
     const label = SECTION_TYPES[sec.type]?.label || 'Section';
     panel.innerHTML = `<div class="canvas-panel-head"><strong>SECTION ${order} OF ${sections.length}</strong><button type="button" data-canvas="section-back">← All sections</button></div>
       <p class="canvas-section-label">Editing: <strong>${esc(label)}</strong></p>
-      <p class="canvas-panel-hint">The highlighted area on the page is the section you're changing. Text can also be edited directly on the page.</p>
-      <div class="canvas-section-inspector"></div>`;
+      <p class="canvas-panel-hint">The outlined area on the page is the section you're editing. Click any text on the page to change its words.</p>
+      <div class="canvas-section-inspector"></div>
+      <button type="button" class="canvas-delete-section" data-canvas="delete-section">Remove this section</button>`;
     openSectionEditor(activePage, selectedSectionId, { mountIn: panel.querySelector('.canvas-section-inspector') });
     return;
   }
@@ -254,7 +255,7 @@ function paintPanel() {
       (panelMode === 'sections' ? `<h3>Your page</h3><p class="canvas-panel-hint">Select any section below—or click an open area of it on the page—to edit it here.</p>
         <div class="canvas-section-list">${layout.get(activePage).filter((s) => s.visible !== false).map((s, i, arr) => `<div class="canvas-section-row" draggable="true" data-section-row="${esc(s.id)}">
           <span class="canvas-section-number" title="Drag to reorder">⠿ ${String(i + 1).padStart(2, '0')}</span>
-          <button type="button" class="canvas-section-select" data-canvas-section="${esc(s.id)}"><strong>${esc(SECTION_TYPES[s.type]?.label || 'Section')}</strong><small>${esc(String(s.title || s.heading || s.text || SECTION_TYPES[s.type]?.blurb || '').replace(/<[^>]*>/g,'').slice(0,55))}</small></button>
+          <button type="button" class="canvas-section-select" data-canvas-section="${esc(s.id)}"><strong>${esc(SECTION_TYPES[s.type]?.label || 'Section')}${arr.filter((x) => x.type === s.type).length > 1 ? ` <em class="canvas-duplicate">${arr.filter((x) => x.type === s.type).findIndex((x) => x.id === s.id) + 1} of ${arr.filter((x) => x.type === s.type).length}</em>` : ''}</strong><small>${esc(String(s.title || s.heading || s.text || SECTION_TYPES[s.type]?.blurb || '').replace(/<[^>]*>/g,'').slice(0,55))}</small></button>
           <span class="canvas-section-moves"><button type="button" data-move-section="${esc(s.id)}" data-move-delta="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move section up">↑</button><button type="button" data-move-section="${esc(s.id)}" data-move-delta="1" ${i === arr.length - 1 ? 'disabled' : ''} aria-label="Move section down">↓</button></span>
         </div>`).join('')}</div>
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add another section</strong><span>Build out the page with a new block</span></button>
@@ -348,10 +349,16 @@ function sectionPicker() {
     b.onclick = async () => {
       b.disabled = true;
       try {
-        await layout.addSection(activePage, type.value);
+        const created = await layout.addSection(activePage, type.value);
         modal.remove();
         refreshPage();
-        toast('Section added. Select Settings on the section to customize it.', 'good');
+        if (created) {
+          requestAnimationFrame(() => {
+            section(created.id)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            inspectSection(created.id);
+          });
+        }
+        toast('Section added at the bottom of the page.', 'good');
       } catch (_) { b.disabled = false; toast('Could not add this section.', 'bad'); }
     };
     options.appendChild(b);
@@ -400,6 +407,18 @@ function ensureTools() {
     if (action === 'remove' && selected) { checkpoint(); change(data().filter((i) => i.id !== selected)); selected = null; render(); }
     if (action === 'deselect') select(null);
     if (action === 'section-back') { selectedSectionId = null; panelMode = 'sections'; render(); }
+    if (action === 'delete-section' && selectedSectionId) {
+      const removingId = selectedSectionId;
+      const sec = layout.getSection(activePage, removingId);
+      confirmSheet({ title: 'Remove this section?', body: `Remove “${SECTION_TYPES[sec?.type]?.label || 'Section'}” from this page? Reading records and books are unaffected. Artwork attached to this section will no longer appear.`, confirm: 'Remove section', danger: true }).then(async (yes) => {
+        if (!yes) return;
+        await layout.removeSection(activePage, removingId);
+        selectedSectionId = null;
+        panelMode = 'sections';
+        refreshPage();
+        toast('Section removed from the page.', 'good');
+      });
+    }
     if (action === 'text-back') { selectedText = null; panelMode = 'sections'; render(); }
   });
   document.addEventListener('click', (e) => {

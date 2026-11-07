@@ -3433,6 +3433,12 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-section-moves { display: flex; flex-direction: column; gap: 2px; }
 .canvas-section-list .canvas-section-moves button { display: block; width: 28px; min-height: 26px; padding: 1px !important; border: 1px solid var(--c-rule) !important; font: 1rem var(--f-ui); }
 .canvas-section-moves button:disabled { opacity: .24; cursor: default; }
+.canvas-duplicate { display: inline-block; vertical-align: middle; margin-left: 5px; font: 600 .6rem var(--f-ui); color: var(--c-accent); }
+.canvas-delete-section { width: 100%; margin-top: 30px; color: var(--c-danger) !important; background: transparent !important; border-color: var(--c-rule-strong) !important; }
+.recent-books-empty { border: 1px dashed var(--c-rule-strong); background: color-mix(in srgb,var(--c-bg-sunk) 30%,transparent); text-align: center; padding: clamp(28px,5vw,65px) 20px; }
+.recent-books-empty p { font: italic 400 clamp(1.5rem,2.5vw,2.4rem)/1.25 var(--f-body); margin: 0 0 10px; }
+.recent-books-empty span { display: block; font: 1rem/1.45 var(--f-body); color: var(--c-ink-soft); }
+.recent-books-empty a { display: inline-block; margin-top: 18px; font: 600 .72rem var(--f-ui); color: var(--c-accent); }
 /* Appearance is chosen in Settings, leaving the reading masthead uncluttered. */
 #mode-toggle { display: none !important; }
 @media (max-width: 780px) {

@@ -921,7 +921,13 @@ export const SECTION_TYPES = {
       const books = sortedBooks()
         .filter((b) => inPeriod(b.dateFinished, yearPeriod(year)))
         .slice(0, Number(sec.limit) || 5);
-      if (!books.length) return '';
+      if (!books.length) return sectionShell(sec, `
+        <div class="ed-head ed-head-split"><div>${kicker(sec.kicker)}${headline(sec.title)}</div></div>
+        <div class="recent-books-empty">
+          <p>No finished books on this shelf just yet.</p>
+          <span>As you finish books, their covers will appear here in reading order.</span>
+          <a href="#/books">Go to your library &rarr;</a>
+        </div>`);
       return sectionShell(sec, `
         <div class="ed-head ed-head-split">
           <div>${kicker(sec.kicker)}${headline(sec.title)}</div>
