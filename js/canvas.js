@@ -237,11 +237,23 @@ function paintPanel() {
     const sections = layout.get(activePage).filter((s) => s.visible !== false);
     const order = sections.findIndex((s) => s.id === selectedSectionId) + 1;
     const label = SECTION_TYPES[sec.type]?.label || 'Section';
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>SECTION ${order} OF ${sections.length}</strong><button type="button" data-canvas="section-back">← All sections</button></div>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>SECTION ${order} OF ${sections.length}</strong><div class="canvas-panel-actions"><button type="button" data-canvas="section-back">← All sections</button><button type="button" data-canvas="section-exit" aria-label="Exit section editor">×</button></div></div>
       <p class="canvas-section-label">Editing: <strong>${esc(label)}</strong></p>
-      <p class="canvas-panel-hint">The outlined area on the page is the section you're editing. Click any text on the page to change its words.</p>
       <div class="canvas-section-inspector"></div>
       <button type="button" class="canvas-delete-section" data-canvas="delete-section">Remove this section</button>`;
+    // Wire navigation at its source. On a small screen the panel is an
+    // independently scrollable tray, so delegated document clicks are not a
+    // reliable substitute for a working, obvious back/close control.
+    const leaveSection = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      selectedSectionId = null;
+      selectedText = null;
+      panelMode = 'sections';
+      render();
+    };
+    panel.querySelector('[data-canvas="section-back"]').addEventListener('click', leaveSection);
+    panel.querySelector('[data-canvas="section-exit"]').addEventListener('click', leaveSection);
     openSectionEditor(activePage, selectedSectionId, { mountIn: panel.querySelector('.canvas-section-inspector') });
     return;
   }

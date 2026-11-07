@@ -596,20 +596,30 @@ function fieldsHtml(def, sec, mode = 'all') {
     const all = def.fields.filter((f) => typeof f.when !== 'function' || f.when(sec));
     const content = (f) => ['rich', 'textarea', 'text'].includes(f.type)
       || (!f.type && /title|heading|subtitle|body|text|kicker|label|intro|caption|note|eyebrow|description/i.test(f.key));
-    const style = (f) => f.type === 'typeface' || STYLE_KEYS.has(f.key);
-    const artwork = (f) => f.type === 'media' || f.type === 'medialist' || ARTWORK_KEYS.has(f.key);
-    const chosen = all.filter((f) => mode === 'content' ? content(f)
-      : mode === 'style' ? style(f)
-      : mode === 'artwork' ? artwork(f) : !content(f) && !style(f) && !artwork(f));
+    // The section editor is for the handful of decisions made repeatedly.
+    // Existing values for all other fields remain in the saved data; they are
+    // simply no longer surfaced as an intimidating grid of switches.
+    const contentEssentials = new Set(['limit', 'layout', 'mode', 'columns']);
+    const styleEssentials = new Set(['tone', 'fontDisplay', 'fontBody']);
+    const artworkEssentials = new Set([
+      'bgImage', 'backdrop', 'picture', 'inset', 'items', 'strip',
+      'edge', 'edgeArt', 'edgeWhere', 'edgeSize',
+      'curtainArt', 'curtainWhere', 'curtainDrop',
+    ]);
+    const chosen = all.filter((f) => mode === 'content'
+      ? content(f) || contentEssentials.has(f.key)
+      : mode === 'style' ? styleEssentials.has(f.key)
+      : mode === 'artwork' ? artworkEssentials.has(f.key)
+      : false);
     if (!chosen.length && mode !== 'artwork') return `<p class="canvas-panel-hint">${mode === 'content' ? 'This section draws its words from your reading records, so there is no text to rewrite here.' : mode === 'style' ? 'This section uses the journal’s shared visual style.' : 'No additional options for this section.'}</p>`;
     const draw = (f) => fieldControl(f, sec[f.key], sec.id, { inlineStyle: false });
     if (mode === 'style') {
       const appearance = chosen.filter((f) => f.type !== 'typeface');
       const typography = chosen.filter((f) => f.type === 'typeface');
-      return `${appearance.length ? '<p class="canvas-field-group">Background & decoration</p>' + appearance.map(draw).join('') : ''}
-        ${typography.length ? '<p class="canvas-field-group">Text appearance</p><p class="canvas-panel-hint">Choose a font or its text color for this section. “Site default” keeps your journal’s overall styling.</p>' + typography.map(draw).join('') : ''}`;
+      return `${appearance.length ? '<p class="canvas-field-group">Background</p>' + appearance.map(draw).join('') : ''}
+        ${typography.length ? '<p class="canvas-field-group">Fonts & text colors</p>' + typography.map(draw).join('') : ''}`;
     }
-    if (mode === 'artwork') return `${sec.edge && sec.edge !== 'none' ? `<p class="canvas-panel-hint canvas-edge-help">${sec.edge === 'curtain' ? 'Full-frame curtain: choose whether it hangs from the TOP or finishes at the BOTTOM. Bottom placement mirrors the image.' : sec.edge === 'artwork' ? 'Decorative trim: choose TOP, BOTTOM or BOTH below.' : 'This preset paper-edge shape decorates the BOTTOM of this section.'}</p>` : ''}
+    if (mode === 'artwork') return `${sec.edge && sec.edge !== 'none' ? `<p class="canvas-panel-hint canvas-edge-help">${sec.edge === 'curtain' ? 'Place the curtain at the top or bottom.' : sec.edge === 'artwork' ? 'Choose which edge gets your artwork.' : 'This shapes the bottom edge.'}</p>` : ''}
       ${chosen.length ? chosen.map(draw).join('') : '<p class="canvas-panel-hint">No built-in picture slots in this section.</p>'}
       <div class="canvas-artwork-cta"><p>Add freeform artwork—curtains, cloud borders, illustrations or decorative cutouts—and position it anywhere in this section.</p>
       <button type="button" data-canvas="image">＋ Place artwork here</button></div>`;
@@ -667,7 +677,6 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
       <button type="button" data-inspector-tab="content" class="${editingTab === 'content' ? 'active' : ''}">Content</button>
       <button type="button" data-inspector-tab="style" class="${editingTab === 'style' ? 'active' : ''}">Style</button>
       <button type="button" data-inspector-tab="artwork" class="${editingTab === 'artwork' ? 'active' : ''}">Artwork</button>
-      <button type="button" data-inspector-tab="more" class="${editingTab === 'more' ? 'active' : ''}">More</button>
     </div>` : ''}
     <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, fresh, editingTab)}</div>
     <div class="btn-row" style="margin-top:1rem">
