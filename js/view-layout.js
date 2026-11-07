@@ -977,11 +977,14 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
 export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
   const m = media(value || {});
   const library = assets.list();
-  // A background fills its section edge to edge, so framing, shaping, tilting
-  // and captioning have nothing to act on. Offering those controls anyway was
-  // the reason a chosen frame appeared to do nothing.
-  const isBackdrop = role === 'backdrop' || role === 'trim';
+  // Each picture role has different rendering capabilities. In particular,
+  // curtain and edge trim use only the chosen asset; transform sliders there
+  // were misleading because they could never change the displayed artwork.
+  const isBackdrop = role === 'backdrop';
   const isTrim = role === 'trim';
+  const isCurtain = role === 'curtain';
+  const isEdgeArtwork = isTrim || isCurtain;
+  const isInset = !isBackdrop && !isEdgeArtwork;
 
   const num = (key, label, min, max, step) => `
     <div class="token-row">
@@ -992,7 +995,7 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
     </div>`;
 
   openSheet(`
-    <h2>Picture</h2>
+    <h2>${isCurtain ? 'Curtain artwork' : isTrim ? 'Edge artwork' : isBackdrop ? 'Section background' : 'Picture'}</h2>
     ${size ? `<p class="hint" style="margin-top:-.3rem">This slot looks best at <b>${esc(size)}</b>.
       Bigger is fine — it is scaled down when you add it to the library.</p>` : ''}
 
@@ -1007,23 +1010,18 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
     </div>
     ${library.length ? '' : '<p class="hint">No pictures saved yet. Upload one above to use it here.</p>'}
 
-    ${isTrim ? `<p class="notice" style="margin-top:1.1rem">
-      <strong>This is a decorative band.</strong>
-      The artwork is shown as it is, laid across the edge of the section — not
-      used to cut a shape. A transparent PNG works best, so the page shows
-      through around it.</p>` : ''}
-    ${isBackdrop && !isTrim ? `<p class="notice" style="margin-top:1.1rem">
-      <strong>This is a background.</strong>
-      It fills the whole section, so frames, shapes and tilts don’t apply.
-      Put those on a picture inside the section instead.</p>` : ''}
+    ${isEdgeArtwork ? `<p class="hint" style="margin-top:1rem">
+      Choose your ${isCurtain ? 'curtain' : 'edge decoration'} here. To change where it hangs
+      or how much of the section it covers, use this section’s Artwork settings.
+      A transparent PNG works best.</p>` : ''}
 
-    <div class="field" style="margin-top:1.1rem" ${isBackdrop ? 'hidden' : ''}>
+    ${isInset ? `<div class="field" style="margin-top:1.1rem">
       <label for="m-frame">Frame</label>
       <select id="m-frame" data-m="frame">
         ${FRAMES.map(([v, l]) => `<option value="${attr(v)}" ${v === m.frame ? 'selected' : ''}>${esc(l)}</option>`).join('')}
       </select>
     </div>
-    <div class="grid-2" ${isBackdrop ? 'hidden' : ''}>
+    <div class="grid-2">
       <div class="field"><label for="m-ratio">Shape</label>
         <select id="m-ratio" data-m="ratio">
           ${RATIOS.map(([v, l]) => `<option value="${attr(v)}" ${v === m.ratio ? 'selected' : ''}>${esc(l)}</option>`).join('')}
@@ -1034,39 +1032,43 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
           <option value="contain" ${m.fit === 'contain' ? 'selected' : ''}>Fit whole picture</option>
         </select></div>
     </div>
-
-    <p class="field-label" style="margin-top:.6rem">Focal point — what stays in frame when cropped</p>
-    ${num('focalX', 'Horizontal', 0, 100, 1)}
-    ${num('focalY', 'Vertical', 0, 100, 1)}
-
-    ${isBackdrop ? `
-      <p class="field-label" style="margin-top:.6rem">Strength</p>
-      ${num('opacity', 'Opacity', 0.1, 1, 0.05)}
-    ` : `
-      <p class="field-label" style="margin-top:.6rem">Placement</p>
+    <p class="field-label" style="margin-top:.9rem">Size and visibility</p>
       ${num('width', 'Width (% of slot)', 10, 100, 1)}
-      ${num('rotate', 'Tilt (degrees)', -20, 20, 1)}
       ${num('opacity', 'Opacity', 0.1, 1, 0.05)}
-      ${num('z', 'Layer order', 1, 9, 1)}
-      ${num('x', 'Nudge across (%)', -50, 50, 1)}
-      ${num('y', 'Nudge down (%)', -50, 50, 1)}
-    `}
+    ` : ''}
+    ${isBackdrop ? `
+      <p class="hint" style="margin-top:1rem">This image fills the whole section.</p>
+      ${num('opacity', 'Background strength', 0.1, 1, 0.05)}
+    ` : ''}
 
-    <div class="field" style="margin-top:.8rem" ${isBackdrop ? 'hidden' : ''}>
+    ${!isEdgeArtwork ? `<details class="picture-advanced">
+      <summary>More adjustments <span>Optional</span></summary>
+      <div class="picture-advanced-body">
+        <p class="field-label">${isBackdrop ? 'Crop position' : 'Focal point when cropped'}</p>
+        ${num('focalX', 'Horizontal', 0, 100, 1)}
+        ${num('focalY', 'Vertical', 0, 100, 1)}
+        ${isInset ? `
+          <p class="field-label" style="margin-top:1rem">Fine-tune placement</p>
+          ${num('rotate', 'Tilt', -20, 20, 1)}
+          ${num('x', 'Move left / right', -50, 50, 1)}
+          ${num('y', 'Move up / down', -50, 50, 1)}
+          ${num('z', 'Layer order', 1, 9, 1)}
+          <div class="field" style="margin-top:.8rem">
       <label for="m-tape">Tape</label>
       <select id="m-tape" data-m="tape">
         ${TAPES.map(([v, l]) => `<option value="${attr(v)}" ${v === m.tape ? 'selected' : ''}>${esc(l)}</option>`).join('')}
       </select>
     </div>
-    <label class="switch-row" ${isBackdrop ? 'hidden' : ''}><input type="checkbox" data-m="shadow" ${m.shadow ? 'checked' : ''}>
+    <label class="switch-row"><input type="checkbox" data-m="shadow" ${m.shadow ? 'checked' : ''}>
       <span class="switch-text">Drop shadow</span></label>
-    <label class="switch-row" ${isBackdrop ? 'hidden' : ''}><input type="checkbox" data-m="hideOnMobile" ${m.hideOnMobile ? 'checked' : ''}>
+    <label class="switch-row"><input type="checkbox" data-m="hideOnMobile" ${m.hideOnMobile ? 'checked' : ''}>
       <span class="switch-text">Hide on phones<em>Useful for decorative layers that crowd a small screen.</em></span></label>
-
-    <div class="field" style="margin-top:.8rem" ${isBackdrop ? 'hidden' : ''}>
+    <div class="field" style="margin-top:.8rem">
       <label for="m-cap">Caption</label>
       <input type="text" id="m-cap" data-m="caption" value="${attr(m.caption || '')}">
-    </div>
+    </div>` : ''}
+      </div>
+    </details>` : ''}
 
     <div class="btn-row" style="margin-top:1rem">
       <button class="btn grow" type="button" data-close>Cancel</button>

@@ -3361,6 +3361,10 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-item.is-full-width .canvas-resize { display: none; }
 .canvas-upload-choice { display: block !important; cursor: pointer; text-align: center; border: 1px dashed var(--c-rule-strong); padding: 18px 12px !important; margin: 16px 0 20px !important; font: 600 .85rem var(--f-ui); color: var(--c-accent); background: var(--c-bg-raised); }
 .canvas-upload-choice:hover { border-color: var(--c-accent); }
+.picture-advanced { margin-top: 1.25rem; border: 1px solid var(--c-rule-strong); border-radius: 5px; background: var(--c-bg-raised); }
+.picture-advanced > summary { cursor: pointer; padding: .9rem 1rem; font: 600 .85rem var(--f-ui); color: var(--c-ink); list-style-position: inside; }
+.picture-advanced > summary span { float: right; font-size: .75rem; font-weight: 400; color: var(--c-ink-soft); }
+.picture-advanced-body { padding: .25rem 1rem 1rem; border-top: 1px solid var(--c-rule); }
 .canvas-check { display: flex !important; flex-direction: row !important; align-items: flex-start; gap: 9px !important; line-height: 1.45; }
 .canvas-check input { margin-top: 3px; flex: none; }
 /* Editor chrome follows the nocturne palette instead of retaining terracotta. */
