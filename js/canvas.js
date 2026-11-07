@@ -252,7 +252,11 @@ function paintPanel() {
   if (panelMode !== 'selected' || !item) {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>DESIGN STUDIO</strong><span class="canvas-live-dot">● Editing</span></div>${tabs}` +
       (panelMode === 'sections' ? `<h3>Your page</h3><p class="canvas-panel-hint">Select any section below—or click an open area of it on the page—to edit it here.</p>
-        <div class="canvas-section-list">${layout.get(activePage).filter((s) => s.visible !== false).map((s, i) => `<button type="button" data-canvas-section="${esc(s.id)}"><span class="canvas-section-number">${String(i + 1).padStart(2, '0')}</span><span><strong>${esc(SECTION_TYPES[s.type]?.label || 'Section')}</strong><small>${esc(String(s.title || s.heading || s.text || SECTION_TYPES[s.type]?.blurb || '').replace(/<[^>]*>/g,'').slice(0,55))}</small></span><span aria-hidden="true">›</span></button>`).join('')}</div>
+        <div class="canvas-section-list">${layout.get(activePage).filter((s) => s.visible !== false).map((s, i, arr) => `<div class="canvas-section-row" draggable="true" data-section-row="${esc(s.id)}">
+          <span class="canvas-section-number" title="Drag to reorder">⠿ ${String(i + 1).padStart(2, '0')}</span>
+          <button type="button" class="canvas-section-select" data-canvas-section="${esc(s.id)}"><strong>${esc(SECTION_TYPES[s.type]?.label || 'Section')}</strong><small>${esc(String(s.title || s.heading || s.text || SECTION_TYPES[s.type]?.blurb || '').replace(/<[^>]*>/g,'').slice(0,55))}</small></button>
+          <span class="canvas-section-moves"><button type="button" data-move-section="${esc(s.id)}" data-move-delta="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move section up">↑</button><button type="button" data-move-section="${esc(s.id)}" data-move-delta="1" ${i === arr.length - 1 ? 'disabled' : ''} aria-label="Move section down">↓</button></span>
+        </div>`).join('')}</div>
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add another section</strong><span>Build out the page with a new block</span></button>
         <div class="canvas-panel-links"><a href="#/customize">Site typography & colors</a><a href="#/layout">Reorder or hide sections</a></div>`
       : panelMode === 'site' ? `<h3>Site identity</h3><p class="canvas-panel-hint">Change your wordmark without editing code.</p>
@@ -270,6 +274,7 @@ function paintPanel() {
     return;
   }
   panel.innerHTML = `<div class="canvas-panel-head"><strong>${item.type === 'text' ? 'EDIT TEXT' : 'EDIT ARTWORK'}</strong><button type="button" data-canvas="deselect" aria-label="Back to tools">← Back</button></div>
+    ${item.type === 'image' ? `<p class="canvas-panel-hint">Drag the picture on the page to move it. Adjust its size or placement here.</p><button type="button" data-canvas="replace-art">Replace picture</button>` : ''}
     ${item.type === 'text' ? `<label>Text<textarea data-prop="text" rows="2">${esc(item.text)}</textarea></label>
       <label>Font<select data-prop="font">
       ${["'Bodoni Moda', serif", "'Cormorant Garamond', serif", "'EB Garamond', serif", "'Playfair Display', serif", "'Pinyon Script', cursive", "'Imperial Script', cursive", "'Jost', sans-serif"].map((f) => `<option value="${f}" ${f === item.font ? 'selected' : ''}>${f.split("'")[1]}</option>`).join('')}
@@ -279,6 +284,8 @@ function paintPanel() {
     ${item.type === 'image' ? `<label class="canvas-check"><input data-prop="fullWidth" type="checkbox" ${item.fullWidth ? 'checked' : ''}> Stretch artwork across the full section (great for curtains and cloud borders)</label>` : ''}
     <div class="canvas-panel-row">${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}<label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label></div>
     <label>Opacity<input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity}"></label>
+    ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" value="${item.x}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" value="${item.y}"></label></div>
+      <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
   panel.querySelectorAll('[data-prop]').forEach((input) => {
     input.addEventListener('change', () => {
@@ -290,7 +297,7 @@ function paintPanel() {
   });
 }
 
-function picker() {
+function picker(onChoose = (id) => add('image', id)) {
   const list = assets.list();
   const modal = document.createElement('div');
   modal.className = 'canvas-picker';
@@ -307,7 +314,7 @@ function picker() {
     try {
       const saved = await assets.add(file, { kind: 'cutout', name: file.name });
       modal.remove();
-      add('image', saved.id);
+      onChoose(saved.id);
       toast('Artwork saved to your picture library and placed on this page.', 'good');
     } catch (err) { toast(err.message || 'Could not add that artwork.', 'bad'); }
   };
@@ -317,7 +324,7 @@ function picker() {
     const img = document.createElement('img');
     img.src = asset.dataUrl; img.alt = asset.alt || asset.name || 'Artwork';
     b.appendChild(img);
-    b.onclick = () => { modal.remove(); add('image', asset.id); };
+    b.onclick = () => { modal.remove(); onChoose(asset.id); };
     grid.appendChild(b);
   }
   modal.querySelector('[data-close]').onclick = () => modal.remove();
@@ -372,6 +379,13 @@ function ensureTools() {
     if (action === 'text') add('text');
     if (action === 'image') picker();
     if (action === 'section') sectionPicker();
+    if (action === 'replace-art' && selected) picker((assetId) => update(selected, { assetId }));
+    if ((action === 'art-forward' || action === 'art-backward') && selected) {
+      const items = [...data()];
+      const from = items.findIndex((x) => x.id === selected);
+      const to = from + (action === 'art-forward' ? 1 : -1);
+      if (from >= 0 && to >= 0 && to < items.length) { checkpoint(); [items[from], items[to]] = [items[to], items[from]]; change(items); }
+    }
     if (action === 'undo') undo();
     if (action === 'redo') redo();
     if (action === 'tab-sections') { panelMode = 'sections'; selected = null; render(); }
@@ -396,7 +410,34 @@ function ensureTools() {
       inspectSection(sectionId);
       section(sectionId)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
+    const moveId = e.target.closest('[data-move-section]')?.dataset.moveSection;
+    if (editing && moveId) {
+      const delta = Number(e.target.closest('[data-move-section]').dataset.moveDelta);
+      layout.moveSection(activePage, moveId, delta).then(() => { refreshPage(); toast('Section order updated.', 'good'); });
+    }
   });
+  let draggedSection = null;
+  document.addEventListener('dragstart', (e) => {
+    if (!editing) return;
+    const row = e.target.closest('[data-section-row]');
+    if (!row) return;
+    draggedSection = row.dataset.sectionRow;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', draggedSection);
+  });
+  document.addEventListener('dragover', (e) => {
+    if (editing && draggedSection && e.target.closest('[data-section-row]')) e.preventDefault();
+  });
+  document.addEventListener('drop', (e) => {
+    const row = e.target.closest('[data-section-row]');
+    if (!editing || !row || !draggedSection) return;
+    e.preventDefault();
+    const destination = layout.get(activePage).findIndex((s) => s.id === row.dataset.sectionRow);
+    const id = draggedSection;
+    draggedSection = null;
+    layout.reorderSection(activePage, id, destination).then(() => refreshPage());
+  });
+  document.addEventListener('dragend', () => { draggedSection = null; });
   document.getElementById('app')?.addEventListener('click', (e) => {
     if (!editing || e.target.closest('[data-edit],.canvas-item,a,button,input,select,textarea,[contenteditable]')) return;
     const sec = e.target.closest('[data-sec]');
