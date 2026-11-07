@@ -4,6 +4,7 @@ import { getBook, state } from './state.js';
 import { esc, attr, coverImg } from './ui.js';
 import { formatDate } from './periods.js';
 import { src as artworkSrc } from './assets.js';
+import { bookDecorMarkup, mountBookDecor } from './book-decor.js';
 
 const STATUS = { want: 'Want to read', reading: 'Currently reading', read: 'Read', dnf: 'Did not finish' };
 const paragraph = (value) => esc(String(value || '')).replace(/\n/g, '<br>');
@@ -27,8 +28,9 @@ export function bookDetailView({ id } = {}) {
   const hasWriting = !!(book.review || book.favoriteQuote || book.notes || book.journalArtworkId);
 
   return {
-    title: book.title, tab: 'books', editorial: true, back: true,
+    title: book.title, tab: 'books', editorial: true, back: true, live: false,
     html: `<article class="book-archive-page">
+      ${bookDecorMarkup(book)}
       <div class="book-archive-nav"><a href="#/books">← Back to the Library</a>
         <a class="book-archive-edit" href="#/book/${encodeURIComponent(book.id)}/edit">Edit book details ↗</a></div>
 
@@ -73,5 +75,6 @@ export function bookDetailView({ id } = {}) {
         </aside>
       </div>
     </article>`,
+    onMount(root) { mountBookDecor(root, book); },
   };
 }
