@@ -1629,6 +1629,19 @@ a.ed-meta:hover { color: var(--c-accent); }
 .tick-body { flex: 1; min-width: 0; }
 .tick-title { display: block; font-family: var(--f-display); font-size: var(--fs-h3); font-weight: var(--fw-heading); }
 .tick-note { display: block; font-size: var(--fs-small); font-style: italic; color: var(--c-ink-faint); overflow-wrap: anywhere; }
+.tick-go { align-self: center; color: var(--c-accent); font: 1rem var(--f-ui); padding: 0 .3rem; transition: transform .18s ease; }
+.tick:hover .tick-go, .tick:focus-visible .tick-go { transform: translate(2px, -2px); }
+.period-action { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem; margin-top: 1.25rem; }
+.period-action p { margin: 0; max-width: 30rem; color: var(--c-ink-soft); font: italic .98rem/1.4 var(--f-body); }
+.period-action a { display: inline-flex; align-items: center; justify-content: space-between; gap: 1.5rem; min-height: 44px; padding: .7rem 1rem; border: 1px solid var(--c-accent); color: var(--c-accent); text-decoration: none; font: 600 .7rem var(--f-ui); letter-spacing: .09em; text-transform: uppercase; }
+.period-action a:hover, .period-action a:focus-visible { background: var(--c-accent); color: var(--c-accent-ink); }
+@media (max-width: 520px) {
+  .tick { min-height: 66px; align-items: center; gap: .75rem; }
+  .tick-mark { width: 25px; height: 25px; margin-top: 0; }
+  .tick-title { font-size: clamp(1.15rem, 5vw, 1.4rem); }
+  .tick-note { margin-top: .2rem; }
+  .period-action a { width: 100%; }
+}
 
 /* --------------------------------------------------------- spreads ------ */
 

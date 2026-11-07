@@ -811,12 +811,16 @@ export const SECTION_TYPES = {
           <span class="tick-body">
             <span class="tick-title">${esc(spec.label)} — ${esc(p.label.replace(/^Q\d · /, ''))}</span>
             <span class="tick-note">${esc(note)}</span>
-          </span></a>`);
+          </span><span class="tick-go" aria-hidden="true">↗</span></a>`);
       }
       if (!rows.length) return '';
       return sectionShell(sec, `
         <div class="ed-head">${kicker(sec.kicker)}${headline(sec.title)}</div>
-        <div class="ticks">${rows.join('')}</div>`);
+        <div class="ticks">${rows.join('')}</div>
+        <div class="period-action">
+          <p>Finished something? Log it once and these checks update automatically.</p>
+          <a href="#/add">+ Add a book <span aria-hidden="true">↗</span></a>
+        </div>`);
     },
   },
 
