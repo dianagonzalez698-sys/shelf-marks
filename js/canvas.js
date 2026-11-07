@@ -13,7 +13,7 @@ let activePage = null;
 let editing = false;
 let selected = null;
 let selectedSectionId = null;
-let panelMode = 'add';
+let panelMode = 'sections';
 let history = [];
 let future = [];
 let saveQueue = Promise.resolve();
@@ -54,6 +54,7 @@ function redo() { if (!future.length) return; history.push(clone(data())); chang
 
 function section(id) { return [...document.querySelectorAll('#app [data-sec]')].find((el) => el.dataset.sec === id); }
 function targetSection() {
+  if (selectedSectionId && section(selectedSectionId)) return section(selectedSectionId);
   const list = [...document.querySelectorAll('#app [data-sec]')];
   if (!list.length) return null;
   const center = window.scrollY + window.innerHeight / 2;
@@ -179,7 +180,7 @@ function render({ preservePanel = false } = {}) {
   if (!preservePanel) paintPanel();
 }
 
-function select(id) { selected = id; panelMode = id ? 'selected' : 'add'; render(); }
+function select(id) { selected = id; panelMode = id ? 'selected' : 'sections'; render(); }
 export function inspectSection(id) {
   if (!editing || !id || !layout.getSection(activePage, id)) return;
   selectedSectionId = id;
@@ -194,11 +195,11 @@ function paintPanel() {
   panel.hidden = false;
   if (panelMode === 'section' && selectedSectionId) {
     const sec = layout.getSection(activePage, selectedSectionId);
-    if (!sec) { panelMode = 'add'; selectedSectionId = null; render(); return; }
+    if (!sec) { panelMode = 'sections'; selectedSectionId = null; render(); return; }
     const sections = layout.get(activePage).filter((s) => s.visible !== false);
     const order = sections.findIndex((s) => s.id === selectedSectionId) + 1;
     const label = SECTION_TYPES[sec.type]?.label || 'Section';
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>SECTION ${order} OF ${sections.length}</strong><button type="button" data-canvas="section-back">← Back</button></div>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>SECTION ${order} OF ${sections.length}</strong><button type="button" data-canvas="section-back">← All sections</button></div>
       <p class="canvas-section-label">Editing: <strong>${esc(label)}</strong></p>
       <p class="canvas-panel-hint">The highlighted area on the page is the section you're changing. Text can also be edited directly on the page.</p>
       <div class="canvas-section-inspector"></div>`;
@@ -206,21 +207,24 @@ function paintPanel() {
     return;
   }
   const tabs = `<div class="canvas-panel-tabs">
+      <button type="button" data-canvas="tab-sections" class="${panelMode === 'sections' ? 'active' : ''}">Sections</button>
       <button type="button" data-canvas="tab-add" class="${panelMode === 'add' ? 'active' : ''}">Add</button>
       <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
-      <button type="button" data-canvas="tab-site" class="${panelMode === 'site' ? 'active' : ''}">Site</button>
     </div>`;
   if (panelMode !== 'selected' || !item) {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>DESIGN STUDIO</strong><span class="canvas-live-dot">● Editing</span></div>${tabs}` +
-      (panelMode === 'site' ? `<h3>Site identity</h3><p class="canvas-panel-hint">Change your wordmark without editing code.</p>
+      (panelMode === 'sections' ? `<h3>Your page</h3><p class="canvas-panel-hint">Select any section below—or click an open area of it on the page—to edit it here.</p>
+        <div class="canvas-section-list">${layout.get(activePage).filter((s) => s.visible !== false).map((s, i) => `<button type="button" data-canvas-section="${esc(s.id)}"><span class="canvas-section-number">${String(i + 1).padStart(2, '0')}</span><span><strong>${esc(SECTION_TYPES[s.type]?.label || 'Section')}</strong><small>${esc(String(s.title || s.heading || s.text || SECTION_TYPES[s.type]?.blurb || '').replace(/<[^>]*>/g,'').slice(0,55))}</small></span><span aria-hidden="true">›</span></button>`).join('')}</div>
+        <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add another section</strong><span>Build out the page with a new block</span></button>
+        <div class="canvas-panel-links"><a href="#/customize">Site typography & colors</a><a href="#/layout">Reorder or hide sections</a></div>`
+      : panelMode === 'site' ? `<h3>Site identity</h3><p class="canvas-panel-hint">Change your wordmark without editing code.</p>
         <label>Website name<input id="canvas-site-name" value="${esc(theme.getContent().siteName || theme.CONTENT_DEFAULTS.siteName)}"></label>
-        <button type="button" data-canvas="save-site">Save website name</button>
-        <div class="canvas-panel-links"><a href="#/customize">Colors & typography</a><a href="#/layout">Page layout</a></div>`
+        <button type="button" data-canvas="save-site">Save website name</button>`
       : panelMode === 'layers' ? `<h3>Elements on this page</h3><p class="canvas-panel-hint">Select a layer to style or move it.</p>
         <div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p>No freeform elements yet.</p>'}</div>`
       : `<h3>Make this page yours</h3><p class="canvas-panel-hint">Add something, then drag it anywhere within its section. Click any heading on the page to edit the words directly.</p>
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
-        <p class="canvas-panel-hint">To edit an existing section, select its Settings button on the page. The section stays visible and highlighted.</p>
+        <p class="canvas-panel-hint">To edit something already on the page, choose Sections or Layers above.</p>
         <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>Headings, notes, labels & quotes</span></button>
         <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Choose a saved picture, or upload a curtain, clouds or a transparent PNG directly</span></button>
         <div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Add or arrange sections</a><a href="#/customize">Global colors & fonts</a></div>
@@ -332,6 +336,7 @@ function ensureTools() {
     if (action === 'section') sectionPicker();
     if (action === 'undo') undo();
     if (action === 'redo') redo();
+    if (action === 'tab-sections') { panelMode = 'sections'; selected = null; render(); }
     if (action === 'tab-add') { panelMode = 'add'; selected = null; render(); }
     if (action === 'tab-layers') { panelMode = 'layers'; selected = null; render(); }
     if (action === 'tab-site') { panelMode = 'site'; selected = null; render(); }
@@ -342,11 +347,21 @@ function ensureTools() {
     if (action === 'finish') document.getElementById('edit-page')?.click();
     if (action === 'remove' && selected) { checkpoint(); change(data().filter((i) => i.id !== selected)); selected = null; render(); }
     if (action === 'deselect') select(null);
-    if (action === 'section-back') { selectedSectionId = null; panelMode = 'add'; render(); }
+    if (action === 'section-back') { selectedSectionId = null; panelMode = 'sections'; render(); }
   });
   document.addEventListener('click', (e) => {
     const id = e.target.closest('[data-canvas-select]')?.dataset.canvasSelect;
     if (editing && id) select(id);
+    const sectionId = e.target.closest('[data-canvas-section]')?.dataset.canvasSection;
+    if (editing && sectionId) {
+      inspectSection(sectionId);
+      section(sectionId)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  });
+  document.getElementById('app')?.addEventListener('click', (e) => {
+    if (!editing || e.target.closest('[data-edit],.canvas-item,a,button,input,select,textarea,[contenteditable]')) return;
+    const sec = e.target.closest('[data-sec]');
+    if (sec) inspectSection(sec.dataset.sec);
   });
   document.addEventListener('keydown', (e) => {
     if (!editing || !(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return;
@@ -358,7 +373,7 @@ function ensureTools() {
 export function setPage(pageId) { activePage = pageId; selected = null; selectedSectionId = null; history = []; future = []; render(); }
 export function setEditing(next) {
   editing = next;
-  if (next) { panelMode = 'add'; selectedSectionId = null; }
+  if (next) { panelMode = 'sections'; selectedSectionId = null; }
   ensureTools();
   document.body.classList.toggle('canvas-editing', next);
   if (!next) selected = null;
