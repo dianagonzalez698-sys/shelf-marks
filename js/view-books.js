@@ -50,12 +50,15 @@ export function booksView(params = {}) {
       ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b,i)=>`<article class="lit-shelf-book">
         <div class="lit-shelf-folio"><span>№ ${String(i + 1).padStart(2,'0')}</span><span>${esc(statusOf(b) === 'read' ? 'FINISHED' : statusOf(b) === 'reading' ? 'IN PROGRESS' : statusOf(b) === 'dnf' ? 'SET ASIDE' : 'TO BE READ')}</span></div>
         <a href="#/book/${encodeURIComponent(b.id)}" class="lit-shelf-cover">${assets.src(b.customCoverAssetId) || b.coverUrl ? `<img src="${attr(assets.src(b.customCoverAssetId) || b.coverUrl)}" alt="Cover of ${attr(b.title)}" loading="lazy">` : `<span>${esc(b.title.slice(0,1))}</span>`}</a>
-        <div class="lit-shelf-info"><a href="#/book/${encodeURIComponent(b.id)}"><h2>${esc(b.title)}</h2></a><p>${esc(b.author || 'Author unknown')}</p>
-          <label class="visually-hidden" for="shelf-status-${attr(b.id)}">Reading status for ${esc(b.title)}</label>
-          <select id="shelf-status-${attr(b.id)}" class="lit-shelf-status" data-book-status="${attr(b.id)}">${STATUS.filter(([s])=>s !== 'all').map(([s,label])=>`<option value="${s}" ${statusOf(b) === s ? 'selected' : ''}>${label}</option>`).join('')}</select>
-          ${customShelves.length ? `<details class="lit-book-shelves"><summary>Personal shelves ${(b.shelves || []).filter(id=>customShelves.some(s=>s.id===id)).length ? `· ${(b.shelves || []).filter(id=>customShelves.some(s=>s.id===id)).length}` : ''}</summary>
-            ${customShelves.map((s)=>`<label><input type="checkbox" data-book-shelf="${attr(b.id)}" value="${attr(s.id)}" ${(b.shelves || []).includes(s.id) ? 'checked' : ''}>${esc(s.name)}</label>`).join('')}
-          </details>` : ''}
+        <div class="lit-shelf-info">
+          <div class="lit-shelf-bibliography"><a href="#/book/${encodeURIComponent(b.id)}"><h2>${esc(b.title)}</h2></a><p>${esc(b.author || 'Author unknown')}</p></div>
+          <div class="lit-shelf-controls">
+            <label class="visually-hidden" for="shelf-status-${attr(b.id)}">Reading status for ${esc(b.title)}</label>
+            <select id="shelf-status-${attr(b.id)}" class="lit-shelf-status" data-book-status="${attr(b.id)}">${STATUS.filter(([s])=>s !== 'all').map(([s,label])=>`<option value="${s}" ${statusOf(b) === s ? 'selected' : ''}>${label}</option>`).join('')}</select>
+            ${customShelves.length ? `<details class="lit-book-shelves"><summary>Personal shelves ${(b.shelves || []).filter(id=>customShelves.some(s=>s.id===id)).length ? `· ${(b.shelves || []).filter(id=>customShelves.some(s=>s.id===id)).length}` : ''}</summary>
+              ${customShelves.map((s)=>`<label><input type="checkbox" data-book-shelf="${attr(b.id)}" value="${attr(s.id)}" ${(b.shelves || []).includes(s.id) ? 'checked' : ''}>${esc(s.name)}</label>`).join('')}
+            </details>` : ''}
+          </div>
         </div></article>`).join('')}</div>` : `<div class="lit-empty-shelf"><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>${search ? 'No books matched that search.' : 'A lovely shelf waiting to be filled.'}</p><a href="#/add">ADD A BOOK ↗</a></div>`}
     </div>`,
     onMount(root) {
