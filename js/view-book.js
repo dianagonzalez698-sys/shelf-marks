@@ -59,7 +59,7 @@ export function addView({ query = {} } = {}) {
       </div>
       <div class="book-search-filters" aria-label="Search filters">
         <label>Search by <select id="ol-by"><option value="all">Title or author</option><option value="title">Title only</option><option value="author">Author only</option><option value="isbn">ISBN</option></select></label>
-        <label>Language <select id="ol-language"><option value="en">English preferred</option><option value="all">All languages</option></select></label>
+        <label>Language <select id="ol-language"><option value="en">English first</option><option value="all">Any language</option></select></label>
       </div>
       <div id="ol-status" class="muted small" aria-live="polite"></div>
       <div id="ol-results"></div>
@@ -84,17 +84,17 @@ export function addView({ query = {} } = {}) {
       function show(docs) {
         if (!docs.length) {
           results.innerHTML = '';
-          status.textContent = 'No matches. Try All languages, search by title, or add it manually below.';
+          status.textContent = 'No matches. Try a shorter title, the author’s name, or manual entry below.';
           return;
         }
-        status.textContent = `${docs.length} possible matches · best title matches first`;
+        status.textContent = `Showing ${Math.min(docs.length, 15)} of ${docs.length} possible matches · closest matches first`;
         results.innerHTML = docs.slice(0, 15).map((d, i) => `
           <button class="result" type="button" data-i="${i}">
             ${coverImg(d, { lazy: false })}
             <span class="grow">
               <span class="result-title">${esc(d.title || 'Untitled')}</span>
               <span class="result-meta">${esc(d.author || 'Unknown author')}</span>
-              <span class="result-meta">${d.firstPublishYear ? esc(d.firstPublishYear) : 'Year unknown'}${d.pages ? ` · ${d.pages} pages` : ''}</span>
+              <span class="result-meta">${d.firstPublishYear ? esc(d.firstPublishYear) : 'Year unknown'}${d.pages ? ` · ${d.pages} pages` : ''}${d.languages?.length ? ` · ${d.languages.includes('eng') ? 'English available' : d.languages.includes('jpn') ? 'Japanese' : d.languages.includes('spa') ? 'Spanish' : d.languages.includes('fre') ? 'French' : 'Other language'}` : ''}${d.editionCount > 1 ? ` · ${d.editionCount} editions` : ''}</span>
             </span>
           </button>
         `).join('');
@@ -126,10 +126,12 @@ export function addView({ query = {} } = {}) {
       }, 350);
 
       input.addEventListener('input', () => {
+        // Stop the previous query as soon as the user changes their mind,
+        // rather than letting an old result flash during debounce.
+        if (controller) controller.abort();
         const q = input.value.trim();
         if (q.length < 2) {
           run.cancel();
-          if (controller) controller.abort();
           status.textContent = '';
           results.innerHTML = '';
           return;
@@ -139,6 +141,7 @@ export function addView({ query = {} } = {}) {
       input.addEventListener('search', () => { if (input.value.trim().length >= 2) run(input.value.trim()); });
       root.querySelectorAll('#ol-by, #ol-language').forEach(filter => {
         filter.onchange = () => {
+          if (controller) controller.abort();
           if (input.value.trim().length >= 2) run(input.value.trim());
         };
       });
