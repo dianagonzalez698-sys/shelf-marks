@@ -3143,6 +3143,8 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-layer-list .canvas-layer-row .canvas-layer-name { display: flex; flex: 1; align-items: center; gap: 9px; min-width: 0; border: 0; background: transparent; padding: 9px 5px 9px 10px; font: .77rem/1.35 var(--f-ui); }
 .canvas-layer-name span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .canvas-layer-name span:first-child { color: var(--c-accent); flex: none; }
+.canvas-item.is-locked { cursor: default; }
+.canvas-item.is-locked .canvas-resize { display: none; }
 .canvas-layer-order { display: inline-flex; padding-right: 4px; gap: 2px; }
 .canvas-layer-list .canvas-layer-order button { padding: 5px 7px; min-width: 27px; text-align: center; border: 1px solid var(--c-rule); background: transparent; color: var(--c-ink-soft); border-radius: 2px; }
 .canvas-layer-list .canvas-layer-order button:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-accent); }

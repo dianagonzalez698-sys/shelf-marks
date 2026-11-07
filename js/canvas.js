@@ -127,7 +127,7 @@ function add(type, assetId = null) {
 
 function elFor(item) {
   const node = document.createElement('div');
-  node.className = `canvas-item canvas-${item.type}${item.type === 'image' ? frameClass(item.frame) : ''}`;
+  node.className = `canvas-item canvas-${item.type}${item.type === 'image' ? frameClass(item.frame) : ''}${item.locked ? ' is-locked' : ''}`;
   node.dataset.canvasId = item.id;
   node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${clamp(item.y, 0, 100)}%;width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
   node.classList.toggle('is-full-width', !!item.fullWidth);
@@ -154,11 +154,11 @@ function elFor(item) {
   node.classList.toggle('is-selected', editing && selected === item.id);
   if (editing) {
     node.tabIndex = 0;
-    node.setAttribute('aria-label', `${item.type === 'text' ? 'Text' : 'Artwork'}: select and drag to move`);
+    node.setAttribute('aria-label', `${item.type === 'text' ? 'Text' : 'Artwork'}: ${item.locked ? 'locked in place; select to unlock' : 'select and drag to move'}`);
     node.addEventListener('pointerdown', (e) => startPointer(e, node, item));
     node.addEventListener('click', (e) => { e.stopPropagation(); select(item.id); });
     node.addEventListener('keydown', (e) => {
-      if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) return;
+      if (item.locked || !['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) return;
       e.preventDefault();
       const dx = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0;
       const dy = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
@@ -172,6 +172,7 @@ function elFor(item) {
 
 function startPointer(e, node, item) {
   if (e.button !== 0) return;
+  if (item.locked) { selected = item.id; panelMode = 'selected'; render(); return; }
   e.preventDefault(); e.stopPropagation();
   selected = item.id;
   panelMode = 'selected';
@@ -276,7 +277,7 @@ function paintPanel() {
     return `<span class="canvas-kind-badge kind-${group}" title="${names[group]}" aria-label="${names[group]}">${marks[group]}</span>`;
   };
   const layerRows = (items) => [...items].reverse().map((x, index, ordered) => `<div class="canvas-layer-row${selected === x.id ? ' is-active' : ''}">
-    <button class="canvas-layer-name" type="button" data-canvas-select="${esc(x.id)}" aria-label="Edit ${esc(x.label || (x.type === 'text' ? 'text' : 'artwork'))}"><span>${x.type === 'text' ? 'T' : '▧'}</span><span>${esc(x.label || (x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork'))}</span></button>
+    <button class="canvas-layer-name" type="button" data-canvas-select="${esc(x.id)}" aria-label="Edit ${esc(x.label || (x.type === 'text' ? 'text' : 'artwork'))}"><span>${x.locked ? '🔒' : x.type === 'text' ? 'T' : '▧'}</span><span>${esc(x.label || (x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork'))}</span></button>
     <span class="canvas-layer-order"><button type="button" data-layer-move="1" data-layer-id="${esc(x.id)}" aria-label="Bring this layer forward" title="Bring forward" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-layer-move="-1" data-layer-id="${esc(x.id)}" aria-label="Send this layer backward" title="Send backward" ${index === ordered.length - 1 ? 'disabled' : ''}>↓</button></span>
   </div>`).join('');
   panel.hidden = false;
@@ -386,15 +387,16 @@ function paintPanel() {
       <label>Font<select data-prop="font">
       ${["'Bodoni Moda', serif", "'Cormorant Garamond', serif", "'EB Garamond', serif", "'Playfair Display', serif", "'Pinyon Script', cursive", "'Imperial Script', cursive", "'Jost', sans-serif"].map((f) => `<option value="${f}" ${f === item.font ? 'selected' : ''}>${f.split("'")[1]}</option>`).join('')}
       </select></label>
-      <div class="canvas-panel-row"><label>Size<input data-prop="size" type="number" min="10" max="150" value="${item.size}"></label><label>Color<input data-prop="color" type="color" value="${item.color}"></label></div>
+      <div class="canvas-panel-row"><label>Size<input data-prop="size" type="number" min="10" max="150" value="${item.size}" ${item.locked ? 'disabled' : ''}></label><label>Color<input data-prop="color" type="color" value="${item.color}"></label></div>
       <div class="canvas-panel-row"><label>Bold<input data-prop="weight" type="checkbox" ${item.weight >= 700 ? 'checked' : ''}></label><label>Italic<input data-prop="italic" type="checkbox" ${item.italic ? 'checked' : ''}></label></div>` : ''}
-    ${item.type === 'image' ? `<label class="canvas-check"><input data-prop="fullWidth" type="checkbox" ${item.fullWidth ? 'checked' : ''}> Stretch across the page</label>` : ''}
-    ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}
+    ${item.type === 'image' ? `<label class="canvas-check"><input data-prop="fullWidth" type="checkbox" ${item.fullWidth ? 'checked' : ''} ${item.locked ? 'disabled' : ''}> Stretch across the page</label>` : ''}
+    ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}" ${item.locked ? 'disabled' : ''}></label>`}
     <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
       <label>Layer name <input data-prop="label" type="text" maxlength="60" placeholder="e.g. Left gilded oval" value="${esc(item.label || '')}"></label>
-      <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label>
+      <label class="canvas-check"><input data-prop="locked" type="checkbox" ${item.locked ? 'checked' : ''}> Lock position & size</label>
+      <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}" ${item.locked ? 'disabled' : ''}></label>
       <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}" style="--opacity-fill:${Math.round((item.opacity ?? 1) * 100)}%"></label>
-      ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}"></label></div>
+      ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label></div>
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
     </details>
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
