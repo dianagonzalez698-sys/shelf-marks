@@ -431,6 +431,11 @@ export function render() {
     }
 
     const previousPath = current ? current.path : null;
+    // Design Mode edits one page at a time. Leaving that route must close the
+    // studio even when the destination doesn't expose an edit button.
+    if (previousPath !== null && path !== previousPath && document.body.classList.contains('is-editing')) {
+      stopEditing();
+    }
     const view = match.route.handler({ ...match.params, query }) || {};
     current = { path, view, params: match.params, query };
 

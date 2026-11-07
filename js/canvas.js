@@ -263,7 +263,7 @@ function paintPanel() {
       <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
     </div>`;
   if (panelMode !== 'selected' || !item) {
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>DESIGN STUDIO</strong><span class="canvas-live-dot">● Editing</span></div>${tabs}` +
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>DESIGN STUDIO</strong><button type="button" data-canvas="finish" aria-label="Exit design mode">× Exit</button></div>${tabs}` +
       (panelMode === 'sections' ? `<h3>Your page</h3><p class="canvas-panel-hint">Select any section below—or click an open area of it on the page—to edit it here.</p>
         <div class="canvas-section-list">${layout.get(activePage).filter((s) => s.visible !== false).map((s, i, arr) => `<div class="canvas-section-row" draggable="true" data-section-row="${esc(s.id)}">
           <span class="canvas-section-number" title="Drag to reorder">⠿ ${String(i + 1).padStart(2, '0')}</span>
@@ -488,6 +488,10 @@ export function setEditing(next) {
   ensureTools();
   document.body.classList.toggle('canvas-editing', next);
   if (!next) selected = null;
+  // paintPanel intentionally does nothing outside editing. Explicitly hide
+  // the old panel here or it remains floating over unrelated pages.
+  const panel = document.getElementById('canvas-panel');
+  if (panel) panel.hidden = !next;
   render();
 }
 export function refresh() { if (activePage) render({ preservePanel: panelMode === 'section' || panelMode === 'text' }); }
