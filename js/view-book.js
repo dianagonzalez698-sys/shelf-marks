@@ -183,7 +183,7 @@ export function bookFormView(params = {}) {
       <div class="section-head" style="margin-bottom:1.6rem"><div>
         <h2 class="section-title">${editing ? 'Book details' : 'New book'}</h2>
         <p class="section-sub">${editing ? 'Update the catalog information, reading status, and challenge categories here. Your personal writing has its own Reading Journal.' : 'Add a book to your shelves. You can write about it later in its Reading Journal.'}</p>
-        ${editing ? `<a class="btn" href="#/book/${encodeURIComponent(draft.id)}/journal" style="margin-top:12px">✎ Open reading journal</a>` : ''}
+        ${editing ? `<a class="btn" href="#/book/${encodeURIComponent(draft.id)}" style="margin-top:12px">✎ Back to my journal page</a>` : ''}
       </div></div>
       <form id="book-form" novalidate>
         <section class="panel">

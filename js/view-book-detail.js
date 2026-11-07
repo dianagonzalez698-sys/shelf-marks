@@ -1,7 +1,7 @@
 // A book is a small page in the reader's literary archive, distinct from the
 // form used to change it. Everything here reads existing book records.
-import { getBook, state } from './state.js';
-import { esc, attr, coverImg } from './ui.js';
+import { getBook, state, saveBook } from './state.js';
+import { esc, attr, coverImg, toast, navigate } from './ui.js';
 import { formatDate } from './periods.js';
 import { src as artworkSrc } from './assets.js';
 import { bookDecorMarkup, mountBookDecor } from './book-decor.js';
@@ -49,8 +49,8 @@ export function bookDetailView({ id } = {}) {
             ${book.series ? `<span>${esc(book.series)}</span>` : ''}
           </div>
           <div class="book-archive-next-step">
-            <p>${hasWriting ? 'Your reading journal is below.' : status === 'want' ? 'On your to-read shelf. When you begin, this is where you can track your reading and collect your thoughts.' : 'Your journal is ready for a rating, a favorite passage, or a few thoughts.'}</p>
-            <a class="book-archive-primary" href="#/book/${encodeURIComponent(book.id)}/journal">${hasWriting ? 'Write more in my journal' : 'Open my reading journal'} →</a>
+            <p>${hasWriting ? 'Your words and artwork live together on this page.' : status === 'want' ? 'On your to-read shelf. Start collecting thoughts whenever you’re ready.' : 'This is your space for thoughts, passages, and artwork.'}</p>
+            <button class="book-archive-primary" type="button" id="book-journal-toggle" aria-expanded="false">${hasWriting ? '✎ Edit my journal' : '✎ Write in my journal'}</button>
             ${hasWriting ? '<a class="book-archive-jump" href="#book-journal">Read my notes ↓</a>' : ''}
           </div>
         </div>
@@ -58,11 +58,25 @@ export function bookDetailView({ id } = {}) {
 
       <div class="book-archive-body">
         <main class="book-archive-writing" id="book-journal">
+          <form class="book-inline-journal" id="book-inline-journal" hidden>
+            <div class="book-inline-heading"><p class="lit-overline">A PAGE OF YOUR OWN</p><h2>Write in your journal</h2><p>Just the words you want to keep. Decorate the page separately whenever inspiration strikes.</p></div>
+            <label for="bj-rating">My rating <span>(optional)</span></label>
+            <select id="bj-rating"><option value="">Not rated yet</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(book.rating)===n?'selected':''}>${'★'.repeat(n)}${'☆'.repeat(5-n)}</option>`).join('')}</select>
+            <label for="bj-review">What I thought</label>
+            <textarea id="bj-review" rows="6" placeholder="Your impressions and reflections…">${esc(book.review || '')}</textarea>
+            <label for="bj-quote">A passage to keep</label>
+            <textarea id="bj-quote" rows="3" placeholder="A line worth remembering…">${esc(book.favoriteQuote || '')}</textarea>
+            <label for="bj-notes">Marginalia & little notes</label>
+            <textarea id="bj-notes" rows="4" placeholder="Anything else worth keeping…">${esc(book.notes || '')}</textarea>
+            <div class="book-inline-actions"><button class="btn btn-primary" type="submit">Save my words</button><button class="btn" type="button" id="book-journal-cancel">Cancel</button></div>
+          </form>
+          <div id="book-journal-reading">
           ${book.review ? `<section class="book-archive-review"><p class="lit-overline">MY READING JOURNAL / REVIEW</p><h2>What I thought</h2><div class="book-archive-prose">${paragraph(book.review)}</div></section>` : ''}
           ${book.favoriteQuote ? `<section class="book-archive-passage"><p class="lit-overline">A PASSAGE TO KEEP</p><blockquote>“${paragraph(book.favoriteQuote)}”</blockquote></section>` : ''}
           ${book.notes ? `<section class="book-archive-notes"><p class="lit-overline">MARGINALIA</p><h2>Notes to remember</h2><div class="book-archive-prose">${paragraph(book.notes)}</div></section>` : ''}
           ${book.journalArtworkId && artworkSrc(book.journalArtworkId) ? `<section class="book-archive-art"><p class="lit-overline">A VISUAL MEMENTO</p><figure><img src="${artworkSrc(book.journalArtworkId)}" alt="Artwork saved with this reading journal">${book.journalArtCaption ? `<figcaption>${esc(book.journalArtCaption)}</figcaption>` : ''}</figure></section>` : ''}
-          ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready.</p><a href="#/book/${encodeURIComponent(book.id)}/journal">Write about this book ↗</a></section>` : ''}
+          ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready.</p><button class="btn" type="button" id="book-journal-empty-edit">Write a first note ✎</button></section>` : ''}
+          </div>
         </main>
         <aside class="book-archive-aside">
           <section><p class="lit-overline">READING CHALLENGES</p><h3>How it counts</h3>
@@ -75,6 +89,40 @@ export function bookDetailView({ id } = {}) {
         </aside>
       </div>
     </article>`,
-    onMount(root) { mountBookDecor(root, book); },
+    onMount(root) {
+      mountBookDecor(root, book);
+      const form = root.querySelector('#book-inline-journal');
+      const reading = root.querySelector('#book-journal-reading');
+      const toggle = root.querySelector('#book-journal-toggle');
+      const edit = () => {
+        form.hidden = false;
+        reading.hidden = true;
+        toggle.setAttribute('aria-expanded', 'true');
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+      const cancel = () => {
+        form.hidden = true;
+        reading.hidden = false;
+        toggle.setAttribute('aria-expanded', 'false');
+      };
+      toggle.onclick = () => form.hidden ? edit() : cancel();
+      const empty = root.querySelector('#book-journal-empty-edit');
+      if (empty) empty.onclick = edit;
+      root.querySelector('#book-journal-cancel').onclick = cancel;
+      form.onsubmit = async event => {
+        event.preventDefault();
+        const rating = root.querySelector('#bj-rating').value;
+        try {
+          await saveBook({ ...book,
+            rating: rating ? Number(rating) : null,
+            review: root.querySelector('#bj-review').value.trim(),
+            favoriteQuote: root.querySelector('#bj-quote').value.trim(),
+            notes: root.querySelector('#bj-notes').value.trim(),
+          });
+          toast('Journal saved.', 'good');
+          navigate(`/book/${encodeURIComponent(book.id)}`);
+        } catch (_) { toast('Could not save your journal.', 'bad'); }
+      };
+    },
   };
 }
