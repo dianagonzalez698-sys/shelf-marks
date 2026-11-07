@@ -3543,6 +3543,9 @@ html:not([data-theme="dark"]) .lit-hero {
 .book-inline-preview h3 { margin: 0 0 8px; font: 1.55rem var(--f-display); color: var(--c-ink); }
 .book-inline-preview p:not(.lit-overline), .book-inline-preview blockquote { margin: 0; color: var(--c-ink-soft); font: 1.05rem/1.65 var(--f-body); white-space: pre-wrap; overflow-wrap: anywhere; }
 .book-inline-preview blockquote { padding-left: 16px; border-left: 2px solid var(--c-rule-strong); font-style: italic; }
+.book-entry-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; }
+.book-entry-heading button, .book-inline-start { flex: none; border: 0; border-bottom: 1px solid var(--c-rule-strong); padding: 3px 0; background: transparent; color: var(--c-ink-soft); font: 500 .75rem var(--f-ui); letter-spacing: .04em; cursor: pointer; }
+.book-entry-heading button:hover, .book-entry-heading button:focus-visible, .book-inline-start:hover, .book-inline-start:focus-visible { color: var(--c-accent); border-bottom-color: var(--c-accent); }
 .book-archive-primary { border: 0; cursor: pointer; }
 .book-archive-writing .lit-overline, .book-archive-aside .lit-overline { color: var(--c-accent); font-size: .7rem; }
 .book-archive-writing h2 { font: 400 clamp(2.6rem,4vw,4.5rem)/1.1 var(--f-display); margin: 17px 0 25px; }

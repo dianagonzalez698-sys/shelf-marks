@@ -86,11 +86,11 @@ export function bookDetailView({ id } = {}) {
             <p class="book-draft-state" id="book-draft-state" aria-live="polite">Your draft stays in this tab until you save.</p>
           </form>
           <div id="book-journal-reading">
-          ${book.review ? `<section class="book-archive-review"><p class="lit-overline">MY READING JOURNAL / REVIEW</p><h2>What I thought</h2><div class="book-archive-prose">${paragraph(book.review)}</div></section>` : ''}
-          ${book.favoriteQuote ? `<section class="book-archive-passage"><p class="lit-overline">A PASSAGE TO KEEP</p><blockquote>“${paragraph(book.favoriteQuote)}”</blockquote></section>` : ''}
-          ${book.notes ? `<section class="book-archive-notes"><p class="lit-overline">MARGINALIA</p><h2>Notes to remember</h2><div class="book-archive-prose">${paragraph(book.notes)}</div></section>` : ''}
+          ${book.review ? `<section class="book-archive-review"><p class="lit-overline">MY READING JOURNAL / REVIEW</p><div class="book-entry-heading"><h2>What I thought</h2><button type="button" data-edit-journal="review" aria-label="Edit review">Edit ↗</button></div><div class="book-archive-prose">${paragraph(book.review)}</div></section>` : ''}
+          ${book.favoriteQuote ? `<section class="book-archive-passage"><div class="book-entry-heading"><p class="lit-overline">A PASSAGE TO KEEP</p><button type="button" data-edit-journal="quote" aria-label="Edit favorite passage">Edit ↗</button></div><blockquote>“${paragraph(book.favoriteQuote)}”</blockquote></section>` : ''}
+          ${book.notes ? `<section class="book-archive-notes"><p class="lit-overline">MARGINALIA</p><div class="book-entry-heading"><h2>Notes to remember</h2><button type="button" data-edit-journal="notes" aria-label="Edit marginalia">Edit ↗</button></div><div class="book-archive-prose">${paragraph(book.notes)}</div></section>` : ''}
           ${book.journalArtworkId && artworkSrc(book.journalArtworkId) ? `<section class="book-archive-art"><p class="lit-overline">A VISUAL MEMENTO</p><figure><img src="${artworkSrc(book.journalArtworkId)}" alt="Artwork saved with this reading journal">${book.journalArtCaption ? `<figcaption>${esc(book.journalArtCaption)}</figcaption>` : ''}</figure></section>` : ''}
-          ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready. Use “Write in my journal” above to begin.</p></section>` : ''}
+          ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready.</p><button class="book-inline-start" type="button" data-edit-journal="review">Begin writing ↗</button></section>` : ''}
           </div>
         </main>
         <aside class="book-archive-aside">
@@ -164,6 +164,13 @@ export function bookDetailView({ id } = {}) {
         toggle.setAttribute('aria-expanded', 'false');
       };
       toggle.onclick = () => form.hidden ? edit() : cancel();
+      root.querySelectorAll('[data-edit-journal]').forEach(button => {
+        button.onclick = () => {
+          edit();
+          const field = draftFields[button.dataset.editJournal];
+          if (field) field.focus({ preventScroll: true });
+        };
+      });
       root.querySelector('#book-journal-cancel').onclick = cancel;
       form.onsubmit = async event => {
         event.preventDefault();
