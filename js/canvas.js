@@ -490,8 +490,8 @@ function ensureTools() {
   bar.id = 'canvas-toolbar'; bar.className = 'canvas-toolbar';
   bar.innerHTML = `<span class="canvas-toolbar-title">DESIGN MODE</span>
     <span class="canvas-save-state">Editing this page · Saved locally</span>
-    <button type="button" data-canvas="undo" title="Undo">↶</button>
-    <button type="button" data-canvas="redo" title="Redo">↷</button>
+    <button type="button" data-canvas="undo" title="Undo (⌘/Ctrl+Z)" aria-label="Undo">↶</button>
+    <button type="button" data-canvas="redo" title="Redo (⌘/Ctrl+Shift+Z or Ctrl+Y)" aria-label="Redo">↷</button>
     <button type="button" data-canvas="finish">Done</button>`;
   const panel = document.createElement('aside');
   panel.id = 'canvas-panel'; panel.className = 'canvas-panel'; panel.hidden = true;
@@ -579,9 +579,20 @@ function ensureTools() {
     if (sec) inspectSection(sec.dataset.sec);
   });
   document.addEventListener('keydown', (e) => {
-    if (!editing || !(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'z') return;
-    if (e.target.closest('input,textarea,[contenteditable]')) return;
-    e.preventDefault(); e.shiftKey ? redo() : undo();
+    if (!editing || !activePage) return;
+    if (e.target.closest('input,textarea,select,[contenteditable],[role="dialog"]') || document.querySelector('.canvas-picker')) return;
+    if (e.key === 'Escape' && (selected || selectedSectionId || selectedText)) {
+      e.preventDefault();
+      selected = null; selectedSectionId = null; selectedText = null;
+      panelMode = simplePage ? 'add' : 'sections';
+      render();
+      return;
+    }
+    if (!(e.metaKey || e.ctrlKey)) return;
+    const key = e.key.toLowerCase();
+    if (key !== 'z' && !(key === 'y' && e.ctrlKey)) return;
+    e.preventDefault();
+    key === 'y' || e.shiftKey ? redo() : undo();
   });
 }
 
