@@ -1631,6 +1631,12 @@ a.ed-meta:hover { color: var(--c-accent); }
 .tick-note { display: block; font-size: var(--fs-small); font-style: italic; color: var(--c-ink-faint); overflow-wrap: anywhere; }
 .tick-go { align-self: center; color: var(--c-accent); font: 1rem var(--f-ui); padding: 0 .3rem; transition: transform .18s ease; }
 .tick:hover .tick-go, .tick:focus-visible .tick-go { transform: translate(2px, -2px); }
+.period-tick { align-items: center; }
+.period-check { appearance: none; -webkit-appearance: none; padding: 0; background: transparent; cursor: pointer; margin-top: 0; font: inherit; }
+.period-check:disabled { cursor: default; }
+.period-check:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 4px; }
+.period-detail { flex: none; align-self: center; display: inline-flex; align-items: center; gap: .35rem; padding: .6rem .15rem; color: var(--c-accent); font: 600 .65rem var(--f-ui); letter-spacing: .05em; text-decoration: none; }
+.period-detail:hover { text-decoration: underline; }
 .period-action { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem; margin-top: 1.25rem; }
 .period-action p { margin: 0; max-width: 30rem; color: var(--c-ink-soft); font: italic .98rem/1.4 var(--f-body); }
 .period-action a { display: inline-flex; align-items: center; justify-content: space-between; gap: 1.5rem; min-height: 44px; padding: .7rem 1rem; border: 1px solid var(--c-accent); color: var(--c-accent); text-decoration: none; font: 600 .7rem var(--f-ui); letter-spacing: .09em; text-transform: uppercase; }

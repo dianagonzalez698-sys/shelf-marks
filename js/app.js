@@ -1,6 +1,6 @@
 // Bootstrap: wire routes, load the database, start the router.
 
-import { load, onChange, state } from './state.js';
+import { load, onChange, saveSettings, state } from './state.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
@@ -125,6 +125,21 @@ async function boot() {
   if (editBtn) editBtn.onclick = () => toggleEditing();
 
   onChange(() => { if (isEditing()) refreshEditing(); });
+
+  // The journal's period circles are actual checkboxes, independent of the
+  // Details links. Keep manual checks separate from book-derived rewards.
+  document.getElementById('app')?.addEventListener('click', async (event) => {
+    const check = event.target.closest('[data-period-check]');
+    if (!check || check.disabled) return;
+    const key = check.dataset.periodCheck;
+    if (!key) return;
+    check.disabled = true;
+    const next = { ...(state.settings.manualPeriodChecks || {}) };
+    if (next[key]) delete next[key];
+    else next[key] = true;
+    try { await saveSettings({ manualPeriodChecks: next }); }
+    catch (_) { check.disabled = false; paintStorageBanner(); }
+  });
 
   installOrnateFrame();
 

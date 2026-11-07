@@ -803,22 +803,26 @@ export const SECTION_TYPES = {
         if (!challenge) continue;
         const p = evaluate(challenge, state.books).periods.find((x) => x.key === spec.period.key);
         if (!p) continue;
+        const checkId = `${spec.id}:${spec.period.key}`;
+        const manuallyChecked = !!state.settings.manualPeriodChecks?.[checkId];
+        const checked = p.complete || manuallyChecked;
         const note = p.complete
           ? `${p.books[0].title} · finished ${formatDate(p.books[0].dateFinished)}`
+          : manuallyChecked ? 'Checked off by you · log a book to count it toward rewards'
           : `${p.label} · nothing logged yet`;
-        rows.push(`<a class="tick${p.complete ? ' done' : ''}" href="#/challenge/${encodeURIComponent(challenge.id)}">
-          <span class="tick-mark" aria-hidden="true">${checkGlyph()}</span>
+        rows.push(`<div class="tick period-tick${checked ? ' done' : ''}">
+          <button type="button" class="period-check tick-mark" data-period-check="${attr(checkId)}" aria-label="${checked ? 'Uncheck' : 'Check off'} ${attr(spec.label)}" aria-pressed="${checked}" ${p.complete ? 'disabled title="Completed automatically from your book log"' : ''}>${checkGlyph()}</button>
           <span class="tick-body">
             <span class="tick-title">${esc(spec.label)} — ${esc(p.label.replace(/^Q\d · /, ''))}</span>
             <span class="tick-note">${esc(note)}</span>
-          </span><span class="tick-go" aria-hidden="true">↗</span></a>`);
+          </span><a class="period-detail" href="#/challenge/${encodeURIComponent(challenge.id)}" aria-label="View ${attr(spec.label)} challenge details">Details <span aria-hidden="true">↗</span></a></div>`);
       }
       if (!rows.length) return '';
       return sectionShell(sec, `
         <div class="ed-head">${kicker(sec.kicker)}${headline(sec.title)}</div>
         <div class="ticks">${rows.join('')}</div>
         <div class="period-action">
-          <p>Finished something? Log it once and these checks update automatically.</p>
+          <p>Check off your list here, or log a finished book to update challenge progress and earn bookmarks.</p>
           <a href="#/add">+ Add a book <span aria-hidden="true">↗</span></a>
         </div>`);
     },
