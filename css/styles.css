@@ -3445,6 +3445,38 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-section-inspector .ink-dot { display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: auto; height: auto; min-height: 42px; padding: 0 10px; border-radius: 3px; background: var(--c-bg-raised); box-shadow: none; font: 600 .74rem var(--f-ui); color: var(--c-ink); }
 .canvas-section-inspector .ink-dot::before { content: ''; width: 15px; height: 15px; flex: 0 0 15px; border: 1px solid var(--c-rule-strong); border-radius: 50%; background: var(--sw); }
 .canvas-section-inspector .ink-dot.is-auto::before { background: linear-gradient(135deg, transparent 45%, var(--c-ink-faint) 45%, var(--c-ink-faint) 55%, transparent 55%), var(--c-bg); }
+/* A phone gets a compact bottom editing tray, not a second full-page form.
+   Keep the section and its artwork visible above the tools. */
+@media (max-width: 850px) {
+  .canvas-editing #app { padding-bottom: 260px; }
+  .canvas-editing .canvas-panel {
+    height: min(250px, 36dvh);
+    max-height: 36dvh;
+    padding: 10px 14px;
+  }
+  .canvas-editing .canvas-panel-head { margin-bottom: 6px; }
+  .canvas-editing .canvas-panel-tabs { margin-bottom: 10px; }
+  .canvas-editing .canvas-panel-tabs button { padding: 8px 4px; }
+  .canvas-section-inspector { padding-top: 9px; }
+  .canvas-section-inspector h2 { font-size: 1.28rem; }
+  .canvas-section-inspector #sec-fields { margin-top: 8px !important; }
+  .canvas-section-inspector .type-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 30%) minmax(0, 1fr);
+    gap: 9px;
+    align-items: center;
+    margin: 0;
+    padding: 7px 0;
+  }
+  .canvas-section-inspector .type-row-label { margin: 0; font-size: .67rem; }
+  .canvas-section-inspector .type-row-ctl { gap: 5px; }
+  .canvas-section-inspector .face-btn { padding: 7px 9px; font-size: .8rem; }
+  .canvas-section-inspector .ink-dot { min-height: 35px; padding: 0 8px; font-size: .7rem; }
+  .canvas-section-inspector .ink-dot::before { width: 12px; height: 12px; flex-basis: 12px; }
+  .canvas-section-inspector .type-pop { grid-column: 1 / -1; }
+  .canvas-section-inspector .canvas-field-group { margin: 14px 0 6px; }
+  .canvas-section-inspector .canvas-panel-hint { margin-bottom: 8px; }
+}
 .canvas-editing #app [data-edit] { cursor: text; }
 .canvas-editing #app [data-edit].canvas-text-target { outline: 2px solid var(--c-accent); outline-offset: 5px; background: color-mix(in srgb,var(--c-accent) 8%,transparent); }
 .canvas-inline-text { min-height: 100px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-field); color: var(--c-ink); padding: 17px; font: 1.35rem/1.4 var(--f-body); white-space: pre-wrap; overflow-wrap: anywhere; }
