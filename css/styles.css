@@ -3722,6 +3722,7 @@ html:not([data-theme="dark"]) .lit-hero {
 .canvas-more-tools .canvas-panel-row { align-items: end; }
 .canvas-more-tools .canvas-opacity-field { display: block; width: 100%; min-width: 0; }
 .canvas-more-tools .canvas-opacity-field input[type="range"] { display: block; width: 100%; max-width: none; box-sizing: border-box; margin: 10px 0 4px; }
+.canvas-opacity-field output { float: right; font: 600 .75rem var(--f-ui); color: var(--c-accent); }
 .canvas-section-inspector .rich-input { min-height: 52px; padding: 12px; }
 .canvas-section-inspector .rich-bar { margin-bottom: 6px; }
 .canvas-section-inspector .type-row { border-bottom: 1px solid var(--c-rule); padding-bottom: 15px; margin-bottom: 12px; }
