@@ -570,7 +570,7 @@ function visibleFields(def, sec) {
 const FINE_KEYS = new Set([
   'tone', 'bgImage', 'bgScrim', 'bgInk',
   'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
-  'curtainArt', 'curtainDrop', 'curtainGap',
+  'curtainArt', 'curtainWhere', 'curtainDrop', 'curtainGap',
   'spacing', 'scrim', 'rotate', 'flip', 'ratio', 'dropcap', 'stagger',
   'showLabel', 'showNote', 'showCount', 'showWhy', 'showOutside',
   'showStats', 'showFilter', 'showBar', 'showStanding', 'showFilters',
@@ -609,7 +609,8 @@ function fieldsHtml(def, sec, mode = 'all') {
       return `${appearance.length ? '<p class="canvas-field-group">Background & decoration</p>' + appearance.map(draw).join('') : ''}
         ${typography.length ? '<p class="canvas-field-group">Typography & text color</p>' + typography.map(draw).join('') : ''}`;
     }
-    if (mode === 'artwork') return `${chosen.length ? chosen.map(draw).join('') : '<p class="canvas-panel-hint">No built-in picture slots in this section.</p>'}
+    if (mode === 'artwork') return `${sec.edge && sec.edge !== 'none' ? `<p class="canvas-panel-hint canvas-edge-help">${sec.edge === 'curtain' ? 'Full-frame curtain: choose whether it hangs from the TOP or finishes at the BOTTOM. Bottom placement mirrors the image.' : sec.edge === 'artwork' ? 'Decorative trim: choose TOP, BOTTOM or BOTH below.' : 'This preset paper-edge shape decorates the BOTTOM of this section.'}</p>` : ''}
+      ${chosen.length ? chosen.map(draw).join('') : '<p class="canvas-panel-hint">No built-in picture slots in this section.</p>'}
       <div class="canvas-artwork-cta"><p>Add freeform artwork—curtains, cloud borders, illustrations or decorative cutouts—and position it anywhere in this section.</p>
       <button type="button" data-canvas="image">＋ Place artwork here</button></div>`;
     return chosen.map(draw).join('');

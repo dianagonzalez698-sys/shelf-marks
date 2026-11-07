@@ -194,6 +194,7 @@ function sectionShell(sec, inner, extraClass = '') {
   const want = sec.edge && sec.edge !== 'none' ? sec.edge : '';
   const isArt = want === 'artwork';
   const isCurtain = want === 'curtain';
+  const curtainAtBottom = isCurtain && sec.curtainWhere === 'bottom';
   const cut = (want && !isArt && !isCurtain && hasGround) ? want : '';
 
   const styles = [];
@@ -289,7 +290,7 @@ function sectionShell(sec, inner, extraClass = '') {
 
   return `<section class="ed ed-${sec.type}${tone}${pad}`
     + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''}`
-    + `${cut ? ` has-edge edge-${cut}` : ''}${curtain ? ' has-curtain' : ''}`
+    + `${cut ? ` has-edge edge-${cut}` : ''}${curtain ? ` has-curtain${curtainAtBottom ? ' curtain-bottom' : ' curtain-top'}` : ''}`
     + `${band ? ' has-trim' : ''}${bandBottom ? ' has-trim-bottom' : ''}`
     + `${bandTop ? ' has-trim-top' : ''} ${extraClass}"`
     + ` data-sec="${attr(sec.id)}"${style}>${bg}${curtain}${band}${inner}</section>`;
@@ -337,6 +338,7 @@ const EDGE_WHERE = [
   ['top', 'Along the top'],
   ['both', 'Both edges'],
 ];
+const CURTAIN_WHERE = [['top', 'Top of this section'], ['bottom', 'Bottom of this section (flipped)']];
 
 /**
  * Older sections carried two separate edge features — a mask and an overlay
@@ -399,14 +401,15 @@ const COMMON_FIELDS = [
   { key: 'bgScrim', label: 'Darken the photograph', type: 'range', min: 0, max: 90, step: 5, when: (s) => !!(s.bgImage && s.bgImage.assetId) },
   { key: 'bgInk', label: 'Type over the photograph', type: 'select', options: [['light', 'Light'], ['dark', 'Dark']], when: (s) => !!(s.bgImage && s.bgImage.assetId) },
 
-  { key: 'edge', label: 'Edge treatment', type: 'select', options: EDGES, controls: true },
+  { key: 'edge', label: 'Decoration type', type: 'select', options: EDGES, controls: true },
   { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
-  { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
+  { key: 'edgeWhere', label: 'Artwork placement — top or bottom', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
   { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
   { key: 'edgeShift', label: 'How far it sits below the seam', type: 'range', min: -120, max: 220, step: 4, when: (s) => s.edge === 'artwork' },
   { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
+  { key: 'curtainWhere', label: 'Curtain placement', type: 'select', options: CURTAIN_WHERE, when: (s) => s.edge === 'curtain' },
   { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
-  { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainGap', label: 'Space between curtain and text', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
 
@@ -429,6 +432,7 @@ export const SECTION_BASE = {
   edgeSize: 0,
   edgeShift: 0,
   curtainArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
+  curtainWhere: 'top',
   curtainDrop: 30,
   curtainGap: 0,
   edgeV: 3,
@@ -521,12 +525,13 @@ export const SECTION_TYPES = {
       { key: 'backdrop', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
       { key: 'edge', label: 'Edge treatment', type: 'select', options: EDGES, controls: true },
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
-      { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
+      { key: 'edgeWhere', label: 'Artwork placement — top or bottom', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
       { key: 'edgeShift', label: 'How far it sits below the seam', type: 'range', min: -120, max: 220, step: 4, when: (s) => s.edge === 'artwork' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
+      { key: 'curtainWhere', label: 'Curtain placement', type: 'select', options: CURTAIN_WHERE, when: (s) => s.edge === 'curtain' },
       { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
-      { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainGap', label: 'Space between curtain and text', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
       ...TYPE_FIELDS,
@@ -1235,12 +1240,13 @@ export const SECTION_TYPES = {
       { key: 'showBlurb', label: 'Show the blurb', type: 'bool' },
       { key: 'edge', label: 'Edge treatment', type: 'select', options: EDGES, controls: true },
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
-      { key: 'edgeWhere', label: 'Where it goes', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
+      { key: 'edgeWhere', label: 'Artwork placement — top or bottom', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
       { key: 'edgeSize', label: 'Size', type: 'range', min: 16, max: 280, step: 4, when: (s) => s.edge && s.edge !== 'none' && s.edge !== 'curtain' },
       { key: 'edgeShift', label: 'How far it sits below the seam', type: 'range', min: -120, max: 220, step: 4, when: (s) => s.edge === 'artwork' },
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
+      { key: 'curtainWhere', label: 'Curtain placement', type: 'select', options: CURTAIN_WHERE, when: (s) => s.edge === 'curtain' },
       { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
-      { key: 'curtainGap', label: 'Space below the curtain', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
+      { key: 'curtainGap', label: 'Space between curtain and text', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
       ...TYPE_FIELDS,
     ],
     render(sec, ctx) {
