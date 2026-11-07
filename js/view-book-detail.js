@@ -29,7 +29,7 @@ export function bookDetailView({ id } = {}) {
     title: book.title, tab: 'books', editorial: true, back: true,
     html: `<article class="book-archive-page">
       <div class="book-archive-nav"><a href="#/books">← Back to the Library</a>
-        <a class="book-archive-edit" href="#/book/${encodeURIComponent(book.id)}/edit">Edit this book ↗</a></div>
+        <a class="book-archive-edit" href="#/book/${encodeURIComponent(book.id)}/edit">Edit book details ↗</a></div>
 
       <header class="book-archive-hero">
         <div class="book-archive-cover">${coverImg(book, { big: true })}</div>
@@ -47,7 +47,7 @@ export function bookDetailView({ id } = {}) {
           </div>
           <div class="book-archive-next-step">
             <p>${hasWriting ? 'Your reading journal is below.' : status === 'want' ? 'On your to-read shelf. When you begin, this is where you can track your reading and collect your thoughts.' : 'Your journal is ready for a rating, a favorite passage, or a few thoughts.'}</p>
-            <a class="book-archive-primary" href="#/book/${encodeURIComponent(book.id)}/edit">${hasWriting ? 'Update my journal' : 'Add notes or update this book'} →</a>
+            <a class="book-archive-primary" href="#/book/${encodeURIComponent(book.id)}/journal">${hasWriting ? 'Write more in my journal' : 'Open my reading journal'} →</a>
             ${hasWriting ? '<a class="book-archive-jump" href="#book-journal">Read my notes ↓</a>' : ''}
           </div>
         </div>
@@ -58,7 +58,7 @@ export function bookDetailView({ id } = {}) {
           ${book.review ? `<section class="book-archive-review"><p class="lit-overline">MY READING JOURNAL / REVIEW</p><h2>What I thought</h2><div class="book-archive-prose">${paragraph(book.review)}</div></section>` : ''}
           ${book.favoriteQuote ? `<section class="book-archive-passage"><p class="lit-overline">A PASSAGE TO KEEP</p><blockquote>“${paragraph(book.favoriteQuote)}”</blockquote></section>` : ''}
           ${book.notes ? `<section class="book-archive-notes"><p class="lit-overline">MARGINALIA</p><h2>Notes to remember</h2><div class="book-archive-prose">${paragraph(book.notes)}</div></section>` : ''}
-          ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready.</p><a href="#/book/${encodeURIComponent(book.id)}/edit">Write about this book ↗</a></section>` : ''}
+          ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready.</p><a href="#/book/${encodeURIComponent(book.id)}/journal">Write about this book ↗</a></section>` : ''}
         </main>
         <aside class="book-archive-aside">
           <section><p class="lit-overline">READING CHALLENGES</p><h3>How it counts</h3>
