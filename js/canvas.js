@@ -162,6 +162,7 @@ function elFor(item) {
       img.src = src;
       img.alt = assets.get(item.assetId)?.alt || 'Decorative artwork';
       img.draggable = false;
+      img.style.transform = `scale(${item.flipX ? -1 : 1}, ${item.flipY ? -1 : 1})`;
       node.appendChild(img);
     } else node.textContent = 'Missing artwork';
   } else {
@@ -418,6 +419,7 @@ function paintPanel() {
     ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}" ${item.locked ? 'disabled' : ''}></label>`}
     <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
       <label>Layer name <input data-prop="label" type="text" maxlength="60" placeholder="e.g. Left gilded oval" value="${esc(item.label || '')}"></label>
+      ${item.type === 'image' ? `<div class="canvas-panel-row canvas-flip-row"><label class="canvas-check"><input data-prop="flipX" type="checkbox" ${item.flipX ? 'checked' : ''}> Flip horizontally</label><label class="canvas-check"><input data-prop="flipY" type="checkbox" ${item.flipY ? 'checked' : ''}> Flip vertically</label></div>` : ''}
       <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}" ${item.locked ? 'disabled' : ''}></label>
       <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}" style="--opacity-fill:${Math.round((item.opacity ?? 1) * 100)}%"></label>
       ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label></div>
