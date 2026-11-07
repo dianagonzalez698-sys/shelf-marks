@@ -77,7 +77,7 @@ export function bookDetailView({ id } = {}) {
           ${book.favoriteQuote ? `<section class="book-archive-passage"><p class="lit-overline">A PASSAGE TO KEEP</p><blockquote>“${paragraph(book.favoriteQuote)}”</blockquote></section>` : ''}
           ${book.notes ? `<section class="book-archive-notes"><p class="lit-overline">MARGINALIA</p><h2>Notes to remember</h2><div class="book-archive-prose">${paragraph(book.notes)}</div></section>` : ''}
           ${book.journalArtworkId && artworkSrc(book.journalArtworkId) ? `<section class="book-archive-art"><p class="lit-overline">A VISUAL MEMENTO</p><figure><img src="${artworkSrc(book.journalArtworkId)}" alt="Artwork saved with this reading journal">${book.journalArtCaption ? `<figcaption>${esc(book.journalArtCaption)}</figcaption>` : ''}</figure></section>` : ''}
-          ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready.</p><button class="btn" type="button" id="book-journal-empty-edit">Write a first note ✎</button></section>` : ''}
+          ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready. Use “Write in my journal” above to begin.</p></section>` : ''}
           </div>
         </main>
         <aside class="book-archive-aside">
@@ -141,8 +141,6 @@ export function bookDetailView({ id } = {}) {
         toggle.setAttribute('aria-expanded', 'false');
       };
       toggle.onclick = () => form.hidden ? edit() : cancel();
-      const empty = root.querySelector('#book-journal-empty-edit');
-      if (empty) empty.onclick = edit;
       root.querySelector('#book-journal-cancel').onclick = cancel;
       form.onsubmit = async event => {
         event.preventDefault();
