@@ -241,6 +241,13 @@ function paintPanel() {
       <button type="button" class="canvas-text-done" data-canvas="text-save">Save text</button>`;
     const input = panel.querySelector('#canvas-inline-text');
     const target = { ...selectedText };
+    // The page itself is the preview. Update the rendered words during typing
+    // without re-rendering the inspector and stealing the caret.
+    input.addEventListener('input', () => {
+      const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
+      const visible = [...(block?.querySelectorAll('[data-edit]') || [])].find(el => el.dataset.edit === target.key);
+      if (visible) visible.innerHTML = rich(richValue(input.innerHTML));
+    });
     const save = async () => {
       const current = layout.getSection(activePage, target.sectionId);
       const next = richValue(input.innerHTML);
@@ -298,8 +305,14 @@ function paintPanel() {
       : panelMode === 'site' ? `<h3>Site identity</h3><p class="canvas-panel-hint">Change your wordmark without editing code.</p>
         <label>Website name<input id="canvas-site-name" value="${esc(theme.getContent().siteName || theme.CONTENT_DEFAULTS.siteName)}"></label>
         <button type="button" data-canvas="save-site">Save website name</button>`
-      : panelMode === 'layers' ? `<h3>Elements on this page</h3><p class="canvas-panel-hint">Select a layer to style or move it.</p>
-        <div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p>No freeform elements yet.</p>'}</div>`
+      : panelMode === 'layers' ? `<h3>Layers on this page</h3><p class="canvas-panel-hint">Your journal sections belong here too, including the art inside them. Select one to edit it.</p>
+        <p class="canvas-field-group">Page sections</p>
+        <div class="canvas-layer-list">${layout.get(activePage).filter(s => s.visible !== false).map((s, index) => {
+          const art = ['bgImage','picture','edgeArt','curtainArt','artwork','image'].some(key => !!s[key]);
+          return `<button type="button" data-canvas-section="${esc(s.id)}">${art ? '▧' : '§'} &nbsp; ${esc(SECTION_TYPES[s.type]?.label || 'Section')} <small>${index + 1}${art ? ' · artwork' : ''}</small></button>`;
+        }).join('')}</div>
+        <p class="canvas-field-group">Floating elements</p>
+        <div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p class="canvas-panel-hint">No floating artwork or text added yet.</p>'}</div>`
       : `<h3>Make this page yours</h3><p class="canvas-panel-hint">Add something, then drag it anywhere within its section. Click any heading on the page to edit the words directly.</p>
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
         <p class="canvas-panel-hint">To edit something already on the page, choose Sections or Layers above.</p>
@@ -324,6 +337,11 @@ function paintPanel() {
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
   panel.querySelectorAll('[data-prop]').forEach((input) => {
+    if (input.dataset.prop === 'text') input.addEventListener('input', () => {
+      const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
+      const visible = itemNode?.querySelector('.canvas-text-content');
+      if (visible) visible.textContent = input.value;
+    });
     input.addEventListener('change', () => {
       const key = input.dataset.prop;
       const value = input.type === 'checkbox' ? (key === 'weight' ? (input.checked ? 700 : 400) : input.checked)
