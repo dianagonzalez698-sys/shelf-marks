@@ -19,6 +19,8 @@ let panelMode = 'sections';
 let history = [];
 let future = [];
 let saveQueue = Promise.resolve();
+let saveRevision = 0;
+let saveState = 'saved';
 
 const idFor = (page) => `canvas:${page}`;
 const clone = (v) => JSON.parse(JSON.stringify(v));
@@ -26,6 +28,15 @@ const uid = () => `cv_${crypto.randomUUID ? crypto.randomUUID() : Date.now().toS
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
 const frameClass = frame => ['fine', 'ornate', 'gilded-round', 'gilded-oval', 'polaroid'].includes(frame) ? ` frame-${frame}` : '';
 const data = () => records.get(idFor(activePage))?.items || [];
+
+function paintSaveState() {
+  const message = document.querySelector('#canvas-toolbar .canvas-save-state');
+  if (!message) return;
+  const label = simplePage ? 'Page accents' : 'Design edits';
+  message.textContent = !activePage ? 'Design Mode stays on as you browse'
+    : `${label} · ${saveState === 'saving' ? 'Saving…' : saveState === 'error' ? 'Not saved' : 'Saved on this device'}`;
+  message.setAttribute('role', 'status');
+}
 
 export async function load() { adoptMany(await store.getAll('canvas')); }
 export function snapshot() { return [...records.values()].map(clone); }
@@ -36,11 +47,20 @@ export function adoptMany(rows) {
 
 function persist() {
   if (!activePage) return;
+  const page = activePage;
+  const revision = ++saveRevision;
+  saveState = 'saving';
+  paintSaveState();
   const id = idFor(activePage);
   const row = { id, items: clone(data()), updatedAt: new Date().toISOString() };
   records.set(id, row);
   saveQueue = saveQueue.catch(() => {}).then(() => store.put('canvas', row));
-  saveQueue.catch(() => toast('Could not save canvas edits. Export a backup.', 'bad'));
+  saveQueue.then(() => {
+    if (activePage === page && revision === saveRevision) { saveState = 'saved'; paintSaveState(); }
+  }).catch(() => {
+    if (activePage === page && revision === saveRevision) { saveState = 'error'; paintSaveState(); }
+    toast('Could not save canvas edits. Export a backup.', 'bad');
+  });
 }
 
 function checkpoint() { history.push(clone(data())); if (history.length > 40) history.shift(); future = []; }
@@ -87,9 +107,7 @@ function add(type, assetId = null) {
     font: "'Bodoni Moda', serif", weight: 400, italic: false, opacity: 1, rotate: 0,
   };
   change([...data(), item]);
-  panelMode = 'selected';
   select(item.id);
-  if (!freePage && !simplePage) sec.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 
 function elFor(item) {
@@ -129,7 +147,9 @@ function elFor(item) {
       e.preventDefault();
       const dx = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0;
       const dy = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
-      update(item.id, { x: clamp(item.x + dx, 0, 100), y: clamp(item.y + dy, 0, 100) });
+      const step = e.shiftKey ? 5 : 1;
+      update(item.id, { x: clamp(item.x + dx * step, 0, 100), y: clamp(item.y + dy * step, 0, 100) });
+      [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id)?.focus({ preventScroll: true });
     });
   }
   return node;
@@ -139,9 +159,10 @@ function startPointer(e, node, item) {
   if (e.button !== 0) return;
   e.preventDefault(); e.stopPropagation();
   selected = item.id;
+  panelMode = 'selected';
   document.querySelectorAll('.canvas-item').forEach((n) => n.classList.toggle('is-selected', n === node));
   paintPanel();
-  checkpoint();
+  let moved = false;
   const host = node.parentElement;
   const bounds = host.getBoundingClientRect();
   const resize = !item.fullWidth && e.target.classList.contains('canvas-resize');
@@ -150,6 +171,8 @@ function startPointer(e, node, item) {
   node.setPointerCapture(e.pointerId);
   const move = (ev) => {
     const dx = ev.clientX - startX, dy = ev.clientY - startY;
+    if (!moved && Math.abs(dx) + Math.abs(dy) < 3) return;
+    if (!moved) { checkpoint(); moved = true; }
     const patch = resize
       ? { width: clamp(origin.width + dx, 60, 1200) }
       : { x: clamp(origin.x + dx / Math.max(bounds.width, 1) * 100, 0, 100), y: clamp(origin.y + dy / Math.max(bounds.height, 1) * 100, 0, 100) };
@@ -162,7 +185,7 @@ function startPointer(e, node, item) {
     node.removeEventListener('pointerup', stop);
     node.removeEventListener('pointercancel', stop);
     // Store the pointer result without repainting the editor mid-drag.
-    change(data().map((i) => i.id === item.id ? { ...item } : i));
+    if (moved) change(data().map((i) => i.id === item.id ? { ...item } : i));
   };
   node.addEventListener('pointermove', move);
   node.addEventListener('pointerup', stop);
@@ -173,8 +196,7 @@ function render({ preservePanel = false } = {}) {
   document.querySelectorAll('.canvas-layer').forEach((el) => el.remove());
   const toolbar = document.getElementById('canvas-toolbar');
   if (toolbar) {
-    const message = toolbar.querySelector('.canvas-save-state');
-    if (message) message.textContent = simplePage ? 'Page accents · Saved locally' : activePage ? 'Editing this page · Saved locally' : 'Design Mode stays on as you browse';
+    paintSaveState();
     toolbar.querySelectorAll('[data-canvas="undo"], [data-canvas="redo"]').forEach(button => { button.hidden = !activePage; });
   }
   if (!activePage) {
@@ -226,13 +248,14 @@ function paintPanel() {
   const panel = document.getElementById('canvas-panel');
   if (!panel || !editing) return;
   const item = data().find((i) => i.id === selected);
+  const layerRows = (items) => items.map((x, index) => `<button type="button" data-canvas-select="${esc(x.id)}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('');
   panel.hidden = false;
   if (simplePage && panelMode !== 'selected') {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>PAGE ACCENTS</strong></div>
       <p class="canvas-panel-hint">Add a handwritten note or decorative artwork to this page. Your books, forms and lists stay editable through their usual controls.</p>
       <div class="canvas-panel-tabs"><button type="button" data-canvas="tab-add" class="${panelMode !== 'layers' ? 'active' : ''}">Add</button><button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button></div>
       ${panelMode === 'layers'
-        ? `<div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p>No page accents yet.</p>'}</div>`
+        ? `<div class="canvas-layer-list">${data().length ? layerRows(data()) : '<p>No page accents yet.</p>'}</div>`
         : `<button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>A personal inscription, small caption or note</span></button><button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add floating artwork</strong><span>Use a saved image or upload your own</span></button>`}`;
     return;
   }
@@ -312,14 +335,15 @@ function paintPanel() {
       : panelMode === 'site' ? `<h3>Site identity</h3><p class="canvas-panel-hint">Change your wordmark without editing code.</p>
         <label>Website name<input id="canvas-site-name" value="${esc(theme.getContent().siteName || theme.CONTENT_DEFAULTS.siteName)}"></label>
         <button type="button" data-canvas="save-site">Save website name</button>`
-      : panelMode === 'layers' ? `<h3>Layers on this page</h3><p class="canvas-panel-hint">Your journal sections belong here too, including the art inside them. Select one to edit it.</p>
+      : panelMode === 'layers' ? `<h3>Layers on this page</h3><p class="canvas-panel-hint">Choose a section or a decorative piece to edit. Artwork that floats across the page is listed separately from artwork attached to a section.</p>
         <p class="canvas-field-group">Page sections</p>
         <div class="canvas-layer-list">${layout.get(activePage).filter(s => s.visible !== false).map((s, index) => {
           const art = ['bgImage','picture','edgeArt','curtainArt','artwork','image'].some(key => !!s[key]);
           return `<button type="button" data-canvas-section="${esc(s.id)}">${art ? '▧' : '§'} &nbsp; ${esc(SECTION_TYPES[s.type]?.label || 'Section')} <small>${index + 1}${art ? ' · artwork' : ''}</small></button>`;
         }).join('')}</div>
-        <p class="canvas-field-group">Floating elements</p>
-        <div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p class="canvas-panel-hint">No floating artwork or text added yet.</p>'}</div>`
+        <p class="canvas-field-group">Floating artwork & text</p>
+        <div class="canvas-layer-list">${data().some(x => x.sectionId === 'page-surface') ? layerRows(data().filter(x => x.sectionId === 'page-surface')) : '<p class="canvas-panel-hint">No floating elements added yet.</p>'}</div>
+        ${data().some(x => x.sectionId !== 'page-surface') ? `<p class="canvas-field-group">Section-attached accents</p><div class="canvas-layer-list">${layerRows(data().filter(x => x.sectionId !== 'page-surface'))}</div>` : ''}`
       : `<h3>Make this page yours</h3><p class="canvas-panel-hint">Add something, then drag it anywhere within its section. Click any heading on the page to edit the words directly.</p>
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
         <p class="canvas-panel-hint">To edit something already on the page, choose Sections or Layers above.</p>
@@ -529,7 +553,7 @@ function ensureTools() {
   });
 }
 
-export function setPage(pageId, { simple = false } = {}) { activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; render(); }
+export function setPage(pageId, { simple = false } = {}) { activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; saveState = 'saved'; render(); }
 export function setEditing(next) {
   editing = next;
   if (next) { panelMode = 'sections'; selectedSectionId = null; selectedText = null; }
