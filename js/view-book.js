@@ -13,10 +13,17 @@ import * as assets from './assets.js';
 
 // Handed from the search screen to the form screen.
 let pendingPrefill = null;
+let quickFinishedLog = false;
+let quickLogReturnY = 0;
+
+export function rememberQuickLogPosition(scrollY) {
+  quickLogReturnY = Math.max(0, Number(scrollY) || 0);
+}
 
 /* ---------------------------------------------------------- search view ---- */
 
-export function addView() {
+export function addView({ query = {} } = {}) {
+  quickFinishedLog = query.finished === '1';
   return {
     title: 'Add a book',
     tab: 'books',
@@ -161,6 +168,10 @@ export function bookFormView(params = {}) {
 
   // Working copy — nothing is written until Save.
   const draft = editing ? { ...existing } : prefillToBook(pendingPrefill);
+  if (!editing && quickFinishedLog) {
+    draft.status = 'read';
+    draft.dateFinished = todayISO();
+  }
   const guessed = !editing && !!pendingPrefill && !!draft.format;
   pendingPrefill = null;
 
@@ -476,7 +487,15 @@ export function bookFormView(params = {}) {
           } else {
             toast(editing ? 'Changes saved.' : `“${esc(title)}” added.`, 'good');
           }
-          navigate(`/book/${encodeURIComponent(record.id)}`);
+          if (!editing && quickFinishedLog) {
+            quickFinishedLog = false;
+            navigate('/');
+            // Route navigation starts the Journal at its top; restore the
+            // exact reading position saved before the quick-log flow.
+            requestAnimationFrame(() => window.scrollTo(0, quickLogReturnY));
+          } else {
+            navigate(`/book/${encodeURIComponent(record.id)}`);
+          }
         } catch (_) {
           toast('Could not save — this device is blocking local storage.', 'bad');
         }

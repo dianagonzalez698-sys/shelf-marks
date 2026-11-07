@@ -10,7 +10,7 @@ import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
 import { homeView } from './view-home.js';
 import { booksView } from './view-books.js';
-import { addView, bookFormView } from './view-book.js';
+import { addView, bookFormView, rememberQuickLogPosition } from './view-book.js';
 import { bookDetailView } from './view-book-detail.js';
 import { challengesView, challengeDetailView } from './view-challenges.js';
 import { bookmarksView } from './view-bookmarks.js';
@@ -125,6 +125,10 @@ async function boot() {
   if (editBtn) editBtn.onclick = () => toggleEditing();
 
   onChange(() => { if (isEditing()) refreshEditing(); });
+
+  document.getElementById('app')?.addEventListener('click', (event) => {
+    if (event.target.closest('a[data-quick-log]')) rememberQuickLogPosition(window.scrollY);
+  });
 
   // The journal's period circles are actual checkboxes, independent of the
   // Details links. Keep manual checks separate from book-derived rewards.

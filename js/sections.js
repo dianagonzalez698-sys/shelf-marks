@@ -823,7 +823,7 @@ export const SECTION_TYPES = {
         <div class="ticks">${rows.join('')}</div>
         <div class="period-action">
           <p>Check off your list here, or log a finished book to update challenge progress and earn bookmarks.</p>
-          <a href="#/add">+ Add a book <span aria-hidden="true">↗</span></a>
+          <a href="#/add?finished=1" data-quick-log>+ Log a finished book <span aria-hidden="true">↗</span></a>
         </div>`);
     },
   },
