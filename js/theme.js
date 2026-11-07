@@ -589,6 +589,19 @@ function writeLocal() {
 function adopt(payload) {
   if (!payload || typeof payload !== 'object') return false;
   state.tokens = (payload.tokens && typeof payload.tokens === 'object') ? { ...payload.tokens } : {};
+  // Older versions wrote their *default* editorial font set as explicit
+  // overrides. Those inline values mask any future CSS default, making a
+  // typography refresh appear to do nothing for existing readers. Retire only
+  // exact legacy defaults; leave every deliberately chosen different face.
+  const oldDefaultFonts = {
+    '--f-script': ["'Mrs Saint Delafield', 'Imperial Script', 'Snell Roundhand', cursive"],
+    '--f-display': ["'Bodoni Moda', 'Didot', Georgia, serif", "'Bodoni Moda', 'Didot', 'Playfair Display', Georgia, serif"],
+    '--f-body': ["'EB Garamond', 'Cormorant Garamond', Georgia, serif", "'EB Garamond', 'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif"],
+    '--f-ui': ["'Jost', 'Futura', Arial, sans-serif", "'Jost', 'Futura', -apple-system, 'Helvetica Neue', Arial, sans-serif"],
+  };
+  for (const [key, previous] of Object.entries(oldDefaultFonts)) {
+    if (previous.includes(state.tokens[key])) delete state.tokens[key];
+  }
   state.content = { ...CONTENT_DEFAULTS, ...(payload.content || {}) };
   state.mode = MODES.some(([v]) => v === payload.mode) ? payload.mode : DEFAULT_MODE;
   return true;
