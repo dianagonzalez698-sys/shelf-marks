@@ -6,7 +6,7 @@ import { NONFICTION_SUBJECT_HINTS, FICTION_SUBJECT_HINTS } from './config.js';
 const SEARCH_URL = 'https://openlibrary.org/search.json';
 const FIELDS = [
   'key', 'title', 'author_name', 'first_publish_year',
-  'cover_i', 'number_of_pages_median', 'subject', 'edition_count',
+  'cover_i', 'number_of_pages_median', 'subject', 'edition_count', 'language',
 ].join(',');
 
 export function coverUrl(coverId, size = 'M') {
@@ -14,17 +14,44 @@ export function coverUrl(coverId, size = 'M') {
   return `https://covers.openlibrary.org/b/id/${encodeURIComponent(coverId)}-${size}.jpg`;
 }
 
-export async function searchBooks(query, { signal, limit = 12 } = {}) {
+export async function searchBooks(query, { signal, limit = 35, by = 'all', language = 'en' } = {}) {
   const q = String(query || '').trim();
   if (q.length < 2) return [];
 
-  const url = `${SEARCH_URL}?q=${encodeURIComponent(q)}&limit=${limit}&fields=${FIELDS}`;
+  const key = ({ title: 'title', author: 'author', isbn: 'isbn' })[by] || 'q';
+  const url = `${SEARCH_URL}?${key}=${encodeURIComponent(q)}&limit=${limit}&fields=${FIELDS}`;
   const res = await fetch(url, { signal, headers: { Accept: 'application/json' } });
   if (!res.ok) {
     throw new Error(`Open Library returned ${res.status}`);
   }
   const data = await res.json();
-  return (data.docs || []).map(normalizeDoc);
+  return rankResults((data.docs || []).map(normalizeDoc), q, { language });
+}
+
+function clean(text) {
+  return String(text || '').normalize('NFKD').toLocaleLowerCase()
+    .replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+}
+
+/** Relevance first, then richer records; never confuse cover availability with a title match. */
+export function rankResults(docs, query, { language = 'en' } = {}) {
+  const q = clean(query);
+  const parts = q.split(' ').filter(Boolean);
+  const score = (doc) => {
+    const title = clean(doc.title);
+    const author = clean(doc.author);
+    const tokens = new Set(title.split(' '));
+    const matching = parts.filter(p => tokens.has(p)).length;
+    const titleRelevance = title === q ? 200 : title.startsWith(q) ? 140
+      : title.includes(q) ? 115 : matching / (parts.length || 1) * 80;
+    const authorRelevance = author.includes(q) ? 85 : 0;
+    const english = (doc.languages || []).includes('eng');
+    return titleRelevance + authorRelevance + (english ? 24 : 0)
+      + (doc.coverUrl ? 8 : 0) + (doc.author ? 4 : 0)
+      + (doc.firstPublishYear ? 2 : 0);
+  };
+  return docs.filter(d => language !== 'en' || !d.languages?.length || d.languages.includes('eng'))
+    .sort((a,b) => score(b)-score(a));
 }
 
 function normalizeDoc(doc) {
@@ -40,6 +67,7 @@ function normalizeDoc(doc) {
     coverUrl: coverUrl(doc.cover_i, 'M'),
     subjects,
     editionCount: doc.edition_count || null,
+    languages: doc.language || [],
   };
 }
 

@@ -3294,6 +3294,13 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .lit-book-shelves label, .lit-book-form-shelves label { display: flex; gap: 8px; align-items: center; padding: 7px 0; color: var(--c-ink); font: .78rem var(--f-ui); cursor: pointer; }
 .lit-book-shelves input, .lit-book-form-shelves input { accent-color: var(--c-accent); }
 .lit-book-form-shelves { margin-top: 18px; border-top: 1px solid var(--c-rule); padding-top: 15px; }
+.book-search-filters { display: flex; gap: 16px; flex-wrap: wrap; margin: 2px 0 17px; }
+.book-search-filters label { display: flex; align-items: center; gap: 8px; font: .75rem var(--f-ui); color: var(--c-ink-soft); }
+.book-search-filters select { background: var(--c-bg-raised); border: 1px solid var(--c-rule-strong); color: var(--c-ink); padding: 7px 9px; border-radius: 3px; font: .79rem var(--f-ui); }
+.book-cover-upload { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+.book-cover-upload > label { cursor: pointer; display: inline-block; margin: 0; }
+.book-cover-upload > button { background: transparent; color: var(--c-accent); border: 0; cursor: pointer; text-decoration: underline; font: .76rem var(--f-ui); }
+.book-cover-upload > p { width: 100%; margin: 0; }
 .canvas-section-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .canvas-section-options button { display: grid; gap: 8px; text-align: left; padding: 14px; border: 1px solid #d8c6ae; border-radius: 5px; background: white; color: #4b2828; cursor: pointer; }
 .canvas-section-options button:hover { border-color: #a8482a; }
