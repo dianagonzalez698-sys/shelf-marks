@@ -42,7 +42,7 @@ export function bookDetailView({ id } = {}) {
       <header class="book-archive-hero">
         <div class="book-archive-cover"><div class="book-archive-cover-art">${coverImg(book, { big: true })}</div><p class="book-archive-cover-caption">A BOOK FROM MY SHELVES <span>✦</span></p></div>
         <div class="book-archive-intro">
-          <p class="lit-overline">FROM MY PERSONAL LIBRARY <span>✦</span> ${esc(STATUS[status] || 'On my shelf')}</p>
+          <p class="lit-overline">AN ENTRY FROM MY PERSONAL LIBRARY <span>✦</span> ${esc(STATUS[status] || 'On my shelf')}</p>
           <h1>${esc(book.title)}</h1>
           <p class="book-archive-author">by ${esc(book.author || 'Unknown author')}</p>
           ${book.rating ? `<p class="book-archive-rating" aria-label="My rating ${book.rating} out of 5 stars">${'★'.repeat(Math.max(1,Math.min(5,Number(book.rating))))}${'☆'.repeat(5-Math.max(1,Math.min(5,Number(book.rating))))}<span>My rating</span></p>` : ''}
@@ -65,8 +65,9 @@ export function bookDetailView({ id } = {}) {
 
       <div class="book-archive-body">
         <main class="book-archive-writing" id="book-journal">
+          <div class="book-archive-page-marker" aria-hidden="true"><span>NOTES FROM THE READING DESK</span><span>✧ &nbsp; ✧ &nbsp; ✧</span></div>
           <form class="book-inline-journal" id="book-inline-journal" hidden>
-            <div class="book-inline-heading"><p class="lit-overline">A PAGE OF YOUR OWN</p><h2>Write in your journal</h2><p>Just the words you want to keep. Decorate the page separately whenever inspiration strikes.</p></div>
+            <div class="book-inline-heading"><p class="lit-overline">A PAGE OF YOUR OWN</p><h2>Write in your journal</h2><p>Put your thoughts on paper. Your words take shape in the preview as you write.</p></div>
             <label for="bj-rating">My rating <span>(optional)</span></label>
             <select id="bj-rating"><option value="">Not rated yet</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(book.rating)===n?'selected':''}>${'★'.repeat(n)}${'☆'.repeat(5-n)}</option>`).join('')}</select>
             <label for="bj-review">What I thought</label>
