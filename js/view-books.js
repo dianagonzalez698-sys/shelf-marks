@@ -37,7 +37,6 @@ export function booksView(params = {}) {
     html: `<div class="literary-shelf">
       <header class="lit-shelf-header"><div><p class="lit-overline">THE PERSONAL LIBRARY / ${state.settings.year}</p>
         <h1>My <em>Bookshelf</em></h1><p>Every book has a place here, whether read, reading, or still waiting.</p></div>
-        <a class="lit-primary-action" href="#/add">+ Add a book <span>↗</span></a>
       </header>
       <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
       <div class="lit-custom-shelves"><details id="shelf-manager"><summary>＋ Create or manage shelves</summary>

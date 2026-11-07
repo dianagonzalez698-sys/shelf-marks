@@ -24,7 +24,6 @@ export function bookDecorMarkup(book, part = 'layer') {
         <button class="btn" type="button" id="book-decor-remove">Remove</button>
       </div>
       <p>Drag images to move them. Select one and pull its bottom corner to resize it. Changes save automatically.</p>
-      <button class="btn btn-primary" type="button" id="book-decor-done">Done</button>
     </div>
   </div>`;
   return `<div class="book-decor-layer" id="book-decor-layer" aria-label="Decorative imagery">
@@ -82,7 +81,7 @@ export function mountBookDecor(root, book) {
     article.classList.toggle('book-decor-editing', editing);
     tools.hidden = !editing;
     toggle.setAttribute('aria-expanded', String(editing));
-    toggle.textContent = editing ? '✧ Decorating this page' : '✧ Decorate this page';
+    toggle.textContent = editing ? '✓ Done decorating' : '✧ Decorate this page';
     if (!editing) select(null);
     else select(selected);
   };
@@ -97,7 +96,6 @@ export function mountBookDecor(root, book) {
   };
 
   toggle.onclick = () => setEditing(!editing);
-  root.querySelector('#book-decor-done').onclick = () => setEditing(false);
   root.querySelector('#book-decor-add').onclick = () => add(assetSelect.value);
   root.querySelector('#book-decor-upload').onchange = async (event) => {
     const file = event.target.files?.[0];
