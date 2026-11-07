@@ -46,7 +46,9 @@ export function settingsView() {
             <div class="settings-card-head"><span>01 / THE LOOK</span><h2>Design & appearance</h2></div>
             <p>Make the journal your own, from a single heading to the whole composition.</p>
             <a class="lit-primary-action" href="#/?design=1">Enter Design Mode <span>↗</span></a>
-            <div class="settings-link-grid"><a href="#/customize">Typography & colors ↗</a><a href="#/layout">Page layouts ↗</a><a href="#/assets">Picture library ↗</a></div>
+            <details class="settings-disclosure"><summary>More design tools <span>+</span></summary>
+              <div class="settings-link-grid"><a href="#/customize">Typography & colors ↗</a><a href="#/layout">Page layouts ↗</a><a href="#/assets">Picture library ↗</a></div>
+            </details>
             <div class="settings-mode-field"><label for="set-mode">COLOR APPEARANCE</label>
               <select id="set-mode"><option value="system" ${theme.getMode() === 'system' ? 'selected' : ''}>Follow my device (recommended)</option>
                 <option value="light" ${theme.getMode() === 'light' ? 'selected' : ''}>Always light</option>
@@ -66,13 +68,8 @@ export function settingsView() {
           </section>
         </div>
 
-        <section class="settings-card settings-library-card">
-          <div class="settings-card-head"><span>03 / YOUR COLLECTIONS</span><h2>Literary projects</h2></div>
-          <div class="settings-link-grid"><a href="#/notebook">The Notebook ↗</a><a href="#/words">Words of the year ↗</a><a href="#/challenges">Reading challenges ↗</a><a href="#/bookmarks">Bookmark archive ↗</a></div>
-        </section>
-
         <section class="settings-card settings-backup-card">
-          <div class="settings-card-head"><span>04 / SAFEKEEPING</span><h2>Data & backups</h2></div>
+          <div class="settings-card-head"><span>03 / SAFEKEEPING</span><h2>Data & backups</h2></div>
           ${untouchedDevice() ? `<div class="notice"><strong>This device is using the default journal.</strong> Layouts and images don't sync automatically between browsers. Import a backup from the device where you customized them.</div>` : ''}
           <p>Your books, Notebook, artwork and design settings live in this browser. Export a backup regularly, especially before switching devices.</p>
           <div class="settings-backup-actions"><button class="btn btn-primary" type="button" id="do-export">Export backup</button>
