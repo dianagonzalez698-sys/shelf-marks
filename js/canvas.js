@@ -276,7 +276,7 @@ function paintPanel() {
     return `<span class="canvas-kind-badge kind-${group}" title="${names[group]}" aria-label="${names[group]}">${marks[group]}</span>`;
   };
   const layerRows = (items) => [...items].reverse().map((x, index, ordered) => `<div class="canvas-layer-row${selected === x.id ? ' is-active' : ''}">
-    <button class="canvas-layer-name" type="button" data-canvas-select="${esc(x.id)}" aria-label="Edit ${esc(x.type === 'text' ? 'text' : 'artwork')}"><span>${x.type === 'text' ? 'T' : '▧'}</span><span>${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')}</span></button>
+    <button class="canvas-layer-name" type="button" data-canvas-select="${esc(x.id)}" aria-label="Edit ${esc(x.label || (x.type === 'text' ? 'text' : 'artwork'))}"><span>${x.type === 'text' ? 'T' : '▧'}</span><span>${esc(x.label || (x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork'))}</span></button>
     <span class="canvas-layer-order"><button type="button" data-layer-move="1" data-layer-id="${esc(x.id)}" aria-label="Bring this layer forward" title="Bring forward" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-layer-move="-1" data-layer-id="${esc(x.id)}" aria-label="Send this layer backward" title="Send backward" ${index === ordered.length - 1 ? 'disabled' : ''}>↓</button></span>
   </div>`).join('');
   panel.hidden = false;
@@ -391,6 +391,7 @@ function paintPanel() {
     ${item.type === 'image' ? `<label class="canvas-check"><input data-prop="fullWidth" type="checkbox" ${item.fullWidth ? 'checked' : ''}> Stretch across the page</label>` : ''}
     ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}
     <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
+      <label>Layer name <input data-prop="label" type="text" maxlength="60" placeholder="e.g. Left gilded oval" value="${esc(item.label || '')}"></label>
       <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label>
       <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}" style="--opacity-fill:${Math.round((item.opacity ?? 1) * 100)}%"></label>
       ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}"></label></div>
