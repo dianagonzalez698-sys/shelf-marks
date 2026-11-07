@@ -106,6 +106,7 @@ export function newBook(fields = {}) {
     isTbr: false,
     series: null,
     tags: [],
+    shelves: [], // optional personal collections; independent of reading status
     notes: '',
     createdAt: nowISO(),
     updatedAt: nowISO(),

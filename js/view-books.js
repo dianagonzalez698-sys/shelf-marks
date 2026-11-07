@@ -1,6 +1,6 @@
 // The Library is a collection first; reading goals are a separate lens.
-import { state, sortedBooks, saveBook } from './state.js';
-import { esc, attr, toast } from './ui.js';
+import { state, sortedBooks, saveBook, saveSettings, uid } from './state.js';
+import { esc, attr, toast, confirmSheet } from './ui.js';
 
 export const BOOKS_PAGE_ID = 'books';
 export const STATUS = [
@@ -18,12 +18,16 @@ function filterLink(status, query) {
 
 export function booksView(params = {}) {
   const query = params.query || {};
-  const shelf = STATUS.some(([s]) => s === query.shelf) ? query.shelf : 'all';
+  const customShelves = Array.isArray(state.settings.customShelves) ? state.settings.customShelves : [];
+  const shelfChoices = [...STATUS, ...customShelves.map((s) => [`custom:${s.id}`, s.name])];
+  const shelf = shelfChoices.some(([s]) => s === query.shelf) ? query.shelf : 'all';
   const search = String(query.search || '').trim().toLowerCase();
   const sort = query.sort === 'title' ? 'title' : 'recent';
   const all = sortedBooks();
-  const counts = Object.fromEntries(STATUS.map(([key]) => [key, key === 'all' ? all.length : all.filter(b => statusOf(b) === key).length]));
-  let shown = all.filter((b) => (shelf === 'all' || statusOf(b) === shelf)
+  const onShelf = (b, key) => key === 'all' || (key.startsWith('custom:')
+    ? (b.shelves || []).includes(key.slice(7)) : statusOf(b) === key);
+  const counts = Object.fromEntries(shelfChoices.map(([key]) => [key, all.filter(b => onShelf(b,key)).length]));
+  let shown = all.filter((b) => onShelf(b, shelf)
     && (!search || `${b.title} ${b.author} ${(b.tags || []).join(' ')}`.toLowerCase().includes(search)));
   if (sort === 'title') shown.sort((a,b) => a.title.localeCompare(b.title));
 
@@ -34,7 +38,11 @@ export function booksView(params = {}) {
         <h1>My <em>Bookshelf</em></h1><p>Every book has a place here, whether read, reading, or still waiting.</p></div>
         <a class="lit-primary-action" href="#/add">+ Add a book <span>↗</span></a>
       </header>
-      <nav class="lit-shelf-tabs" aria-label="Reading shelves">${STATUS.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${label}<span>${counts[key]}</span></a>`).join('')}</nav>
+      <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
+      <div class="lit-custom-shelves"><details id="shelf-manager"><summary>＋ Create or manage shelves</summary>
+        <form id="shelf-create"><label for="shelf-name">New shelf name</label><div><input id="shelf-name" maxlength="45" placeholder="e.g. Cozy mysteries" required><button type="submit">Create shelf</button></div></form>
+        ${customShelves.length ? `<div class="lit-shelf-manage-list">${customShelves.map((s)=>`<div><span>${esc(s.name)}</span><button type="button" data-delete-shelf="${attr(s.id)}" aria-label="Remove shelf ${attr(s.name)}">Remove</button></div>`).join('')}</div>` : '<p class="hint">Your own shelves can hold books from any reading status.</p>'}
+      </details></div>
       <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search">⌕</button></form>
         <label>Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
       <div class="lit-shelf-count">${shown.length} ${shown.length === 1 ? 'BOOK' : 'BOOKS'} ON THIS SHELF</div>
@@ -43,6 +51,9 @@ export function booksView(params = {}) {
         <div class="lit-shelf-info"><a href="#/book/${encodeURIComponent(b.id)}"><h2>${esc(b.title)}</h2></a><p>${esc(b.author || 'Author unknown')}</p>
           <label class="visually-hidden" for="shelf-status-${attr(b.id)}">Reading status for ${esc(b.title)}</label>
           <select id="shelf-status-${attr(b.id)}" class="lit-shelf-status" data-book-status="${attr(b.id)}">${STATUS.filter(([s])=>s !== 'all').map(([s,label])=>`<option value="${s}" ${statusOf(b) === s ? 'selected' : ''}>${label}</option>`).join('')}</select>
+          ${customShelves.length ? `<details class="lit-book-shelves"><summary>Personal shelves ${(b.shelves || []).filter(id=>customShelves.some(s=>s.id===id)).length ? `· ${(b.shelves || []).filter(id=>customShelves.some(s=>s.id===id)).length}` : ''}</summary>
+            ${customShelves.map((s)=>`<label><input type="checkbox" data-book-shelf="${attr(b.id)}" value="${attr(s.id)}" ${(b.shelves || []).includes(s.id) ? 'checked' : ''}>${esc(s.name)}</label>`).join('')}
+          </details>` : ''}
         </div></article>`).join('')}</div>` : `<div class="lit-empty-shelf"><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>${search ? 'No books matched that search.' : 'A lovely shelf waiting to be filled.'}</p><a href="#/add">ADD A BOOK ↗</a></div>`}
     </div>`,
     onMount(root) {
@@ -65,6 +76,37 @@ export function booksView(params = {}) {
               dateFinished: select.value === 'read' ? (book.dateFinished || book.previousFinishDate || '') : ''});
             toast('Shelf updated.', 'good');
           } catch (_) { toast('Could not update this book.', 'bad'); }
+        };
+      });
+      root.querySelector('#shelf-create').onsubmit = async (e) => {
+        e.preventDefault();
+        const name = root.querySelector('#shelf-name').value.trim();
+        if (!name) return;
+        if (customShelves.some(s=>s.name.toLocaleLowerCase() === name.toLocaleLowerCase())) {
+          toast('That shelf already exists.', 'bad'); return;
+        }
+        try {
+          await saveSettings({ customShelves: [...customShelves, { id: uid('shelf'), name }] });
+          toast(`“${name}” shelf created.`, 'good');
+        } catch (_) { toast('Could not create the shelf.', 'bad'); }
+      };
+      root.querySelectorAll('[data-delete-shelf]').forEach(button => {
+        button.onclick = async () => {
+          const s = customShelves.find(x=>x.id===button.dataset.deleteShelf);
+          if (!s) return;
+          if (!await confirmSheet({title:`Remove “${s.name}”?`,body:'Books stay in your library and keep their reading statuses. Only this personal shelf is removed.',confirm:'Remove shelf',danger:true})) return;
+          await saveSettings({customShelves:customShelves.filter(x=>x.id!==s.id)});
+          if (shelf === `custom:${s.id}`) location.hash = '#/books';
+        };
+      });
+      root.querySelectorAll('[data-book-shelf]').forEach(box => {
+        box.onchange = async () => {
+          const book = state.books.find(b=>b.id===box.dataset.bookShelf);
+          if (!book) return;
+          const shelves = new Set(book.shelves || []);
+          if (box.checked) shelves.add(box.value); else shelves.delete(box.value);
+          try { await saveBook({...book,shelves:[...shelves]}); }
+          catch (_) { box.checked = !box.checked; toast('Could not update this shelf.', 'bad'); }
         };
       });
     },

@@ -157,6 +157,7 @@ export function bookFormView(params = {}) {
     }
   });
   const tagOptions = new Set([...knownTags(), ...(draft.tags || [])]);
+  const personalShelves = Array.isArray(state.settings.customShelves) ? state.settings.customShelves : [];
 
   return {
     title: editing ? 'Edit book' : 'New book',
@@ -233,6 +234,9 @@ export function bookFormView(params = {}) {
           </div>
           <p class="hint" id="period-hint"></p>
           <p class="hint">Save books at any stage. Only books marked Read with a finish date count toward dated reading challenges.</p>
+          ${personalShelves.length ? `<div class="field lit-book-form-shelves"><span class="field-label">Personal shelves <span class="muted">(optional)</span></span>
+            ${personalShelves.map(s=>`<label><input type="checkbox" data-personal-shelf value="${attr(s.id)}" ${(draft.shelves || []).includes(s.id) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')}
+          </div>` : ''}
         </section>
 
         <h2 class="form-heading">How it counts</h2>
@@ -458,6 +462,7 @@ export function bookFormView(params = {}) {
           isTbr: root.querySelector('#f-tbr').checked,
           series: seriesInput.value.trim() || null,
           tags: [...tags],
+          shelves: [...root.querySelectorAll('[data-personal-shelf]:checked')].map(el=>el.value),
           notes: root.querySelector('#f-notes').value.trim(),
         };
 
