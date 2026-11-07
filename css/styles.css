@@ -3277,6 +3277,23 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .lit-shelf-info p { font: 1rem/1.3 var(--f-body); color: var(--c-ink-soft); margin-bottom: 12px; }
 .lit-shelf-status, .shelf-status-select { max-width: 100%; border: 1px solid var(--c-rule-strong); background: var(--c-bg-raised); color: var(--c-ink); font: .72rem var(--f-ui); padding: 8px; border-radius: 2px; }
 .lit-shelf-status:focus-visible, .lit-shelf-tabs a:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 3px; }
+.lit-custom-shelves { padding: 13px 0 0; }
+.lit-custom-shelves > details { max-width: 470px; border-bottom: 1px solid var(--c-rule); }
+.lit-custom-shelves summary, .lit-book-shelves summary { cursor: pointer; color: var(--c-accent); font: 600 .75rem var(--f-ui); }
+.lit-custom-shelves > details > summary { padding: 7px 0 12px; }
+#shelf-create { padding: 14px 0; }
+#shelf-create > label { display: block; margin-bottom: 7px; font: .74rem var(--f-ui); color: var(--c-ink-soft); }
+#shelf-create > div { display: flex; gap: 8px; }
+#shelf-name { flex: 1; min-width: 0; padding: 9px; background: var(--c-bg-raised); color: var(--c-ink); border: 1px solid var(--c-rule-strong); }
+#shelf-create button { padding: 9px 13px; border: 0; background: var(--c-accent); color: var(--c-accent-ink); cursor: pointer; font: 600 .73rem var(--f-ui); }
+.lit-shelf-manage-list { border-top: 1px solid var(--c-rule); padding-bottom: 10px; }
+.lit-shelf-manage-list > div { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; font: .9rem var(--f-body); }
+.lit-shelf-manage-list button { border: 0; background: transparent; color: var(--c-accent); cursor: pointer; font: .71rem var(--f-ui); }
+.lit-book-shelves { margin-top: 9px; }
+.lit-book-shelves summary { color: var(--c-ink-soft); }
+.lit-book-shelves label, .lit-book-form-shelves label { display: flex; gap: 8px; align-items: center; padding: 7px 0; color: var(--c-ink); font: .78rem var(--f-ui); cursor: pointer; }
+.lit-book-shelves input, .lit-book-form-shelves input { accent-color: var(--c-accent); }
+.lit-book-form-shelves { margin-top: 18px; border-top: 1px solid var(--c-rule); padding-top: 15px; }
 .canvas-section-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .canvas-section-options button { display: grid; gap: 8px; text-align: left; padding: 14px; border: 1px solid #d8c6ae; border-radius: 5px; background: white; color: #4b2828; cursor: pointer; }
 .canvas-section-options button:hover { border-color: #a8482a; }
