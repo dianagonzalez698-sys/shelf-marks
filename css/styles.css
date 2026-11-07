@@ -2588,6 +2588,14 @@ a.ed-meta:hover { color: var(--c-accent); }
 .ed-hero.has-curtain .hero { overflow: visible; }
 .ed-hero.has-curtain .hero-type { padding-inline: calc(var(--cur-side) + 1.6rem); }
 
+/* The second curtain placement is a true bottom-edge treatment. The same
+   transparent picture is mirrored vertically so the valance finishes at the
+   bottom seam; text clearance is reserved below, not above. */
+.ed.has-curtain.curtain-bottom { padding-block-start: var(--sp-section); padding-block-end: max(calc(var(--cur-arch) * var(--cur-over) - var(--cur-lift) + var(--cur-clear) + var(--cur-gap,0px)),var(--sp-section)); }
+.ed.has-curtain.curtain-bottom .ed-curtain { top: auto; bottom: calc((var(--cur-lift,0px) + var(--trim-bite,3px)) * -1); transform: scaleY(-1); }
+.ed-hero.has-curtain.curtain-bottom { padding-block-start: 0; padding-block-end: 0; }
+.ed-hero.has-curtain.curtain-bottom .hero-type { padding-bottom: max(calc(var(--cur-arch) * var(--cur-over) + var(--cur-clear) + var(--cur-gap,0px)),var(--sp-section)); }
+
 @media (max-width: 759px) {
   /* A phone cannot spare a third of its width on cloth, so the curtain hangs
      shallower and the content keeps only the room it needs. */
@@ -2600,6 +2608,9 @@ a.ed-meta:hover { color: var(--c-accent); }
         - var(--trim-bite, 3px) + var(--cur-clear) + var(--cur-gap, 0px)),
       calc(var(--sp-section) * .6));
   }
+  .ed.has-curtain.curtain-bottom { padding-block-start: calc(var(--sp-section) * .6); padding-block-end: max(calc(var(--cur-arch) * var(--cur-over) * .62 - var(--cur-lift) + var(--cur-clear) + var(--cur-gap,0px)),calc(var(--sp-section) * .6)); }
+  .ed-hero.has-curtain.curtain-bottom { padding-block-start: 0; padding-block-end: 0; }
+  .ed-hero.has-curtain.curtain-bottom .hero-type { padding-bottom: max(calc(var(--cur-arch) * var(--cur-over) * .62 + var(--cur-clear) + var(--cur-gap,0px)),var(--sp-section)); }
 }
 
 /* ------------------------------------------------------- word of the year --
