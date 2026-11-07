@@ -248,6 +248,18 @@ function paintPanel() {
   const panel = document.getElementById('canvas-panel');
   if (!panel || !editing) return;
   const item = data().find((i) => i.id === selected);
+  const sectionBadge = (type) => {
+    const groups = {
+      image: ['hero', 'split', 'collage', 'gallery', 'interlude'],
+      writing: ['notebookFeature', 'statement', 'note', 'journalEntries'],
+      reading: ['readingNote', 'progress', 'period', 'challenges', 'challengeEligible', 'challengeMarks', 'challengeRecord'],
+      books: ['books', 'shelf', 'archive', 'bookmarks', 'word', 'wordShelf', 'challengeHero'],
+    };
+    const group = Object.keys(groups).find(key => groups[key].includes(type)) || 'writing';
+    const marks = { image: '▧', writing: '✎', reading: '◷', books: '▤' };
+    const names = { image: 'Visual section', writing: 'Writing section', reading: 'Reading progress', books: 'Book collection' };
+    return `<span class="canvas-kind-badge kind-${group}" title="${names[group]}" aria-label="${names[group]}">${marks[group]}</span>`;
+  };
   const layerRows = (items) => items.map((x, index) => `<button type="button" data-canvas-select="${esc(x.id)}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('');
   panel.hidden = false;
   if (simplePage && panelMode !== 'selected') {
@@ -326,7 +338,7 @@ function paintPanel() {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>DESIGN STUDIO</strong><button type="button" data-canvas="finish" aria-label="Exit design mode">× Exit</button></div>${tabs}` +
       (panelMode === 'sections' ? `<h3>Your page</h3><p class="canvas-panel-hint">Select any section below—or click an open area of it on the page—to edit it here.</p>
         <div class="canvas-section-list">${layout.get(activePage).filter((s) => s.visible !== false).map((s, i, arr) => `<div class="canvas-section-row" draggable="true" data-section-row="${esc(s.id)}">
-          <span class="canvas-section-number" title="Drag to reorder">⠿ ${String(i + 1).padStart(2, '0')}</span>
+          <span class="canvas-section-number" title="Drag to reorder">${sectionBadge(s.type)}</span>
           <button type="button" class="canvas-section-select" data-canvas-section="${esc(s.id)}"><strong>${esc(SECTION_TYPES[s.type]?.label || 'Section')}${arr.filter((x) => x.type === s.type).length > 1 ? ` <em class="canvas-duplicate">${arr.filter((x) => x.type === s.type).findIndex((x) => x.id === s.id) + 1} of ${arr.filter((x) => x.type === s.type).length}</em>` : ''}</strong><small>${esc(String(s.title || s.heading || s.text || SECTION_TYPES[s.type]?.blurb || '').replace(/<[^>]*>/g,'').slice(0,55))}</small></button>
           <span class="canvas-section-moves"><button type="button" data-move-section="${esc(s.id)}" data-move-delta="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move section up">↑</button><button type="button" data-move-section="${esc(s.id)}" data-move-delta="1" ${i === arr.length - 1 ? 'disabled' : ''} aria-label="Move section down">↓</button></span>
         </div>`).join('')}</div>
@@ -339,7 +351,7 @@ function paintPanel() {
         <p class="canvas-field-group">Page sections</p>
         <div class="canvas-layer-list">${layout.get(activePage).filter(s => s.visible !== false).map((s, index) => {
           const art = ['bgImage','picture','edgeArt','curtainArt','artwork','image'].some(key => !!s[key]);
-          return `<button type="button" data-canvas-section="${esc(s.id)}">${art ? '▧' : '§'} &nbsp; ${esc(SECTION_TYPES[s.type]?.label || 'Section')} <small>${index + 1}${art ? ' · artwork' : ''}</small></button>`;
+          return `<button type="button" data-canvas-section="${esc(s.id)}">${sectionBadge(s.type)} &nbsp; ${esc(SECTION_TYPES[s.type]?.label || 'Section')} <small>${index + 1}${art ? ' · artwork' : ''}</small></button>`;
         }).join('')}</div>
         <p class="canvas-field-group">Floating artwork & text</p>
         <div class="canvas-layer-list">${data().some(x => x.sectionId === 'page-surface') ? layerRows(data().filter(x => x.sectionId === 'page-surface')) : '<p class="canvas-panel-hint">No floating elements added yet.</p>'}</div>
