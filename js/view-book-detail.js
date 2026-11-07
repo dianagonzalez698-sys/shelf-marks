@@ -88,6 +88,7 @@ export function bookDetailView({ id } = {}) {
           </section>
         </aside>
       </div>
+      ${bookDecorMarkup(book, 'toolbar')}
     </article>`,
     onMount(root) {
       mountBookDecor(root, book);

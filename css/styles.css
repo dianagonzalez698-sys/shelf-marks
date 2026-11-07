@@ -3346,7 +3346,7 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-archive-page { max-width: 1420px; margin: 0 auto; padding: clamp(25px,5vw,65px) clamp(20px,7vw,105px) 110px; }
 .book-archive-page { position: relative; isolation: isolate; }
 .book-archive-page > :not(.book-decor-layer) { position: relative; z-index: 1; }
-.book-decor-toolbar { margin-bottom: 18px; }
+.book-decor-toolbar { margin-top: 65px; border-top: 1px solid var(--c-rule); padding-top: 24px; }
 .book-decor-tools { padding: 22px; margin-top: 12px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-sunk); display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
 .book-decor-tools[hidden] { display: none; }
 .book-decor-add-row { width: 100%; display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
@@ -3358,12 +3358,18 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-decor-tools p { flex: 1 1 230px; margin: 0; color: var(--c-ink-soft); font: italic .94rem var(--f-body); }
 .book-decor-tools .btn { cursor: pointer; }
 .book-decor-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
-.book-decor-piece { position: absolute; display: block; height: auto; max-width: 34%; transform: translate(-50%, -50%); pointer-events: none; user-select: none; touch-action: none; filter: drop-shadow(3px 7px 5px rgba(0,0,0,.1)); }
+.book-decor-piece { position: absolute; display: block; height: auto; max-width: 75%; transform: translate(-50%, -50%); pointer-events: none; user-select: none; touch-action: none; filter: drop-shadow(3px 7px 5px rgba(0,0,0,.1)); }
+.book-decor-piece > img { display: block; width: 100%; height: auto; user-select: none; pointer-events: none; }
+.book-decor-piece.frame-fine { background: var(--c-bg); padding: 6px; border: 1px solid #b6a48d; box-shadow: inset 0 0 0 2px var(--c-bg), inset 0 0 0 3px #b6a48d; }
+.book-decor-piece.frame-ornate { background: #ece0c5; padding: 11px; border: 5px ridge #ab8950; box-shadow: 0 3px 12px rgba(44,28,16,.16), inset 0 0 0 2px #6e542e; }
+.book-decor-piece.frame-polaroid { background: #fffaf0; padding: 10px 10px 28px; box-shadow: 0 4px 12px rgba(44,28,16,.18); }
+.book-decor-resize { display: none; position: absolute; bottom: -13px; right: -13px; width: 28px; height: 28px; padding: 0; border: 1px solid var(--c-accent); border-radius: 50%; background: var(--c-bg); color: var(--c-accent); font: 700 17px var(--f-ui); cursor: nwse-resize; pointer-events: auto; touch-action: none; }
 .book-decor-editing .book-decor-layer { pointer-events: none; }
 .book-decor-editing .book-decor-piece { pointer-events: auto; cursor: grab; outline: 1px dashed var(--c-accent); outline-offset: 4px; }
 .book-decor-editing .book-decor-piece.selected { outline: 2px solid var(--c-accent); }
+.book-decor-editing .book-decor-piece.selected .book-decor-resize { display: block; }
 .book-decor-editing .book-decor-piece:active { cursor: grabbing; }
-@media (max-width: 740px) { .book-decor-piece { max-width: 37%; } .book-decor-tools { align-items: stretch; } }
+@media (max-width: 740px) { .book-decor-piece { max-width: 75%; } .book-decor-tools { align-items: stretch; } }
 .book-archive-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 0 28px; border-bottom: 1px solid var(--c-rule); font: 600 .75rem var(--f-ui); }
 .book-archive-nav a { color: var(--c-ink-soft); text-decoration: none; }
 .book-archive-nav .book-archive-edit { color: var(--c-accent); border: 1px solid var(--c-rule-strong); padding: 10px 14px; }
@@ -3417,7 +3423,7 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-archive-empty p { font: 1.1rem var(--f-body); color: var(--c-ink-soft); }
 .book-archive-empty a { display: inline-block; margin-top: 16px; color: var(--c-accent); font: 600 .75rem var(--f-ui); }
 @media (max-width: 740px) {
-  .book-decor-toolbar { margin-bottom: 12px; }
+  .book-decor-toolbar { margin-top: 35px; padding-top: 18px; }
   .book-decor-tools { padding: 14px; }
   .book-decor-add-row > label:first-child { flex: 1 1 100%; }
   .book-decor-tools select { max-width: 100%; width: 100%; }
