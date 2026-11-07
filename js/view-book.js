@@ -181,8 +181,9 @@ export function bookFormView(params = {}) {
     html: `
       <section class="section form-wrap">
       <div class="section-head" style="margin-bottom:1.6rem"><div>
-        <h2 class="section-title">${editing ? 'Edit entry' : 'New entry'}</h2>
-        <p class="section-sub">${editing ? 'Change anything — the goals recount themselves.' : 'Everything here is yours to adjust.'}</p>
+        <h2 class="section-title">${editing ? 'Book details' : 'New book'}</h2>
+        <p class="section-sub">${editing ? 'Update the catalog information, reading status, and challenge categories here. Your personal writing has its own Reading Journal.' : 'Add a book to your shelves. You can write about it later in its Reading Journal.'}</p>
+        ${editing ? `<a class="btn" href="#/book/${encodeURIComponent(draft.id)}/journal" style="margin-top:12px">✎ Open reading journal</a>` : ''}
       </div></div>
       <form id="book-form" novalidate>
         <section class="panel">
@@ -228,7 +229,7 @@ export function bookFormView(params = {}) {
           <label class="switch-row"><input type="checkbox" id="f-tbr" ${draft.isTbr ? 'checked' : ''}><span class="switch-text">From my physical TBR<em>Physical TBR Every Other Month</em></span></label>
         </section>
 
-        <h2 class="form-heading">My Reading Journal</h2>
+        <h2 class="form-heading">Reading dates</h2>
         <section class="panel">
           <div class="grid-2">
             <div class="field" style="margin-bottom:0">
@@ -242,15 +243,6 @@ export function bookFormView(params = {}) {
             </div>
           </div>
           <p class="hint" id="period-hint"></p>
-          <div class="field"><label for="f-rating">My rating <span class="muted">(optional)</span></label>
-            <select id="f-rating"><option value="">Not rated</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(draft.rating)===n?'selected':''}>${'★'.repeat(n)}${'☆'.repeat(5-n)}</option>`).join('')}</select>
-          </div>
-          <div class="field"><label for="f-review">My review</label>
-            <textarea id="f-review" rows="4" placeholder="What did you think?">${esc(draft.review || '')}</textarea></div>
-          <div class="field"><label for="f-quote">A favorite passage</label>
-            <textarea id="f-quote" rows="3" placeholder="A line worth remembering…">${esc(draft.favoriteQuote || '')}</textarea></div>
-          <div class="field"><label for="f-notes">Private notes</label>
-            <textarea id="f-notes" rows="3" placeholder="Anything else you want to keep…">${esc(draft.notes || '')}</textarea></div>
         </section>
 
         <h2 class="form-heading">My Shelves</h2>
@@ -475,10 +467,6 @@ export function bookFormView(params = {}) {
           series: seriesInput.value.trim() || null,
           tags: [...tags],
           shelves: [...root.querySelectorAll('[data-personal-shelf]:checked')].map(el=>el.value),
-          notes: root.querySelector('#f-notes').value.trim(),
-          rating: root.querySelector('#f-rating').value ? Number(root.querySelector('#f-rating').value) : null,
-          review: root.querySelector('#f-review').value.trim(),
-          favoriteQuote: root.querySelector('#f-quote').value.trim(),
         };
 
         try {
