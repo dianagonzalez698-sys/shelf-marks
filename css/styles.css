@@ -3702,6 +3702,11 @@ html:not([data-theme="dark"]) .lit-hero {
 .canvas-section-list button { display: grid; grid-template-columns: 30px minmax(0,1fr) 15px; align-items: center; gap: 12px; text-align: left; border: 0; border-bottom: 1px solid var(--c-rule) !important; border-radius: 0 !important; padding: 14px 3px !important; background: transparent !important; color: var(--c-ink) !important; }
 .canvas-section-list button:hover { background: var(--c-accent-soft) !important; }
 .canvas-section-number { color: var(--c-accent); font: 600 .7rem var(--f-ui); }
+.canvas-kind-badge { display: inline-grid; place-items: center; width: 29px; height: 29px; border: 1px solid currentColor; border-radius: 3px; font: 500 1.08rem/1 var(--f-ui); vertical-align: middle; flex: none; }
+.canvas-kind-badge.kind-image { color: #52756e; background: #e1eae4; }
+.canvas-kind-badge.kind-writing { color: #8e5264; background: #f3e4e9; }
+.canvas-kind-badge.kind-reading { color: #a06b35; background: #f5ecdb; }
+.canvas-kind-badge.kind-books { color: #5d6390; background: #e8e8f2; }
 .canvas-section-list strong { display: block; font: 500 1.18rem/1.2 var(--f-display); }
 .canvas-section-list small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: .72rem/1.5 var(--f-ui); color: var(--c-ink-soft); margin-top: 4px; }
 .canvas-inspector-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 3px; border-bottom: 1px solid var(--c-rule-strong); margin: 12px 0; }
