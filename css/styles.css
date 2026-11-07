@@ -3344,6 +3344,22 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .journal-entry-words p:not(.lit-overline) { font: italic 1.04rem/1.4 var(--f-body); color: var(--c-ink-soft); }
 .journal-entry-words small { color: var(--c-accent); font: 600 .7rem var(--f-ui); letter-spacing: .08em; }
 .book-archive-page { max-width: 1420px; margin: 0 auto; padding: clamp(25px,5vw,65px) clamp(20px,7vw,105px) 110px; }
+.book-archive-page { position: relative; isolation: isolate; }
+.book-archive-page > :not(.book-decor-layer) { position: relative; z-index: 1; }
+.book-decor-toolbar { margin-bottom: 18px; }
+.book-decor-tools { padding: 18px; margin-top: 12px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-sunk); display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.book-decor-tools[hidden] { display: none; }
+.book-decor-tools label { color: var(--c-ink-soft); font: .78rem var(--f-ui); }
+.book-decor-tools select { display: block; max-width: 220px; margin-top: 6px; padding: 9px; background: var(--c-bg); color: var(--c-ink); border: 1px solid var(--c-rule-strong); }
+.book-decor-tools p { flex-basis: 100%; margin: 0; color: var(--c-ink-soft); font: italic .94rem var(--f-body); }
+.book-decor-tools .btn { cursor: pointer; }
+.book-decor-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+.book-decor-piece { position: absolute; display: block; height: auto; max-width: 34%; transform: translate(-50%, -50%); pointer-events: none; user-select: none; touch-action: none; filter: drop-shadow(3px 7px 5px rgba(0,0,0,.1)); }
+.book-decor-editing .book-decor-layer { pointer-events: none; }
+.book-decor-editing .book-decor-piece { pointer-events: auto; cursor: grab; outline: 1px dashed var(--c-accent); outline-offset: 4px; }
+.book-decor-editing .book-decor-piece.selected { outline: 2px solid var(--c-accent); }
+.book-decor-editing .book-decor-piece:active { cursor: grabbing; }
+@media (max-width: 740px) { .book-decor-piece { max-width: 37%; } .book-decor-tools { align-items: stretch; } }
 .book-archive-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 0 28px; border-bottom: 1px solid var(--c-rule); font: 600 .75rem var(--f-ui); }
 .book-archive-nav a { color: var(--c-ink-soft); text-decoration: none; }
 .book-archive-nav .book-archive-edit { color: var(--c-accent); border: 1px solid var(--c-rule-strong); padding: 10px 14px; }

@@ -40,7 +40,7 @@ export function bookJournalView({ id } = {}) {
         <section class="book-writing-art">
           <p class="lit-overline">THE VISUAL PAGE</p>
           <h2>A little scrapbook</h2>
-          <p>Keep a painting, photograph, or collage beside your words. Entirely optional.</p>
+          <p>Keep a featured painting, photograph, or collage beside your words. Or decorate the entire finished page with movable artwork.</p>
           <div id="j-art-preview" class="book-writing-art-preview">${artworkId && assets.src(artworkId) ? `<img src="${assets.src(artworkId)}" alt="Artwork for this reading journal">` : '<span>✿</span><small>A space for something lovely</small>'}</div>
           <label class="btn" for="j-art-upload">${artworkId ? 'Change artwork' : '+ Add artwork'}<input id="j-art-upload" type="file" accept="image/*" class="visually-hidden"></label>
           <button class="btn" type="button" id="j-art-remove" ${artworkId ? '' : 'hidden'}>Remove artwork</button>
@@ -51,7 +51,7 @@ export function bookJournalView({ id } = {}) {
           <a class="btn" href="#${url}">Cancel</a>
         </div>
       </form>
-      <p class="book-writing-footnote">Want these pages to appear on your Journal homepage? In Design Studio, add the optional <strong>From the reading journal</strong> section. Looking for cover, status, or challenge checkboxes? <a href="#${url}/edit">Edit book details</a>.</p>
+      <p class="book-writing-footnote">For movable cutouts, clouds, and decorative flourishes, <a href="#${url}">open the finished page</a> and choose <strong>Decorate this page</strong>. To feature your entries on the Journal homepage, add the optional <strong>From the reading journal</strong> section in Design Studio. Looking for cover, status, or challenge checkboxes? <a href="#${url}/edit">Edit book details</a>.</p>
     </article>`,
     onMount(root) {
       const preview = root.querySelector('#j-art-preview');
