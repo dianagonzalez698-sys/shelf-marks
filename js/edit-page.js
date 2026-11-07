@@ -23,7 +23,7 @@ let pageId = HOME_PAGE_ID;
 export function isEditing() { return on; }
 
 /** Which layout a rendered page belongs to, so edits are saved to it. */
-export function setEditPage(id) { pageId = id || HOME_PAGE_ID; canvas.setPage(pageId); }
+export function setEditPage(id) { pageId = id || null; canvas.setPage(pageId); }
 
 export function toggleEditing(next) {
   on = next === undefined ? !on : !!next;

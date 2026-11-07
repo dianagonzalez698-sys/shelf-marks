@@ -434,11 +434,8 @@ export function render() {
 
     const previousPath = current ? current.path : null;
     const previousScrollY = window.scrollY;
-    // Design Mode edits one page at a time. Leaving that route must close the
-    // studio even when the destination doesn't expose an edit button.
-    if (previousPath !== null && path !== previousPath && document.body.classList.contains('is-editing')) {
-      stopEditing();
-    }
+    // Design Mode belongs to the browsing session, not one route. Switching
+    // pages changes the design target without ending the editing session.
     const view = match.route.handler({ ...match.params, query }) || {};
     current = { path, view, params: match.params, query };
 
@@ -450,9 +447,8 @@ export function render() {
     const editBtn = document.getElementById('edit-page');
     if (editBtn) {
       const pageId = view.editPage || null;
-      editBtn.hidden = !pageId;
-      if (pageId) setEditPageId(pageId);
-      else if (document.body.classList.contains('is-editing')) stopEditing();
+      editBtn.hidden = !pageId && !document.body.classList.contains('is-editing');
+      setEditPageId(pageId);
     }
     highlightTab(view.tab);
     // In-place actions (checkmarks, saved edits, progress updates) re-render

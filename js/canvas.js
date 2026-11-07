@@ -163,7 +163,20 @@ function startPointer(e, node, item) {
 
 function render({ preservePanel = false } = {}) {
   document.querySelectorAll('.canvas-layer').forEach((el) => el.remove());
-  if (!activePage) return;
+  const toolbar = document.getElementById('canvas-toolbar');
+  if (toolbar) {
+    const message = toolbar.querySelector('.canvas-save-state');
+    if (message) message.textContent = activePage ? 'Editing this page · Saved locally' : 'Design Mode stays on as you browse';
+    toolbar.querySelectorAll('[data-canvas="undo"], [data-canvas="redo"]').forEach(button => { button.hidden = !activePage; });
+  }
+  if (!activePage) {
+    const panel = document.getElementById('canvas-panel');
+    if (panel && editing) {
+      panel.hidden = false;
+      panel.innerHTML = '<div class="canvas-panel-head"><strong>DESIGN MODE</strong></div><h3>Keep exploring</h3><p class="canvas-panel-hint">This page has no editable layout sections. Design Mode is still on—visit Journal or another editable page to continue decorating, or choose Done above to leave Design Mode.</p>';
+    }
+    return;
+  }
   document.querySelectorAll('#app [data-sec]').forEach((el) => {
     el.classList.toggle('canvas-section-selected', editing && (panelMode === 'section' || panelMode === 'text') && el.dataset.sec === selectedSectionId);
     el.querySelectorAll('[data-edit]').forEach((textEl) => {
@@ -481,7 +494,7 @@ function ensureTools() {
   });
 }
 
-export function setPage(pageId) { activePage = pageId; selected = null; selectedSectionId = null; selectedText = null; history = []; future = []; render(); }
+export function setPage(pageId) { activePage = pageId; selected = null; selectedSectionId = null; selectedText = null; panelMode = 'sections'; history = []; future = []; render(); }
 export function setEditing(next) {
   editing = next;
   if (next) { panelMode = 'sections'; selectedSectionId = null; selectedText = null; }
