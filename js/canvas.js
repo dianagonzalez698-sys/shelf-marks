@@ -374,7 +374,8 @@ function paintPanel() {
     ${item.type === 'image' ? `<label class="canvas-check"><input data-prop="fullWidth" type="checkbox" ${item.fullWidth ? 'checked' : ''}> Stretch across the page</label>` : ''}
     ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}
     <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
-      <div class="canvas-panel-row"><label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label><label>Opacity<input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity}"></label></div>
+      <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label>
+      <label class="canvas-opacity-field">Opacity<input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity}"></label>
       ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" value="${item.x}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" value="${item.y}"></label></div>
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
     </details>
