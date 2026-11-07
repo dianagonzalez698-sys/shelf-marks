@@ -3730,6 +3730,8 @@ html:not([data-theme="dark"]) .lit-hero {
 .canvas-more-tools summary { cursor: pointer; font: 600 .73rem/1.45 var(--f-ui); letter-spacing: .035em; color: var(--c-ink-soft); padding: 4px 1px; }
 .canvas-more-tools[open] summary { color: var(--c-accent); margin-bottom: 15px; }
 .canvas-more-tools .canvas-panel-links { margin-top: 8px; }
+.canvas-more-tools .canvas-duplicate { width: 100%; margin-top: 12px; padding: 10px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-raised); color: var(--c-accent); font: 600 .75rem var(--f-ui); text-align: center; }
+.canvas-more-tools .canvas-duplicate:hover { border-color: var(--c-accent); }
 .canvas-more-tools .canvas-panel-row { align-items: end; }
 .canvas-lock-action { display: grid; grid-template-columns: 28px minmax(0,1fr); column-gap: 9px; align-items: center; width: 100%; text-align: left; background: var(--c-bg-raised); color: var(--c-ink); border: 1px solid var(--c-rule-strong); border-radius: 3px; padding: 11px 12px; margin: 10px 0 16px; cursor: pointer; }
 .canvas-lock-action > span { grid-row: span 2; font: 1.1rem var(--f-ui); color: var(--c-accent); text-align: center; }

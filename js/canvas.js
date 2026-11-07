@@ -73,6 +73,22 @@ function update(id, patch, { record = true } = {}) {
   if (record) checkpoint();
   change(data().map((i) => i.id === id ? { ...i, ...patch } : i));
 }
+function duplicateSelected() {
+  const original = data().find(x => x.id === selected);
+  if (!original) return;
+  checkpoint();
+  const copy = {
+    ...clone(original), id: uid(), locked: false,
+    x: original.fullWidth ? 0 : clamp(Number(original.x || 0) + 3, 0, 100),
+    y: clamp(Number(original.y || 0) + 3, 0, 100),
+    label: original.label ? `${original.label.replace(/ copy$/i, '')} copy`.slice(0, 60) : '',
+  };
+  const items = [...data()];
+  items.splice(items.findIndex(x => x.id === original.id) + 1, 0, copy);
+  selected = copy.id;
+  panelMode = 'selected';
+  change(items);
+}
 function moveLayer(id, direction, { stayInLayers = true } = {}) {
   const items = [...data()];
   const from = items.findIndex(x => x.id === id);
@@ -398,6 +414,7 @@ function paintPanel() {
       <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}" style="--opacity-fill:${Math.round((item.opacity ?? 1) * 100)}%"></label>
       ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label></div>
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
+      <button type="button" class="canvas-duplicate" data-canvas="duplicate">＋ Duplicate element</button>
     </details>
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
   panel.querySelector('.canvas-more-tools')?.addEventListener('toggle', (event) => { advancedOpen = event.target.open; });
@@ -407,13 +424,13 @@ function paintPanel() {
       const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
       if (!itemNode) return;
       const value = Number(input.value);
-      input.style.setProperty('--opacity-fill', `${Math.round(value * 100)}%`);
       if (input.dataset.prop === 'rotate') itemNode.style.transform = `rotate(${value}deg)`;
       else if (input.dataset.prop === 'width') itemNode.style.width = `${value}px`;
       else itemNode.style[input.dataset.prop === 'x' ? 'left' : 'top'] = `${value}%`;
     });
     if (input.dataset.prop === 'opacity') input.addEventListener('input', () => {
       const value = Number(input.value);
+      input.style.setProperty('--opacity-fill', `${Math.round(value * 100)}%`);
       const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
       if (itemNode) itemNode.style.opacity = String(value);
       const output = panel.querySelector('[data-opacity-value]');
@@ -523,6 +540,7 @@ function ensureTools() {
     if (action === 'image') picker();
     if (action === 'section') sectionPicker();
     if (action === 'replace-art' && selected) picker((assetId) => update(selected, { assetId }));
+    if (action === 'duplicate' && selected) duplicateSelected();
     if (action === 'toggle-lock' && selected) {
       const current = data().find(x => x.id === selected);
       if (current) update(selected, { locked: !current.locked });
