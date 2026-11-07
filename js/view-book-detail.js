@@ -3,6 +3,7 @@
 import { getBook, state } from './state.js';
 import { esc, attr, coverImg } from './ui.js';
 import { formatDate } from './periods.js';
+import { src as artworkSrc } from './assets.js';
 
 const STATUS = { want: 'Want to read', reading: 'Currently reading', read: 'Read', dnf: 'Did not finish' };
 const paragraph = (value) => esc(String(value || '')).replace(/\n/g, '<br>');
@@ -23,7 +24,7 @@ export function bookDetailView({ id } = {}) {
   ].filter(Boolean);
   const readingDates = [book.dateStarted && `Started ${formatDate(book.dateStarted)}`,
     book.dateFinished && `Finished ${formatDate(book.dateFinished)}`].filter(Boolean);
-  const hasWriting = !!(book.review || book.favoriteQuote || book.notes);
+  const hasWriting = !!(book.review || book.favoriteQuote || book.notes || book.journalArtworkId);
 
   return {
     title: book.title, tab: 'books', editorial: true, back: true,
@@ -58,6 +59,7 @@ export function bookDetailView({ id } = {}) {
           ${book.review ? `<section class="book-archive-review"><p class="lit-overline">MY READING JOURNAL / REVIEW</p><h2>What I thought</h2><div class="book-archive-prose">${paragraph(book.review)}</div></section>` : ''}
           ${book.favoriteQuote ? `<section class="book-archive-passage"><p class="lit-overline">A PASSAGE TO KEEP</p><blockquote>“${paragraph(book.favoriteQuote)}”</blockquote></section>` : ''}
           ${book.notes ? `<section class="book-archive-notes"><p class="lit-overline">MARGINALIA</p><h2>Notes to remember</h2><div class="book-archive-prose">${paragraph(book.notes)}</div></section>` : ''}
+          ${book.journalArtworkId && artworkSrc(book.journalArtworkId) ? `<section class="book-archive-art"><p class="lit-overline">A VISUAL MEMENTO</p><figure><img src="${artworkSrc(book.journalArtworkId)}" alt="Artwork saved with this reading journal">${book.journalArtCaption ? `<figcaption>${esc(book.journalArtCaption)}</figcaption>` : ''}</figure></section>` : ''}
           ${!hasWriting ? `<section class="book-archive-empty"><p class="book-archive-ornament">❦</p><h2>The pages are waiting.</h2><p>Your thoughts, favorite lines and reflections can live here whenever you’re ready.</p><a href="#/book/${encodeURIComponent(book.id)}/journal">Write about this book ↗</a></section>` : ''}
         </main>
         <aside class="book-archive-aside">

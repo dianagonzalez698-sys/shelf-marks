@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 44243)
-Total output lines: 3600
+Warning: truncated output (original token count: 44819)
+Total output lines: 3622
 
 /* ===========================================================================
    Diana's Lit Picks — editorial reading journal
@@ -1569,7 +1569,435 @@ a.ed-meta:hover { color: var(--c-accent); }
 }
 .statement cite {
   display: block; margin-top: 1.2rem;
-  font-family: var(--f-ui); …14243 tokens truncated…
+  font-family: var(--f-ui); font-style: normal;
+  font-size: var(--fs-label); letter-spacing: var(--ls-label);
+  text-transform: var(--tt-label); color: var(--c-ink-faint);
+}
+.ed-dark .statement cite { color: var(--c-banner-ink-dim); }
+.ed-dark .st-quote::before { color: var(--c-banner-accent); }
+
+/* ------------------------------------------------------ interlude ------- */
+
+.ornament { display: flex; align-items: center; gap: 1.1rem; justify-content: center; }
+.ornament-line { flex: 1; max-width: 170px; height: 1px; background: var(--c-rule-strong); }
+.ornament svg { width: 22px; height: 22px; fill: var(--c-accent); opacity: .8; }
+.interlude-rule { margin: 0; border: 0; border-top: var(--rule-w) solid var(--c-rule-strong); }
+.interlude-strip .m-fig { width: 100%; }
+
+/* -------------------------------------------------------- measures ------ */
+
+.measures { display: grid; gap: 0; }
+.measure { padding: 1.3rem 0; border-top: var(--rule-w) solid var(--c-rule); }
+.measure:first-child { border-top: 0; }
+.measure-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.measure-head .ed-kicker { margin: 0; }
+.measure-pct {
+  font-family: var(--f-ui); font-variant-numeric: tabular-nums;
+  font-size: var(--fs-small); color: var(--c-ink-soft);
+}
+.measure-pct.over { color: var(--c-accent); }
+.measure-stat {
+  margin: .2rem 0 .1rem;
+  font-family: var(--f-display); font-size: var(--fs-stat);
+  font-weight: var(--fw-display); line-height: 1.1;
+  letter-spacing: var(--ls-display);
+}
+.measure-stat span { color: var(--c-ink-faint); }
+.measure-foot {
+  display: flex; justify-content: space-between; gap: 1rem; margin-top: .55rem;
+  font-size: var(--fs-tiny); font-style: italic; color: var(--c-ink-faint);
+}
+
+/* ----------------------------------------------------------- ticks ------ */
+
+.ticks { display: grid; grid-template-columns: minmax(0, 1fr); }
+.tick {
+  display: flex; align-items: flex-start; gap: .95rem;
+  padding: .95rem 0; border-bottom: var(--rule-w) solid var(--c-rule);
+  color: inherit; text-decoration: none;
+}
+.tick:first-child { border-top: var(--rule-w) solid var(--c-rule); }
+.tick-mark {
+  flex: none; width: 21px; height: 21px; margin-top: .2rem;
+  border-radius: var(--r-pill); border: 1px solid var(--c-rule-strong);
+  display: grid; place-items: center; color: transparent;
+}
+.tick.done .tick-mark { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink); }
+.tick-mark svg { width: 11px; height: 11px; }
+.tick-body { flex: 1; min-width: 0; }
+.tick-title { display: block; font-family: var(--f-display); font-size: var(--fs-h3); font-weight: var(--fw-heading); }
+.tick-note { display: block; font-size: var(--fs-small); font-style: italic; color: var(--c-ink-faint); overflow-wrap: anywhere; }
+
+/* --------------------------------------------------------- spreads ------ */
+
+.spreads { display: grid; gap: clamp(2.2rem, 5vw, 4.2rem); }
+.spread {
+  display: grid; gap: clamp(1.2rem, 3.5vw, 3rem);
+  align-items: center; color: inherit; text-decoration: none;
+}
+@media (min-width: 720px) {
+  .spread { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); }
+  .spread-flip .spread-media { order: 2; }
+}
+.spread-media { position: relative; }
+.spread-marks {
+  position: absolute; right: -10px; bottom: -14px;
+  display: flex; gap: 4px; width: 46%; max-width: 150px;
+}
+.spread-marks > * { flex: 1; }
+.spread-title {
+  margin: .15rem 0 0;
+  font-family: var(--f-display); font-size: clamp(1.5rem, 3.2vw, 2.2rem);
+  font-weight: var(--fw-display); line-height: 1.12;
+  letter-spacing: var(--ls-display); text-transform: var(--tt-display);
+}
+.spread-filter {
+  margin: .9rem 0 .6rem;
+  font-family: var(--f-ui); font-size: var(--fs-tiny);
+  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+.spread:hover .spread-title { color: var(--c-accent); }
+
+/* ----------------------------------------------------------- shelf ------ */
+
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 132px));
+  gap: clamp(1rem, 2.6vw, 2rem);
+  justify-content: start;
+}
+.shelf-item { text-decoration: none; color: inherit; display: block; }
+.shelf-item .cover { width: 100%; }
+.shelf-title { display: block; margin-top: .6rem; font-family: var(--f-display); font-size: var(--fs-small); font-weight: var(--fw-heading); line-height: 1.2; }
+.shelf-meta { display: block; font-size: var(--fs-tiny); font-style: italic; color: var(--c-ink-faint); }
+
+/* ===========================================================================
+   MEDIA — every picture in the journal, drawn by js/media.js
+   ======================================================================== */
+
+.m-fig {
+  position: relative;
+  margin: 0;
+  display: block;
+  transform: rotate(var(--m-rot, 0deg));
+  transition: transform var(--dur) var(--ease);
+}
+.m-mount { position: relative; display: block; width: 100%; }
+.m-box {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  background: var(--c-bg-sunk);
+}
+.m-img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+/* A picture at its natural shape has no height to fill, so it flows instead. */
+.m-auto .m-img { position: static; height: auto; }
+.m-cap {
+  margin-top: .55rem;
+  font-family: var(--f-ui); font-size: var(--fs-tiny);
+  letter-spacing: .06em; text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+
+/* Empty slots are tinted plates, not broken images — the layouts read as
+   designed before a single photograph has been uploaded. */
+.m-empty {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+}
+.m-empty::after {
+  content: ''; position: absolute; inset: 0;
+  opacity: .5; mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+.m-empty-mark { width: 26px; height: 26px; opacity: .5; position: relative; z-index: 1; }
+.m-tint-sage    { background: linear-gradient(150deg, #9db197, #7c9178); }
+.m-tint-olive   { background: linear-gradient(150deg, #64805f, #42573f); }
+.m-tint-rose    { background: linear-gradient(150deg, #d79098, #bc6a72); }
+.m-tint-blue    { background: linear-gradient(150deg, #93b0d8, #6b8cbd); }
+.m-tint-apricot { background: linear-gradient(150deg, #dd8a55, #c4652f); }
+.m-tint-gold    { background: linear-gradient(150deg, #e9c478, #d2a04a); }
+.m-empty-mark, .m-tint-sage .m-empty-mark { fill: rgba(255,255,255,.75); }
+
+/* ---- frames ---- */
+.mf-shadow .m-mount { box-shadow: 0 2px 5px rgba(60, 36, 28, .10), 0 14px 34px rgba(60, 36, 28, .13); }
+.mf-line .m-box { border: var(--rule-w) solid var(--c-rule-strong); }
+.mf-plate .m-box { border: 1px solid rgba(120, 92, 70, .22); }
+.mf-plate .m-box::after {
+  content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  box-shadow: inset 0 0 0 7px var(--c-bg-raised), inset 0 0 0 8px rgba(120, 92, 70, .20);
+}
+.mf-oval .m-box { border-radius: 50% / 50%; }
+.mf-arch .m-box { border-radius: 50% 50% var(--bm-radius) var(--bm-radius) / 36% 36% var(--bm-radius) var(--bm-radius); }
+
+.mf-polaroid .m-mount {
+  background: var(--c-bg-raised);
+  padding: 9px 9px 42px;
+  box-shadow: 0 2px 5px rgba(60, 36, 28, .12), 0 16px 36px rgba(60, 36, 28, .16);
+}
+.mf-polaroid .m-cap {
+  position: absolute; left: 0; right: 0; bottom: 10px;
+  margin: 0; padding: 0 10px; text-align: center;
+  font-family: var(--f-script); font-size: 1.1rem;
+  letter-spacing: 0; text-transform: none; color: var(--c-ink-soft);
+}
+
+
+/* A torn deckle edge, cut with a mask so it works over any ground. */
+.mf-deckle .m-box {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 100'%3E%3Cpath d='M2.5,1.2 Q12,0.2 22,1.6 Q33,3 44,1 Q56,-0.6 67,1.4 Q79,3.2 89,1.2 Q97,0.2 98.6,2.4 L98.4,97.2 Q89,99.4 78,97.6 Q66,95.8 55,98 Q43,100 32,98 Q20,95.8 10,97.8 Q3,99 1.4,96.8 Z' fill='black'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' preserveAspectRatio='none' viewBox='0 0 100 100'%3E%3Cpath d='M2.5,1.2 Q12,0.2 22,1.6 Q33,3 44,1 Q56,-0.6 67,1.4 Q79,3.2 89,1.2 Q97,0.2 98.6,2.4 L98.4,97.2 Q89,99.4 78,97.6 Q66,95.8 55,98 Q43,100 32,98 Q20,95.8 10,97.8 Q3,99 1.4,96.8 Z' fill='black'/%3E%3C/svg%3E");
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+}
+
+/* A postage stamp. The perforation mask is applied to the white backing only —
+   masking the mount itself punched holes straight through the picture. */
+.mf-stamp .m-mount { position: relative; padding: 11px; }
+.mf-stamp .m-mount::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 0;
+  background: var(--c-bg-raised);
+  filter: drop-shadow(0 6px 14px rgba(60, 36, 28, .18));
+  -webkit-mask: radial-gradient(circle 5px at 5px 5px, transparent 97%, #000) -5px -5px / 10px 10px;
+  mask: radial-gradient(circle 5px at 5px 5px, transparent 97%, #000) -5px -5px / 10px 10px;
+}
+.mf-stamp .m-box { z-index: 1; }
+
+/* Washi tape holding a picture to the page. */
+.mf-tape-top .m-mount::before,
+.mf-tape-corners .m-mount::before,
+.mf-tape-corners .m-mount::after {
+  content: '';
+  position: absolute; z-index: 4;
+  width: 92px; height: 26px;
+  background: linear-gradient(100deg, rgba(224,179,90,.62), rgba(212,118,60,.5));
+  box-shadow: 0 1px 3px rgba(60,36,28,.14);
+  opacity: .9;
+}
+.mf-tape-top .m-mount::before { top: -11px; left: 50%; transform: translateX(-50%) rotate(-2.5deg); }
+.mf-tape-corners .m-mount::before { top: -12px; left: -16px; transform: rotate(-38deg); }
+.mf-tape-corners .m-mount::after  { top: -12px; right: -16px; transform: rotate(38deg); }
+
+/* Full-bleed backdrop behind a hero. */
+.m-backdrop {
+  position: absolute; inset: 0; z-index: 0;
+  background-size: cover;
+  background-repeat: no-repeat;…9819 tokens truncated….word-center { text-align: center; }
+.word-center .word-note { margin-inline: auto; }
+.word-right { text-align: right; }
+.word-right .word-note { margin-inline-start: auto; }
+
+/* With a picture beside it, the word takes the larger share. */
+.word-split {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
+  gap: clamp(1.6rem, 5vw, 4.5rem);
+  align-items: center;
+}
+.word-split.is-flipped { grid-template-columns: minmax(0, 5fr) minmax(0, 3fr); }
+.word-split.is-flipped .word-pic { order: 2; }
+
+/* The tally page's summary figures. */
+.wstats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+  gap: clamp(1rem, 3vw, 2.4rem);
+  margin: 0 0 1.8rem;
+  padding-bottom: 1.6rem;
+  border-bottom: 1px solid var(--c-rule);
+  text-align: center;
+}
+.wstat-n {
+  display: block;
+  font-family: var(--f-display);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1;
+  color: var(--c-accent);
+}
+.wstat-l {
+  display: block; margin-top: .35rem;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
+  color: var(--c-ink-faint);
+}
+
+.word-count {
+  flex: 0 0 auto;
+  font-family: var(--f-display);
+  font-size: 1.3rem;
+  color: var(--c-accent);
+  padding-inline: .8rem .2rem;
+}
+
+/* The editor's per-book tally list. */
+.wlist { max-height: 46vh; overflow-y: auto; margin-top: .5rem; }
+.wrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5rem;
+  grid-template-areas: "title n" "meta n";
+  align-items: center;
+  gap: 0 .8rem;
+  padding: .5rem .6rem;
+  border-bottom: 1px solid var(--c-rule);
+  cursor: text;
+}
+.wrow.is-on { background: var(--c-accent-soft); }
+.wrow-title { grid-area: title; font-weight: 500; }
+.wrow-meta { grid-area: meta; font-size: .85em; color: var(--c-ink-faint); }
+.wrow input { grid-area: n; text-align: center; }
+
+@media (max-width: 759px) {
+  .word-split, .word-split.is-flipped { grid-template-columns: minmax(0, 1fr); }
+  .word-split.is-flipped .word-pic { order: 0; }
+  /* justify-self, not margin:auto — an auto margin makes a grid item
+     shrink-to-fit, and the figure inside is width:100%, so the pair collapse
+     to nothing. */
+  .word-pic { inline-size: 100%; max-inline-size: 320px; justify-self: center; }
+}
+
+/* The eligible-books picker: the tick shows what counts now, whether the rule
+   decided it or you did. */
+.elist { max-height: 50vh; overflow-y: auto; margin-top: .6rem; }
+.erow {
+  display: grid; grid-template-columns: auto minmax(0, 1fr);
+  align-items: start; gap: .7rem;
+  padding: .6rem;
+  border-bottom: 1px solid var(--c-rule);
+  cursor: pointer;
+}
+.erow.is-on { background: var(--c-accent-soft); }
+.erow input { margin-top: .25rem; }
+.erow-body { display: block; min-width: 0; }
+.erow-title { display: block; font-weight: 500; }
+.erow-meta { display: block; font-size: .85em; color: var(--c-ink-faint); }
+.erow-why {
+  display: block; margin-top: .15rem;
+  font-family: var(--f-ui); font-size: .72em;
+  letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--c-accent);
+}
+
+/* A sheet opened on top of another says how to get back to it. */
+.sheet-back {
+  display: inline-flex; align-items: center; gap: .3rem;
+  margin: 0 0 .9rem; padding: .3rem .6rem .3rem 0;
+  background: none; border: 0; cursor: pointer;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
+  color: var(--c-accent);
+}
+.sheet-back:hover { color: var(--c-accent-deep); }
+@media (pointer: coarse) { .sheet-back { padding: .6rem 1rem .6rem 0; min-block-size: 44px; } }
+
+/* ------------------------------------------------- type style controls ---
+   Weight, style, size, tracking and case for one role, inside the panel its
+   face button opens. Four roles stay four rows; the depth is on demand. */
+
+.sty-block { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--c-rule); }
+.sty-head {
+  margin: .9rem 0 .4rem;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--c-ink-faint);
+}
+.sty-head:first-child { margin-top: 0; }
+.sty-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+.sty-chip {
+  padding: .34rem .66rem;
+  font-family: var(--f-ui); font-size: .78rem;
+  color: var(--c-ink-soft);
+  background: var(--c-bg-raised);
+  border: 1px solid var(--c-rule-strong); border-radius: 2px;
+  cursor: pointer;
+}
+.sty-chip:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-ink); }
+.sty-chip.is-on {
+  background: var(--c-accent); border-color: var(--c-accent); color: var(--c-accent-ink);
+}
+.sty-chip:disabled { opacity: .4; cursor: not-allowed; }
+
+.sty-slider { margin-top: .8rem; }
+.sty-slider label {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--f-ui); font-size: var(--fs-label);
+  letter-spacing: var(--ls-label); text-transform: uppercase;
+  color: var(--c-ink-faint);
+}
+.sty-slider input { inline-size: 100%; margin-top: .3rem; }
+
+@media (pointer: coarse) { .sty-chip { padding: .5rem .8rem; } }
+
+/* -------------------------------------------------------- rich text field --
+   Emphasis on a phrase rather than a whole element. */
+.rich-bar { display: flex; gap: .3rem; margin: .3rem 0; }
+.rich-btn {
+  inline-size: 30px; block-size: 28px; padding: 0;
+  font-family: var(--f-body); font-size: .95rem;
+  color: var(--c-ink-soft);
+  background: var(--c-bg-raised);
+  border: 1px solid var(--c-rule-strong); border-radius: 2px;
+  cursor: pointer;
+}
+.rich-btn:hover { border-color: var(--c-accent); color: var(--c-accent); }
+.rich-clear { font-size: .85rem; }
+.rich-input {
+  min-block-size: 2.6rem;
+  padding: .55rem .7rem;
+  font-family: var(--f-body); font-size: var(--fs-body);
+  color: var(--c-ink);
+  background: var(--c-bg-raised);
+  border: 1px solid var(--c-rule-strong); border-radius: 3px;
+  white-space: pre-wrap; overflow-wrap: break-word;
+}
+.rich-input:focus { outline: 2px solid var(--c-accent); outline-offset: 1px; }
+.rich-input b { font-weight: 700; }
+.rich-input i { font-style: italic; }
+@media (pointer: coarse) { .rich-btn { inline-size: 40px; block-size: 40px; } }
+
+/* ========================================================================
+   THE ILLUSTRATED LITERARY SALON — typographic finish
+   Delicate rules, editorial navigation, restrained buttons. Everything here
+   reads the role tokens, so a section override still wins over it.
+   ===================================================================== */
+
+/* A copperplate's entrance and exit strokes reach outside the glyph box; the
+   wordmark needs room for them and must never clip or force a page scroll. */
+.wordmark {
+  padding-inline: .14em;
+  padding-block: .06em;
+  overflow: visible;
+  line-height: 1.5;
+}
+.masthead, .masthead-inner { overflow: visible; }
+.ed-script, .marginalia.big { overflow-wrap: normal; }
+
+/* Navigation: small, widely spaced, with a hairline that draws on approach
+   rather than a block of colour. */
+.masthead-link {
+  position: relative;
+  font-weight: 500;
+  letter-spacing: var(--ls-nav);
+}
+.masthead-link::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -.38em;
+  block-size: 1px; background: currentColor;
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .22s ease;
+}
+.masthead-link:hover::after,
+.masthead-link[aria-current]::after { transform: scaleX(1); }
+
+/* Buttons read as editorial labels, not as interface chrome. */
+.btn {
+  font-family: var(--f-ui);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  text-transform: var(--tt-label);
+}
+
+/* Metadata and captions share one quiet treatment. */
 .ed-meta, .shelf-meta, .entry-meta, .hint, .marginalia {
   font-feature-settings: 'onum' 1, 'liga' 1;
 }
@@ -2028,6 +2456,28 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-writing-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 .book-writing-footnote { border-top: 1px solid var(--c-rule); padding-top: 25px; margin-top: 45px; color: var(--c-ink-soft); font: .9rem/1.5 var(--f-ui); }
 .book-writing-footnote a { color: var(--c-accent); }
+.book-writing-art { margin: 50px 0 38px; padding: 32px 0; border-block: 1px solid var(--c-rule); }
+.book-writing-art h2 { font: 400 2.5rem var(--f-display); margin: 6px 0 10px; }
+.book-writing-art > p:not(.lit-overline) { color: var(--c-ink-soft); font: 1rem/1.5 var(--f-body); }
+.book-writing-art-preview { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 185px; max-width: 480px; margin: 22px 0; background: var(--c-bg-sunk); border: 1px dashed var(--c-rule-strong); color: var(--c-ink-soft); }
+.book-writing-art-preview img { display: block; width: 100%; max-height: 390px; object-fit: contain; }
+.book-writing-art-preview span { font: 3.5rem var(--f-display); }
+.book-writing-art-preview small { font: italic 1rem var(--f-body); }
+.book-writing-art .btn { display: inline-block; margin-right: 8px; cursor: pointer; }
+.book-writing-caption { margin: 22px 0 0; max-width: 480px; }
+.book-writing-caption label { font-size: 1.3rem; }
+.book-writing-caption input { width: 100%; box-sizing: border-box; padding: 12px; background: var(--c-bg); border: 1px solid var(--c-rule-strong); color: var(--c-ink); font: 1rem var(--f-body); }
+.book-archive-art figure { margin: 24px 0; max-width: 650px; }
+.book-archive-art img { display: block; max-width: 100%; max-height: 570px; object-fit: contain; }
+.book-archive-art figcaption { font: italic 1.05rem var(--f-body); color: var(--c-ink-soft); margin-top: 14px; }
+.journal-entry-cards { display: grid; gap: 25px; grid-template-columns: repeat(auto-fit,minmax(min(100%,290px),1fr)); }
+.journal-entry-card { display: block; text-decoration: none; color: var(--c-ink); border-top: 1px solid var(--c-rule-strong); padding-top: 15px; }
+.journal-entry-visual { height: 215px; display: flex; justify-content: center; align-items: center; background: var(--c-bg-sunk); overflow: hidden; }
+.journal-entry-visual img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.journal-entry-words { padding: 18px 5px; }
+.journal-entry-words h3 { font: 400 2rem/1.12 var(--f-display); margin: 8px 0 12px; }
+.journal-entry-words p:not(.lit-overline) { font: italic 1.04rem/1.4 var(--f-body); color: var(--c-ink-soft); }
+.journal-entry-words small { color: var(--c-accent); font: 600 .7rem var(--f-ui); letter-spacing: .08em; }
 .book-archive-page { max-width: 1420px; margin: 0 auto; padding: clamp(25px,5vw,65px) clamp(20px,7vw,105px) 110px; }
 .book-archive-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 0 28px; border-bottom: 1px solid var(--c-rule); font: 600 .75rem var(--f-ui); }
 .book-archive-nav a { color: var(--c-ink-soft); text-decoration: none; }

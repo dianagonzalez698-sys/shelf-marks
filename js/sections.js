@@ -911,6 +911,35 @@ export const SECTION_TYPES = {
   },
 
   /* 12. Recent books (live) ------------------------------------------------ */
+  journalEntries: {
+    label: 'From the reading journal',
+    blurb: 'Book reviews, favorite passages, and scrapbook pages from your personal library.',
+    create: () => ({ kicker: 'Between the pages', title: 'From My Reading Journal', limit: 3 }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'rich', styleRole: 'Ui' },
+      { key: 'title', label: 'Heading', type: 'rich', styleRole: 'Display' },
+      { key: 'limit', label: 'How many', type: 'range', min: 1, max: 8, step: 1 },
+      ...COMMON_FIELDS,
+    ],
+    render(sec) {
+      const entries = [...state.books].filter(b => b.review || b.favoriteQuote || b.notes || b.journalArtworkId)
+        .sort((a,b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))
+        .slice(0, Number(sec.limit) || 3);
+      return sectionShell(sec, `
+        <div class="ed-head"><div>${kicker(sec.kicker)}${headline(sec.title)}</div></div>
+        ${entries.length ? `<div class="journal-entry-cards">${entries.map(b => {
+          const excerpt = String(b.review || b.notes || b.favoriteQuote || '').replace(/\s+/g, ' ').slice(0, 155);
+          const artwork = b.journalArtworkId && assetSrc(b.journalArtworkId);
+          return `<a href="#/book/${encodeURIComponent(b.id)}" class="journal-entry-card">
+            <div class="journal-entry-visual">${artwork ? `<img src="${artwork}" alt="">` : coverImg(b, { big: true })}</div>
+            <div class="journal-entry-words"><p class="lit-overline">READING JOURNAL</p><h3>${esc(b.title)}</h3><p>${esc(excerpt || b.journalArtCaption || 'A visual note from this book.')}</p><small>OPEN THE ENTRY →</small></div>
+          </a>`;
+        }).join('')}</div>` : `<div class="recent-books-empty"><p>Your literary pages will appear here.</p><span>Write about a book in your Library, then return to this section.</span><a href="#/books">Visit your library →</a></div>`}
+      `);
+    },
+  },
+
+  /* 12. Recent books (live) ------------------------------------------------ */
   books: {
     label: 'Recent reading',
     blurb: 'The latest books finished, with their covers.',
