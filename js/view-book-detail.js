@@ -69,7 +69,8 @@ export function bookDetailView({ id } = {}) {
             <textarea id="bj-quote" rows="3" placeholder="A line worth remembering…">${esc(book.favoriteQuote || '')}</textarea>
             <label for="bj-notes">Marginalia & little notes</label>
             <textarea id="bj-notes" rows="4" placeholder="Anything else worth keeping…">${esc(book.notes || '')}</textarea>
-            <div class="book-inline-actions"><button class="btn btn-primary" type="submit">Save my words</button><button class="btn" type="button" id="book-journal-cancel">Cancel</button></div>
+            <div class="book-inline-actions"><button class="btn btn-primary" type="submit">Save my words</button><button class="btn" type="button" id="book-journal-cancel">Close editor</button></div>
+            <p class="book-draft-state" id="book-draft-state" aria-live="polite">Your draft stays in this tab until you save.</p>
           </form>
           <div id="book-journal-reading">
           ${book.review ? `<section class="book-archive-review"><p class="lit-overline">MY READING JOURNAL / REVIEW</p><h2>What I thought</h2><div class="book-archive-prose">${paragraph(book.review)}</div></section>` : ''}
@@ -96,6 +97,38 @@ export function bookDetailView({ id } = {}) {
       const form = root.querySelector('#book-inline-journal');
       const reading = root.querySelector('#book-journal-reading');
       const toggle = root.querySelector('#book-journal-toggle');
+      const draftState = root.querySelector('#book-draft-state');
+      const draftFields = {
+        rating: root.querySelector('#bj-rating'),
+        review: root.querySelector('#bj-review'),
+        quote: root.querySelector('#bj-quote'),
+        notes: root.querySelector('#bj-notes'),
+      };
+      const draftKey = `dlp:journal-draft:${book.id}`;
+      let draftTimer = null;
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+        if (saved && Date.now() - saved.at < 30 * 24 * 60 * 60 * 1000) {
+          Object.entries(draftFields).forEach(([key, field]) => {
+            if (typeof saved[key] === 'string') field.value = saved[key];
+          });
+          draftState.textContent = 'Your unfinished draft has been restored.';
+        }
+      } catch (_) { draftState.textContent = 'Press Save my words to keep your writing.'; }
+      const keepDraft = () => {
+        clearTimeout(draftTimer);
+        draftState.textContent = 'Keeping your draft…';
+        draftTimer = setTimeout(() => {
+          try {
+            sessionStorage.setItem(draftKey, JSON.stringify({
+              at: Date.now(), ...Object.fromEntries(Object.entries(draftFields).map(([key, field]) => [key, field.value])),
+            }));
+            draftState.textContent = 'Draft kept in this tab.';
+          } catch (_) { draftState.textContent = 'Draft storage unavailable. Please save your words.'; }
+        }, 350);
+      };
+      form.addEventListener('input', keepDraft);
+      form.addEventListener('change', keepDraft);
       const edit = () => {
         form.hidden = false;
         reading.hidden = true;
@@ -121,6 +154,8 @@ export function bookDetailView({ id } = {}) {
             favoriteQuote: root.querySelector('#bj-quote').value.trim(),
             notes: root.querySelector('#bj-notes').value.trim(),
           });
+          clearTimeout(draftTimer);
+          try { sessionStorage.removeItem(draftKey); } catch (_) { /* saved book is authoritative */ }
           toast('Journal saved.', 'good');
           navigate(`/book/${encodeURIComponent(book.id)}`);
         } catch (_) { toast('Could not save your journal.', 'bad'); }

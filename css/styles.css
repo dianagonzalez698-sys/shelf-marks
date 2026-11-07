@@ -3511,6 +3511,9 @@ html:not([data-theme="dark"]) .lit-hero {
 .book-inline-journal textarea, .book-inline-journal select { width: 100%; max-width: 100%; box-sizing: border-box; padding: 15px; border: 1px solid var(--c-rule-strong); border-radius: 2px; color: var(--c-ink); background: var(--c-bg); font: 1.05rem/1.55 var(--f-body); }
 .book-inline-journal textarea:focus-visible, .book-inline-journal select:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
 .book-inline-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.book-draft-state { margin: 14px 0 0; color: var(--c-ink-faint); font: italic .88rem/1.4 var(--f-body); }
+.book-inline-journal textarea { resize: vertical; min-height: 95px; }
+.book-inline-journal label[for="bj-review"] { margin-top: 32px; }
 .book-archive-primary { border: 0; cursor: pointer; }
 .book-archive-writing .lit-overline, .book-archive-aside .lit-overline { color: var(--c-accent); font-size: .7rem; }
 .book-archive-writing h2 { font: 400 clamp(2.6rem,4vw,4.5rem)/1.1 var(--f-display); margin: 17px 0 25px; }
