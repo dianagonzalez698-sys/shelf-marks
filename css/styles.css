@@ -920,24 +920,6 @@ html:not([data-theme="dark"]) .screen {
 .btn:disabled { opacity: .45; cursor: default; }
 .btn-row { display: flex; gap: .7rem; flex-wrap: wrap; }
 
-.fab {
-  position: fixed; z-index: 25;
-  right: calc(var(--sp-page-x) + var(--safe-r));
-  bottom: calc(var(--h-tabbar) + var(--safe-b) + 1.1rem);
-  min-height: 46px; padding: 0 1.3rem;
-  display: inline-flex; align-items: center; gap: .5rem;
-  background: var(--c-accent); color: var(--c-accent-ink);
-  border-radius: var(--r-pill);
-  text-decoration: none;
-  font-family: var(--f-ui); font-size: var(--fs-label);
-  font-weight: var(--fw-label); letter-spacing: var(--ls-label);
-  text-transform: var(--tt-label);
-  box-shadow: 0 4px 18px rgba(52, 42, 33, .20);
-  transition: background var(--dur) var(--ease);
-}
-.fab:hover { background: var(--c-accent-deep); }
-@media (max-width: 400px) { .fab-label { display: none; } .fab { padding: 0 1rem; } }
-
 /* tab bar — phones only */
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
@@ -1198,12 +1180,11 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
   :root { --bm-scale: .82; }
 }
 
-/* Desktop: the tab bar and the floating button give way to the masthead. */
+/* Desktop: the tab bar gives way to the masthead. */
 @media (min-width: 860px) {
   .tabbar { display: none; }
   .screen { padding-bottom: 5rem; }
   .toasts { bottom: 2rem; }
-  .fab { bottom: 2rem; }
 }
 
 @media (max-width: 520px) {
@@ -1224,7 +1205,7 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 }
 
 @media print {
-  .masthead, .tabbar, .fab, .toasts, .sheet-host { display: none !important; }
+  .masthead, .tabbar, .toasts, .sheet-host { display: none !important; }
   body { background: #fff; }
 }
 
@@ -3351,6 +3332,8 @@ html:not([data-theme="dark"]) .lit-hero {
 #shelf-query { background: transparent; border: 0; flex: 1; min-width: 0; color: var(--c-ink); font: 1.2rem var(--f-body); padding: 10px 0; }
 #shelf-search button { border: 0; background: transparent; color: var(--c-ink); font: 2rem var(--f-body); cursor: pointer; }
 .lit-shelf-tools>label { font: .72rem var(--f-ui); color: var(--c-ink-faint); white-space: nowrap; }
+.lit-shelf-add-link { flex: none; color: var(--c-accent); font: 600 .75rem var(--f-ui); text-decoration: none; white-space: nowrap; }
+.lit-shelf-add-link:hover, .lit-shelf-add-link:focus-visible { text-decoration: underline; text-underline-offset: 4px; }
 #shelf-sort { border: 0; background: transparent; color: var(--c-ink); font: .78rem var(--f-ui); }
 .lit-shelf-count { display: flex; justify-content: space-between; gap: 1rem; font: 600 .67rem var(--f-ui); color: var(--c-ink-faint); letter-spacing: .17em; margin: 26px 0 17px; padding-bottom: 13px; border-bottom: 1px solid var(--c-rule-strong); }
 .lit-shelf-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); column-gap: clamp(16px,2.1vw,32px); row-gap: clamp(38px,5vw,75px); }

@@ -33,13 +33,14 @@ export function booksView(params = {}) {
   if (sort === 'title') shown.sort((a,b) => a.title.localeCompare(b.title));
 
   return {
-    title: 'My Library', tab: 'books', fab: true, editorial: true, keepScroll: true,
+    title: 'My Library', tab: 'books', editorial: true, keepScroll: true,
     html: `<div class="literary-shelf">
       <header class="lit-shelf-header"><div><p class="lit-overline">THE PERSONAL LIBRARY / ${state.settings.year}</p>
         <h1>My <em>Bookshelf</em></h1><p>Every book has a place here, whether read, reading, or still waiting.</p></div>
       </header>
       <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
       <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search">⌕</button></form>
+        <a class="lit-shelf-add-link" href="#/add">＋ Add book</a>
         <details class="lit-shelf-manage-control" id="shelf-manager"><summary>✧ Edit shelves</summary>
           <div class="lit-shelf-manage-panel">
             <form id="shelf-create"><label for="shelf-name">New shelf name</label><div><input id="shelf-name" maxlength="45" placeholder="e.g. Cozy mysteries" required><button type="submit">Create shelf</button></div></form>
@@ -60,7 +61,7 @@ export function booksView(params = {}) {
               ${customShelves.map((s)=>`<label><input type="checkbox" data-book-shelf="${attr(b.id)}" value="${attr(s.id)}" ${(b.shelves || []).includes(s.id) ? 'checked' : ''}>${esc(s.name)}</label>`).join('')}
             </details>` : ''}
           </div>
-        </div></article>`).join('')}</div>` : `<div class="lit-empty-shelf"><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>${search ? 'No books matched that search.' : 'A lovely shelf waiting to be filled.'}</p><a href="#/add">ADD A BOOK ↗</a></div>`}
+        </div></article>`).join('')}</div>` : `<div class="lit-empty-shelf"><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>${search ? 'No books matched that search.' : 'A lovely shelf waiting to be filled.'}</p></div>`}
     </div>`,
     onMount(root) {
       const form = root.querySelector('#shelf-search');

@@ -494,12 +494,10 @@ function setChrome(view) {
   if (app) app.classList.toggle('is-editorial', !!view.editorial);
   const backBtn = document.getElementById('appbar-back');
   const actions = document.getElementById('appbar-actions');
-  const fab = document.getElementById('fab');
   const banner = document.getElementById('editorial-banner');
 
   if (backBtn) backBtn.hidden = !view.back;
   if (banner) banner.hidden = !view.banner;
-  if (fab) fab.hidden = !view.fab;
 
   if (actions) {
     actions.innerHTML = view.actions || '';
