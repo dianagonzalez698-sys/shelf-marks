@@ -3138,6 +3138,15 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-layer-list { display: grid; gap: 6px; }
 .canvas-layer-list button { text-align: left; padding: 11px; }
 .canvas-layer-list small { float: right; opacity: .5; }
+.canvas-layer-row { display: flex; align-items: center; gap: 4px; border: 1px solid var(--c-rule); background: var(--c-bg-raised); border-radius: 3px; min-width: 0; }
+.canvas-layer-row.is-active { border-color: var(--c-accent); background: var(--c-accent-soft); }
+.canvas-layer-list .canvas-layer-row .canvas-layer-name { display: flex; flex: 1; align-items: center; gap: 9px; min-width: 0; border: 0; background: transparent; padding: 9px 5px 9px 10px; font: .77rem/1.35 var(--f-ui); }
+.canvas-layer-name span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.canvas-layer-name span:first-child { color: var(--c-accent); flex: none; }
+.canvas-layer-order { display: inline-flex; padding-right: 4px; gap: 2px; }
+.canvas-layer-list .canvas-layer-order button { padding: 5px 7px; min-width: 27px; text-align: center; border: 1px solid var(--c-rule); background: transparent; color: var(--c-ink-soft); border-radius: 2px; }
+.canvas-layer-list .canvas-layer-order button:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-accent); }
+.canvas-layer-list .canvas-layer-order button:disabled { opacity: .22; cursor: default; }
 @media (max-width: 850px) {
   .edit-toggle-label { display: none; }
   .canvas-editing #app { margin-left: 0; padding-bottom: 340px; }
