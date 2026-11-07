@@ -318,7 +318,8 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: calc(var(--paper-texture-opacity) * .75);
+  opacity: var(--paper-texture-opacity);
+  filter: contrast(1.8) brightness(.985);
   background: url('../assets/paper/antique-cotton-ivory.webp') repeat 0 0 / 768px 768px;
 }
 html[data-theme="dark"] body::before { opacity: 0; }
@@ -491,6 +492,12 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
     calc(var(--sp-page-x) + var(--safe-r))
     calc(var(--h-tabbar) + var(--safe-b) + 5rem)
     calc(var(--sp-page-x) + var(--safe-l));
+}
+/* The journal canvas itself needs paper grain; its full-size opaque surface
+   otherwise hides the lower-level body texture. Keep decorative artwork intact. */
+html:not([data-theme="dark"]) .screen {
+  background-image: url('../assets/paper/antique-cotton-ivory.webp');
+  background-size: 768px 768px;
 }
 
 /* Editorial pages run edge to edge; every section sets its own measure, so
@@ -3269,8 +3276,8 @@ body.is-editing [data-sec]:hover > .edit-tools,
 html:not([data-theme="dark"]) .masthead,
 html:not([data-theme="dark"]) .lit-hero {
   background-color: var(--c-bg);
-  background-image: linear-gradient(rgba(245,245,241,.20), rgba(245,245,241,.20)), url('../assets/paper/antique-cotton-ivory.webp');
-  background-size: auto, 768px 768px;
+  background-image: url('../assets/paper/antique-cotton-ivory.webp');
+  background-size: 768px 768px;
 }
 .lit-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .lit-form-actions { display: flex; gap: 20px; justify-content: space-between; align-items: center; color: var(--c-ink-faint); font: .76rem var(--f-ui); }
