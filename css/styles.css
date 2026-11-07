@@ -3414,7 +3414,7 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-section-number { color: var(--c-accent); font: 600 .7rem var(--f-ui); }
 .canvas-section-list strong { display: block; font: 500 1.18rem/1.2 var(--f-display); }
 .canvas-section-list small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: .72rem/1.5 var(--f-ui); color: var(--c-ink-soft); margin-top: 4px; }
-.canvas-inspector-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 5px; border-bottom: 1px solid var(--c-rule-strong); margin: 16px 0; }
+.canvas-inspector-tabs { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 3px; border-bottom: 1px solid var(--c-rule-strong); margin: 16px 0; }
 .canvas-inspector-tabs button { border: 0 !important; border-bottom: 2px solid transparent !important; border-radius: 0 !important; background: transparent !important; color: var(--c-ink-soft) !important; padding: 11px 4px !important; font: 600 .78rem var(--f-ui) !important; }
 .canvas-inspector-tabs button.active { color: var(--c-accent) !important; border-bottom-color: var(--c-accent) !important; }
 .canvas-field-group { font: 600 .65rem var(--f-ui); letter-spacing: .15em; text-transform: uppercase; color: var(--c-accent); margin: 24px 0 12px; }
@@ -3439,6 +3439,9 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .recent-books-empty p { font: italic 400 clamp(1.5rem,2.5vw,2.4rem)/1.25 var(--f-body); margin: 0 0 10px; }
 .recent-books-empty span { display: block; font: 1rem/1.45 var(--f-body); color: var(--c-ink-soft); }
 .recent-books-empty a { display: inline-block; margin-top: 18px; font: 600 .72rem var(--f-ui); color: var(--c-accent); }
+.canvas-artwork-cta { margin: 24px 0 10px; padding: 18px 14px; border: 1px dashed var(--c-rule-strong); background: var(--c-bg-raised); }
+.canvas-artwork-cta p { margin: 0 0 14px; font: .78rem/1.55 var(--f-ui); color: var(--c-ink-soft); }
+.canvas-artwork-cta button { width: 100%; background: var(--c-accent) !important; color: var(--c-accent-ink) !important; border-color: var(--c-accent) !important; }
 /* Appearance is chosen in Settings, leaving the reading masthead uncluttered. */
 #mode-toggle { display: none !important; }
 @media (max-width: 780px) {
