@@ -89,6 +89,14 @@ function duplicateSelected() {
   panelMode = 'selected';
   change(items);
 }
+function removeSelected() {
+  if (!selected || !data().some(x => x.id === selected)) return;
+  checkpoint();
+  const removing = selected;
+  selected = null;
+  panelMode = 'layers';
+  change(data().filter(x => x.id !== removing));
+}
 function moveLayer(id, direction, { stayInLayers = true } = {}) {
   const items = [...data()];
   const from = items.findIndex(x => x.id === id);
@@ -416,7 +424,7 @@ function paintPanel() {
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
       <button type="button" class="canvas-duplicate" data-canvas="duplicate">＋ Duplicate element</button>
     </details>
-    <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
+    <button type="button" class="canvas-remove" data-canvas="remove" title="Remove selected element (Esc)">Remove element <small>Esc</small></button>`;
   panel.querySelector('.canvas-more-tools')?.addEventListener('toggle', (event) => { advancedOpen = event.target.open; });
   panel.querySelectorAll('[data-prop]').forEach((input) => {
     if (['rotate', 'width', 'x', 'y'].includes(input.dataset.prop)) input.addEventListener('input', () => {
@@ -559,7 +567,7 @@ function ensureTools() {
       if (name) theme.setContent('siteName', name).then(() => toast('Site name saved.', 'good'));
     }
     if (action === 'finish') document.getElementById('edit-page')?.click();
-    if (action === 'remove' && selected) { checkpoint(); change(data().filter((i) => i.id !== selected)); selected = null; render(); }
+    if (action === 'remove' && selected) removeSelected();
     if (action === 'deselect') select(null);
     if (action === 'section-back') { selectedSectionId = null; panelMode = 'sections'; render(); }
     if (action === 'delete-section' && selectedSectionId) {
@@ -622,7 +630,12 @@ function ensureTools() {
   document.addEventListener('keydown', (e) => {
     if (!editing || !activePage) return;
     if (e.target.closest('input,textarea,select,[contenteditable],[role="dialog"]') || document.querySelector('.canvas-picker')) return;
-    if (e.key === 'Escape' && (selected || selectedSectionId || selectedText)) {
+    if (e.key === 'Escape' && selected) {
+      e.preventDefault();
+      removeSelected();
+      return;
+    }
+    if (e.key === 'Escape' && (selectedSectionId || selectedText)) {
       e.preventDefault();
       selected = null; selectedSectionId = null; selectedText = null;
       panelMode = simplePage ? 'add' : 'sections';
