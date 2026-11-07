@@ -10,6 +10,7 @@ import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } fro
 
 const records = new Map();
 let activePage = null;
+let simplePage = false;
 let editing = false;
 let selected = null;
 let selectedSectionId = null;
@@ -81,7 +82,7 @@ function add(type, assetId = null) {
   change([...data(), item]);
   panelMode = 'selected';
   select(item.id);
-  sec.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  if (!simplePage) sec.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 
 function elFor(item) {
@@ -166,7 +167,7 @@ function render({ preservePanel = false } = {}) {
   const toolbar = document.getElementById('canvas-toolbar');
   if (toolbar) {
     const message = toolbar.querySelector('.canvas-save-state');
-    if (message) message.textContent = activePage ? 'Editing this page · Saved locally' : 'Design Mode stays on as you browse';
+    if (message) message.textContent = simplePage ? 'Page accents · Saved locally' : activePage ? 'Editing this page · Saved locally' : 'Design Mode stays on as you browse';
     toolbar.querySelectorAll('[data-canvas="undo"], [data-canvas="redo"]').forEach(button => { button.hidden = !activePage; });
   }
   if (!activePage) {
@@ -197,7 +198,7 @@ function render({ preservePanel = false } = {}) {
   if (!preservePanel) paintPanel();
 }
 
-function select(id) { selected = id; panelMode = id ? 'selected' : 'sections'; render(); }
+function select(id) { selected = id; panelMode = id ? 'selected' : (simplePage ? 'add' : 'sections'); render(); }
 export function inspectSection(id) {
   if (!editing || !id || !layout.getSection(activePage, id)) return;
   selectedSectionId = id;
@@ -219,6 +220,15 @@ function paintPanel() {
   if (!panel || !editing) return;
   const item = data().find((i) => i.id === selected);
   panel.hidden = false;
+  if (simplePage && panelMode !== 'selected') {
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>PAGE ACCENTS</strong></div>
+      <p class="canvas-panel-hint">Add a handwritten note or decorative artwork to this page. Your books, forms and lists stay editable through their usual controls.</p>
+      <div class="canvas-panel-tabs"><button type="button" data-canvas="tab-add" class="${panelMode !== 'layers' ? 'active' : ''}">Add</button><button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button></div>
+      ${panelMode === 'layers'
+        ? `<div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p>No page accents yet.</p>'}</div>`
+        : `<button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>A personal inscription, small caption or note</span></button><button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Use a saved image or upload your own</span></button>`}`;
+    return;
+  }
   if (panelMode === 'text' && selectedText) {
     const sec = layout.getSection(activePage, selectedText.sectionId);
     const field = SECTION_TYPES[sec?.type]?.fields.find((f) => f.key === selectedText.key);
@@ -494,7 +504,7 @@ function ensureTools() {
   });
 }
 
-export function setPage(pageId) { activePage = pageId; selected = null; selectedSectionId = null; selectedText = null; panelMode = 'sections'; history = []; future = []; render(); }
+export function setPage(pageId, { simple = false } = {}) { activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; render(); }
 export function setEditing(next) {
   editing = next;
   if (next) { panelMode = 'sections'; selectedSectionId = null; selectedText = null; }

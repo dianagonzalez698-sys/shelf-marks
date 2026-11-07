@@ -3077,6 +3077,8 @@ body.is-editing [data-sec]:hover > .edit-tools,
 }
 /* Phase 1: independent, section-anchored freeform canvas. */
 #app [data-sec] { position: relative; }
+#app > .canvas-page-surface[data-sec] { position: absolute; inset: 0; z-index: 15; pointer-events: none; }
+#app:has(> .canvas-page-surface) { position: relative; }
 .canvas-layer { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
 .canvas-item { position: absolute; max-width: 90%; transform-origin: top left; pointer-events: none; min-height: 20px; }
 .canvas-item img { display: block; width: 100%; height: auto; user-select: none; }
