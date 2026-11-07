@@ -3414,6 +3414,13 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-section-number { color: var(--c-accent); font: 600 .7rem var(--f-ui); }
 .canvas-section-list strong { display: block; font: 500 1.18rem/1.2 var(--f-display); }
 .canvas-section-list small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: .72rem/1.5 var(--f-ui); color: var(--c-ink-soft); margin-top: 4px; }
+.canvas-inspector-tabs { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 5px; border-bottom: 1px solid var(--c-rule-strong); margin: 16px 0; }
+.canvas-inspector-tabs button { border: 0 !important; border-bottom: 2px solid transparent !important; border-radius: 0 !important; background: transparent !important; color: var(--c-ink-soft) !important; padding: 11px 4px !important; font: 600 .78rem var(--f-ui) !important; }
+.canvas-inspector-tabs button.active { color: var(--c-accent) !important; border-bottom-color: var(--c-accent) !important; }
+.canvas-field-group { font: 600 .65rem var(--f-ui); letter-spacing: .15em; text-transform: uppercase; color: var(--c-accent); margin: 24px 0 12px; }
+.canvas-section-inspector .rich-input { min-height: 52px; padding: 12px; }
+.canvas-section-inspector .rich-bar { margin-bottom: 6px; }
+.canvas-section-inspector .type-row { border-bottom: 1px solid var(--c-rule); padding-bottom: 15px; margin-bottom: 12px; }
 /* Appearance is chosen in Settings, leaving the reading masthead uncluttered. */
 #mode-toggle { display: none !important; }
 @media (max-width: 780px) {

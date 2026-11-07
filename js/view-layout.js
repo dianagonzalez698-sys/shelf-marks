@@ -463,7 +463,7 @@ function sec_ink(secId, key) {
   return EDITING && EDITING.id === secId ? EDITING[key] : '';
 }
 
-function fieldControl(f, value, secId) {
+function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
   const id = `f-${secId}-${f.key}`;
   switch (f.type) {
     case 'textarea':
@@ -487,7 +487,7 @@ function fieldControl(f, value, secId) {
         <div class="rich-input" id="${id}" data-rich-field="${attr(f.key)}"
              contenteditable="true" role="textbox" aria-multiline="${f.multiline ? 'true' : 'false'}"
              >${rich(value)}</div>
-        ${r ? roleControlHtml(r, secId, f.label) : ''}
+        ${r && inlineStyle ? roleControlHtml(r, secId, f.label) : ''}
         <p class="hint">Select a word and press <b>⌘B</b> or <b>⌘I</b> to emphasise just that part.</p>
       </div>`;
     }
@@ -581,9 +581,32 @@ function isFine(f) {
   return FINE_KEYS.has(f.key) || f.type === 'typeface';
 }
 
-function fieldsHtml(def, sec) {
+const STYLE_KEYS = new Set([
+  'tone', 'bgImage', 'bgScrim', 'bgInk', 'edge', 'edgeArt', 'edgeWhere',
+  'edgeSize', 'edgeShift', 'curtainArt', 'curtainDrop', 'curtainGap',
+  'scrim', 'ink', 'color', 'background',
+]);
+
+function fieldsHtml(def, sec, mode = 'all') {
   EDITING = sec;
   refreshInkSwatches();
+  if (mode !== 'all') {
+    const all = def.fields.filter((f) => typeof f.when !== 'function' || f.when(sec));
+    const content = (f) => ['rich', 'textarea', 'text'].includes(f.type)
+      || (!f.type && /title|heading|subtitle|body|text|kicker|label|intro|caption|note|eyebrow|description/i.test(f.key));
+    const style = (f) => f.type === 'typeface' || STYLE_KEYS.has(f.key);
+    const chosen = all.filter((f) => mode === 'content' ? content(f)
+      : mode === 'style' ? style(f) : !content(f) && !style(f));
+    if (!chosen.length) return `<p class="canvas-panel-hint">${mode === 'content' ? 'This section draws its words from your reading records, so there is no text to rewrite here.' : mode === 'style' ? 'This section uses the journal’s shared visual style.' : 'No additional options for this section.'}</p>`;
+    const draw = (f) => fieldControl(f, sec[f.key], sec.id, { inlineStyle: false });
+    if (mode === 'style') {
+      const appearance = chosen.filter((f) => f.type !== 'typeface');
+      const typography = chosen.filter((f) => f.type === 'typeface');
+      return `${appearance.length ? '<p class="canvas-field-group">Background & decoration</p>' + appearance.map(draw).join('') : ''}
+        ${typography.length ? '<p class="canvas-field-group">Typography & text color</p>' + typography.map(draw).join('') : ''}`;
+    }
+    return chosen.map(draw).join('');
+  }
   const all = visibleFields(def, sec);
   const plain = all.filter((f) => !isFine(f));
   const fine = all.filter(isFine);
@@ -622,6 +645,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
   if (!sec) return;
   const def = SECTION_TYPES[sec.type];
   if (!def) return;
+  let editingTab = mountIn ? 'content' : 'all';
 
   // Rebuilt rather than snapshotted, so returning from the picture editor
   // shows the picture you just chose.
@@ -631,7 +655,12 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
     <h2>${esc(def.label)}</h2>
     <p class="small muted">${esc(def.blurb)}</p>
     <div id="sec-warnings">${warningsHtml(fresh)}</div>
-    <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, fresh)}</div>
+    ${mountIn ? `<div class="canvas-inspector-tabs" role="group" aria-label="Section settings">
+      <button type="button" data-inspector-tab="content" class="${editingTab === 'content' ? 'active' : ''}">Content</button>
+      <button type="button" data-inspector-tab="style" class="${editingTab === 'style' ? 'active' : ''}">Style</button>
+      <button type="button" data-inspector-tab="more" class="${editingTab === 'more' ? 'active' : ''}">More</button>
+    </div>` : ''}
+    <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, fresh, editingTab)}</div>
     <div class="btn-row" style="margin-top:1rem">
       <button class="btn btn-block" type="button" data-close>Done</button>
     </div>`;
@@ -643,11 +672,20 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
       const warnBox = sheet.querySelector('#sec-warnings');
       const fieldBox = sheet.querySelector('#sec-fields');
 
+      sheet.querySelectorAll('[data-inspector-tab]').forEach((button) => {
+        button.onclick = () => {
+          editingTab = button.dataset.inspectorTab;
+          sheet.querySelectorAll('[data-inspector-tab]').forEach((tab) => tab.classList.toggle('active', tab === button));
+          fieldBox.innerHTML = fieldsHtml(def, layout.getSection(pageId, sectionId), editingTab);
+          bind();
+        };
+      });
+
       const refreshPanel = () => {
         const fresh = layout.getSection(pageId, sectionId);
         if (warnBox) warnBox.innerHTML = warningsHtml(fresh);
         if (fieldBox) {
-          fieldBox.innerHTML = fieldsHtml(def, fresh);
+          fieldBox.innerHTML = fieldsHtml(def, fresh, editingTab);
           bind();
         }
       };
@@ -659,7 +697,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
         // A control that decides which other controls apply redraws the panel,
         // so the sheet never shows settings that cannot do anything.
         if (rebuild && fieldBox) {
-          fieldBox.innerHTML = fieldsHtml(def, fresh);
+          fieldBox.innerHTML = fieldsHtml(def, fresh, editingTab);
           bind();
         }
       };
