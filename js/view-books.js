@@ -39,11 +39,13 @@ export function booksView(params = {}) {
         <h1>My <em>Bookshelf</em></h1><p>Every book has a place here, whether read, reading, or still waiting.</p></div>
       </header>
       <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
-      <div class="lit-custom-shelves"><details id="shelf-manager"><summary>＋ Create or manage shelves</summary>
-        <form id="shelf-create"><label for="shelf-name">New shelf name</label><div><input id="shelf-name" maxlength="45" placeholder="e.g. Cozy mysteries" required><button type="submit">Create shelf</button></div></form>
-        ${customShelves.length ? `<div class="lit-shelf-manage-list">${customShelves.map((s)=>`<div><span>${esc(s.name)}</span><button type="button" data-delete-shelf="${attr(s.id)}" aria-label="Remove shelf ${attr(s.name)}">Remove</button></div>`).join('')}</div>` : '<p class="hint">Your own shelves can hold books from any reading status.</p>'}
-      </details></div>
       <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search">⌕</button></form>
+        <details class="lit-shelf-manage-control" id="shelf-manager"><summary>✧ Edit shelves</summary>
+          <div class="lit-shelf-manage-panel">
+            <form id="shelf-create"><label for="shelf-name">New shelf name</label><div><input id="shelf-name" maxlength="45" placeholder="e.g. Cozy mysteries" required><button type="submit">Create shelf</button></div></form>
+            ${customShelves.length ? `<div class="lit-shelf-manage-list">${customShelves.map((s)=>`<div><span>${esc(s.name)}</span><button type="button" data-delete-shelf="${attr(s.id)}" aria-label="Remove shelf ${attr(s.name)}">Remove</button></div>`).join('')}</div>` : '<p class="hint">Your own shelves can hold books from any reading status.</p>'}
+          </div>
+        </details>
         <label>Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
       <div class="lit-shelf-count"><span>THE CATALOGUE</span><span>${String(shown.length).padStart(2,'0')} ${shown.length === 1 ? 'VOLUME' : 'VOLUMES'}</span></div>
       ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b,i)=>`<article class="lit-shelf-book">
@@ -62,6 +64,13 @@ export function booksView(params = {}) {
     </div>`,
     onMount(root) {
       const form = root.querySelector('#shelf-search');
+      const shelfManager = root.querySelector('#shelf-manager');
+      root.addEventListener('pointerdown', (event) => {
+        if (shelfManager.open && !shelfManager.contains(event.target)) shelfManager.open = false;
+      });
+      shelfManager.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') { shelfManager.open = false; shelfManager.querySelector('summary').focus(); }
+      });
       const move = (patch) => {
         const next = {...query,...patch};
         Object.keys(next).forEach(k => { if (!next[k]) delete next[k]; });
