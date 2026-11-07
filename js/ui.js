@@ -444,7 +444,7 @@ export function render() {
     // a small, independent art-and-text canvas without homepage section tools.
     const hasOwnEditor = /^\/book\/[^/]+(?:\/journal|\/edit)?$/.test(path) || ['/add', '/new'].includes(path);
     const simpleDesign = !view.editPage && !hasOwnEditor;
-    if (simpleDesign) app.insertAdjacentHTML('beforeend', '<div class="canvas-page-surface" data-sec="page-surface" data-editorial-static aria-label="Page decorations"></div>');
+    if (simpleDesign || view.editPage === 'home') app.insertAdjacentHTML('beforeend', '<div class="canvas-page-surface" data-sec="page-surface" data-editorial-static aria-label="Page decorations"></div>');
     setChrome(view);
 
     // The pencil only appears where the page is built from a layout, and it
