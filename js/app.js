@@ -137,7 +137,13 @@ async function boot() {
     const next = { ...(state.settings.manualPeriodChecks || {}) };
     if (next[key]) delete next[key];
     else next[key] = true;
-    try { await saveSettings({ manualPeriodChecks: next }); }
+    try {
+      await saveSettings({ manualPeriodChecks: next });
+      // The state update repaints the row; keep keyboard focus on the same
+      // checkmark without scrolling it into a different position.
+      [...document.querySelectorAll('[data-period-check]')]
+        .find((node) => node.dataset.periodCheck === key)?.focus({ preventScroll: true });
+    }
     catch (_) { check.disabled = false; paintStorageBanner(); }
   });
 

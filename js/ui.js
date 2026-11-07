@@ -433,6 +433,7 @@ export function render() {
     }
 
     const previousPath = current ? current.path : null;
+    const previousScrollY = window.scrollY;
     // Design Mode edits one page at a time. Leaving that route must close the
     // studio even when the destination doesn't expose an edit button.
     if (previousPath !== null && path !== previousPath && document.body.classList.contains('is-editing')) {
@@ -454,9 +455,10 @@ export function render() {
       else if (document.body.classList.contains('is-editing')) stopEditing();
     }
     highlightTab(view.tab);
-    // keepScroll only holds position across re-renders of the same screen;
-    // arriving at a different screen always starts at the top.
-    if (!view.keepScroll || path !== previousPath) window.scrollTo(0, 0);
+    // In-place actions (checkmarks, saved edits, progress updates) re-render
+    // this screen. Never throw the reader back to the top for those updates.
+    // Only intentional navigation to a different screen starts at the top.
+    if (path !== previousPath) window.scrollTo(0, 0);
     // Moving to a different screen dismisses any open sheet; a re-render of
     // the same screen leaves it alone, so saving from inside one is safe.
     if (path !== previousPath) closeSheet();
@@ -468,6 +470,7 @@ export function render() {
     });
     if (typeof view.onMount === 'function') view.onMount(app);
     refreshEditLayer();
+    if (path === previousPath) window.scrollTo(0, previousScrollY);
     if (query.design === '1' && path !== previousPath && view.editPage) startEditing();
   } finally {
     rendering = false;
