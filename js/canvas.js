@@ -111,6 +111,30 @@ function moveLayer(id, direction, { stayInLayers = true } = {}) {
   if (stayInLayers) panelMode = 'layers';
   change(items);
 }
+function moveLayerToEdge(id, front) {
+  const items = [...data()];
+  const from = items.findIndex(x => x.id === id);
+  if (from < 0) return;
+  const peerIndices = items.map((x, i) => x.sectionId === items[from].sectionId ? i : -1).filter(i => i >= 0);
+  const destination = front ? peerIndices[peerIndices.length - 1] : peerIndices[0];
+  if (destination === from) return;
+  checkpoint();
+  const [moving] = items.splice(from, 1);
+  items.splice(destination, 0, moving);
+  change(items);
+}
+function alignSelected(where) {
+  const item = data().find(x => x.id === selected);
+  if (!item || item.locked || item.fullWidth) return;
+  const host = section(item.sectionId);
+  if (!host) return;
+  const width = host.getBoundingClientRect().width;
+  const rendered = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
+  const itemWidth = rendered?.getBoundingClientRect().width || item.width;
+  if (!width) return;
+  const left = where === 'left' ? 0 : where === 'right' ? width - itemWidth : (width - itemWidth) / 2;
+  update(item.id, { x: clamp(left / width * 100, 0, 100) });
+}
 function undo() { if (!history.length) return; future.push(clone(data())); change(history.pop()); }
 function redo() { if (!future.length) return; history.push(clone(data())); change(future.pop()); }
 
@@ -152,6 +176,7 @@ function add(type, assetId = null) {
 function elFor(item) {
   const node = document.createElement('div');
   node.className = `canvas-item canvas-${item.type}${item.type === 'image' ? frameClass(item.frame) : ''}${item.locked ? ' is-locked' : ''}`;
+  if (item.hidden) node.hidden = true;
   node.dataset.canvasId = item.id;
   node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${clamp(item.y, 0, 100)}%;width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
   node.classList.toggle('is-full-width', !!item.fullWidth);
@@ -301,9 +326,9 @@ function paintPanel() {
     const names = { image: 'Visual section', writing: 'Writing section', reading: 'Reading progress', books: 'Book collection' };
     return `<span class="canvas-kind-badge kind-${group}" title="${names[group]}" aria-label="${names[group]}">${marks[group]}</span>`;
   };
-  const layerRows = (items) => [...items].reverse().map((x, index, ordered) => `<div class="canvas-layer-row${selected === x.id ? ' is-active' : ''}">
+  const layerRows = (items) => [...items].reverse().map((x, index, ordered) => `<div class="canvas-layer-row${selected === x.id ? ' is-active' : ''}${x.hidden ? ' is-hidden' : ''}">
     <button class="canvas-layer-name" type="button" data-canvas-select="${esc(x.id)}" aria-label="Edit ${esc(x.label || (x.type === 'text' ? 'text' : 'artwork'))}"><span>${x.locked ? '🔒' : x.type === 'text' ? 'T' : '▧'}</span><span>${esc(x.label || (x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork'))}</span></button>
-    <span class="canvas-layer-order"><button type="button" data-layer-move="1" data-layer-id="${esc(x.id)}" aria-label="Bring this layer forward" title="Bring forward" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-layer-move="-1" data-layer-id="${esc(x.id)}" aria-label="Send this layer backward" title="Send backward" ${index === ordered.length - 1 ? 'disabled' : ''}>↓</button></span>
+    <span class="canvas-layer-order"><button type="button" data-layer-visible="${esc(x.id)}" aria-label="${x.hidden ? 'Show' : 'Hide'} this layer" aria-pressed="${!x.hidden}" title="${x.hidden ? 'Show layer' : 'Hide layer'}">${x.hidden ? '◌' : '◉'}</button><button type="button" data-layer-move="1" data-layer-id="${esc(x.id)}" aria-label="Bring this layer forward" title="Bring forward" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-layer-move="-1" data-layer-id="${esc(x.id)}" aria-label="Send this layer backward" title="Send backward" ${index === ordered.length - 1 ? 'disabled' : ''}>↓</button></span>
   </div>`).join('');
   panel.hidden = false;
   if (simplePage && panelMode !== 'selected') {
@@ -423,7 +448,8 @@ function paintPanel() {
       <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}" ${item.locked ? 'disabled' : ''}></label>
       <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}" style="--opacity-fill:${Math.round((item.opacity ?? 1) * 100)}%"></label>
       ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label></div>
-      <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
+      <div class="canvas-align-buttons"><span>Align horizontally</span><div><button type="button" data-canvas-align="left" ${item.locked || item.fullWidth ? 'disabled' : ''}>Left</button><button type="button" data-canvas-align="center" ${item.locked || item.fullWidth ? 'disabled' : ''}>Center</button><button type="button" data-canvas-align="right" ${item.locked || item.fullWidth ? 'disabled' : ''}>Right</button></div></div>
+      <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send to back</button><button type="button" data-canvas="art-forward">Bring to front</button></div>` : ''}
       <button type="button" class="canvas-duplicate" data-canvas="duplicate">＋ Duplicate element</button>
     </details>
     <button type="button" class="canvas-remove" data-canvas="remove" title="Remove selected element (Esc)">Remove element <small>Esc</small></button>`;
@@ -556,7 +582,7 @@ function ensureTools() {
       if (current) update(selected, { locked: !current.locked });
     }
     if ((action === 'art-forward' || action === 'art-backward') && selected) {
-      moveLayer(selected, action === 'art-forward' ? 1 : -1, { stayInLayers: false });
+      moveLayerToEdge(selected, action === 'art-forward');
     }
     if (action === 'undo') undo();
     if (action === 'redo') redo();
@@ -587,6 +613,15 @@ function ensureTools() {
     if (action === 'text-back') { selectedText = null; panelMode = 'sections'; render(); }
   });
   document.addEventListener('click', (e) => {
+    const visibility = e.target.closest('[data-layer-visible]');
+    if (editing && visibility) {
+      e.preventDefault();
+      const item = data().find(x => x.id === visibility.dataset.layerVisible);
+      if (item) { panelMode = 'layers'; update(item.id, { hidden: !item.hidden }); }
+      return;
+    }
+    const alignment = e.target.closest('[data-canvas-align]');
+    if (editing && alignment) { e.preventDefault(); alignSelected(alignment.dataset.canvasAlign); return; }
     const layerMove = e.target.closest('[data-layer-move]');
     if (editing && layerMove) { e.preventDefault(); moveLayer(layerMove.dataset.layerId, Number(layerMove.dataset.layerMove)); return; }
     const id = e.target.closest('[data-canvas-select]')?.dataset.canvasSelect;

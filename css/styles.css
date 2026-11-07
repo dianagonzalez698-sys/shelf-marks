@@ -3140,6 +3140,8 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-layer-list small { float: right; opacity: .5; }
 .canvas-layer-row { display: flex; align-items: center; gap: 4px; border: 1px solid var(--c-rule); background: var(--c-bg-raised); border-radius: 3px; min-width: 0; }
 .canvas-layer-row.is-active { border-color: var(--c-accent); background: var(--c-accent-soft); }
+.canvas-layer-row.is-hidden .canvas-layer-name { opacity: .45; }
+.canvas-item[hidden] { display: none !important; }
 .canvas-layer-list .canvas-layer-row .canvas-layer-name { display: flex; flex: 1; align-items: center; gap: 9px; min-width: 0; border: 0; background: transparent; padding: 9px 5px 9px 10px; font: .77rem/1.35 var(--f-ui); }
 .canvas-layer-name span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .canvas-layer-name span:first-child { color: var(--c-accent); flex: none; }
@@ -3149,6 +3151,11 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-layer-list .canvas-layer-order button { padding: 5px 7px; min-width: 27px; text-align: center; border: 1px solid var(--c-rule); background: transparent; color: var(--c-ink-soft); border-radius: 2px; }
 .canvas-layer-list .canvas-layer-order button:hover:not(:disabled) { border-color: var(--c-accent); color: var(--c-accent); }
 .canvas-layer-list .canvas-layer-order button:disabled { opacity: .22; cursor: default; }
+.canvas-align-buttons { margin: 12px 0 15px; }
+.canvas-align-buttons > span { display: block; margin-bottom: 6px; color: var(--c-ink-soft); font: 600 .73rem var(--f-ui); }
+.canvas-align-buttons > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.canvas-align-buttons button { padding: 9px 4px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-raised); color: var(--c-ink); font: 600 .72rem var(--f-ui); }
+.canvas-align-buttons button:disabled { opacity: .35; cursor: default; }
 @media (max-width: 850px) {
   .edit-toggle-label { display: none; }
   .canvas-editing #app { margin-left: 0; padding-bottom: 340px; }
