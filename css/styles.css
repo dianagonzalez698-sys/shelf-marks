@@ -3405,6 +3405,15 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-section-inspector .token-control { display: block; width: 100%; }
 .canvas-section-inspector .type-pop { max-width: 100%; }
 .canvas-section-inspector .small.muted { font-size: .78rem; }
+/* The drawer is the editor; don't show a competing button on every section. */
+.canvas-editing .edit-tools { display: none; }
+.canvas-editing [data-sec]:not(.canvas-section-selected):hover { outline: 1px solid color-mix(in srgb,var(--c-accent) 60%,transparent); outline-offset: -2px; }
+.canvas-section-list { display: grid; margin: 15px 0 25px; border-top: 1px solid var(--c-rule); }
+.canvas-section-list button { display: grid; grid-template-columns: 30px minmax(0,1fr) 15px; align-items: center; gap: 12px; text-align: left; border: 0; border-bottom: 1px solid var(--c-rule) !important; border-radius: 0 !important; padding: 14px 3px !important; background: transparent !important; color: var(--c-ink) !important; }
+.canvas-section-list button:hover { background: var(--c-accent-soft) !important; }
+.canvas-section-number { color: var(--c-accent); font: 600 .7rem var(--f-ui); }
+.canvas-section-list strong { display: block; font: 500 1.18rem/1.2 var(--f-display); }
+.canvas-section-list small { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: .72rem/1.5 var(--f-ui); color: var(--c-ink-soft); margin-top: 4px; }
 /* Appearance is chosen in Settings, leaving the reading masthead uncluttered. */
 #mode-toggle { display: none !important; }
 @media (max-width: 780px) {
