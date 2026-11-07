@@ -3063,6 +3063,18 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-layer { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
 .canvas-item { position: absolute; max-width: 90%; transform-origin: top left; pointer-events: none; min-height: 20px; }
 .canvas-item img { display: block; width: 100%; height: auto; user-select: none; }
+.canvas-item.canvas-image.frame-fine { padding: 6px; border: 1px solid #b6a48d; background: var(--c-bg); box-shadow: inset 0 0 0 2px var(--c-bg), inset 0 0 0 3px #b6a48d; }
+.canvas-item.canvas-image.frame-ornate { border: 23px solid transparent; border-image-source: url('../assets/frames/antique-gilt-rectangle.webp'); border-image-slice: 175; border-image-repeat: stretch; filter: drop-shadow(0 6px 10px rgba(44,28,16,.24)); }
+.canvas-item.canvas-image.frame-gilded-round, .canvas-item.canvas-image.frame-gilded-oval { padding: 0; filter: drop-shadow(0 6px 10px rgba(44,28,16,.24)); }
+.canvas-item.canvas-image.frame-gilded-round { aspect-ratio: 1 / 1; }
+.canvas-item.canvas-image.frame-gilded-oval { aspect-ratio: 3 / 4; }
+.canvas-item.canvas-image.frame-gilded-round > img, .canvas-item.canvas-image.frame-gilded-oval > img { position: absolute; width: 64%; height: 64%; inset: 18%; border-radius: 50%; object-fit: cover; }
+.canvas-item.canvas-image.frame-gilded-oval > img { width: 64%; height: 66%; inset: 17% 18%; }
+.canvas-item.canvas-image.frame-gilded-round::after, .canvas-item.canvas-image.frame-gilded-oval::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background-size: 100% 100%; background-repeat: no-repeat; }
+.canvas-item.canvas-image.frame-gilded-round::after { background-image: url('../assets/frames/antique-gilt-round.webp'); }
+.canvas-item.canvas-image.frame-gilded-oval::after { background-image: url('../assets/frames/antique-gilt-oval.webp'); }
+.canvas-item.canvas-image.frame-polaroid { padding: 10px 10px 28px; background: #fffaf0; box-shadow: 0 4px 12px rgba(44,28,16,.18); }
+.canvas-item.canvas-image .canvas-resize { z-index: 5; }
 .canvas-text-content { line-height: 1.12; overflow-wrap: anywhere; white-space: pre-wrap; }
 .canvas-editing .canvas-item { pointer-events: auto; cursor: move; touch-action: none; outline: 1px dashed transparent; }
 .canvas-editing .canvas-item:hover { outline-color: #a8482a; }

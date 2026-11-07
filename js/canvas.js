@@ -24,6 +24,7 @@ const idFor = (page) => `canvas:${page}`;
 const clone = (v) => JSON.parse(JSON.stringify(v));
 const uid = () => `cv_${crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2)}`;
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+const frameClass = frame => ['fine', 'ornate', 'gilded-round', 'gilded-oval', 'polaroid'].includes(frame) ? ` frame-${frame}` : '';
 const data = () => records.get(idFor(activePage))?.items || [];
 
 export async function load() { adoptMany(await store.getAll('canvas')); }
@@ -67,27 +68,33 @@ function targetSection() {
 }
 
 function add(type, assetId = null) {
-  const sec = targetSection();
+  // The journal homepage has a full-page canvas as well as section canvases.
+  // New accents belong to the full page, so they can cross section borders.
+  const sec = document.querySelector('#app > .canvas-page-surface') || targetSection();
   if (!sec) { toast('This page has no editable sections.', 'bad'); return; }
   checkpoint();
   const artwork = type === 'image' ? assets.get(assetId) : null;
   const isWideDecoration = !!(artwork && (artwork.w > artwork.h * 2 || /curtain|cloud|valance|banner|drape/i.test(artwork.name)));
+  const freePage = sec.dataset.sec === 'page-surface';
+  const bounds = sec.getBoundingClientRect();
+  const visibleY = freePage ? clamp((window.innerHeight * .45 - bounds.top) / Math.max(bounds.height, 1) * 100, 2, 96) : 35;
   const item = {
     id: uid(), sectionId: sec.dataset.sec, type, assetId,
-    text: type === 'text' ? 'Your text here' : '', x: isWideDecoration ? 0 : 25, y: isWideDecoration ? 0 : 35,
+    text: type === 'text' ? 'Your text here' : '', x: isWideDecoration ? 0 : 25, y: isWideDecoration ? 0 : visibleY,
     width: type === 'text' ? 260 : 240, fullWidth: isWideDecoration,
+    frame: 'none',
     size: 34, color: '#4b2828',
     font: "'Bodoni Moda', serif", weight: 400, italic: false, opacity: 1, rotate: 0,
   };
   change([...data(), item]);
   panelMode = 'selected';
   select(item.id);
-  if (!simplePage) sec.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  if (!freePage && !simplePage) sec.scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
 
 function elFor(item) {
   const node = document.createElement('div');
-  node.className = `canvas-item canvas-${item.type}`;
+  node.className = `canvas-item canvas-${item.type}${item.type === 'image' ? frameClass(item.frame) : ''}`;
   node.dataset.canvasId = item.id;
   node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${clamp(item.y, 0, 100)}%;width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
   node.classList.toggle('is-full-width', !!item.fullWidth);
@@ -317,13 +324,13 @@ function paintPanel() {
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
         <p class="canvas-panel-hint">To edit something already on the page, choose Sections or Layers above.</p>
         <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>Headings, notes, labels & quotes</span></button>
-        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Choose a saved picture, or upload a curtain, clouds or a transparent PNG directly</span></button>
+        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Choose a saved image or upload your own. On the Journal, drag it anywhere across the page.</span></button>
         <div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Add or arrange sections</a><a href="#/customize">Global colors & fonts</a></div>
         <p class="canvas-panel-hint">Your changes save on this device. Use Settings → Export backup to keep a copy.</p>`);
     return;
   }
   panel.innerHTML = `<div class="canvas-panel-head"><strong>${item.type === 'text' ? 'EDIT TEXT' : 'EDIT ARTWORK'}</strong><button type="button" data-canvas="deselect" aria-label="Back to tools">← Back</button></div>
-    ${item.type === 'image' ? `<p class="canvas-panel-hint">Drag the picture on the page to move it. Adjust its size or placement here.</p><button type="button" data-canvas="replace-art">Replace picture</button>` : ''}
+    ${item.type === 'image' ? `<p class="canvas-panel-hint">Drag the picture on the page to move it. Pull its corner to resize, or adjust the placement here.</p><button type="button" data-canvas="replace-art">Replace picture</button><label>Frame<select data-prop="frame"><option value="none" ${!item.frame || item.frame === 'none' ? 'selected' : ''}>No frame</option><option value="fine" ${item.frame === 'fine' ? 'selected' : ''}>Fine border</option><option value="ornate" ${item.frame === 'ornate' ? 'selected' : ''}>Carved gilt · rectangular</option><option value="gilded-round" ${item.frame === 'gilded-round' ? 'selected' : ''}>Carved gilt · round</option><option value="gilded-oval" ${item.frame === 'gilded-oval' ? 'selected' : ''}>Carved gilt · oval</option><option value="polaroid" ${item.frame === 'polaroid' ? 'selected' : ''}>Photograph mount</option></select></label>` : ''}
     ${item.type === 'text' ? `<label>Text<textarea data-prop="text" rows="2">${esc(item.text)}</textarea></label>
       <label>Font<select data-prop="font">
       ${["'Bodoni Moda', serif", "'Cormorant Garamond', serif", "'EB Garamond', serif", "'Playfair Display', serif", "'Pinyon Script', cursive", "'Imperial Script', cursive", "'Jost', sans-serif"].map((f) => `<option value="${f}" ${f === item.font ? 'selected' : ''}>${f.split("'")[1]}</option>`).join('')}
