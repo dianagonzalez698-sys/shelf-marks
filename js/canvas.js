@@ -375,7 +375,7 @@ function paintPanel() {
     ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}
     <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
       <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label>
-      <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}"></label>
+      <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}" style="--opacity-fill:${Math.round((item.opacity ?? 1) * 100)}%"></label>
       ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}"></label></div>
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
     </details>
@@ -387,6 +387,7 @@ function paintPanel() {
       const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
       if (!itemNode) return;
       const value = Number(input.value);
+      input.style.setProperty('--opacity-fill', `${Math.round(value * 100)}%`);
       if (input.dataset.prop === 'rotate') itemNode.style.transform = `rotate(${value}deg)`;
       else if (input.dataset.prop === 'width') itemNode.style.width = `${value}px`;
       else itemNode.style[input.dataset.prop === 'x' ? 'left' : 'top'] = `${value}%`;
