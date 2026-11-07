@@ -382,6 +382,7 @@ function paintPanel() {
     return;
   }
   panel.innerHTML = `<div class="canvas-panel-head"><strong>${item.type === 'text' ? 'EDIT TEXT' : 'EDIT ARTWORK'}</strong><button type="button" data-canvas="deselect" aria-label="Back to tools">← Back</button></div>
+    <button type="button" class="canvas-lock-action${item.locked ? ' is-locked' : ''}" data-canvas="toggle-lock" aria-pressed="${!!item.locked}"><span aria-hidden="true">${item.locked ? '🔒' : '◇'}</span><strong>${item.locked ? 'Position locked' : 'Lock position & size'}</strong><small>${item.locked ? 'Click to unlock' : 'Prevent accidental moving or resizing'}</small></button>
     ${item.type === 'image' ? `<p class="canvas-panel-hint">Drag the picture on the page to move it. Pull its corner to resize, or adjust the placement here.</p><button type="button" data-canvas="replace-art">Replace picture</button><label>Frame<select data-prop="frame"><option value="none" ${!item.frame || item.frame === 'none' ? 'selected' : ''}>No frame</option><option value="fine" ${item.frame === 'fine' ? 'selected' : ''}>Fine border</option><option value="ornate" ${item.frame === 'ornate' ? 'selected' : ''}>Carved gilt · rectangular</option><option value="gilded-round" ${item.frame === 'gilded-round' ? 'selected' : ''}>Carved gilt · round</option><option value="gilded-oval" ${item.frame === 'gilded-oval' ? 'selected' : ''}>Carved gilt · oval</option><option value="polaroid" ${item.frame === 'polaroid' ? 'selected' : ''}>Photograph mount</option></select></label>` : ''}
     ${item.type === 'text' ? `<label>Text<textarea data-prop="text" rows="2">${esc(item.text)}</textarea></label>
       <label>Font<select data-prop="font">
@@ -393,7 +394,6 @@ function paintPanel() {
     ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}" ${item.locked ? 'disabled' : ''}></label>`}
     <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
       <label>Layer name <input data-prop="label" type="text" maxlength="60" placeholder="e.g. Left gilded oval" value="${esc(item.label || '')}"></label>
-      <label class="canvas-check"><input data-prop="locked" type="checkbox" ${item.locked ? 'checked' : ''}> Lock position & size</label>
       <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}" ${item.locked ? 'disabled' : ''}></label>
       <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}" style="--opacity-fill:${Math.round((item.opacity ?? 1) * 100)}%"></label>
       ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}" ${item.locked ? 'disabled' : ''}></label></div>
@@ -523,6 +523,10 @@ function ensureTools() {
     if (action === 'image') picker();
     if (action === 'section') sectionPicker();
     if (action === 'replace-art' && selected) picker((assetId) => update(selected, { assetId }));
+    if (action === 'toggle-lock' && selected) {
+      const current = data().find(x => x.id === selected);
+      if (current) update(selected, { locked: !current.locked });
+    }
     if ((action === 'art-forward' || action === 'art-backward') && selected) {
       moveLayer(selected, action === 'art-forward' ? 1 : -1, { stayInLayers: false });
     }
