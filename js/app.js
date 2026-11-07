@@ -11,6 +11,7 @@ import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js'
 import { homeView } from './view-home.js';
 import { booksView } from './view-books.js';
 import { addView, bookFormView } from './view-book.js';
+import { bookDetailView } from './view-book-detail.js';
 import { challengesView, challengeDetailView } from './view-challenges.js';
 import { bookmarksView } from './view-bookmarks.js';
 import { settingsView } from './view-settings.js';
@@ -27,7 +28,8 @@ route('/', homeView);
 route('/books', booksView);
 route('/add', addView);
 route('/new', bookFormView);
-route('/book/:id', bookFormView);
+route('/book/:id', bookDetailView);
+route('/book/:id/edit', bookFormView);
 route('/challenges', challengesView);
 route('/challenge/:id', challengeDetailView);
 route('/bookmarks', bookmarksView);
