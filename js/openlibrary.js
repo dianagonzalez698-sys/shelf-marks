@@ -33,7 +33,8 @@ function clean(text) {
     .replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
 }
 
-/** Relevance first, then richer records; never confuse cover availability with a title match. */
+/** Relevance first, then richer records. Language is a preference, not a gate:
+ * an untranslated book should still be findable when English was selected. */
 export function rankResults(docs, query, { language = 'en' } = {}) {
   const q = clean(query);
   const parts = q.split(' ').filter(Boolean);
@@ -46,12 +47,11 @@ export function rankResults(docs, query, { language = 'en' } = {}) {
       : title.includes(q) ? 115 : matching / (parts.length || 1) * 80;
     const authorRelevance = author.includes(q) ? 85 : 0;
     const english = (doc.languages || []).includes('eng');
-    return titleRelevance + authorRelevance + (english ? 24 : 0)
+    return titleRelevance + authorRelevance + (language === 'en' && english ? 36 : 0)
       + (doc.coverUrl ? 8 : 0) + (doc.author ? 4 : 0)
       + (doc.firstPublishYear ? 2 : 0);
   };
-  return docs.filter(d => language !== 'en' || !d.languages?.length || d.languages.includes('eng'))
-    .sort((a,b) => score(b)-score(a));
+  return docs.sort((a,b) => score(b)-score(a));
 }
 
 function normalizeDoc(doc) {
