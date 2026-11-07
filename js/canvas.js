@@ -233,7 +233,7 @@ function paintPanel() {
       <div class="canvas-panel-tabs"><button type="button" data-canvas="tab-add" class="${panelMode !== 'layers' ? 'active' : ''}">Add</button><button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button></div>
       ${panelMode === 'layers'
         ? `<div class="canvas-layer-list">${data().length ? data().map((x, index) => `<button type="button" data-canvas-select="${x.id}">${x.type === 'text' ? 'T' : '▧'} &nbsp; ${esc(x.type === 'text' ? x.text.slice(0, 28) : assets.get(x.assetId)?.name || 'Artwork')} <small>${index + 1}</small></button>`).join('') : '<p>No page accents yet.</p>'}</div>`
-        : `<button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>A personal inscription, small caption or note</span></button><button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Use a saved image or upload your own</span></button>`}`;
+        : `<button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>A personal inscription, small caption or note</span></button><button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add floating artwork</strong><span>Use a saved image or upload your own</span></button>`}`;
     return;
   }
   if (panelMode === 'text' && selectedText) {
@@ -324,7 +324,7 @@ function paintPanel() {
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
         <p class="canvas-panel-hint">To edit something already on the page, choose Sections or Layers above.</p>
         <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>Headings, notes, labels & quotes</span></button>
-        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add artwork</strong><span>Choose a saved image or upload your own. On the Journal, drag it anywhere across the page.</span></button>
+        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add floating artwork</strong><span>Choose a saved image or upload your own. On the Journal, drag it anywhere across the page.</span></button>
         <div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Add or arrange sections</a><a href="#/customize">Global colors & fonts</a></div>
         <p class="canvas-panel-hint">Your changes save on this device. Use Settings → Export backup to keep a copy.</p>`);
     return;
