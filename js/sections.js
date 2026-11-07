@@ -822,8 +822,7 @@ export const SECTION_TYPES = {
         <div class="ed-head">${kicker(sec.kicker)}${headline(sec.title)}</div>
         <div class="ticks">${rows.join('')}</div>
         <div class="period-action">
-          <p>Check off your list here, or log a finished book to update challenge progress and earn bookmarks.</p>
-          <a href="#/add?finished=1" data-quick-log>+ Log a finished book <span aria-hidden="true">↗</span></a>
+          <p>Check off your list here. Finished books logged in the Library also update challenge progress and earn bookmarks.</p>
         </div>`);
     },
   },

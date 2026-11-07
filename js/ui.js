@@ -434,25 +434,26 @@ export function render() {
 
     const previousPath = current ? current.path : null;
     const previousScrollY = window.scrollY;
-    // Design Mode edits one page at a time. Leaving that route must close the
-    // studio even when the destination doesn't expose an edit button.
-    if (previousPath !== null && path !== previousPath && document.body.classList.contains('is-editing')) {
-      stopEditing();
-    }
+    // Design Mode belongs to the browsing session, not one route. Switching
+    // pages changes the design target without ending the editing session.
     const view = match.route.handler({ ...match.params, query }) || {};
     current = { path, view, params: match.params, query };
 
     app.innerHTML = view.html || '';
+    // Content-heavy screens keep their own forms. Other non-layout pages get
+    // a small, independent art-and-text canvas without homepage section tools.
+    const hasOwnEditor = /^\/book\/[^/]+(?:\/journal|\/edit)?$/.test(path) || ['/add', '/new'].includes(path);
+    const simpleDesign = !view.editPage && !hasOwnEditor;
+    if (simpleDesign) app.insertAdjacentHTML('beforeend', '<div class="canvas-page-surface" data-sec="page-surface" data-editorial-static aria-label="Page decorations"></div>');
     setChrome(view);
 
     // The pencil only appears where the page is built from a layout, and it
     // has to know which layout so an edit lands on the right page.
     const editBtn = document.getElementById('edit-page');
     if (editBtn) {
-      const pageId = view.editPage || null;
-      editBtn.hidden = !pageId;
-      if (pageId) setEditPageId(pageId);
-      else if (document.body.classList.contains('is-editing')) stopEditing();
+      const pageId = view.editPage || (simpleDesign ? `simple:${path}` : null);
+      editBtn.hidden = !pageId && !document.body.classList.contains('is-editing');
+      setEditPageId(pageId, { simple: simpleDesign });
     }
     highlightTab(view.tab);
     // In-place actions (checkmarks, saved edits, progress updates) re-render
