@@ -382,6 +382,15 @@ function paintPanel() {
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
   panel.querySelector('.canvas-more-tools')?.addEventListener('toggle', (event) => { advancedOpen = event.target.open; });
   panel.querySelectorAll('[data-prop]').forEach((input) => {
+    if (['rotate', 'width', 'x', 'y'].includes(input.dataset.prop)) input.addEventListener('input', () => {
+      if (input.value === '') return;
+      const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
+      if (!itemNode) return;
+      const value = Number(input.value);
+      if (input.dataset.prop === 'rotate') itemNode.style.transform = `rotate(${value}deg)`;
+      else if (input.dataset.prop === 'width') itemNode.style.width = `${value}px`;
+      else itemNode.style[input.dataset.prop === 'x' ? 'left' : 'top'] = `${value}%`;
+    });
     if (input.dataset.prop === 'opacity') input.addEventListener('input', () => {
       const value = Number(input.value);
       const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
