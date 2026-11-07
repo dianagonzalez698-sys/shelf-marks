@@ -25,7 +25,7 @@ export function bookDetailView({ id } = {}) {
   ].filter(Boolean);
   const readingDates = [book.dateStarted && `Started ${formatDate(book.dateStarted)}`,
     book.dateFinished && `Finished ${formatDate(book.dateFinished)}`].filter(Boolean);
-  const hasWriting = !!(book.review || book.favoriteQuote || book.notes || book.journalArtworkId);
+  const hasWriting = !!(book.review || book.favoriteQuote || book.notes || book.journalArtworkId || (book.journalDecorations || []).length);
 
   return {
     title: book.title, tab: 'books', editorial: true, back: true, live: false,
@@ -113,7 +113,7 @@ export function bookDetailView({ id } = {}) {
         event.preventDefault();
         const rating = root.querySelector('#bj-rating').value;
         try {
-          await saveBook({ ...book,
+          await saveBook({ ...(getBook(book.id) || book),
             rating: rating ? Number(rating) : null,
             review: root.querySelector('#bj-review').value.trim(),
             favoriteQuote: root.querySelector('#bj-quote').value.trim(),

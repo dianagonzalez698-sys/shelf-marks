@@ -1,6 +1,6 @@
 // A small visual collage editor for a single book's literary page.
 // Artwork stays attached to its book record, not to the global site theme.
-import { saveBook } from './state.js';
+import { getBook, saveBook } from './state.js';
 import { esc, attr, toast } from './ui.js';
 import * as assets from './assets.js';
 
@@ -11,13 +11,19 @@ export function bookDecorMarkup(book) {
   return `<div class="book-decor-toolbar" id="book-decor-toolbar">
     <button class="btn" type="button" id="book-decor-toggle" aria-expanded="false">✧ Decorate this page</button>
     <div class="book-decor-tools" id="book-decor-tools" hidden>
-      <label>Choose saved artwork <select id="book-decor-asset"><option value="">Choose an image…</option>${assets.list().map(a => `<option value="${attr(a.id)}">${esc(a.name)}</option>`).join('')}</select></label>
-      <button class="btn" type="button" id="book-decor-add">Add to page</button>
-      <label class="btn" for="book-decor-upload">Upload new art<input type="file" id="book-decor-upload" accept="image/*" class="visually-hidden"></label>
-      <button class="btn" type="button" id="book-decor-size">Resize selected</button>
-      <button class="btn" type="button" id="book-decor-remove">Remove selected</button>
-      <button class="btn btn-primary" type="button" id="book-decor-done">Done decorating</button>
-      <p>Drag an image wherever it belongs. Select it to resize or remove. Decorations save automatically and move with the page on smaller screens.</p>
+      <div class="book-decor-add-row">
+        <label>Add from your artwork library<select id="book-decor-asset"><option value="">Choose an image…</option>${assets.list().map(a => `<option value="${attr(a.id)}">${esc(a.name)}</option>`).join('')}</select></label>
+        <button class="btn" type="button" id="book-decor-add">+ Add image</button>
+        <label class="btn" for="book-decor-upload">Upload a new image<input type="file" id="book-decor-upload" accept="image/*" class="visually-hidden"></label>
+      </div>
+      <div class="book-decor-selected-tools" id="book-decor-selected-tools" hidden>
+        <span>Selected image</span>
+        <button class="btn" type="button" id="book-decor-smaller" aria-label="Make selected image smaller">− Smaller</button>
+        <button class="btn" type="button" id="book-decor-larger" aria-label="Make selected image larger">+ Larger</button>
+        <button class="btn" type="button" id="book-decor-remove">Remove</button>
+      </div>
+      <p>Drag images into place. Click an image to adjust its size. Changes save automatically.</p>
+      <button class="btn btn-primary" type="button" id="book-decor-done">Done</button>
     </div>
   </div>
   <div class="book-decor-layer" id="book-decor-layer" aria-label="Decorative imagery">
@@ -34,20 +40,20 @@ export function mountBookDecor(root, book) {
   const tools = root.querySelector('#book-decor-tools');
   const toggle = root.querySelector('#book-decor-toggle');
   const assetSelect = root.querySelector('#book-decor-asset');
+  const selectionTools = root.querySelector('#book-decor-selected-tools');
   let pieces = [...(Array.isArray(book.journalDecorations) ? book.journalDecorations : [])];
   let selected = null;
   let editing = false;
   let drag = null;
 
   const save = async () => {
-    try { await saveBook({ ...book, journalDecorations: pieces }); }
+    try { await saveBook({ ...(getBook(book.id) || book), journalDecorations: pieces }); }
     catch (_) { toast('Could not save this decoration.', 'bad'); }
   };
   const select = (id) => {
     selected = id;
     layer.querySelectorAll('.book-decor-piece').forEach(el => el.classList.toggle('selected', el.dataset.piece === id));
-    root.querySelector('#book-decor-size').disabled = !id;
-    root.querySelector('#book-decor-remove').disabled = !id;
+    selectionTools.hidden = !id || !editing;
   };
   const paint = () => {
     layer.replaceChildren();
@@ -74,6 +80,7 @@ export function mountBookDecor(root, book) {
     toggle.setAttribute('aria-expanded', String(editing));
     toggle.textContent = editing ? '✧ Decorating this page' : '✧ Decorate this page';
     if (!editing) select(null);
+    else select(selected);
   };
   const add = async (assetId) => {
     if (!assetId) { toast('Choose an image first.'); return; }
@@ -99,12 +106,14 @@ export function mountBookDecor(root, book) {
     } catch (_) { toast('Could not upload this artwork.', 'bad'); }
     event.target.value = '';
   };
-  root.querySelector('#book-decor-size').onclick = async () => {
+  const resize = async delta => {
     const piece = pieces.find(p => p.id === selected);
     if (!piece) return;
-    piece.width = piece.width >= 240 ? 100 : piece.width + 45;
+    piece.width = clamp((Number(piece.width) || 150) + delta, 70, 280);
     paint(); await save();
   };
+  root.querySelector('#book-decor-smaller').onclick = () => resize(-30);
+  root.querySelector('#book-decor-larger').onclick = () => resize(30);
   root.querySelector('#book-decor-remove').onclick = async () => {
     if (!selected) return;
     pieces = pieces.filter(p => p.id !== selected);

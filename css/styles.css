@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 45529)
-Total output lines: 3649
+Warning: truncated output (original token count: 45823)
+Total output lines: 3661
 
 /* ===========================================================================
    Diana's Lit Picks — editorial reading journal
@@ -1784,34 +1784,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 .m-backdrop {
   position: absolute; inset: 0; z-index: 0;
   background-size: cover;
-  background-repeat: no-repeat;…10529 tokens truncated…lock; font-size: .85em; color: var(--c-ink-faint); }
-.erow-why {
-  display: block; margin-top: .15rem;
-  font-family: var(--f-ui); font-size: .72em;
-  letter-spacing: var(--ls-label); text-transform: uppercase;
-  color: var(--c-accent);
-}
-
-/* A sheet opened on top of another says how to get back to it. */
-.sheet-back {
-  display: inline-flex; align-items: center; gap: .3rem;
-  margin: 0 0 .9rem; padding: .3rem .6rem .3rem 0;
-  background: none; border: 0; cursor: pointer;
-  font-family: var(--f-ui); font-size: var(--fs-label);
-  letter-spacing: var(--ls-label); text-transform: var(--tt-label);
-  color: var(--c-accent);
-}
-.sheet-back:hover { color: var(--c-accent-deep); }
-@media (pointer: coarse) { .sheet-back { padding: .6rem 1rem .6rem 0; min-block-size: 44px; } }
-
-/* ------------------------------------------------- type style controls ---
-   Weight, style, size, tracking and case for one role, inside the panel its
-   face button opens. Four roles stay four rows; the depth is on demand. */
-
-.sty-block { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--c-rule); }
-.sty-head {
-  margin: .9rem 0 .4rem;
-  font-family: var(--f-ui); font-size: var(--fs-label);
+  background-repeat: no-repeat;…10823 tokens truncated…ar(--fs-label);
   letter-spacing: var(--ls-label); text-transform: uppercase;
   color: var(--c-ink-faint);
 }
@@ -2395,11 +2368,15 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-archive-page { position: relative; isolation: isolate; }
 .book-archive-page > :not(.book-decor-layer) { position: relative; z-index: 1; }
 .book-decor-toolbar { margin-bottom: 18px; }
-.book-decor-tools { padding: 18px; margin-top: 12px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-sunk); display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.book-decor-tools { padding: 22px; margin-top: 12px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-sunk); display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
 .book-decor-tools[hidden] { display: none; }
+.book-decor-add-row { width: 100%; display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.book-decor-selected-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; width: 100%; border-top: 1px solid var(--c-rule); padding-top: 14px; }
+.book-decor-selected-tools[hidden] { display: none; }
+.book-decor-selected-tools span { font: 600 .72rem var(--f-ui); text-transform: uppercase; letter-spacing: .08em; color: var(--c-accent); margin-right: 12px; }
 .book-decor-tools label { color: var(--c-ink-soft); font: .78rem var(--f-ui); }
 .book-decor-tools select { display: block; max-width: 220px; margin-top: 6px; padding: 9px; background: var(--c-bg); color: var(--c-ink); border: 1px solid var(--c-rule-strong); }
-.book-decor-tools p { flex-basis: 100%; margin: 0; color: var(--c-ink-soft); font: italic .94rem var(--f-body); }
+.book-decor-tools p { flex: 1 1 230px; margin: 0; color: var(--c-ink-soft); font: italic .94rem var(--f-body); }
 .book-decor-tools .btn { cursor: pointer; }
 .book-decor-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
 .book-decor-piece { position: absolute; display: block; height: auto; max-width: 34%; transform: translate(-50%, -50%); pointer-events: none; user-select: none; touch-action: none; filter: drop-shadow(3px 7px 5px rgba(0,0,0,.1)); }
@@ -2412,6 +2389,7 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-archive-nav a { color: var(--c-ink-soft); text-decoration: none; }
 .book-archive-nav .book-archive-edit { color: var(--c-accent); border: 1px solid var(--c-rule-strong); padding: 10px 14px; }
 .book-archive-hero { display: grid; grid-template-columns: minmax(170px,.62fr) minmax(0,1.38fr); align-items: center; gap: clamp(28px,5vw,75px); padding: clamp(26px,4vw,52px) 0; border-bottom: 1px solid var(--c-rule-strong); }
+.book-archive-hero::after { content: '❧'; grid-column: 1 / -1; justify-self: center; color: var(--c-accent); font: italic 1.7rem var(--f-body); line-height: 1; margin-bottom: -62px; padding: 0 20px; background: var(--c-bg); }
 .book-archive-cover { max-width: 245px; margin: 0 auto; width: 100%; filter: drop-shadow(10px 12px 0 color-mix(in srgb,var(--c-rule) 45%,transparent)); }
 .book-archive-cover .cover { display: block; width: 100%; height: auto; max-height: 380px; object-fit: contain; }
 .book-archive-cover .cover-ph { aspect-ratio: 2/3; display: grid; place-items: center; background: var(--c-bg-sunk); }
@@ -2444,6 +2422,7 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-archive-writing .lit-overline, .book-archive-aside .lit-overline { color: var(--c-accent); font-size: .7rem; }
 .book-archive-writing h2 { font: 400 clamp(2.6rem,4vw,4.5rem)/1.1 var(--f-display); margin: 17px 0 25px; }
 .book-archive-prose { font: 1.28rem/1.8 var(--f-body); color: var(--c-ink); }
+.book-archive-review .book-archive-prose::first-letter { float: left; font: 400 3.3rem/.95 var(--f-display); color: var(--c-accent); padding: .12em .12em 0 0; }
 .book-archive-passage { border-block: 1px solid var(--c-rule); padding-block: 35px 55px !important; }
 .book-archive-passage blockquote { margin: 25px 0 0; padding: 0; border: 0; font: italic 400 clamp(1.9rem,3vw,3.2rem)/1.36 var(--f-body); color: var(--c-ink); }
 .book-archive-aside section { padding: 18px 0 30px; border-top: 1px solid var(--c-rule-strong); margin-bottom: 40px; }
@@ -2459,7 +2438,13 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-archive-empty p { font: 1.1rem var(--f-body); color: var(--c-ink-soft); }
 .book-archive-empty a { display: inline-block; margin-top: 16px; color: var(--c-accent); font: 600 .75rem var(--f-ui); }
 @media (max-width: 740px) {
+  .book-decor-toolbar { margin-bottom: 12px; }
+  .book-decor-tools { padding: 14px; }
+  .book-decor-add-row > label:first-child { flex: 1 1 100%; }
+  .book-decor-tools select { max-width: 100%; width: 100%; }
+  .book-decor-selected-tools .btn { flex: 1; }
   .book-archive-hero { grid-template-columns: 1fr; gap: 28px; padding: 25px 0 40px; }
+  .book-archive-hero::after { margin-bottom: -48px; }
   .book-archive-cover { max-width: 175px; }
   .book-archive-intro h1 { font-size: clamp(2.6rem,10vw,4.2rem); }
   .book-archive-body { grid-template-columns: 1fr; gap: 10px; }
