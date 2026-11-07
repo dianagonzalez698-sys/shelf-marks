@@ -213,6 +213,21 @@ export function bookFormView(params = {}) {
           </div>
         </section>
 
+        <h2 class="form-heading">Reading Challenges</h2>
+        <section class="panel book-challenge-panel">
+          <p class="hint">Mark what applies to this book. Your challenge progress updates automatically.</p>
+          <div class="field"><span class="field-label">Fiction or nonfiction</span>
+            <div class="seg" id="f-format" role="group" aria-label="Fiction or nonfiction">
+              <button type="button" data-v="fiction" aria-pressed="${draft.format === 'fiction'}">Fiction</button>
+              <button type="button" data-v="nonfiction" aria-pressed="${draft.format === 'nonfiction'}">Nonfiction</button>
+            </div>
+            ${guessed ? `<p class="hint">Pre-selected from the catalog; change if needed.</p>` : ''}
+          </div>
+          <label class="switch-row"><input type="checkbox" id="f-classic" ${draft.isClassic ? 'checked' : ''}><span class="switch-text">Classic<em>Classic Every Quarter</em></span></label>
+          <label class="switch-row"><input type="checkbox" id="f-reread" ${draft.isReread ? 'checked' : ''}><span class="switch-text">Re-read<em>Counts toward reading goals</em></span></label>
+          <label class="switch-row"><input type="checkbox" id="f-tbr" ${draft.isTbr ? 'checked' : ''}><span class="switch-text">From my physical TBR<em>Physical TBR Every Other Month</em></span></label>
+        </section>
+
         <h2 class="form-heading">My Reading Journal</h2>
         <section class="panel">
           <div class="grid-2">
@@ -252,7 +267,7 @@ export function bookFormView(params = {}) {
         </section>
 
         <details class="book-more-details">
-          <summary>More details & reading challenges <span>Optional</span></summary>
+          <summary>More book details <span>Optional</span></summary>
           <section class="panel">
           <div class="grid-2">
             <div class="field"><label for="f-pages">Pages</label><input id="f-pages" type="number" inputmode="numeric" min="1" max="20000" value="${draft.pages == null ? '' : attr(draft.pages)}"></div>
@@ -260,27 +275,6 @@ export function bookFormView(params = {}) {
           </div>
           <div class="field"><label for="f-cover">Catalog cover URL</label><input id="f-cover" type="text" inputmode="url" autocomplete="off" value="${attr(draft.coverUrl || '')}"></div>
           <div class="field"><label for="f-subjects">Subjects</label><input id="f-subjects" type="text" value="${attr((draft.subjects || []).join(', '))}"></div>
-          <div class="field">
-            <span class="field-label">Fiction or nonfiction</span>
-            <div class="seg" id="f-format" role="group" aria-label="Fiction or nonfiction">
-              <button type="button" data-v="fiction" aria-pressed="${draft.format === 'fiction'}">Fiction</button>
-              <button type="button" data-v="nonfiction" aria-pressed="${draft.format === 'nonfiction'}">Nonfiction</button>
-            </div>
-            ${guessed ? `<p class="hint">Pre-selected <b>${esc(draft.format)}</b> from the Open Library subjects — change it if that's wrong.</p>` : ''}
-          </div>
-
-          <label class="switch-row">
-            <input type="checkbox" id="f-classic" ${draft.isClassic ? 'checked' : ''}>
-            <span class="switch-text">Classic<em>Counts toward Classic Every Quarter</em></span>
-          </label>
-          <label class="switch-row">
-            <input type="checkbox" id="f-reread" ${draft.isReread ? 'checked' : ''}>
-            <span class="switch-text">Re-read<em>Still counts toward every goal</em></span>
-          </label>
-          <label class="switch-row">
-            <input type="checkbox" id="f-tbr" ${draft.isTbr ? 'checked' : ''}>
-            <span class="switch-text">From my physical TBR<em>Counts toward Physical TBR Every Other Month</em></span>
-          </label>
         </section>
 
         <section class="panel">
