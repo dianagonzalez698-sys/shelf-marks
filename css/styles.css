@@ -3722,6 +3722,11 @@ html:not([data-theme="dark"]) .lit-hero {
 .canvas-more-tools .canvas-panel-row { align-items: end; }
 .canvas-more-tools .canvas-opacity-field { display: block; width: 100%; min-width: 0; }
 .canvas-more-tools .canvas-opacity-field input[type="range"] { display: block; width: 100%; max-width: none; box-sizing: border-box; margin: 10px 0 4px; }
+.canvas-more-tools .canvas-opacity-field input[type="range"] { appearance: none; -webkit-appearance: none; height: 26px; min-height: 26px; cursor: pointer; border: 0; border-radius: 0; background: linear-gradient(to right, var(--c-accent) 0 var(--opacity-fill, 100%), var(--c-rule-strong) var(--opacity-fill, 100%) 100%) center / 100% 5px no-repeat; }
+.canvas-opacity-field input[type="range"]::-webkit-slider-runnable-track { height: 5px; background: transparent; border: none; }
+.canvas-opacity-field input[type="range"]::-moz-range-track { height: 5px; background: transparent; border: none; }
+.canvas-opacity-field input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 17px; height: 17px; margin-top: -6px; border-radius: 50%; background: var(--c-accent); border: 2px solid var(--c-bg-raised); box-shadow: 0 0 0 1px var(--c-accent); }
+.canvas-opacity-field input[type="range"]::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; background: var(--c-accent); border: 2px solid var(--c-bg-raised); box-shadow: 0 0 0 1px var(--c-accent); }
 .canvas-opacity-field output { float: right; font: 600 .75rem var(--f-ui); color: var(--c-accent); }
 .canvas-section-inspector .rich-input { min-height: 52px; padding: 12px; }
 .canvas-section-inspector .rich-bar { margin-bottom: 6px; }
