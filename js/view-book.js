@@ -14,10 +14,26 @@ import * as assets from './assets.js';
 // Handed from the search screen to the form screen.
 let pendingPrefill = null;
 let quickFinishedLog = false;
-let quickLogReturnY = 0;
+let addOrigin = null;
 
-export function rememberQuickLogPosition(scrollY) {
-  quickLogReturnY = Math.max(0, Number(scrollY) || 0);
+export function rememberAddOrigin(hash, scrollY) {
+  const origin = String(hash || '#/');
+  // Add and edit screens are not meaningful return destinations.
+  if (/^#\/(add|new)(?:[/?]|$)/.test(origin)) return;
+  addOrigin = { hash: origin, scrollY: Math.max(0, Number(scrollY) || 0) };
+}
+
+function returnToOrigin() {
+  const origin = addOrigin;
+  addOrigin = null;
+  if (!origin) return false;
+  // The router handles the new route first, then we restore the position
+  // after it paints. A new book should never silently land on the homepage.
+  window.addEventListener('hashchange', () => {
+    requestAnimationFrame(() => window.scrollTo(0, origin.scrollY));
+  }, { once: true });
+  navigate(origin.hash);
+  return true;
 }
 
 /* ---------------------------------------------------------- search view ---- */
@@ -487,13 +503,8 @@ export function bookFormView(params = {}) {
           } else {
             toast(editing ? 'Changes saved.' : `“${esc(title)}” added.`, 'good');
           }
-          if (!editing && quickFinishedLog) {
-            quickFinishedLog = false;
-            navigate('/');
-            // Route navigation starts the Journal at its top; restore the
-            // exact reading position saved before the quick-log flow.
-            requestAnimationFrame(() => window.scrollTo(0, quickLogReturnY));
-          } else {
+          if (!editing) quickFinishedLog = false;
+          if (editing || !returnToOrigin()) {
             navigate(`/book/${encodeURIComponent(record.id)}`);
           }
         } catch (_) {
