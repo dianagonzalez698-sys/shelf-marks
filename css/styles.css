@@ -311,17 +311,17 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* A faint paper grain over the whole page — the only "texture" in the design. */
+/* Real cotton-paper fibers, without procedural noise or distressed speckles. */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  /* Visible like fine uncoated book paper, not a distressed parchment print. */
-  opacity: calc(var(--paper-texture-opacity) * .34);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: calc(var(--paper-texture-opacity) * .75);
+  background: url('../assets/paper/antique-cotton-ivory.webp') repeat 0 0 / 768px 768px;
 }
+html[data-theme="dark"] body::before { opacity: 0; }
 body > * { position: relative; z-index: 1; }
 
 h1, h2, h3, h4 { margin: 0; font-weight: var(--fw-heading); line-height: var(--lh-heading); }
@@ -3265,15 +3265,12 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .lit-writing-form textarea:focus { background-image: none; }
 .lit-writing-form #linked-journal-hint { margin: -14px 0 0; font: italic 1rem/1.35 var(--f-body); color: var(--c-ink-soft); }
 .lit-writing-form #linked-journal-hint a { color: var(--c-accent); }
-/* Light, opaque panels otherwise hide the body's grain completely. Tint the
-   noise itself with mostly cool ivory so it remains visible on the hero and
-   masthead without tinting decorative images or dark section backgrounds. */
+/* Carry the same antique paper into solid light sections without touching artwork. */
 html:not([data-theme="dark"]) .masthead,
 html:not([data-theme="dark"]) .lit-hero {
   background-color: var(--c-bg);
-  background-image:
-    linear-gradient(rgba(245, 245, 241, .84), rgba(245, 245, 241, .84)),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: linear-gradient(rgba(245,245,241,.20), rgba(245,245,241,.20)), url('../assets/paper/antique-cotton-ivory.webp');
+  background-size: auto, 768px 768px;
 }
 .lit-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .lit-form-actions { display: flex; gap: 20px; justify-content: space-between; align-items: center; color: var(--c-ink-faint); font: .76rem var(--f-ui); }
