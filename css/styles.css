@@ -3532,6 +3532,15 @@ html:not([data-theme="dark"]) .lit-hero {
 .book-draft-state { margin: 14px 0 0; color: var(--c-ink-faint); font: italic .88rem/1.4 var(--f-body); }
 .book-inline-journal textarea { resize: vertical; min-height: 95px; }
 .book-inline-journal label[for="bj-review"] { margin-top: 32px; }
+.book-archive-next-step .book-decor-toolbar { margin: 16px 0 0; padding: 0; border: 0; }
+.book-archive-next-step .book-decor-tools { position: relative; z-index: 3; margin-top: 10px; padding: 16px; }
+.book-inline-preview { margin-top: 32px; padding: 25px clamp(18px,3vw,34px); border: 1px solid var(--c-rule-strong); background: var(--c-bg); }
+.book-inline-preview > .lit-overline { margin: 0 0 18px; }
+.book-inline-preview [data-preview] + [data-preview] { margin-top: 20px; }
+.book-inline-preview [data-preview][hidden], .book-inline-preview-empty[hidden] { display: none; }
+.book-inline-preview h3 { margin: 0 0 8px; font: 1.55rem var(--f-display); color: var(--c-ink); }
+.book-inline-preview p:not(.lit-overline), .book-inline-preview blockquote { margin: 0; color: var(--c-ink-soft); font: 1.05rem/1.65 var(--f-body); white-space: pre-wrap; overflow-wrap: anywhere; }
+.book-inline-preview blockquote { padding-left: 16px; border-left: 2px solid var(--c-rule-strong); font-style: italic; }
 .book-archive-primary { border: 0; cursor: pointer; }
 .book-archive-writing .lit-overline, .book-archive-aside .lit-overline { color: var(--c-accent); font-size: .7rem; }
 .book-archive-writing h2 { font: 400 clamp(2.6rem,4vw,4.5rem)/1.1 var(--f-display); margin: 17px 0 25px; }

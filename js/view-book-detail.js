@@ -58,6 +58,7 @@ export function bookDetailView({ id } = {}) {
             <p>${hasWriting ? 'Your words and artwork live together on this page.' : status === 'want' ? 'On your to-read shelf. Start collecting thoughts whenever you’re ready.' : 'This is your space for thoughts, passages, and artwork.'}</p>
             <button class="book-archive-primary" type="button" id="book-journal-toggle" aria-expanded="false">${hasWriting ? '✎ Edit my journal' : '✎ Write in my journal'}</button>
             ${hasWriting ? '<a class="book-archive-jump" href="#book-journal">Read my notes ↓</a>' : ''}
+            ${bookDecorMarkup(book, 'toolbar')}
           </div>
         </div>
       </header>
@@ -74,6 +75,13 @@ export function bookDetailView({ id } = {}) {
             <textarea id="bj-quote" rows="3" placeholder="A line worth remembering…">${esc(book.favoriteQuote || '')}</textarea>
             <label for="bj-notes">Marginalia & little notes</label>
             <textarea id="bj-notes" rows="4" placeholder="Anything else worth keeping…">${esc(book.notes || '')}</textarea>
+            <section class="book-inline-preview" aria-label="Live journal preview">
+              <p class="lit-overline">AS IT WILL APPEAR ON YOUR PAGE</p>
+              <div data-preview="review"><h3>What I thought</h3><p></p></div>
+              <div data-preview="quote"><h3>A passage to keep</h3><blockquote></blockquote></div>
+              <div data-preview="notes"><h3>Marginalia</h3><p></p></div>
+              <p class="book-inline-preview-empty" id="bj-preview-empty">Start writing above to see your journal take shape here.</p>
+            </section>
             <div class="book-inline-actions"><button class="btn btn-primary" type="submit">Save my words</button><button class="btn" type="button" id="book-journal-cancel">Close editor</button></div>
             <p class="book-draft-state" id="book-draft-state" aria-live="polite">Your draft stays in this tab until you save.</p>
           </form>
@@ -95,7 +103,6 @@ export function bookDetailView({ id } = {}) {
           </section>
         </aside>
       </div>
-      ${bookDecorMarkup(book, 'toolbar')}
     </article>`,
     onMount(root) {
       mountBookDecor(root, book);
@@ -110,6 +117,16 @@ export function bookDetailView({ id } = {}) {
         notes: root.querySelector('#bj-notes'),
       };
       const draftKey = `dlp:journal-draft:${book.id}`;
+      const paintPreview = () => {
+        let filled = 0;
+        for (const key of ['review', 'quote', 'notes']) {
+          const text = draftFields[key].value.trim();
+          const section = root.querySelector(`[data-preview="${key}"]`);
+          section.hidden = !text;
+          if (text) { filled++; section.querySelector('p, blockquote').textContent = text; }
+        }
+        root.querySelector('#bj-preview-empty').hidden = !!filled;
+      };
       let draftTimer = null;
       try {
         const saved = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
@@ -120,6 +137,7 @@ export function bookDetailView({ id } = {}) {
           draftState.textContent = 'Your unfinished draft has been restored.';
         }
       } catch (_) { draftState.textContent = 'Press Save my words to keep your writing.'; }
+      paintPreview();
       const keepDraft = () => {
         clearTimeout(draftTimer);
         draftState.textContent = 'Keeping your draft…';
@@ -132,8 +150,8 @@ export function bookDetailView({ id } = {}) {
           } catch (_) { draftState.textContent = 'Draft storage unavailable. Please save your words.'; }
         }, 350);
       };
-      form.addEventListener('input', keepDraft);
-      form.addEventListener('change', keepDraft);
+      form.addEventListener('input', () => { keepDraft(); paintPreview(); });
+      form.addEventListener('change', () => { keepDraft(); paintPreview(); });
       const edit = () => {
         form.hidden = false;
         reading.hidden = true;

@@ -11,7 +11,7 @@ const frameClass = frame => ['fine','ornate','gilded-round','gilded-oval','polar
 export function bookDecorMarkup(book, part = 'layer') {
   const pieces = Array.isArray(book.journalDecorations) ? book.journalDecorations : [];
   if (part === 'toolbar') return `<div class="book-decor-toolbar" id="book-decor-toolbar">
-    <button class="btn" type="button" id="book-decor-toggle" aria-expanded="false">✧ Decorate this page</button>
+    <button class="btn" type="button" id="book-decor-toggle" aria-expanded="false">✧ Arrange artwork</button>
     <div class="book-decor-tools" id="book-decor-tools" hidden>
       <div class="book-decor-add-row">
         <label>Add from your artwork library<select id="book-decor-asset"><option value="">Choose an image…</option>${assets.list().map(a => `<option value="${attr(a.id)}">${esc(a.name)}</option>`).join('')}</select></label>
@@ -81,7 +81,7 @@ export function mountBookDecor(root, book) {
     article.classList.toggle('book-decor-editing', editing);
     tools.hidden = !editing;
     toggle.setAttribute('aria-expanded', String(editing));
-    toggle.textContent = editing ? '✓ Done decorating' : '✧ Decorate this page';
+    toggle.textContent = editing ? '✓ Done arranging' : '✧ Arrange artwork';
     if (!editing) select(null);
     else select(selected);
   };
