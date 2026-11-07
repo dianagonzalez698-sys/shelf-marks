@@ -279,14 +279,25 @@ function addSectionTools(root) {
   });
 }
 
+function onTextClick(e) {
+  const el = e.target.closest('[data-edit]');
+  if (!el || !el.closest('#app [data-sec]')) return;
+  e.preventDefault();
+  e.stopPropagation();
+  canvas.inspectText(el.closest('[data-sec]').dataset.sec, el.dataset.edit);
+}
+
 function attach() {
   const root = document.getElementById('app');
   if (!root) return;
   root.querySelectorAll('[data-edit]').forEach((el) => {
-    el.setAttribute('contenteditable', 'true');
-    el.setAttribute('spellcheck', 'true');
+    // Clicking page text opens its focused text editor in the same drawer.
+    // The canvas is a preview; typography lives under Section → Style.
+    el.removeAttribute('contenteditable');
+    el.removeAttribute('spellcheck');
   });
   addSectionTools(root);
+  root.addEventListener('click', onTextClick);
   root.addEventListener('keydown', onKeyDown);
   root.addEventListener('paste', onPaste);
   root.addEventListener('focusout', onBlur);
@@ -306,6 +317,7 @@ function detach() {
     el.removeAttribute('spellcheck');
   });
   root.querySelectorAll('.edit-tools').forEach((n) => n.remove());
+  root.removeEventListener('click', onTextClick);
   root.removeEventListener('keydown', onKeyDown);
   root.removeEventListener('paste', onPaste);
   root.removeEventListener('focusout', onBlur);

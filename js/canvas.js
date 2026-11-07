@@ -6,13 +6,14 @@ import * as theme from './theme.js';
 import * as layout from './layout.js';
 import { typeList, SECTION_TYPES } from './sections.js';
 import { openSectionEditor } from './view-layout.js';
-import { esc, toast, refresh as refreshPage } from './ui.js';
+import { esc, rich, richValue, toast, refresh as refreshPage } from './ui.js';
 
 const records = new Map();
 let activePage = null;
 let editing = false;
 let selected = null;
 let selectedSectionId = null;
+let selectedText = null;
 let panelMode = 'sections';
 let history = [];
 let future = [];
@@ -164,7 +165,10 @@ function render({ preservePanel = false } = {}) {
   document.querySelectorAll('.canvas-layer').forEach((el) => el.remove());
   if (!activePage) return;
   document.querySelectorAll('#app [data-sec]').forEach((el) => {
-    el.classList.toggle('canvas-section-selected', editing && panelMode === 'section' && el.dataset.sec === selectedSectionId);
+    el.classList.toggle('canvas-section-selected', editing && (panelMode === 'section' || panelMode === 'text') && el.dataset.sec === selectedSectionId);
+    el.querySelectorAll('[data-edit]').forEach((textEl) => {
+      textEl.classList.toggle('canvas-text-target', editing && panelMode === 'text' && el.dataset.sec === selectedText?.sectionId && textEl.dataset.edit === selectedText?.key);
+    });
   });
   for (const item of data()) {
     const sec = section(item.sectionId);
@@ -188,11 +192,45 @@ export function inspectSection(id) {
   panelMode = 'section';
   render();
 }
+export function inspectText(sectionId, key) {
+  if (!editing || !sectionId || !key || !layout.getSection(activePage, sectionId)) return;
+  selectedText = { sectionId, key };
+  selectedSectionId = sectionId;
+  selected = null;
+  panelMode = 'text';
+  render();
+  document.querySelector('#canvas-inline-text')?.focus();
+}
 function paintPanel() {
   const panel = document.getElementById('canvas-panel');
   if (!panel || !editing) return;
   const item = data().find((i) => i.id === selected);
   panel.hidden = false;
+  if (panelMode === 'text' && selectedText) {
+    const sec = layout.getSection(activePage, selectedText.sectionId);
+    const field = SECTION_TYPES[sec?.type]?.fields.find((f) => f.key === selectedText.key);
+    if (!sec) { panelMode = 'sections'; render(); return; }
+    const label = field?.label || selectedText.key.replace(/([A-Z])/g, ' $1');
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT TEXT</strong><button type="button" data-canvas="text-back">← Back</button></div>
+      <p class="canvas-section-label">${esc(SECTION_TYPES[sec.type]?.label || 'Section')}<strong>${esc(label)}</strong></p>
+      <p class="canvas-panel-hint">Edit these words below. Typography, colors and visual styling are in the section's Style tab.</p>
+      <div id="canvas-inline-text" class="canvas-inline-text" contenteditable="true" role="textbox" aria-label="${esc(label)}" aria-multiline="${!!field?.multiline}">${rich(sec[selectedText.key] || '')}</div>
+      <button type="button" class="canvas-text-done" data-canvas="text-save">Save text</button>`;
+    const input = panel.querySelector('#canvas-inline-text');
+    const target = { ...selectedText };
+    const save = async () => {
+      const current = layout.getSection(activePage, target.sectionId);
+      const next = richValue(input.innerHTML);
+      if (current && current[target.key] !== next) {
+        await layout.updateSection(activePage, target.sectionId, { [target.key]: next });
+      }
+    };
+    input.addEventListener('blur', () => save().catch(() => toast('Text could not be saved.', 'bad')));
+    panel.querySelector('[data-canvas="text-save"]').onclick = () => {
+      save().then(() => toast('Text saved.', 'good')).catch(() => toast('Text could not be saved.', 'bad'));
+    };
+    return;
+  }
   if (panelMode === 'section' && selectedSectionId) {
     const sec = layout.getSection(activePage, selectedSectionId);
     if (!sec) { panelMode = 'sections'; selectedSectionId = null; render(); return; }
@@ -348,6 +386,7 @@ function ensureTools() {
     if (action === 'remove' && selected) { checkpoint(); change(data().filter((i) => i.id !== selected)); selected = null; render(); }
     if (action === 'deselect') select(null);
     if (action === 'section-back') { selectedSectionId = null; panelMode = 'sections'; render(); }
+    if (action === 'text-back') { selectedText = null; panelMode = 'sections'; render(); }
   });
   document.addEventListener('click', (e) => {
     const id = e.target.closest('[data-canvas-select]')?.dataset.canvasSelect;
@@ -370,13 +409,13 @@ function ensureTools() {
   });
 }
 
-export function setPage(pageId) { activePage = pageId; selected = null; selectedSectionId = null; history = []; future = []; render(); }
+export function setPage(pageId) { activePage = pageId; selected = null; selectedSectionId = null; selectedText = null; history = []; future = []; render(); }
 export function setEditing(next) {
   editing = next;
-  if (next) { panelMode = 'sections'; selectedSectionId = null; }
+  if (next) { panelMode = 'sections'; selectedSectionId = null; selectedText = null; }
   ensureTools();
   document.body.classList.toggle('canvas-editing', next);
   if (!next) selected = null;
   render();
 }
-export function refresh() { if (activePage) render({ preservePanel: panelMode === 'section' }); }
+export function refresh() { if (activePage) render({ preservePanel: panelMode === 'section' || panelMode === 'text' }); }
