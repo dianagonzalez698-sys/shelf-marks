@@ -124,18 +124,15 @@
   /* A high-contrast Didone for display, a geometric sans for the letterspaced
      small caps, a formal script for the wordmark and the swash initial, and a
      warm serif for anything you actually have to read at length. */
-  /* The Illustrated Literary Salon.
-     Script: extravagant copperplate with long entrance and exit strokes.
-     Display: sculptural high-contrast serif with a true italic.
-     Body: a book serif cut to be set large and airy.
-     UI: a quiet geometric sans that stays out of the way. */
-  --f-script:  'Mrs Saint Delafield', 'Imperial Script', 'Snell Roundhand', 'Apple Chancery', cursive;
-  --f-display: 'Bodoni Moda', 'Didot', 'Playfair Display', Georgia, serif;
-  --f-body:    'EB Garamond', 'Cormorant Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
-  --f-ui:      'Jost', 'Futura', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  /* The Romantic Folio: a more characterful, old-world typography default.
+     Every role is still independently editable in Design Studio. */
+  --f-script:  'Imperial Script', 'Pinyon Script', 'Snell Roundhand', 'Apple Chancery', cursive;
+  --f-display: 'Cormorant Garamond', 'Bodoni Moda', 'Didot', Georgia, serif;
+  --f-body:    'Spectral', 'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
+  --f-ui:      'Josefin Sans', 'Jost', 'Futura', -apple-system, Arial, sans-serif;
 
   /* The script is a fine copperplate: it needs size to show its strokes. */
-  --fs-wordmark:       clamp(1.95rem, 4.4vw, 2.75rem);
+  --fs-wordmark:       clamp(2.15rem, 4.6vw, 3.05rem);
   --fs-nav:            0.70rem;
   --fs-banner-eyebrow: 0.70rem;
   --fs-banner-title:   clamp(2rem, 6.6vw, 4.6rem);
@@ -172,11 +169,11 @@
   --ls-script:   0;
   --tt-body:     none;
 
-  --ls-wordmark: 0.01em;
+  --ls-wordmark: 0;
   --ls-nav:      0.18em;
   --ls-label:    0.16em;
   --ls-eyebrow:  0.34em;
-  --ls-display:  0.045em;   /* caps need air */
+  --ls-display:  0.01em;
   --ls-body:     0.002em;
 
   --lh-display:  1.06;
