@@ -199,48 +199,22 @@ export function bookFormView(params = {}) {
               </div>
             </div>
           </div>
-
-          <div class="grid-2">
-            <div class="field">
-              <label for="f-pages">Pages</label>
-              <input id="f-pages" name="pages" type="number" inputmode="numeric" min="1" max="20000"
-                     value="${draft.pages == null ? '' : attr(draft.pages)}">
-            </div>
-            <div class="field">
-              <label for="f-year">First published</label>
-              <input id="f-year" name="firstPublishYear" type="number" inputmode="numeric" min="-3000" max="2100"
-                     value="${draft.firstPublishYear == null ? '' : attr(draft.firstPublishYear)}">
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="f-cover">Cover image URL</label>
-            <input id="f-cover" name="coverUrl" type="text" inputmode="url" autocomplete="off"
-                   value="${attr(draft.coverUrl || '')}" placeholder="https://covers.openlibrary.org/…">
-          </div>
           <div class="book-cover-upload">
             <label class="btn" for="f-cover-upload">Upload your own cover
               <input type="file" id="f-cover-upload" accept="image/*" class="visually-hidden"></label>
             <button type="button" id="f-cover-original" ${draft.customCoverAssetId ? '' : 'hidden'}>Use original cover</button>
             <p class="hint">Your uploaded cover replaces the catalog image only for this book.</p>
           </div>
-
-          <div class="field" style="margin-bottom:0">
-            <label for="f-subjects">Subjects</label>
-            <input id="f-subjects" name="subjects" type="text" autocomplete="off"
-                   value="${attr((draft.subjects || []).join(', '))}" placeholder="comma separated">
-            <p class="hint">From Open Library. Used to pre-select Fiction/Nonfiction.</p>
-          </div>
-        </section>
-
-        <h2 class="form-heading">On my shelf</h2>
-        <section class="panel">
           <div class="field">
             <label for="f-status">Reading status</label>
             <select id="f-status" name="status" class="shelf-status-select">
               ${[['want','Want to read'],['reading','Currently reading'],['read','Read'],['dnf','Did not finish']].map(([key,label]) => `<option value="${key}" ${(draft.status || (draft.dateFinished ? 'read' : 'want')) === key ? 'selected' : ''}>${label}</option>`).join('')}
             </select>
           </div>
+        </section>
+
+        <h2 class="form-heading">My Reading Journal</h2>
+        <section class="panel">
           <div class="grid-2">
             <div class="field" style="margin-bottom:0">
               <label for="f-finished">Date finished <span class="muted">(optional)</span></label>
@@ -253,16 +227,41 @@ export function bookFormView(params = {}) {
             </div>
           </div>
           <p class="hint" id="period-hint"></p>
-          <p class="hint">Save books at any stage. Only books marked Read with a finish date count toward dated reading challenges.</p>
-          ${personalShelves.length ? `<div class="field lit-book-form-shelves"><span class="field-label">Personal shelves <span class="muted">(optional)</span></span>
-            ${personalShelves.map(s=>`<label><input type="checkbox" data-personal-shelf value="${attr(s.id)}" ${(draft.shelves || []).includes(s.id) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')}
-          </div>` : ''}
+          <div class="field"><label for="f-rating">My rating <span class="muted">(optional)</span></label>
+            <select id="f-rating"><option value="">Not rated</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(draft.rating)===n?'selected':''}>${'★'.repeat(n)}${'☆'.repeat(5-n)}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label for="f-review">My review</label>
+            <textarea id="f-review" rows="4" placeholder="What did you think?">${esc(draft.review || '')}</textarea></div>
+          <div class="field"><label for="f-quote">A favorite passage</label>
+            <textarea id="f-quote" rows="3" placeholder="A line worth remembering…">${esc(draft.favoriteQuote || '')}</textarea></div>
+          <div class="field"><label for="f-notes">Private notes</label>
+            <textarea id="f-notes" rows="3" placeholder="Anything else you want to keep…">${esc(draft.notes || '')}</textarea></div>
         </section>
 
-        <h2 class="form-heading">How it counts</h2>
+        <h2 class="form-heading">My Shelves</h2>
         <section class="panel">
+          ${personalShelves.length ? `<div class="field lit-book-form-shelves"><span class="field-label">Personal shelves <span class="muted">(optional)</span></span>
+            ${personalShelves.map(s=>`<label><input type="checkbox" data-personal-shelf value="${attr(s.id)}" ${(draft.shelves || []).includes(s.id) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('')}
+          </div>` : '<p class="hint">Create your own shelves in the Library to organize books any way you like.</p>'}
+          <div class="field"><span class="field-label">Tags</span>
+            <div class="chips" id="tag-chips">
+              ${[...tagOptions].map((t) => `<button class="chip" type="button" data-tag="${attr(t)}" aria-pressed="${(draft.tags || []).includes(t)}">${esc(t)}</button>`).join('')}
+            </div>
+            <div class="row" style="margin-top:.55rem"><input id="f-newtag" type="text" placeholder="Add a tag" autocomplete="off"><button class="btn btn-sm nowrap" type="button" id="add-tag">Add</button></div>
+          </div>
+        </section>
+
+        <details class="book-more-details">
+          <summary>More details & reading challenges <span>Optional</span></summary>
+          <section class="panel">
+          <div class="grid-2">
+            <div class="field"><label for="f-pages">Pages</label><input id="f-pages" type="number" inputmode="numeric" min="1" max="20000" value="${draft.pages == null ? '' : attr(draft.pages)}"></div>
+            <div class="field"><label for="f-year">First published</label><input id="f-year" type="number" inputmode="numeric" min="-3000" max="2100" value="${draft.firstPublishYear == null ? '' : attr(draft.firstPublishYear)}"></div>
+          </div>
+          <div class="field"><label for="f-cover">Catalog cover URL</label><input id="f-cover" type="text" inputmode="url" autocomplete="off" value="${attr(draft.coverUrl || '')}"></div>
+          <div class="field"><label for="f-subjects">Subjects</label><input id="f-subjects" type="text" value="${attr((draft.subjects || []).join(', '))}"></div>
           <div class="field">
-            <span class="field-label">Fiction or nonfiction <span class="muted">(required)</span></span>
+            <span class="field-label">Fiction or nonfiction</span>
             <div class="seg" id="f-format" role="group" aria-label="Fiction or nonfiction">
               <button type="button" data-v="fiction" aria-pressed="${draft.format === 'fiction'}">Fiction</button>
               <button type="button" data-v="nonfiction" aria-pressed="${draft.format === 'nonfiction'}">Nonfiction</button>
@@ -284,7 +283,6 @@ export function bookFormView(params = {}) {
           </label>
         </section>
 
-        <h2 class="form-heading">Series &amp; tags</h2>
         <section class="panel">
           <div class="field">
             <label for="f-series">Series <span class="muted">(optional)</span></label>
@@ -298,27 +296,8 @@ export function bookFormView(params = {}) {
             </div>` : ''}
           </div>
 
-          <div class="field" style="margin-bottom:0">
-            <span class="field-label">Tags <span class="muted">(optional)</span></span>
-            <div class="chips" id="tag-chips">
-              ${[...tagOptions].map((t) => `<button class="chip" type="button" data-tag="${attr(t)}"
-                 aria-pressed="${(draft.tags || []).includes(t)}">${esc(t)}</button>`).join('')}
-              ${tagOptions.size ? '' : '<span class="muted small">No tags yet — add one below.</span>'}
-            </div>
-            <div class="row" style="margin-top:.55rem">
-              <input id="f-newtag" type="text" placeholder="New tag" autocomplete="off" enterkeyhint="done">
-              <button class="btn btn-sm nowrap" type="button" id="add-tag">Add tag</button>
-            </div>
-          </div>
         </section>
-
-        <h2 class="form-heading">Notes</h2>
-        <section class="panel">
-          <div class="field" style="margin-bottom:0">
-            <label for="f-notes" class="visually-hidden">Notes</label>
-            <textarea id="f-notes" placeholder="Anything you want to remember (optional)">${esc(draft.notes || '')}</textarea>
-          </div>
-        </section>
+        </details>
 
         <div class="btn-row" style="margin-top:1rem">
           <button class="btn btn-primary grow" type="submit">${editing ? 'Save changes' : 'Add to my books'}</button>
@@ -503,6 +482,9 @@ export function bookFormView(params = {}) {
           tags: [...tags],
           shelves: [...root.querySelectorAll('[data-personal-shelf]:checked')].map(el=>el.value),
           notes: root.querySelector('#f-notes').value.trim(),
+          rating: root.querySelector('#f-rating').value ? Number(root.querySelector('#f-rating').value) : null,
+          review: root.querySelector('#f-review').value.trim(),
+          favoriteQuote: root.querySelector('#f-quote').value.trim(),
         };
 
         try {

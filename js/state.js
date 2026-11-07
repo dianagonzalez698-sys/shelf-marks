@@ -108,6 +108,9 @@ export function newBook(fields = {}) {
     tags: [],
     shelves: [], // optional personal collections; independent of reading status
     notes: '',
+    rating: null,
+    review: '',
+    favoriteQuote: '',
     createdAt: nowISO(),
     updatedAt: nowISO(),
     ...fields,
