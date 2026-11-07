@@ -375,13 +375,29 @@ function paintPanel() {
     ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}
     <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
       <label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label>
-      <label class="canvas-opacity-field">Opacity<input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity}"></label>
+      <label class="canvas-opacity-field">Opacity <output data-opacity-value>${Math.round((item.opacity ?? 1) * 100)}%</output><input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity ?? 1}"></label>
       ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.x).toFixed(1))}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" step="0.1" value="${Number(Number(item.y).toFixed(1))}"></label></div>
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
     </details>
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
   panel.querySelector('.canvas-more-tools')?.addEventListener('toggle', (event) => { advancedOpen = event.target.open; });
   panel.querySelectorAll('[data-prop]').forEach((input) => {
+    if (['rotate', 'width', 'x', 'y'].includes(input.dataset.prop)) input.addEventListener('input', () => {
+      if (input.value === '') return;
+      const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
+      if (!itemNode) return;
+      const value = Number(input.value);
+      if (input.dataset.prop === 'rotate') itemNode.style.transform = `rotate(${value}deg)`;
+      else if (input.dataset.prop === 'width') itemNode.style.width = `${value}px`;
+      else itemNode.style[input.dataset.prop === 'x' ? 'left' : 'top'] = `${value}%`;
+    });
+    if (input.dataset.prop === 'opacity') input.addEventListener('input', () => {
+      const value = Number(input.value);
+      const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
+      if (itemNode) itemNode.style.opacity = String(value);
+      const output = panel.querySelector('[data-opacity-value]');
+      if (output) output.textContent = `${Math.round(value * 100)}%`;
+    });
     if (input.dataset.prop === 'text') input.addEventListener('input', () => {
       const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
       const visible = itemNode?.querySelector('.canvas-text-content');
@@ -391,6 +407,7 @@ function paintPanel() {
       const key = input.dataset.prop;
       const value = input.type === 'checkbox' ? (key === 'weight' ? (input.checked ? 700 : 400) : input.checked)
         : input.type === 'number' || input.type === 'range' ? Number(input.value) : input.value;
+      if (item[key] === value) return;
       update(item.id, key === 'fullWidth' && value ? { fullWidth: true, x: 0 } : { [key]: value });
     });
   });
