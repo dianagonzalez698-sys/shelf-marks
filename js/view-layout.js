@@ -732,6 +732,13 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               const out = el.closest('.field').querySelector('[data-readout]');
               if (out) out.textContent = v;
             } else v = el.value;
+            // Keep the actual journal page in step with the text box without
+            // replacing the entire section (which would disrupt the editor).
+            if (['text', 'textarea', 'rich'].includes(fieldDef.type)) {
+              const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
+              const visible = [...(sectionNode?.querySelectorAll('[data-edit]') || [])].find(node => node.dataset.edit === key);
+              if (visible) visible.innerHTML = rich(v);
+            }
             if (fieldDef.type === 'font') el.style.fontFamily = v || 'inherit';
             await commit({ [key]: v }, { rebuild: !!fieldDef.controls });
           });
@@ -883,6 +890,12 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
         sheet.querySelectorAll('[data-rich-field]').forEach((box) => {
           const key = box.dataset.richField;
           const commitRich = () => commit({ [key]: richValue(box.innerHTML) });
+
+          box.addEventListener('input', () => {
+            const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
+            const visible = [...(sectionNode?.querySelectorAll('[data-edit]') || [])].find(node => node.dataset.edit === key);
+            if (visible) visible.innerHTML = rich(richValue(box.innerHTML));
+          });
 
           box.addEventListener('input', commitRich);
           box.addEventListener('blur', commitRich);
