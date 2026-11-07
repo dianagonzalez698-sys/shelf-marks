@@ -6,7 +6,7 @@ import * as assets from './assets.js';
 
 const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
 
-const frameClass = frame => ['fine','ornate','polaroid'].includes(frame) ? ` frame-${frame}` : '';
+const frameClass = frame => ['fine','ornate','gilded-round','gilded-oval','polaroid'].includes(frame) ? ` frame-${frame}` : '';
 
 export function bookDecorMarkup(book, part = 'layer') {
   const pieces = Array.isArray(book.journalDecorations) ? book.journalDecorations : [];
@@ -20,7 +20,7 @@ export function bookDecorMarkup(book, part = 'layer') {
       </div>
       <div class="book-decor-selected-tools" id="book-decor-selected-tools" hidden>
         <span>Selected image</span>
-        <label>Frame <select id="book-decor-frame"><option value="none">No frame</option><option value="fine">Fine border</option><option value="ornate">Antique gold</option><option value="polaroid">Photograph mount</option></select></label>
+        <label>Frame <select id="book-decor-frame"><option value="none">No frame</option><option value="fine">Fine border</option><option value="ornate">Carved gilt · rectangular</option><option value="gilded-round">Carved gilt · round</option><option value="gilded-oval">Carved gilt · oval</option><option value="polaroid">Photograph mount</option></select></label>
         <button class="btn" type="button" id="book-decor-remove">Remove</button>
       </div>
       <p>Drag images to move them. Select one and pull its bottom corner to resize it. Changes save automatically.</p>

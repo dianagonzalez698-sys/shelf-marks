@@ -1729,6 +1729,27 @@ a.ed-meta:hover { color: var(--c-accent); }
 .mf-oval .m-box { border-radius: 50% / 50%; }
 .mf-arch .m-box { border-radius: 50% 50% var(--bm-radius) var(--bm-radius) / 36% 36% var(--bm-radius) var(--bm-radius); }
 
+/* Photographic carved-gold frames: the rectangular border scales by nine-slice,
+   while the round and oval mounts retain their entire sculpted silhouette. */
+.mf-gilded-real .m-mount {
+  border: clamp(13px, 2.8vw, 32px) solid transparent;
+  border-image-source: url('../assets/frames/antique-gilt-rectangle.webp');
+  border-image-slice: 175;
+  border-image-repeat: stretch;
+  filter: drop-shadow(0 5px 8px rgba(40, 27, 10, .28));
+}
+.mf-gilded-real .m-box { box-shadow: inset 0 0 7px rgba(28,18,5,.35); }
+.mf-gilded-round .m-mount, .mf-gilded-oval .m-mount { position: relative; padding: 0; filter: drop-shadow(0 7px 9px rgba(40,27,10,.25)); }
+.mf-gilded-round .m-mount { aspect-ratio: 1; }
+.mf-gilded-oval .m-mount { aspect-ratio: 3 / 4; }
+.mf-gilded-round .m-mount::after, .mf-gilded-oval .m-mount::after { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; background-size: 100% 100%; background-repeat: no-repeat; }
+.mf-gilded-round .m-mount::after { background-image: url('../assets/frames/antique-gilt-round.webp'); }
+.mf-gilded-oval .m-mount::after { background-image: url('../assets/frames/antique-gilt-oval.webp'); }
+.mf-gilded-round .m-box, .mf-gilded-oval .m-box { position: absolute; width: auto; height: auto; overflow: hidden; border-radius: 50%; }
+.mf-gilded-round .m-box { inset: 18%; aspect-ratio: 1 !important; }
+.mf-gilded-oval .m-box { inset: 17% 18%; aspect-ratio: 3 / 4 !important; }
+.mf-gilded-round .m-img, .mf-gilded-oval .m-img, .mf-gilded-round.m-auto .m-img, .mf-gilded-oval.m-auto .m-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover !important; }
+
 .mf-polaroid .m-mount {
   background: var(--c-bg-raised);
   padding: 9px 9px 42px;
@@ -3361,7 +3382,16 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .book-decor-piece { position: absolute; display: block; height: auto; max-width: 75%; transform: translate(-50%, -50%); pointer-events: none; user-select: none; touch-action: none; filter: drop-shadow(3px 7px 5px rgba(0,0,0,.1)); }
 .book-decor-piece > img { display: block; width: 100%; height: auto; user-select: none; pointer-events: none; }
 .book-decor-piece.frame-fine { background: var(--c-bg); padding: 6px; border: 1px solid #b6a48d; box-shadow: inset 0 0 0 2px var(--c-bg), inset 0 0 0 3px #b6a48d; }
-.book-decor-piece.frame-ornate { background: #ece0c5; padding: 11px; border: 5px ridge #ab8950; box-shadow: 0 3px 12px rgba(44,28,16,.16), inset 0 0 0 2px #6e542e; }
+.book-decor-piece.frame-ornate { border: 23px solid transparent; border-image-source: url('../assets/frames/antique-gilt-rectangle.webp'); border-image-slice: 175; border-image-repeat: stretch; filter: drop-shadow(0 6px 10px rgba(44,28,16,.24)); }
+.book-decor-piece.frame-gilded-round, .book-decor-piece.frame-gilded-oval { position: absolute; padding: 0; filter: drop-shadow(0 6px 10px rgba(44,28,16,.24)); }
+.book-decor-piece.frame-gilded-round { aspect-ratio: 1 / 1; }
+.book-decor-piece.frame-gilded-oval { aspect-ratio: 3 / 4; }
+.book-decor-piece.frame-gilded-round > img, .book-decor-piece.frame-gilded-oval > img { position: absolute; width: 64%; height: 64%; inset: 18%; border-radius: 50%; object-fit: cover; }
+.book-decor-piece.frame-gilded-oval > img { width: 64%; height: 66%; inset: 17% 18%; }
+.book-decor-piece.frame-gilded-round::after, .book-decor-piece.frame-gilded-oval::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background-size: 100% 100%; background-repeat: no-repeat; }
+.book-decor-piece.frame-gilded-round::after { background-image: url('../assets/frames/antique-gilt-round.webp'); }
+.book-decor-piece.frame-gilded-oval::after { background-image: url('../assets/frames/antique-gilt-oval.webp'); }
+.book-decor-piece .book-decor-resize { z-index: 5; }
 .book-decor-piece.frame-polaroid { background: #fffaf0; padding: 10px 10px 28px; box-shadow: 0 4px 12px rgba(44,28,16,.18); }
 .book-decor-resize { display: none; position: absolute; bottom: -13px; right: -13px; width: 28px; height: 28px; padding: 0; border: 1px solid var(--c-accent); border-radius: 50%; background: var(--c-bg); color: var(--c-accent); font: 700 17px var(--f-ui); cursor: nwse-resize; pointer-events: auto; touch-action: none; }
 .book-decor-editing .book-decor-layer { pointer-events: none; }
