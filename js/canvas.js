@@ -21,6 +21,7 @@ let future = [];
 let saveQueue = Promise.resolve();
 let saveRevision = 0;
 let saveState = 'saved';
+let advancedOpen = false;
 
 const idFor = (page) => `canvas:${page}`;
 const clone = (v) => JSON.parse(JSON.stringify(v));
@@ -227,7 +228,7 @@ function render({ preservePanel = false } = {}) {
   if (!preservePanel) paintPanel();
 }
 
-function select(id) { selected = id; panelMode = id ? 'selected' : (simplePage ? 'add' : 'sections'); render(); }
+function select(id) { selected = id; advancedOpen = false; panelMode = id ? 'selected' : (simplePage ? 'add' : 'sections'); render(); }
 export function inspectSection(id) {
   if (!editing || !id || !layout.getSection(activePage, id)) return;
   selectedSectionId = id;
@@ -342,8 +343,7 @@ function paintPanel() {
           <button type="button" class="canvas-section-select" data-canvas-section="${esc(s.id)}"><strong>${esc(SECTION_TYPES[s.type]?.label || 'Section')}${arr.filter((x) => x.type === s.type).length > 1 ? ` <em class="canvas-duplicate">${arr.filter((x) => x.type === s.type).findIndex((x) => x.id === s.id) + 1} of ${arr.filter((x) => x.type === s.type).length}</em>` : ''}</strong><small>${esc(String(s.title || s.heading || s.text || SECTION_TYPES[s.type]?.blurb || '').replace(/<[^>]*>/g,'').slice(0,55))}</small></button>
           <span class="canvas-section-moves"><button type="button" data-move-section="${esc(s.id)}" data-move-delta="-1" ${i === 0 ? 'disabled' : ''} aria-label="Move section up">↑</button><button type="button" data-move-section="${esc(s.id)}" data-move-delta="1" ${i === arr.length - 1 ? 'disabled' : ''} aria-label="Move section down">↓</button></span>
         </div>`).join('')}</div>
-        <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add another section</strong><span>Build out the page with a new block</span></button>
-        <div class="canvas-panel-links"><a href="#/customize">Site typography & colors</a><a href="#/layout">Reorder or hide sections</a></div>`
+        <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Build out your page</span></button>`
       : panelMode === 'site' ? `<h3>Site identity</h3><p class="canvas-panel-hint">Change your wordmark without editing code.</p>
         <label>Website name<input id="canvas-site-name" value="${esc(theme.getContent().siteName || theme.CONTENT_DEFAULTS.siteName)}"></label>
         <button type="button" data-canvas="save-site">Save website name</button>`
@@ -356,13 +356,11 @@ function paintPanel() {
         <p class="canvas-field-group">Floating artwork & text</p>
         <div class="canvas-layer-list">${data().some(x => x.sectionId === 'page-surface') ? layerRows(data().filter(x => x.sectionId === 'page-surface')) : '<p class="canvas-panel-hint">No floating elements added yet.</p>'}</div>
         ${data().some(x => x.sectionId !== 'page-surface') ? `<p class="canvas-field-group">Section-attached accents</p><div class="canvas-layer-list">${layerRows(data().filter(x => x.sectionId !== 'page-surface'))}</div>` : ''}`
-      : `<h3>Make this page yours</h3><p class="canvas-panel-hint">Add something, then drag it anywhere within its section. Click any heading on the page to edit the words directly.</p>
-        <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Add section</strong><span>Choose a layout, writing feature, gallery, or decorative block</span></button>
-        <p class="canvas-panel-hint">To edit something already on the page, choose Sections or Layers above.</p>
-        <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Add text</strong><span>Headings, notes, labels & quotes</span></button>
-        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Add floating artwork</strong><span>Choose a saved image or upload your own. On the Journal, drag it anywhere across the page.</span></button>
-        <div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Add or arrange sections</a><a href="#/customize">Global colors & fonts</a></div>
-        <p class="canvas-panel-hint">Your changes save on this device. Use Settings → Export backup to keep a copy.</p>`);
+      : `<h3>Add to this page</h3><p class="canvas-panel-hint">Choose what to add. Select existing pieces directly on the page, or find them in Layers.</p>
+        <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Section</strong><span>Build a new part of the page</span></button>
+        <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Text</strong><span>A handwritten note, heading or quote</span></button>
+        <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Floating artwork</strong><span>Place your own image anywhere on this page</span></button>
+        <details class="canvas-more-tools"><summary>More design settings</summary><div class="canvas-panel-links"><a href="#/assets">Picture library</a><a href="#/layout">Page layout</a><a href="#/customize">Site colors & fonts</a></div></details>`);
     return;
   }
   panel.innerHTML = `<div class="canvas-panel-head"><strong>${item.type === 'text' ? 'EDIT TEXT' : 'EDIT ARTWORK'}</strong><button type="button" data-canvas="deselect" aria-label="Back to tools">← Back</button></div>
@@ -373,12 +371,15 @@ function paintPanel() {
       </select></label>
       <div class="canvas-panel-row"><label>Size<input data-prop="size" type="number" min="10" max="150" value="${item.size}"></label><label>Color<input data-prop="color" type="color" value="${item.color}"></label></div>
       <div class="canvas-panel-row"><label>Bold<input data-prop="weight" type="checkbox" ${item.weight >= 700 ? 'checked' : ''}></label><label>Italic<input data-prop="italic" type="checkbox" ${item.italic ? 'checked' : ''}></label></div>` : ''}
-    ${item.type === 'image' ? `<label class="canvas-check"><input data-prop="fullWidth" type="checkbox" ${item.fullWidth ? 'checked' : ''}> Stretch artwork across the full section (great for curtains and cloud borders)</label>` : ''}
-    <div class="canvas-panel-row">${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}<label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label></div>
-    <label>Opacity<input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity}"></label>
-    ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" value="${item.x}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" value="${item.y}"></label></div>
+    ${item.type === 'image' ? `<label class="canvas-check"><input data-prop="fullWidth" type="checkbox" ${item.fullWidth ? 'checked' : ''}> Stretch across the page</label>` : ''}
+    ${item.fullWidth ? '' : `<label>Width (px)<input data-prop="width" type="number" min="60" max="1200" value="${Math.round(item.width)}"></label>`}
+    <details class="canvas-more-tools" ${advancedOpen ? 'open' : ''}><summary>Fine-tune placement & appearance</summary>
+      <div class="canvas-panel-row"><label>Rotation<input data-prop="rotate" type="number" min="-180" max="180" value="${item.rotate}"></label><label>Opacity<input data-prop="opacity" type="range" min="0" max="1" step="0.05" value="${item.opacity}"></label></div>
+      ${item.type === 'image' ? `<div class="canvas-panel-row"><label>Left (%)<input data-prop="x" type="number" min="0" max="100" value="${item.x}"></label><label>Top (%)<input data-prop="y" type="number" min="0" max="100" value="${item.y}"></label></div>
       <div class="canvas-panel-row"><button type="button" data-canvas="art-backward">Send backward</button><button type="button" data-canvas="art-forward">Bring forward</button></div>` : ''}
+    </details>
     <button type="button" class="canvas-remove" data-canvas="remove">Remove element</button>`;
+  panel.querySelector('.canvas-more-tools')?.addEventListener('toggle', (event) => { advancedOpen = event.target.open; });
   panel.querySelectorAll('[data-prop]').forEach((input) => {
     if (input.dataset.prop === 'text') input.addEventListener('input', () => {
       const itemNode = [...document.querySelectorAll('.canvas-item')].find(el => el.dataset.canvasId === item.id);
@@ -565,7 +566,7 @@ function ensureTools() {
   });
 }
 
-export function setPage(pageId, { simple = false } = {}) { activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; saveState = 'saved'; render(); }
+export function setPage(pageId, { simple = false } = {}) { activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; advancedOpen = false; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; saveState = 'saved'; render(); }
 export function setEditing(next) {
   editing = next;
   if (next) { panelMode = 'sections'; selectedSectionId = null; selectedText = null; }
