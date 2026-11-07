@@ -12,7 +12,6 @@ import { homeView } from './view-home.js';
 import { booksView } from './view-books.js';
 import { addView, bookFormView } from './view-book.js';
 import { bookDetailView } from './view-book-detail.js';
-import { bookJournalView } from './view-book-journal.js';
 import { challengesView, challengeDetailView } from './view-challenges.js';
 import { bookmarksView } from './view-bookmarks.js';
 import { settingsView } from './view-settings.js';
@@ -31,7 +30,8 @@ route('/add', addView);
 route('/new', bookFormView);
 route('/book/:id', bookDetailView);
 route('/book/:id/edit', bookFormView);
-route('/book/:id/journal', bookJournalView);
+// Old deep links now land on the combined writing-and-decoration page.
+route('/book/:id/journal', bookDetailView);
 route('/challenges', challengesView);
 route('/challenge/:id', challengeDetailView);
 route('/bookmarks', bookmarksView);
