@@ -488,7 +488,7 @@ export function bookFormView(params = {}) {
           } else {
             toast(editing ? 'Changes saved.' : `“${esc(title)}” added.`, 'good');
           }
-          navigate('/books');
+          navigate(`/book/${encodeURIComponent(record.id)}`);
         } catch (_) {
           toast('Could not save — this device is blocking local storage.', 'bad');
         }
