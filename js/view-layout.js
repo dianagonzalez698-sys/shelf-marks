@@ -497,7 +497,7 @@ function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
       const r = f.role || {};
       const face = String(value || '');
       const ink = String(sec_ink(secId, f.inkKey) || '');
-      const name = (FONT_CHOICES.find((x) => x.value === face) || {}).label || 'Match the site';
+      const name = (FONT_CHOICES.find((x) => x.value === face) || {}).label || 'Site default';
       const cur = (k) => (k ? String(sec_ink(secId, k) || '') : '');
       const weight = cur(r.weight);
       const italic = cur(r.italic) === 'italic';
@@ -508,12 +508,12 @@ function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
       return `<div class="type-row">
         <span class="type-row-label">${esc(f.label)}</span>
         <div class="type-row-ctl">
-          <button type="button" class="face-btn" data-face="${attr(f.key)}"
+          <button type="button" class="face-btn" data-face="${attr(f.key)}" title="Change ${esc(f.label.toLowerCase())} font"
             style="font-family:${attr(face || 'inherit')};font-weight:${attr(weight || 'inherit')};font-style:${italic ? 'italic' : 'normal'}"
             >${esc(name)}</button>
           <button type="button" class="ink-dot${ink ? '' : ' is-auto'}" data-inkopen="${attr(f.inkKey)}"
-            style="--sw:${attr(ink || 'transparent')}" title="Colour"
-            aria-label="${esc(f.label)} colour"></button>
+            style="--sw:${attr(ink || 'transparent')}" title="Change text color"
+            aria-label="Change ${esc(f.label.toLowerCase())} text color">Color</button>
         </div>
         <input type="hidden" data-field="${attr(f.key)}" value="${attr(face)}">
         <input type="hidden" data-field="${attr(f.inkKey)}" value="${attr(ink)}">
@@ -607,7 +607,7 @@ function fieldsHtml(def, sec, mode = 'all') {
       const appearance = chosen.filter((f) => f.type !== 'typeface');
       const typography = chosen.filter((f) => f.type === 'typeface');
       return `${appearance.length ? '<p class="canvas-field-group">Background & decoration</p>' + appearance.map(draw).join('') : ''}
-        ${typography.length ? '<p class="canvas-field-group">Typography & text color</p>' + typography.map(draw).join('') : ''}`;
+        ${typography.length ? '<p class="canvas-field-group">Text appearance</p><p class="canvas-panel-hint">Choose a font or its text color for this section. “Site default” keeps your journal’s overall styling.</p>' + typography.map(draw).join('') : ''}`;
     }
     if (mode === 'artwork') return `${sec.edge && sec.edge !== 'none' ? `<p class="canvas-panel-hint canvas-edge-help">${sec.edge === 'curtain' ? 'Full-frame curtain: choose whether it hangs from the TOP or finishes at the BOTTOM. Bottom placement mirrors the image.' : sec.edge === 'artwork' ? 'Decorative trim: choose TOP, BOTTOM or BOTH below.' : 'This preset paper-edge shape decorates the BOTTOM of this section.'}</p>` : ''}
       ${chosen.length ? chosen.map(draw).join('') : '<p class="canvas-panel-hint">No built-in picture slots in this section.</p>'}
@@ -737,7 +737,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
           el.dispatchEvent(new Event('input', { bubbles: true }));
         };
 
-        const faceName = (v) => (FONT_CHOICES.find((x) => x.value === v) || {}).label || 'Match the site';
+        const faceName = (v) => (FONT_CHOICES.find((x) => x.value === v) || {}).label || 'Site default';
 
         sheet.querySelectorAll('.type-row').forEach((row) => {
           const faceBtn = row.querySelector('[data-face]');

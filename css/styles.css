@@ -2596,21 +2596,23 @@ a.ed-meta:hover { color: var(--c-accent); }
 .ed-hero.has-curtain.curtain-bottom { padding-block-start: 0; padding-block-end: 0; }
 .ed-hero.has-curtain.curtain-bottom .hero-type { padding-bottom: max(calc(var(--cur-arch) * var(--cur-over) + var(--cur-clear) + var(--cur-gap,0px)),var(--sp-section)); }
 
-@media (max-width: 759px) {
-  /* A phone cannot spare a third of its width on cloth, so the curtain hangs
-     shallower and the content keeps only the room it needs. */
-  .ed-curtain { height: calc(var(--cur-h) * var(--cur-over, 1) * .62); }
+@media (max-width: 1000px) {
+  /* Keep the painted curtain's width and height in the same proportion.
+     Shrinking only its height detached its folds from the section edges on
+     phones and made the valance look like unrelated corner ornaments. */
   .ed.has-curtain {
-    padding-inline: max(calc(var(--cur-side) * .9 + .6rem), var(--sp-page-x));
-    /* The curtain hangs at .62 here, so its arch lands proportionally higher. */
+    --cur-over: 1;
+    --cur-lift: clamp(8px, 2vw, 18px);
+    --cur-clear: clamp(18px, 4vw, 30px);
+    padding-inline: max(calc(var(--cur-side) + .65rem), var(--sp-page-x));
     padding-block-start: max(
-      calc(var(--cur-arch) * var(--cur-over) * .62 - var(--cur-lift)
+      calc(var(--cur-arch) * var(--cur-over) - var(--cur-lift)
         - var(--trim-bite, 3px) + var(--cur-clear) + var(--cur-gap, 0px)),
       calc(var(--sp-section) * .6));
   }
-  .ed.has-curtain.curtain-bottom { padding-block-start: calc(var(--sp-section) * .6); padding-block-end: max(calc(var(--cur-arch) * var(--cur-over) * .62 - var(--cur-lift) + var(--cur-clear) + var(--cur-gap,0px)),calc(var(--sp-section) * .6)); }
+  .ed.has-curtain.curtain-bottom { padding-block-start: calc(var(--sp-section) * .6); padding-block-end: max(calc(var(--cur-arch) * var(--cur-over) - var(--cur-lift) + var(--cur-clear) + var(--cur-gap,0px)),calc(var(--sp-section) * .6)); }
   .ed-hero.has-curtain.curtain-bottom { padding-block-start: 0; padding-block-end: 0; }
-  .ed-hero.has-curtain.curtain-bottom .hero-type { padding-bottom: max(calc(var(--cur-arch) * var(--cur-over) * .62 + var(--cur-clear) + var(--cur-gap,0px)),var(--sp-section)); }
+  .ed-hero.has-curtain.curtain-bottom .hero-type { padding-bottom: max(calc(var(--cur-arch) * var(--cur-over) + var(--cur-clear) + var(--cur-gap,0px)),var(--sp-section)); }
 }
 
 /* ------------------------------------------------------- word of the year --
@@ -3436,6 +3438,13 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .canvas-section-inspector .rich-input { min-height: 52px; padding: 12px; }
 .canvas-section-inspector .rich-bar { margin-bottom: 6px; }
 .canvas-section-inspector .type-row { border-bottom: 1px solid var(--c-rule); padding-bottom: 15px; margin-bottom: 12px; }
+.canvas-section-inspector .type-row { display: block; padding: 11px 0 14px; }
+.canvas-section-inspector .type-row-label { display: block; margin-bottom: 7px; font-size: .72rem; letter-spacing: .07em; }
+.canvas-section-inspector .type-row-ctl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.canvas-section-inspector .face-btn { padding: 9px 11px; font-size: .9rem; }
+.canvas-section-inspector .ink-dot { display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: auto; height: auto; min-height: 42px; padding: 0 10px; border-radius: 3px; background: var(--c-bg-raised); box-shadow: none; font: 600 .74rem var(--f-ui); color: var(--c-ink); }
+.canvas-section-inspector .ink-dot::before { content: ''; width: 15px; height: 15px; flex: 0 0 15px; border: 1px solid var(--c-rule-strong); border-radius: 50%; background: var(--sw); }
+.canvas-section-inspector .ink-dot.is-auto::before { background: linear-gradient(135deg, transparent 45%, var(--c-ink-faint) 45%, var(--c-ink-faint) 55%, transparent 55%), var(--c-bg); }
 .canvas-editing #app [data-edit] { cursor: text; }
 .canvas-editing #app [data-edit].canvas-text-target { outline: 2px solid var(--c-accent); outline-offset: 5px; background: color-mix(in srgb,var(--c-accent) 8%,transparent); }
 .canvas-inline-text { min-height: 100px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-field); color: var(--c-ink); padding: 17px; font: 1.35rem/1.4 var(--f-body); white-space: pre-wrap; overflow-wrap: anywhere; }
