@@ -19,8 +19,16 @@ export function collectionsView() {
   const items = [...FEATURES.map(f=>({...f,...featureDesign[f.id],type:'feature'})), ...shelves.map(s=>({...s,type:'shelf',title:s.name,label:'PERSONAL SHELF',href:shelfHref(s.id),description:s.description || 'A personal collection, still growing.',ornament:'❦'}))];
   const booksOn = (id) => state.books.filter(b=>(b.shelves || []).includes(id));
   const cover = (item) => assets.src(item.coverAssetId);
+  const artFor = (item) => {
+    if (cover(item)) return `<img src="${attr(cover(item))}" alt="" loading="lazy">`;
+    if (item.type === 'shelf') {
+      const books = booksOn(item.id).filter(book => assets.src(book.customCoverAssetId) || book.coverUrl).slice(0,3);
+      if (books.length) return `<div class="lit-cabinet-book-collage" aria-hidden="true">${books.map(book => `<img src="${attr(assets.src(book.customCoverAssetId) || book.coverUrl)}" alt="" loading="lazy">`).join('')}</div>`;
+    }
+    return `<span class="lit-cabinet-ornament" aria-hidden="true">${item.ornament}</span>`;
+  };
   const card = (item,index) => `<a class="lit-cabinet-piece lit-cabinet-${item.type}" data-collection-id="${attr(item.id)}" data-collection-tone="${attr(item.tone || 'paper')}" href="${attr(item.href)}">
-    <div class="lit-cabinet-art">${cover(item) ? `<img src="${attr(cover(item))}" alt="" loading="lazy">` : `<span class="lit-cabinet-ornament" aria-hidden="true">${item.ornament}</span>`}</div>
+    <div class="lit-cabinet-art">${artFor(item)}</div>
     <div class="lit-cabinet-copy"><span class="lit-cabinet-index">${item.type === 'feature' ? item.number : String(index - FEATURES.length + 1).padStart(2,'0')} &nbsp; / &nbsp; ${esc(item.label)}</span>
       <h2 data-preview-title="${attr(item.id)}">${esc(item.title)}</h2><p data-preview-description="${attr(item.id)}">${esc(item.description)}</p>
       <small>${item.type === 'feature' ? esc(countFor(item.id,marks)) : `${booksOn(item.id).length} ${booksOn(item.id).length === 1 ? 'book' : 'books'}`} <span aria-hidden="true">↗</span></small></div>
