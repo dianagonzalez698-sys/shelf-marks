@@ -115,7 +115,7 @@ export function customizeView() {
         ${studioNav('design')}
         <div class="section-head" style="margin-bottom:1.3rem"><div>
           <h2 class="section-title">Design studio</h2>
-          <p class="section-sub">Every change lands immediately and is kept on this device.</p>
+          <p class="section-sub">Choose a detail below. Changes appear immediately and stay on this device.</p>
         </div></div>
 
         <h2 class="form-heading">Appearance</h2>
@@ -128,28 +128,11 @@ export function customizeView() {
           Showing <b id="mode-now">${esc(resolvedMode())}</b> right now.
         </p>
 
-        ${preview()}
-
-        <section class="type-direction">
-          <p class="lit-overline">THE NEW HOUSE STYLE</p>
-          <h2>Something a little <em>romantic.</em></h2>
-          <p class="type-direction-sample">The art of reading <em>beautifully</em></p>
-          <p>Mrs Saint Delafield calligraphy, Bodoni Moda headlines, EB Garamond for reading and understated Jost for navigation. This is the new default—not another full-site preset.</p>
-          <button class="btn btn-primary" type="button" id="use-editorial-type">Use this typography</button>
-          <p class="hint">Changes typography only. Your artwork, colors, page composition and books stay as they are.</p>
-        </section>
-        <details class="studio-group"><summary>Other saved style starting points (optional)</summary>
-          <div class="studio-body"><div class="btn-row" id="presets">
-            ${Object.entries(PRESETS).map(([id, p]) =>
-              `<button class="btn btn-sm" type="button" data-preset="${attr(id)}" title="${attr(p.note || '')}">${esc(p.label)}</button>`).join('')}
-          </div><p class="hint">These replace color and typography overrides together.</p></div>
-        </details>
-
         <div style="margin-top:var(--sp-section)">
           ${THEME_SCHEMA.map(group).join('')}
 
           <details class="studio-group">
-            <summary>Wording</summary>
+            <summary>Page wording</summary>
             <div class="studio-body">
               <p class="hint" style="margin:0 0 .3rem">Titles and labels shown around the journal.</p>
               ${CONTENT_SCHEMA.map((c) => `
@@ -163,6 +146,25 @@ export function customizeView() {
             </div>
           </details>
         </div>
+
+        <details class="studio-group"><summary>Preview sample & style starting points</summary><div class="studio-body">
+        ${preview()}
+        <section class="type-direction">
+          <p class="lit-overline">THE NEW HOUSE STYLE</p>
+          <h2>Something a little <em>romantic.</em></h2>
+          <p class="type-direction-sample">The art of reading <em>beautifully</em></p>
+          <p>Mrs Saint Delafield calligraphy, Bodoni Moda headlines, EB Garamond for reading and understated Jost for navigation. This is the new default—not another full-site preset.</p>
+          <button class="btn btn-primary" type="button" id="use-editorial-type">Use this typography</button>
+          <p class="hint">Changes typography only. Your artwork, colors, page composition and books stay as they are.</p>
+        </section>
+        <details class="studio-group"><summary>Other style starting points</summary>
+          <div class="studio-body"><div class="btn-row" id="presets">
+            ${Object.entries(PRESETS).map(([id, p]) =>
+              `<button class="btn btn-sm" type="button" data-preset="${attr(id)}" title="${attr(p.note || '')}">${esc(p.label)}</button>`).join('')}
+          </div><p class="hint">These replace color and typography overrides together.</p></div>
+        </details>
+
+        </div></details>
 
         <h2 class="form-heading">Keep or share this design</h2>
         <div class="btn-row">
