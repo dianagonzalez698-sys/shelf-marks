@@ -145,7 +145,7 @@ function openBookmark(id) {
   openSheet(`
     <div class="bookmark-detail">
       <div class="bookmark-detail-visual${unlocked ? '' : ' is-waiting'}">
-        ${img ? `<img src="${attr(img.dataUrl)}" alt="Bookmark artwork selected for ${attr(meta ? meta.title : id)}">` : markVisual(id, { unlocked, bonus: !!(meta && meta.bonus) })}
+        ${img ? `<img src="${attr(img.dataUrl)}" alt="Bookmark artwork selected for ${attr(meta ? meta.title : id)}">` : '<span class="bookmark-detail-empty" aria-hidden="true">✧</span>'}
       </div>
       <div class="bookmark-detail-copy">
         <p class="bookmark-detail-collection">${esc(challenge ? challenge.name : 'Reading collection')}</p>
