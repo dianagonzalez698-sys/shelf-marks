@@ -31,13 +31,9 @@ export function challengesView() {
     editorial: true,
     html: `
       ${renderSections(sections)}
-      <div class="ed sp-tight">
-        <div class="btn-row" style="justify-content:center">
-          <button class="btn" type="button" id="new-challenge">Begin a new challenge</button>
-        </div>
-        <p class="hint center" style="margin-top:1rem">
-          Challenges are plain configuration — the presets live in <code>js/config.js</code>.
-        </p>
+      <div class="lit-challenge-invite">
+        <p>Have another reading ambition in mind?</p>
+        <button type="button" id="new-challenge">Begin a challenge <span aria-hidden="true">↗</span></button>
       </div>
     `,
     onMount(root) {
@@ -128,9 +124,6 @@ export function challengeDetailView(params) {
     html: `
       ${spread}
       ${unsetNotice}
-      ${challenge.custom ? `<div class="ed sp-tight"><div class="btn-row">
-        <button class="btn btn-danger" type="button" id="archive">Remove this challenge</button>
-      </div></div>` : ''}
     `,
     onMount(root) {
       // Arriving from a bookmark's "Go to eligible books": the section is well
@@ -177,25 +170,6 @@ export function challengeDetailView(params) {
       const pick = root.querySelector('#pick-eligible');
       if (pick) pick.onclick = () => openEligiblePicker(challenge);
 
-      const archive = root.querySelector('#archive');
-      if (archive) {
-        archive.onclick = async () => {
-          const yes = await confirmSheet({
-            title: `Remove “${challenge.name}”?`,
-            body: 'Bookmarks you already collected from it stay in your archive.',
-            confirm: 'Remove',
-            danger: true,
-          });
-          if (!yes) return;
-          try {
-            await archiveChallenge(challenge.id);
-            toast('Challenge removed.');
-            navigate('/challenges');
-          } catch (_) {
-            toast('Could not save that change.', 'bad');
-          }
-        };
-      }
     },
   };
 }
@@ -346,6 +320,7 @@ export function openEditor(challenge) {
         <button class="btn grow" type="button" data-close>Cancel</button>
         <button class="btn btn-primary grow" type="submit">${creating ? 'Create' : 'Save'}</button>
       </div>
+      ${!creating && c.custom ? `<details class="lit-challenge-more"><summary>More options</summary><button type="button" id="ch-remove" class="btn btn-danger btn-sm">Remove this challenge</button></details>` : ''}
     </form>
   `, {
     onMount(sheet, close) {
@@ -357,6 +332,13 @@ export function openEditor(challenge) {
       const windowExtra = sheet.querySelector('#window-extra');
       const targetNote = sheet.querySelector('#target-note');
       const bookmarkNote = sheet.querySelector('#bookmark-note');
+      const removeButton = sheet.querySelector('#ch-remove');
+      if (removeButton) removeButton.addEventListener('click', async () => {
+        const yes = await confirmSheet({title:`Remove “${c.name}”?`,body:'Bookmarks already collected from this challenge stay in your archive.',confirm:'Remove',danger:true});
+        if (!yes) return;
+        try { await archiveChallenge(c.id); close(); toast('Challenge removed.'); navigate('/challenges'); }
+        catch (_) { toast('Could not remove the challenge.','bad'); }
+      });
 
       function paintFilterExtra() {
         const t = filterEl.value;

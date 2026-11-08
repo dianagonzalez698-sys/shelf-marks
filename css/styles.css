@@ -3626,6 +3626,14 @@ html:not([data-theme="dark"]) .lit-hero {
 .lit-cabinet-copy small { border-bottom-color:rgba(125,105,84,.25); }
 .lit-curation-tools { border-top-color:rgba(125,105,84,.24); }
 .lit-curation-body { border-color:rgba(125,105,84,.18); }
+/* Reading challenges: one unobtrusive invitation and advanced actions tucked away. */
+.lit-challenge-invite { display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap; max-width:930px; margin:55px auto 105px; padding:24px 18px; border-top:1px solid rgba(125,105,84,.22); }
+.lit-challenge-invite p { margin:0; color:var(--c-ink-soft); font:italic 1.3rem var(--f-body); }
+.lit-challenge-invite button { padding:7px 0; background:none; border:0; border-bottom:1px solid var(--c-rule-strong); color:var(--c-accent); font:600 .74rem var(--f-ui); cursor:pointer; }
+.lit-challenge-invite button:hover { color:var(--c-ink); }
+.lit-challenge-more { margin-top:24px; border-top:1px solid var(--c-rule); padding-top:12px; }
+.lit-challenge-more summary { cursor:pointer; color:var(--c-ink-soft); font:.8rem var(--f-ui); }
+.lit-challenge-more button { margin-top:15px; }
 @media (max-width:900px) {
   .lit-cabinet .lit-cabinet-heading { display:block; padding-bottom:55px; }
   .lit-cabinet-heading > p:last-child { margin-top:25px; }
