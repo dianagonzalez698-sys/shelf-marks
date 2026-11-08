@@ -1230,6 +1230,39 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .ed.sp-loose { padding-top: calc(var(--sp-section) * 1.6); padding-bottom: calc(var(--sp-section) * 1.6); }
 .ed.sp-flush { padding-top: 0; padding-bottom: 0; }
 
+/* A single illustrated arch, like a plate in a nineteenth-century book.
+   The uneven spacing keeps it editorial rather than a pair of equal cards. */
+.ed-archFeature { padding-top: clamp(2.5rem, 6vw, 6rem); padding-bottom: clamp(2.5rem, 6vw, 6rem); }
+.lit-arch-feature {
+  display: grid;
+  grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr);
+  align-items: center;
+  gap: clamp(2rem, 8vw, 8.5rem);
+  max-width: 1000px;
+  margin: auto;
+}
+.lit-arch-feature.lit-arch-flip { grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); }
+.lit-arch-flip .lit-arch-picture { order: 2; }
+.lit-arch-picture { max-width: 390px; width: 100%; margin: 0 auto; }
+.lit-arch-picture .m-box {
+  border-radius: 50% 50% 3px 3px / 34% 34% 3px 3px;
+  overflow: hidden;
+  background: linear-gradient(155deg, #b4c2ae 5%, #d9d4bc 48%, #9caa92 100%);
+  box-shadow: 0 0 0 5px rgba(250,248,238,.8), 0 0 0 6px rgba(108,103,81,.25);
+}
+.lit-arch-picture .m-fig { margin: 0; }
+.lit-arch-copy { padding: 1.5rem 0 2.5rem; max-width: 440px; }
+.lit-arch-copy .ed-title { font-size: clamp(2.25rem, 4.4vw, 4.6rem); line-height: 1.09; }
+.lit-arch-body { max-width: 33ch; line-height: 1.8; font-size: clamp(1rem, 1.45vw, 1.22rem); margin-top: 1.5rem; }
+.lit-arch-flourish { display: block; margin-top: 1.6rem; font-size: 1.75rem; opacity: .52; }
+@media (max-width: 680px) {
+  .lit-arch-feature, .lit-arch-feature.lit-arch-flip { grid-template-columns: 1fr; gap: 2rem; }
+  .lit-arch-flip .lit-arch-picture { order: 0; }
+  .lit-arch-picture { width: min(72%, 310px); }
+  .lit-arch-copy { padding: 0; text-align: center; margin: auto; }
+  .lit-arch-body { margin-left: auto; margin-right: auto; }
+}
+
 /* Full-bleed sections escape the measure entirely. */
 .ed-bleed { max-width: none; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0; }
 

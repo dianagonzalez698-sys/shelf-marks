@@ -43,6 +43,7 @@ export function defaultLayout(pageId) {
         height: 'tall', scrim: 45, align: 'center',
       }),
       build('progress', { title: 'The Year So Far', subtitle: 'Everything finished, counted and kept.' }),
+      build('archFeature', { title: 'A little world of words', body: 'Collected in the margins of a reading life.', tone: 'sage' }),
       build('interlude', { mode: 'ornament' }),
       build('period', { title: 'This Period' }),
       build('challenges', {
@@ -103,6 +104,7 @@ export function defaultLayout(pageId) {
     // which is why the editor listed only what you had added on top of them.
     return [
       build('challengeHero', { height: 'short', align: 'left', scrim: 50 }),
+      build('archFeature', { kicker: 'A reading pursuit', title: 'The story unfolds', body: 'An illustrated corner of this challenge.', tone: 'sage', flip: true }),
       build('interlude', { mode: 'ornament', spacing: 'tight' }),
       build('challengeMarks', { kicker: 'The collection', title: 'Bookmarks' }),
       build('challengeRecord', { kicker: 'The record', title: '', tone: 'sage' }),
@@ -121,7 +123,29 @@ export async function load() {
   rows.filter((r) => r && r.id).forEach((r) => cache.set(r.id, r));
   loaded = true;
   try { await adoptChallengeBlocks(); } catch (_) { /* a stale layout still renders */ }
+  try { await adoptArchFeatures(); } catch (_) { /* a stale layout still renders */ }
   return cache.size;
+}
+
+// Introduce the requested single arch to saved homepage and challenge layouts.
+// This is a one-time addition: deleting or moving it later is respected.
+async function adoptArchFeatures() {
+  for (const [id, row] of [...cache]) {
+    if (id !== 'home' && id !== 'challenge' && !id.startsWith('challenge:')) continue;
+    if (row.archV >= 1 || !Array.isArray(row.sections)) continue;
+    const sections = [...row.sections];
+    if (!sections.some((s) => s && s.type === 'archFeature')) {
+      const isHome = id === 'home';
+      const arch = build('archFeature', isHome
+        ? { title: 'A little world of words', body: 'Collected in the margins of a reading life.', tone: 'sage' }
+        : { kicker: 'A reading pursuit', title: 'The story unfolds', body: 'An illustrated corner of this challenge.', tone: 'sage', flip: true });
+      const anchor = sections.findIndex((s) => s.type === (isHome ? 'progress' : 'challengeHero'));
+      sections.splice(anchor < 0 ? 1 : anchor + 1, 0, arch);
+    }
+    const record = { ...row, sections, archV: 1, updatedAt: new Date().toISOString() };
+    await store.put('layouts', record);
+    cache.set(id, record);
+  }
 }
 
 // A challenge spread's opening, bookmarks and record used to be hard-coded in
@@ -182,7 +206,7 @@ export function isCustomised(pageId) {
 export async function save(pageId, sections) {
   // specV marks the layout as current, so the one-time block adoption above
   // never runs again — deleting a block you don't want has to stick.
-  const record = { id: pageId, sections, specV: 2, updatedAt: new Date().toISOString() };
+  const record = { id: pageId, sections, specV: 2, archV: 1, updatedAt: new Date().toISOString() };
   await store.put('layouts', record);
   cache.set(pageId, record);
   return record;

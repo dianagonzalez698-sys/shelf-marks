@@ -455,6 +455,36 @@ export const SECTION_BASE = {
 
 export const SECTION_TYPES = {
 
+  archFeature: {
+    label: 'Arched editorial feature',
+    blurb: 'One graceful arched picture beside a small editorial note. Replace the artwork or words as you like.',
+    create: () => ({
+      kicker: 'An illustrated aside',
+      title: 'Between the pages',
+      body: 'A small place for something lovely, unexpected, or worth remembering.',
+      picture: media({ ratio: '3/4', frame: 'arch', shadow: false }),
+      flip: false,
+      tone: 'sage',
+    }),
+    fields: [
+      { key: 'kicker', label: 'Small label', type: 'rich', styleRole: 'Ui' },
+      { key: 'title', label: 'Heading', type: 'rich', styleRole: 'Display' },
+      { key: 'body', label: 'Description', type: 'rich', multiline: true, styleRole: 'Body' },
+      { key: 'picture', label: 'Artwork inside the arch', type: 'media', size: '900 × 1200 px' },
+      { key: 'flip', label: 'Place arch on the right', type: 'bool' },
+      ...COMMON_FIELDS,
+    ],
+    render(sec) {
+      return sectionShell(sec, `<div class="lit-arch-feature${sec.flip ? ' lit-arch-flip' : ''}">
+        <div class="lit-arch-picture">${figure(sec.picture, { seed: `${sec.id}arch` })}</div>
+        <div class="lit-arch-copy">${kicker(sec.kicker)}${headline(sec.title)}
+          ${sec.body ? `<p class="lit-arch-body" data-edit="body">${rich(sec.body)}</p>` : ''}
+          <span class="lit-arch-flourish" aria-hidden="true">❧</span>
+        </div>
+      </div>`);
+    },
+  },
+
   /* Optional literary writing feature, never forced onto the homepage. */
   notebookFeature: {
     label: 'The writing desk',
