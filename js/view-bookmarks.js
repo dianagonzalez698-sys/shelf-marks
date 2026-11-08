@@ -58,47 +58,64 @@ export function bookmarksView(params = {}) {
 }
 
 function openBookmarkArtworkStudio() {
-  const groups = allChallenges().map((challenge) => {
-    const labels = bookmarkLabels(challenge);
-    const items = [...labels].map(([id, meta]) => {
-      const art = state.images.get(id);
-      return `<div class="bm-curator-item">
-        <div class="bm-curator-thumb">${art ? `<img src="${attr(art.dataUrl)}" alt="">` : `<span aria-hidden="true">✦</span>`}</div>
-        <div><strong>${esc(meta.title || id)}</strong><small>${state.unlocks.some((u) => u.id === id) ? 'Collected' : 'Waiting to be earned'}</small></div>
-        <button class="bm-curator-pick" type="button" data-curate-id="${attr(id)}">${art ? 'Replace' : 'Choose image'}</button>
-      </div>`;
-    }).join('');
-    return items ? `<section class="bm-curator-group"><h3>${esc(challenge.name)}</h3>${items}</section>` : '';
-  }).join('');
+  const groups = allChallenges().map((challenge) => ({
+    challenge, labels: [...bookmarkLabels(challenge)],
+  })).filter((group) => group.labels.length);
+  if (!groups.length) return toast('Create a reading challenge first.');
 
-  openSheet(`<div class="bm-curator-studio">
-    <p class="lit-overline">THE BOOKMARK ATELIER</p><h2>Artwork for every milestone</h2>
-    <p class="muted">Choose images now—even for bookmarks you have not earned yet. They appear in your collection when the reading goal unlocks them.</p>
-    <div class="bm-curator-groups">${groups}</div>
+  openSheet(`<div class="bm-curator-studio bm-curator-compact">
+    <p class="lit-overline">BOOKMARK ARTWORK</p><h2>Choose the illustration</h2>
+    <div class="bm-curator-choices">
+      <label>Challenge<select id="bm-curator-challenge">${groups.map(({ challenge }, i) => `<option value="${i}">${esc(challenge.name)}</option>`).join('')}</select></label>
+      <label>Bookmark<select id="bm-curator-bookmark"></select></label>
+    </div>
+    <div class="bm-curator-focus"><div class="bm-curator-preview" id="bm-curator-preview" aria-live="polite"></div>
+      <div class="bm-curator-caption"><strong id="bm-curator-name"></strong><span id="bm-curator-status"></span>
+        <button type="button" id="bm-curator-pick">Choose image ↗</button>
+      </div>
+    </div>
     <input id="bm-curator-file" class="visually-hidden" type="file" accept="image/*">
-    <button class="btn btn-block" type="button" data-close>Done</button>
+    <p class="bm-curator-footnote">Artwork is prepared now and appears in the collection when earned.</p>
   </div>`, {
     onMount(sheet) {
       const file = sheet.querySelector('#bm-curator-file');
-      let activeId = null;
-      sheet.querySelectorAll('[data-curate-id]').forEach((button) => {
-        button.onclick = () => { activeId = button.dataset.curateId; file.value = ''; file.click(); };
-      });
+      const groupPicker = sheet.querySelector('#bm-curator-challenge');
+      const bookmarkPicker = sheet.querySelector('#bm-curator-bookmark');
+      const button = sheet.querySelector('#bm-curator-pick');
+      const selectedGroup = () => groups[Number(groupPicker.value)] || groups[0];
+      const selectedId = () => bookmarkPicker.value;
+      const show = () => {
+        const id = selectedId();
+        const meta = selectedGroup().labels.find(([key]) => key === id)?.[1];
+        const image = state.images.get(id);
+        sheet.querySelector('#bm-curator-preview').innerHTML = image
+          ? `<img src="${attr(image.dataUrl)}" alt="Selected bookmark artwork">`
+          : `<span aria-hidden="true">✦</span>`;
+        sheet.querySelector('#bm-curator-name').textContent = meta?.title || id;
+        sheet.querySelector('#bm-curator-status').textContent = state.unlocks.some((u) => u.id === id) ? 'Collected' : 'Not yet earned';
+        button.textContent = image ? 'Replace image ↗' : 'Choose image ↗';
+      };
+      const updateBookmarks = () => {
+        bookmarkPicker.innerHTML = selectedGroup().labels.map(([id, meta]) => `<option value="${attr(id)}">${esc(meta.title || id)}</option>`).join('');
+        show();
+      };
+      groupPicker.onchange = updateBookmarks;
+      bookmarkPicker.onchange = show;
+      button.onclick = () => { file.value = ''; file.click(); };
+      updateBookmarks();
       file.onchange = async () => {
         const picture = file.files && file.files[0];
-        if (!picture || !activeId) return;
-        const button = [...sheet.querySelectorAll('[data-curate-id]')].find((el) => el.dataset.curateId === activeId);
-        if (button) { button.disabled = true; button.textContent = 'Saving…'; }
+        const id = selectedId();
+        if (!picture || !id) return;
+        button.disabled = true; button.textContent = 'Saving…';
         try {
           const dataUrl = await fileToDataUrl(picture);
-          await saveBookmarkImage(activeId, dataUrl);
-          const thumb = button?.closest('.bm-curator-item')?.querySelector('.bm-curator-thumb');
-          if (thumb) thumb.innerHTML = `<img src="${attr(dataUrl)}" alt="">`;
-          if (button) button.textContent = 'Replace';
+          await saveBookmarkImage(id, dataUrl);
+          show();
           toast('Artwork assigned to this bookmark.', 'good');
         } catch (error) {
           toast(esc(error.message || 'Could not save artwork.'), 'bad');
-        } finally { if (button) button.disabled = false; }
+        } finally { button.disabled = false; show(); }
       };
     },
   });
