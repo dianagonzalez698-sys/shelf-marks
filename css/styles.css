@@ -3304,6 +3304,22 @@ body.is-editing [data-sec]:hover > .edit-tools,
 .lit-writing-form textarea:focus { background-image: none; }
 .lit-writing-form #linked-journal-hint { margin: -14px 0 0; font: italic 1rem/1.35 var(--f-body); color: var(--c-ink-soft); }
 .lit-writing-form #linked-journal-hint a { color: var(--c-accent); }
+/* The Notebook uses the same clean Regency writing stock as book journals.
+   Keep the texture on the sheets themselves, never across the whole website. */
+html:not([data-theme="dark"]) .literary-notebook .lit-writing-card,
+html:not([data-theme="dark"]) .literary-notebook .lit-empty-writing,
+html:not([data-theme="dark"]) .lit-writing-form form {
+  background: #f8f7f2 url('../assets/regency-writing-paper.webp') center / cover no-repeat;
+  border-color: #ded8cc;
+  box-shadow: 3px 5px 11px rgba(56,48,36,.09);
+}
+html:not([data-theme="dark"]) .literary-notebook .lit-writing-card:nth-child(even) { box-shadow: -3px 5px 11px rgba(56,48,36,.09); }
+html:not([data-theme="dark"]) .lit-writing-form textarea {
+  background: #fbfaf6 url('../assets/regency-writing-paper.webp') center / cover no-repeat;
+  line-height: 1.8;
+  border-color: #ded8cc;
+}
+.literary-notebook .lit-empty-writing { max-width: 780px; margin: 35px auto 0; padding: clamp(55px,7vw,100px) clamp(24px,6vw,80px); border: 1px solid var(--c-rule); }
 /* Carry the same antique paper into solid light sections without touching artwork. */
 html:not([data-theme="dark"]) .masthead,
 html:not([data-theme="dark"]) .lit-hero {
