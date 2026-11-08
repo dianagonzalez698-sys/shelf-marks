@@ -148,9 +148,9 @@ function openBookmark(id) {
         ${img ? `<img src="${attr(img.dataUrl)}" alt="Bookmark artwork selected for ${attr(meta ? meta.title : id)}">` : markVisual(id, { unlocked, bonus: !!(meta && meta.bonus) })}
       </div>
       <div class="bookmark-detail-copy">
-        <p class="lit-overline">${esc(challenge ? challenge.name : 'Reading collection')}</p>
+        <p class="bookmark-detail-collection">${esc(challenge ? challenge.name : 'Reading collection')}</p>
         <h2>${esc(meta ? meta.title : id)}</h2>
-        <p class="bookmark-detail-status">${unlocked ? '✦ Collected' : '◇ Waiting to be earned'}</p>
+        <p class="bookmark-detail-status">${unlocked ? '✦ Collected' : 'Not yet collected'}</p>
         <p class="bookmark-detail-requirement">${unlocked ? `Earned ${esc(formatDateTime(unlock.unlockedAt))}` : esc(requirement)}</p>
         ${!unlocked && img ? '<p class="bookmark-detail-ready">Artwork selected · Reveals when collected</p>' : ''}
       </div>
@@ -158,10 +158,10 @@ function openBookmark(id) {
     <div class="bookmark-detail-actions">
       <input type="file" id="bm-file" accept="image/*" class="visually-hidden">
       <div class="bookmark-detail-manage">
-        <button type="button" id="bm-pick">${img ? 'Change artwork' : 'Choose bookmark artwork'}</button>
+        <button type="button" id="bm-pick">${img ? 'Change image' : 'Add image'}</button>
         ${img ? '<button type="button" id="bm-remove">Remove</button>' : ''}
       </div>
-      ${challenge ? `<a href="#/challenge/${encodeURIComponent(challenge.id)}${unlocked ? '' : '?focus=eligible'}" data-close>${unlocked ? 'Open reading challenge' : 'See qualifying books'} ↗</a>` : ''}
+      ${challenge ? `<a href="#/challenge/${encodeURIComponent(challenge.id)}${unlocked ? '' : '?focus=eligible'}" data-close>${unlocked ? 'Challenge' : 'Qualifying books'} ↗</a>` : ''}
     </div>
   `, {
     onMount(sheet, close) {
@@ -181,7 +181,7 @@ function openBookmark(id) {
             toast('Bookmark artwork saved.', 'good');
           } catch (err) {
             pick.disabled = false;
-            pick.textContent = img ? 'Change artwork' : 'Choose bookmark artwork';
+            pick.textContent = img ? 'Change image' : 'Add image';
             toast(esc(err.message || 'Could not save that photo.'), 'bad');
           }
         };
