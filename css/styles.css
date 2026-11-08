@@ -1235,7 +1235,7 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .ed-archFeature {
   /* Let the crown rise into the preceding section, so the transition feels
      intentional rather than like a separate card with a large gap. */
-  margin-top: clamp(-145px, -9vw, -75px);
+  margin-top: -38px;
   padding-top: 0;
   padding-bottom: clamp(2.5rem, 5vw, 5rem);
   z-index: 2;
@@ -1287,7 +1287,7 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .lit-arch-flourish { display: block; margin-top: 1.4rem; font-size: 1.8rem; opacity: .65; }
 .lit-arch-flip .lit-arch-copy { margin-left: auto; margin-right: clamp(0px, 3vw, 70px); }
 @media (max-width: 680px) {
-  .ed-archFeature { margin-top: -58px; }
+  .ed-archFeature { margin-top: -20px; }
   .lit-arch-panel { width: min(100%, 430px); min-height: 570px; border-radius: 50% 50% 0 0 / 24% 24% 0 0; }
   .lit-arch-copy { padding-inline: 1.25rem; }
   .lit-arch-flip .lit-arch-copy { margin: 0 auto; }
