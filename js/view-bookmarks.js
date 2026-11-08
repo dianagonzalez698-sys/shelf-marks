@@ -41,14 +41,67 @@ export function bookmarksView(params = {}) {
     tab: 'bookmarks',
     banner: false,
     editorial: true,
-    html: renderSections(layout.get(ARCHIVE_PAGE_ID), ctx),
+    html: `<div class="bookmark-curator-intro">
+      <span class="lit-overline">THE KEEPSAKE CABINET</span>
+      <p>Every reading accomplishment has a little work of art waiting for it.</p>
+      <button type="button" id="bm-artwork-manage">Curate bookmark artwork <span aria-hidden="true">↗</span></button>
+    </div>${renderSections(layout.get(ARCHIVE_PAGE_ID), ctx)}`,
     onMount(root) {
+      const manage = root.querySelector('#bm-artwork-manage');
+      if (manage) manage.onclick = openBookmarkArtworkStudio;
       root.querySelectorAll('[data-bm]').forEach((btn) => {
         btn.onclick = () => openBookmark(btn.dataset.bm);
       });
       if (focus) setTimeout(() => openBookmark(focus), 140);
     },
   };
+}
+
+function openBookmarkArtworkStudio() {
+  const groups = allChallenges().map((challenge) => {
+    const labels = bookmarkLabels(challenge);
+    const items = [...labels].map(([id, meta]) => {
+      const art = state.images.get(id);
+      return `<div class="bm-curator-item">
+        <div class="bm-curator-thumb">${art ? `<img src="${attr(art.dataUrl)}" alt="">` : `<span aria-hidden="true">✦</span>`}</div>
+        <div><strong>${esc(meta.title || id)}</strong><small>${state.unlocks.some((u) => u.id === id) ? 'Collected' : 'Waiting to be earned'}</small></div>
+        <button class="bm-curator-pick" type="button" data-curate-id="${attr(id)}">${art ? 'Replace' : 'Choose image'}</button>
+      </div>`;
+    }).join('');
+    return items ? `<section class="bm-curator-group"><h3>${esc(challenge.name)}</h3>${items}</section>` : '';
+  }).join('');
+
+  openSheet(`<div class="bm-curator-studio">
+    <p class="lit-overline">THE BOOKMARK ATELIER</p><h2>Artwork for every milestone</h2>
+    <p class="muted">Choose images now—even for bookmarks you have not earned yet. They appear in your collection when the reading goal unlocks them.</p>
+    <div class="bm-curator-groups">${groups}</div>
+    <input id="bm-curator-file" class="visually-hidden" type="file" accept="image/*">
+    <button class="btn btn-block" type="button" data-close>Done</button>
+  </div>`, {
+    onMount(sheet) {
+      const file = sheet.querySelector('#bm-curator-file');
+      let activeId = null;
+      sheet.querySelectorAll('[data-curate-id]').forEach((button) => {
+        button.onclick = () => { activeId = button.dataset.curateId; file.value = ''; file.click(); };
+      });
+      file.onchange = async () => {
+        const picture = file.files && file.files[0];
+        if (!picture || !activeId) return;
+        const button = [...sheet.querySelectorAll('[data-curate-id]')].find((el) => el.dataset.curateId === activeId);
+        if (button) { button.disabled = true; button.textContent = 'Saving…'; }
+        try {
+          const dataUrl = await fileToDataUrl(picture);
+          await saveBookmarkImage(activeId, dataUrl);
+          const thumb = button?.closest('.bm-curator-item')?.querySelector('.bm-curator-thumb');
+          if (thumb) thumb.innerHTML = `<img src="${attr(dataUrl)}" alt="">`;
+          if (button) button.textContent = 'Replace';
+          toast('Artwork assigned to this bookmark.', 'good');
+        } catch (error) {
+          toast(esc(error.message || 'Could not save artwork.'), 'bad');
+        } finally { if (button) button.disabled = false; }
+      };
+    },
+  });
 }
 
 function openBookmark(id) {
@@ -80,43 +133,25 @@ function openBookmark(id) {
   })();
 
   openSheet(`
-    <div class="row" style="gap:1.2rem;align-items:flex-start">
-      <span style="width:88px;flex:none">
-        ${markVisual(id, { unlocked, bonus: !!(meta && meta.bonus), dataUrl: img ? img.dataUrl : null })}
-      </span>
-      <span class="grow">
-        <h2 style="margin-bottom:.15rem">${esc(meta ? meta.title : id)}</h2>
-        <p class="small italic muted" style="margin:0">${esc(challenge ? challenge.name : 'Unknown challenge')}</p>
-        <dl class="kv" style="margin-top:1rem">
-          <dt>Status</dt><dd>${unlocked ? 'Collected' : 'Not yet collected'}</dd>
-          ${unlocked ? `<dt>Earned</dt><dd>${esc(formatDateTime(unlock.unlockedAt))}</dd>` : ''}
-          ${!unlocked ? `<dt>To earn</dt><dd>${esc(requirement)}</dd>` : ''}
-        </dl>
-      </span>
-    </div>
-
-    ${unlocked ? `
-      <input type="file" id="bm-file" accept="image/*" class="visually-hidden">
-      <div class="btn-row" style="margin-top:1.3rem">
-        <button class="btn grow" type="button" id="bm-pick">${img ? 'Replace photo' : 'Add a photo'}</button>
-        ${img ? '<button class="btn btn-danger" type="button" id="bm-remove">Remove photo</button>' : ''}
+    <div class="bookmark-detail">
+      <div class="bookmark-detail-visual${unlocked ? '' : ' is-waiting'}">
+        ${img ? `<img src="${attr(img.dataUrl)}" alt="Bookmark artwork selected for ${attr(meta ? meta.title : id)}">` : markVisual(id, { unlocked, bonus: !!(meta && meta.bonus) })}
       </div>
-      <p class="hint">Photos stay on this device and travel inside your backup file.</p>
-    ` : ''}
-
-    ${challenge ? `
-      <a class="btn btn-block" style="margin-top:${unlocked ? '.7rem' : '1.3rem'}"
-         href="#/challenge/${encodeURIComponent(challenge.id)}?focus=eligible" data-close>
-        Go to eligible books
-      </a>
-      <a class="btn btn-block" style="margin-top:.7rem"
-         href="#/challenge/${encodeURIComponent(challenge.id)}" data-close>
-        Open ${esc(challenge.name)}
-      </a>
-    ` : ''}
-
-    <div class="btn-row" style="margin-top:.7rem">
-      <button class="btn btn-block" type="button" data-close>Close</button>
+      <div class="bookmark-detail-copy">
+        <p class="lit-overline">${esc(challenge ? challenge.name : 'Reading collection')}</p>
+        <h2>${esc(meta ? meta.title : id)}</h2>
+        <p class="bookmark-detail-status">${unlocked ? '✦ Collected' : '◇ Waiting to be earned'}</p>
+        <p class="bookmark-detail-requirement">${unlocked ? `Earned ${esc(formatDateTime(unlock.unlockedAt))}` : esc(requirement)}</p>
+        ${!unlocked && img ? '<p class="bookmark-detail-ready">Artwork selected · Reveals when collected</p>' : ''}
+      </div>
+    </div>
+    <div class="bookmark-detail-actions">
+      <input type="file" id="bm-file" accept="image/*" class="visually-hidden">
+      <div class="bookmark-detail-manage">
+        <button type="button" id="bm-pick">${img ? 'Change artwork' : 'Choose bookmark artwork'}</button>
+        ${img ? '<button type="button" id="bm-remove">Remove</button>' : ''}
+      </div>
+      ${challenge ? `<a href="#/challenge/${encodeURIComponent(challenge.id)}${unlocked ? '' : '?focus=eligible'}" data-close>${unlocked ? 'Open reading challenge' : 'See qualifying books'} ↗</a>` : ''}
     </div>
   `, {
     onMount(sheet, close) {
@@ -133,10 +168,10 @@ function openBookmark(id) {
             const dataUrl = await fileToDataUrl(f);
             await saveBookmarkImage(id, dataUrl);
             close();
-            toast('Photo saved to this bookmark.', 'good');
+            toast('Bookmark artwork saved.', 'good');
           } catch (err) {
             pick.disabled = false;
-            pick.textContent = 'Add a photo';
+            pick.textContent = img ? 'Change artwork' : 'Choose bookmark artwork';
             toast(esc(err.message || 'Could not save that photo.'), 'bad');
           }
         };
@@ -148,7 +183,7 @@ function openBookmark(id) {
           close();
           const yes = await confirmSheet({
             title: 'Remove this photo?',
-            body: 'The bookmark stays collected — only the photo is deleted.',
+            body: 'The bookmark and its unlock status stay the same. Only its artwork is removed.',
             confirm: 'Remove',
             danger: true,
           });
