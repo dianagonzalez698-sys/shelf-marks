@@ -62,6 +62,8 @@ export function notebookEntryView({id}) {
   const existing = id !== 'new' ? notebook.get(id) : null;
   if (id !== 'new' && !existing) return { title: 'Not found', html: '<div class="empty"><h2>Entry not found</h2><a href="#/notebook">Back to notebook</a></div>' };
   const item = existing || {kind:'reflection',title:'',body:'',bookId:''};
+  const leftWriting = item.bodyLeft ?? item.body ?? '';
+  const rightWriting = item.bodyRight ?? '';
   return {
     title: existing ? 'Edit writing' : 'New writing', tab:'notebook', fab:false, live:false,
     html:`<div class="lit-writing-form${existing ? ' is-decoratable' : ''}">${existing ? bookDecorMarkup(existing) : ''}<a class="lit-back" href="#/notebook">← The Notebook</a>
@@ -69,12 +71,13 @@ export function notebookEntryView({id}) {
       ${existing ? bookDecorMarkup(existing, 'toolbar') : '<p class="lit-new-paper-hint">Save your first entry, then add pictures and arrange them on the page.</p>'}
       <div class="lit-journal-tabs" aria-hidden="true"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span></div>
       <form id="lit-entry-form" class="lit-open-journal">
-        <div class="lit-journal-frontispiece" aria-hidden="true"><span class="lit-journal-kicker">A COMMONPLACE BOOK</span><span class="lit-journal-monogram">D</span><span class="lit-journal-flower">✳</span><div class="lit-journal-paper-slip"><span>Words, gathered</span><em>and kept.</em></div><span class="lit-journal-stars">✧ &nbsp; ✦ &nbsp; ✧</span></div>
+        <div class="lit-journal-frontispiece" aria-hidden="true"><span class="lit-journal-kicker">A COMMONPLACE BOOK</span><h2>Little things<br><em>worth keeping.</em></h2><p>An unhurried place for the words that linger.</p></div>
         <div class="lit-form-row"><label>ENTRY TYPE<select name="kind">${notebook.KINDS.map(([key,name]) => `<option value="${key}" ${item.kind === key ? 'selected' : ''}>${name}</option>`).join('')}</select></label>
         <label>BOOK (OPTIONAL)<select name="bookId"><option value="">Not tied to a book</option>${state.books.map(b => `<option value="${attr(b.id)}" ${item.bookId === b.id ? 'selected' : ''}>${esc(b.title)}</option>`).join('')}</select></label></div>
         <p class="hint" id="linked-journal-hint">${item.bookId ? `Writing about this book? <a href="#/book/${encodeURIComponent(item.bookId)}">Open its reading journal ↗</a>` : 'Writing a book review or tracking a reading challenge? You can do that in the book’s reading journal.'}</p>
         <label>TITLE<input name="title" required maxlength="180" placeholder="Give this piece a title…" value="${attr(item.title)}"></label>
-        <label>YOUR WORDS<textarea name="body" rows="14" placeholder="Start writing…">${esc(item.body)}</textarea></label>
+        <label class="lit-left-writing">FIRST PAGE<textarea name="bodyLeft" rows="12" placeholder="Begin anywhere…">${esc(leftWriting)}</textarea></label>
+        <label class="lit-right-writing">FACING PAGE<textarea name="bodyRight" rows="16" placeholder="Continue your thoughts…">${esc(rightWriting)}</textarea></label>
         <div class="lit-form-actions"><span id="lit-draft-status" role="status" aria-live="polite">Draft kept in this tab until you save.</span><button class="lit-primary-action" type="submit">Save entry ↗</button></div>
       </form></div>`,
     onMount(root) {
@@ -82,7 +85,7 @@ export function notebookEntryView({id}) {
       const form = root.querySelector('#lit-entry-form');
       const status = root.querySelector('#lit-draft-status');
       const draftKey = `dlp:notebook-draft:${existing?.id || 'new'}`;
-      const fields = ['kind', 'bookId', 'title', 'body'];
+      const fields = ['kind', 'bookId', 'title', 'bodyLeft', 'bodyRight'];
       try {
         const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
         const savedAt = existing?.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
@@ -121,7 +124,9 @@ export function notebookEntryView({id}) {
         const btn = form.querySelector('button[type=submit]');
         btn.disabled = true;
         try {
-          const saved = await notebook.save({...(existing ? {id: existing.id} : {}),title:form.elements.title.value.trim(),body:form.elements.body.value,kind:form.elements.kind.value,bookId:form.elements.bookId.value});
+          const bodyLeft = form.elements.bodyLeft.value;
+          const bodyRight = form.elements.bodyRight.value;
+          const saved = await notebook.save({...(existing ? {id: existing.id} : {}),title:form.elements.title.value.trim(),body:[bodyLeft.trimEnd(),bodyRight.trimStart()].filter(Boolean).join('\n\n'),bodyLeft,bodyRight,kind:form.elements.kind.value,bookId:form.elements.bookId.value});
           try { sessionStorage.removeItem(draftKey); } catch (_) { /* entry is already saved */ }
           toast('Your writing is saved.', 'good');
           navigate(`/notebook/${encodeURIComponent(saved.id)}`);
