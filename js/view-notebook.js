@@ -1,6 +1,7 @@
 import * as notebook from './notebook.js';
 import { state } from './state.js';
 import { esc, attr, navigate, toast } from './ui.js';
+import { bookDecorMarkup, mountBookDecor } from './book-decor.js';
 
 const excerpt = (value, limit = 190) => String(value || '').replace(/\s+/g, ' ').slice(0, limit);
 const kindLabel = (kind) => notebook.KINDS.find(x => x[0] === kind)?.[1] || 'Journal entry';
@@ -37,8 +38,9 @@ export function notebookEntryView({id}) {
   const item = existing || {kind:'reflection',title:'',body:'',bookId:''};
   return {
     title: existing ? 'Edit writing' : 'New writing', tab:'notebook', fab:false, live:false,
-    html:`<div class="lit-writing-form"><a class="lit-back" href="#/notebook">← The Notebook</a>
+    html:`<div class="lit-writing-form${existing ? ' is-decoratable' : ''}">${existing ? bookDecorMarkup(existing) : ''}<a class="lit-back" href="#/notebook">← The Notebook</a>
       <p class="lit-overline">THE WRITING DESK</p><h1>${existing ? 'Refine your words' : 'Something worth keeping'}</h1>
+      ${existing ? bookDecorMarkup(existing, 'toolbar') : '<p class="lit-new-paper-hint">Save your first entry, then add pictures and arrange them on the page.</p>'}
       <form id="lit-entry-form">
         <div class="lit-form-row"><label>ENTRY TYPE<select name="kind">${notebook.KINDS.map(([key,name]) => `<option value="${key}" ${item.kind === key ? 'selected' : ''}>${name}</option>`).join('')}</select></label>
         <label>BOOK (OPTIONAL)<select name="bookId"><option value="">Not tied to a book</option>${state.books.map(b => `<option value="${attr(b.id)}" ${item.bookId === b.id ? 'selected' : ''}>${esc(b.title)}</option>`).join('')}</select></label></div>
@@ -48,6 +50,7 @@ export function notebookEntryView({id}) {
         <div class="lit-form-actions"><span id="lit-draft-status" role="status" aria-live="polite">Draft kept in this tab until you save.</span><button class="lit-primary-action" type="submit">Save entry ↗</button></div>
       </form></div>`,
     onMount(root) {
+      if (existing) mountBookDecor(root, existing, {getRecord:notebook.get, saveRecord:notebook.save});
       const form = root.querySelector('#lit-entry-form');
       const status = root.querySelector('#lit-draft-status');
       const draftKey = `dlp:notebook-draft:${existing?.id || 'new'}`;
@@ -90,10 +93,10 @@ export function notebookEntryView({id}) {
         const btn = form.querySelector('button[type=submit]');
         btn.disabled = true;
         try {
-          await notebook.save({...(existing ? {id: existing.id} : {}),title:form.elements.title.value.trim(),body:form.elements.body.value,kind:form.elements.kind.value,bookId:form.elements.bookId.value});
+          const saved = await notebook.save({...(existing ? {id: existing.id} : {}),title:form.elements.title.value.trim(),body:form.elements.body.value,kind:form.elements.kind.value,bookId:form.elements.bookId.value});
           try { sessionStorage.removeItem(draftKey); } catch (_) { /* entry is already saved */ }
           toast('Your writing is saved.', 'good');
-          navigate('/notebook');
+          navigate(`/notebook/${encodeURIComponent(saved.id)}`);
         } catch (_) { toast('Could not save your writing.', 'bad'); btn.disabled = false; }
       });
     },

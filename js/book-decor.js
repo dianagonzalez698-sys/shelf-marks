@@ -34,8 +34,8 @@ export function bookDecorMarkup(book, part = 'layer') {
   </div>`;
 }
 
-export function mountBookDecor(root, book) {
-  const article = root.querySelector('.book-archive-page');
+export function mountBookDecor(root, book, { getRecord = getBook, saveRecord = saveBook } = {}) {
+  const article = root.querySelector('.book-archive-page, .lit-writing-form');
   const layer = root.querySelector('#book-decor-layer');
   const tools = root.querySelector('#book-decor-tools');
   const toggle = root.querySelector('#book-decor-toggle');
@@ -48,7 +48,7 @@ export function mountBookDecor(root, book) {
   let drag = null;
 
   const save = async () => {
-    try { await saveBook({ ...(getBook(book.id) || book), journalDecorations: pieces }); }
+    try { await saveRecord({ ...(getRecord(book.id) || book), journalDecorations: pieces }); }
     catch (_) { toast('Could not save this decoration.', 'bad'); }
   };
   const select = (id) => {

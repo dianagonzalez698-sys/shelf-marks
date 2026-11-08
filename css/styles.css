@@ -3320,6 +3320,18 @@ html:not([data-theme="dark"]) .lit-writing-form textarea {
   border-color: #ded8cc;
 }
 .literary-notebook .lit-empty-writing { max-width: 780px; margin: 35px auto 0; padding: clamp(55px,7vw,100px) clamp(24px,6vw,80px); border: 1px solid var(--c-rule); }
+.lit-writing-form { position: relative; isolation: isolate; }
+.lit-writing-form > :not(.book-decor-layer) { position: relative; z-index: 1; }
+.lit-writing-form .book-decor-toolbar { margin: -22px 0 25px; padding: 0; border: 0; }
+.lit-writing-form #book-decor-toggle { padding: 4px 0; border: 0; border-bottom: 1px solid var(--c-rule-strong); background: none; color: var(--c-ink-soft); font: 500 .78rem var(--f-ui); box-shadow: none; }
+.lit-writing-form .book-decor-tools { position: relative; z-index: 4; margin-top: 12px; }
+.lit-new-paper-hint { margin: -20px 0 28px; color: var(--c-ink-soft); font: italic 1rem var(--f-body); }
+.lit-writing-form textarea { min-height: 370px; }
+.lit-writing-form form { gap: 23px; padding: clamp(24px,5vw,62px); }
+.lit-writing-form input[name="title"] { padding: 8px 0 14px; border: 0; border-bottom: 1px solid var(--c-rule-strong); background: transparent; font: italic 400 clamp(1.65rem,3vw,2.5rem)/1.2 var(--f-display); }
+.lit-writing-form textarea[name="body"] { padding: 12px 0; border: 0; background-color: transparent; background-image: none; font: 1.2rem/1.85 var(--f-body); }
+.lit-writing-form textarea[name="body"]:focus-visible, .lit-writing-form input[name="title"]:focus-visible { outline: 0; box-shadow: 0 2px 0 var(--c-accent); }
+html:not([data-theme="dark"]) .lit-writing-form textarea[name="body"] { background: transparent; }
 /* Carry the same antique paper into solid light sections without touching artwork. */
 html:not([data-theme="dark"]) .masthead,
 html:not([data-theme="dark"]) .lit-hero {
