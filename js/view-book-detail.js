@@ -67,7 +67,8 @@ export function bookDetailView({ id } = {}) {
         <main class="book-archive-writing" id="book-journal">
           <div class="book-archive-page-marker" aria-hidden="true"><span>NOTES FROM THE READING DESK</span><span>✧ &nbsp; ✧ &nbsp; ✧</span></div>
           <form class="book-inline-journal" id="book-inline-journal" hidden>
-            <div class="book-inline-heading"><p class="lit-overline">A PAGE OF YOUR OWN</p><h2>Write in your journal</h2><p>Put your thoughts on paper. Your words take shape in the preview as you write.</p></div>
+            <div class="book-inline-heading"><p class="lit-overline">A PAGE OF YOUR OWN</p><h2>Write in your journal</h2><p>A few thoughts, a favorite line, a little marginalia. Keep whatever matters.</p></div>
+            <div class="book-inline-spread"><div class="book-inline-fields">
             <label for="bj-rating">My rating <span>(optional)</span></label>
             <select id="bj-rating"><option value="">Not rated yet</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${Number(book.rating)===n?'selected':''}>${'★'.repeat(n)}${'☆'.repeat(5-n)}</option>`).join('')}</select>
             <label for="bj-review">What I thought</label>
@@ -76,13 +77,15 @@ export function bookDetailView({ id } = {}) {
             <textarea id="bj-quote" rows="3" placeholder="A line worth remembering…">${esc(book.favoriteQuote || '')}</textarea>
             <label for="bj-notes">Marginalia & little notes</label>
             <textarea id="bj-notes" rows="4" placeholder="Anything else worth keeping…">${esc(book.notes || '')}</textarea>
+            </div>
             <section class="book-inline-preview" aria-label="Live journal preview">
-              <p class="lit-overline">AS IT WILL APPEAR ON YOUR PAGE</p>
+              <p class="lit-overline">THE FACING PAGE <span aria-hidden="true">✧</span></p>
               <div data-preview="review"><h3>What I thought</h3><p></p></div>
               <div data-preview="quote"><h3>A passage to keep</h3><blockquote></blockquote></div>
               <div data-preview="notes"><h3>Marginalia</h3><p></p></div>
               <p class="book-inline-preview-empty" id="bj-preview-empty">Start writing above to see your journal take shape here.</p>
             </section>
+            </div>
             <div class="book-inline-actions"><button class="btn btn-primary" type="submit">Save my words</button><button class="btn" type="button" id="book-journal-cancel">Close editor</button></div>
             <p class="book-draft-state" id="book-draft-state" aria-live="polite">Your draft stays in this tab until you save.</p>
           </form>
@@ -156,12 +159,14 @@ export function bookDetailView({ id } = {}) {
       const edit = () => {
         form.hidden = false;
         reading.hidden = true;
+        root.querySelector('.book-archive-page')?.classList.add('is-editing-journal');
         toggle.setAttribute('aria-expanded', 'true');
         form.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
       const cancel = () => {
         form.hidden = true;
         reading.hidden = false;
+        root.querySelector('.book-archive-page')?.classList.remove('is-editing-journal');
         toggle.setAttribute('aria-expanded', 'false');
       };
       toggle.onclick = () => form.hidden ? edit() : cancel();

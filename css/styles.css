@@ -4047,6 +4047,25 @@ html:not([data-theme="dark"]) .lit-hero {
 .book-inline-preview h3 { margin: 0 0 8px; font: 1.55rem var(--f-display); color: var(--c-ink); }
 .book-inline-preview p:not(.lit-overline), .book-inline-preview blockquote { margin: 0; color: var(--c-ink-soft); font: 1.05rem/1.65 var(--f-body); white-space: pre-wrap; overflow-wrap: anywhere; }
 .book-inline-preview blockquote { padding-left: 16px; border-left: 2px solid var(--c-rule-strong); font-style: italic; }
+
+/* A real writing spread: the editor and the keepsake sit on facing leaves. */
+.book-archive-page.is-editing-journal .book-archive-body { display: block; max-width: 1120px; margin-inline: auto; }
+.book-archive-page.is-editing-journal .book-archive-aside { display: none; }
+.book-inline-spread { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,.88fr); gap: clamp(28px,4vw,68px); align-items: start; }
+.book-inline-fields { min-width: 0; }
+.book-inline-journal .book-inline-spread label { margin-top: 19px; font-size: clamp(1.2rem,2vw,1.45rem); }
+.book-inline-journal .book-inline-spread textarea,
+.book-inline-journal .book-inline-spread select { border: 0; border-bottom: 1px solid var(--c-rule-strong); border-radius: 0; padding: 10px 3px; background: transparent; }
+.book-inline-journal .book-inline-spread textarea:focus-visible,
+.book-inline-journal .book-inline-spread select:focus-visible { outline: none; border-bottom-color: var(--c-accent); box-shadow: 0 1px 0 var(--c-accent); }
+.book-inline-journal .book-inline-preview { margin-top: 0; min-height: 425px; padding: clamp(25px,3vw,44px); border: 0; background: color-mix(in srgb,var(--c-bg-sunk) 52%,var(--c-bg)); box-shadow: -9px 0 18px -21px var(--c-ink), 1px 3px 13px color-mix(in srgb,var(--c-ink) 6%,transparent); }
+.book-inline-preview > .lit-overline { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--c-rule); }
+.book-inline-preview [data-preview] { overflow-wrap: anywhere; }
+.book-inline-preview-empty { font-style: italic !important; }
+@media (max-width: 790px) {
+  .book-inline-spread { grid-template-columns: 1fr; gap: 28px; }
+  .book-inline-journal .book-inline-preview { min-height: 160px; }
+}
 .book-entry-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; }
 .book-entry-heading button, .book-inline-start { flex: none; border: 0; border-bottom: 1px solid var(--c-rule-strong); padding: 3px 0; background: transparent; color: var(--c-ink-soft); font: 500 .75rem var(--f-ui); letter-spacing: .04em; cursor: pointer; }
 .book-entry-heading button:hover, .book-entry-heading button:focus-visible, .book-inline-start:hover, .book-inline-start:focus-visible { color: var(--c-accent); border-bottom-color: var(--c-accent); }
