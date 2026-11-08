@@ -15,8 +15,8 @@ export function notebookView() {
     html: `<div class="literary-notebook">
       <header class="lit-page-heading"><p class="lit-overline">THE WRITING DESK / ${state.settings.year}</p>
         <h1>The <em>Notebook</em></h1>
-        <p>For loose thoughts, passages and little essays. Your notes about a specific book live in its <a href="#/books">reading journal</a>.</p>
-        <a class="lit-primary-action" href="#/notebook/new">+ New entry <span>↗</span></a>
+        <p>A place for loose thoughts, little essays, and passages worth keeping. Notes on a particular book belong in its <a href="#/books">reading journal</a>.</p>
+        <a class="lit-primary-action" href="#/notebook/new">Write a note <span>↗</span></a>
       </header>
       <div class="lit-notebook-index"><span>THE ARCHIVE</span><span>${entries.length} ${entries.length === 1 ? 'ENTRY' : 'ENTRIES'}</span></div>
       ${entries.length ? `<div class="lit-writing-grid">${entries.map((e,i) => `
@@ -39,7 +39,7 @@ export function notebookEntryView({id}) {
   return {
     title: existing ? 'Edit writing' : 'New writing', tab:'notebook', fab:false, live:false,
     html:`<div class="lit-writing-form${existing ? ' is-decoratable' : ''}">${existing ? bookDecorMarkup(existing) : ''}<a class="lit-back" href="#/notebook">← The Notebook</a>
-      <p class="lit-overline">THE WRITING DESK</p><h1>${existing ? 'Refine your words' : 'Something worth keeping'}</h1>
+      <p class="lit-overline">THE WRITING DESK</p><h1>${existing ? 'Your page' : 'A blank page'}</h1>
       ${existing ? bookDecorMarkup(existing, 'toolbar') : '<p class="lit-new-paper-hint">Save your first entry, then add pictures and arrange them on the page.</p>'}
       <form id="lit-entry-form">
         <div class="lit-form-row"><label>ENTRY TYPE<select name="kind">${notebook.KINDS.map(([key,name]) => `<option value="${key}" ${item.kind === key ? 'selected' : ''}>${name}</option>`).join('')}</select></label>
