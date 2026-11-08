@@ -1242,6 +1242,21 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
   background-color: var(--tone-sage, #b1bdaa);
 }
 .ed.shape-arch.ed-bleed { max-width: 720px; }
+/* Presets are visible paper swatches, not opaque names in a native dropdown. */
+.tone-choice-list { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 10px; }
+.tone-choice {
+  display: grid; grid-template-columns: 25px minmax(0, 1fr); column-gap: 9px; align-items: center;
+  padding: 8px; border: 1px solid #d9cbb9; border-radius: 7px;
+  background: #fffcf7; color: #4c3734; text-align: left; cursor: pointer;
+}
+.tone-choice.is-selected { border-color: #a95536; box-shadow: inset 0 0 0 1px #a95536; }
+.tone-choice-swatch { grid-row: span 2; width: 25px; height: 35px; border: 1px solid #c9bcae; border-radius: 3px; }
+.tone-choice-name { font-size: 12px; line-height: 1.15; }
+.tone-choice code { font: 10px/1.5 ui-monospace, monospace; color: #876f68; }
+.tone-hex-label { display: block; margin-top: 14px; font-size: 12px; }
+.tone-hex-row { display: flex; align-items: center; gap: 9px; margin-top: 5px; }
+.tone-hex-row input[type="color"] { width: 41px; height: 41px; padding: 3px; border: 1px solid #cbbca9; border-radius: 6px; background: #fff; cursor: pointer; }
+.tone-hex-row input[type="text"] { flex: 1; min-width: 0; text-transform: uppercase; font-family: ui-monospace, monospace; }
 @media (max-width: 680px) {
   .ed.shape-arch:not(.ed-archFeature) {
     min-height: 420px;

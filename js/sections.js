@@ -198,6 +198,16 @@ function sectionShell(sec, inner, extraClass = '') {
   const cut = (want && !isArt && !isCurtain && hasGround) ? want : '';
 
   const styles = [];
+  const customBackground = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(sec.toneHex || '') ? sec.toneHex : '';
+  if (customBackground && sec.type !== 'archFeature') {
+    styles.push(`background-color:${customBackground}`, `background:${customBackground}`);
+    const full = customBackground.length === 4
+      ? customBackground.slice(1).split('').map((c) => c + c).join('') : customBackground.slice(1);
+    const rgb = [0, 2, 4].map((n) => parseInt(full.slice(n, n + 2), 16) / 255);
+    const luminance = rgb.map((v) => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4);
+    const ink = (.2126*luminance[0]+.7152*luminance[1]+.0722*luminance[2]) < .22 ? '#fff8ed' : '#342c2b';
+    styles.push(`color:${ink}`, `--c-title-ink:${ink}`, `--c-body-ink:${ink}`, `--c-label-ink:${ink}`);
+  }
 
   // Typefaces and ink are set as the same tokens the whole design uses, scoped
   // to this one <section>. Everything inside it — headings, body, labels, the
@@ -322,6 +332,16 @@ const TONES = [
   ['rose', 'Faded rose'], ['blue', 'Powder blue'], ['apricot', 'Burnt apricot'],
   ['gold', 'Honey ochre'], ['ink', 'Mahogany'],
 ];
+export const TONE_SWATCHES = [
+  ['none', 'Paper (default)', '#f8f5ed'],
+  ['sage', 'Sage', '#e7ece3'],
+  ['olive', 'Olive velvet', '#536e50'],
+  ['rose', 'Faded rose', '#f5e4e2'],
+  ['blue', 'Powder blue', '#e3eaf4'],
+  ['apricot', 'Burnt apricot', '#f7e6d8'],
+  ['gold', 'Honey ochre', '#f8edd5'],
+  ['ink', 'Mahogany', '#4b2828'],
+];
 const SPACING = [['', 'Normal'], ['tight', 'Tight'], ['loose', 'Loose'], ['flush', 'Flush (no gap)']];
 const EDGES = [
   ['none', 'None'],
@@ -397,7 +417,7 @@ const TYPE_FIELDS = TYPE_ROLES.map((r) => ({
 
 const COMMON_FIELDS = [
   { key: 'shape', label: 'Section shape', type: 'select', options: [['', 'Original shape'], ['arch', 'Tall arch']], controls: true },
-  { key: 'tone', label: 'Background colour', type: 'select', options: TONES },
+  { key: 'tone', label: 'Background colour', type: 'tonePicker', options: TONES },
   { key: 'bgImage', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
   { key: 'bgScrim', label: 'Darken the photograph', type: 'range', min: 0, max: 90, step: 5, when: (s) => !!(s.bgImage && s.bgImage.assetId) },
   { key: 'bgInk', label: 'Type over the photograph', type: 'select', options: [['light', 'Light'], ['dark', 'Dark']], when: (s) => !!(s.bgImage && s.bgImage.assetId) },
@@ -421,6 +441,7 @@ const COMMON_FIELDS = [
 export const SECTION_BASE = {
   visible: true,
   shape: '',
+  toneHex: '',
   tone: 'none',
   spacing: '',
   bgImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
@@ -479,7 +500,11 @@ export const SECTION_TYPES = {
     render(sec) {
       const image = assetSrc((sec.picture || {}).assetId);
       const panelTone = ['sage', 'olive', 'rose', 'blue', 'apricot', 'gold', 'ink'].includes(sec.tone) ? sec.tone : 'sage';
-      return sectionShell({ ...sec, tone: 'none' }, `<div class="lit-arch-panel lit-arch-tone-${panelTone}${sec.flip ? ' lit-arch-flip' : ''}${image ? ' lit-arch-has-art' : ''}"${image ? ` style="--lit-arch-art:url('${attr(image)}')"` : ''}>
+      const hex = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(sec.toneHex || '') ? sec.toneHex : '';
+      const digits = hex && (hex.length === 4 ? hex.slice(1).split('').map((c) => c + c).join('') : hex.slice(1));
+      const brightness = digits ? [0, 2, 4].map((n) => parseInt(digits.slice(n, n + 2), 16)) : null;
+      const hexInk = brightness && (.2126*brightness[0]+.7152*brightness[1]+.0722*brightness[2]) < 125 ? '#fff8ed' : '#342c2b';
+      return sectionShell({ ...sec, tone: 'none', toneHex: '' }, `<div class="lit-arch-panel lit-arch-tone-${panelTone}${sec.flip ? ' lit-arch-flip' : ''}${image ? ' lit-arch-has-art' : ''}"${image || hex ? ` style="${image ? `--lit-arch-art:url('${attr(image)}');` : ''}${hex ? `background-color:${hex};color:${image ? '#fff8ed' : hexInk};` : ''}"` : ''}>
         <div class="lit-arch-copy">${kicker(sec.kicker)}${headline(sec.title)}
           ${sec.body ? `<p class="lit-arch-body" data-edit="body">${rich(sec.body)}</p>` : ''}
           <span class="lit-arch-flourish" aria-hidden="true">❧</span>

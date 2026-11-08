@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES } from './sections.js';
+import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from './sections.js';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
@@ -527,6 +527,23 @@ function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
         <select id="${id}" data-field="${attr(f.key)}">
           ${f.options.map(([v, l]) => `<option value="${attr(v)}" ${String(v) === String(value || '') ? 'selected' : ''}>${esc(l)}</option>`).join('')}
         </select></div>`;
+    case 'tonePicker': {
+      const chosen = String(value || 'none');
+      const custom = String(sec_ink(secId, 'toneHex') || '');
+      return `<div class="field tone-picker"><span class="field-label">${esc(f.label)}</span>
+        <input type="hidden" data-field="${attr(f.key)}" value="${attr(chosen)}">
+        <div class="tone-choice-list" role="group" aria-label="Preset background colors">
+          ${TONE_SWATCHES.map(([key, label, hex]) => `<button type="button" class="tone-choice${chosen === key && !custom ? ' is-selected' : ''}" data-tone-preset="${attr(key)}" aria-pressed="${chosen === key && !custom}">
+            <span class="tone-choice-swatch" style="background:${hex}"></span><span class="tone-choice-name">${esc(label)}</span><code>${hex.toUpperCase()}</code>
+          </button>`).join('')}
+        </div>
+        <label class="tone-hex-label" for="f-${attr(secId)}-toneHex">Custom hex color</label>
+        <div class="tone-hex-row"><input type="color" data-tone-wheel value="${attr(/^#[a-f0-9]{6}$/i.test(custom) ? custom : '#e7ece3')}">
+          <input type="text" id="f-${attr(secId)}-toneHex" data-field="toneHex" value="${attr(custom)}" placeholder="#A7B49C" maxlength="7" spellcheck="false" aria-label="Custom background hex color">
+        </div>
+        <p class="hint">Choose a preset or enter your own hex code.</p>
+      </div>`;
+    }
     case 'range':
       return `<div class="field"><label for="${id}">${esc(f.label)} <span class="token-value" data-readout>${esc(value)}</span></label>
         <input type="range" id="${id}" data-field="${attr(f.key)}" min="${f.min}" max="${f.max}" step="${f.step}" value="${attr(value)}"></div>`;
@@ -568,7 +585,7 @@ function visibleFields(def, sec) {
 // are the ones that need you to know what a bite or a drop is, and they are
 // the reason the panel reads as a console. Kept in full, put out of the way.
 const FINE_KEYS = new Set([
-  'shape', 'tone', 'bgImage', 'bgScrim', 'bgInk',
+  'shape', 'tone', 'toneHex', 'bgImage', 'bgScrim', 'bgInk',
   'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
   'curtainArt', 'curtainWhere', 'curtainDrop', 'curtainGap',
   'spacing', 'scrim', 'rotate', 'flip', 'ratio', 'dropcap', 'stagger',
@@ -582,7 +599,7 @@ function isFine(f) {
 }
 
 const STYLE_KEYS = new Set([
-  'shape', 'tone', 'bgScrim', 'bgInk', 'scrim', 'ink', 'color', 'background',
+  'shape', 'tone', 'toneHex', 'bgScrim', 'bgInk', 'scrim', 'ink', 'color', 'background',
 ]);
 const ARTWORK_KEYS = new Set([
   'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
@@ -668,6 +685,9 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
   const def = original.fields.some((field) => field.key === 'shape')
     ? original
     : { ...original, fields: [{ key: 'shape', label: 'Section shape', type: 'select', options: [['', 'Original shape'], ['arch', 'Tall arch']], controls: true }, ...original.fields] };
+  if (!def.fields.some((field) => field.key === 'tone')) {
+    def.fields = [...def.fields, { key: 'tone', label: 'Background colour', type: 'tonePicker' }];
+  }
   let editingTab = mountIn ? 'content' : 'all';
 
   // Rebuilt rather than snapshotted, so returning from the picture editor
@@ -726,6 +746,30 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
       };
 
       function bind() {
+        const previewBackground = (hex) => {
+          const node = [...document.querySelectorAll('#app [data-sec]')].find((x) => x.dataset.sec === sectionId);
+          if (!node) return;
+          const archPanel = node.querySelector('.lit-arch-panel');
+          const target = archPanel || node;
+          if (hex) {
+            target.style.backgroundColor = hex;
+            const digits = hex.length === 4 ? hex.slice(1).split('').map((c) => c + c).join('') : hex.slice(1);
+            const rgb = [0, 2, 4].map((n) => parseInt(digits.slice(n, n + 2), 16));
+            const ink = (.2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2]) < 125 ? '#fff8ed' : '#342c2b';
+            target.style.color = ink;
+            target.style.setProperty('--c-title-ink', ink);
+            target.style.setProperty('--c-body-ink', ink);
+            target.style.setProperty('--c-label-ink', ink);
+          } else {
+            target.style.removeProperty('background-color');
+            target.style.removeProperty('color');
+            ['--c-title-ink','--c-body-ink','--c-label-ink'].forEach((key) => target.style.removeProperty(key));
+          }
+          if (!archPanel) {
+            if (hex) target.style.background = hex;
+            else target.style.removeProperty('background');
+          }
+        };
         sheet.querySelectorAll('[data-field]').forEach((el) => {
           const key = el.dataset.field;
           const fieldDef = def.fields.find((x) => x.key === key) || {};
@@ -737,6 +781,18 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               const out = el.closest('.field').querySelector('[data-readout]');
               if (out) out.textContent = v;
             } else v = el.value;
+            if (key === 'toneHex') {
+              const hex = String(v).trim();
+              if (hex && !/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) return;
+              previewBackground(hex);
+              const toneInput = sheet.querySelector('[data-field="tone"]');
+              if (hex && toneInput) toneInput.value = 'none';
+              if (hex) sheet.querySelectorAll('[data-tone-preset]').forEach((button) => {
+                button.classList.remove('is-selected'); button.setAttribute('aria-pressed', 'false');
+              });
+              await commit(hex ? { tone: 'none', toneHex: hex } : { toneHex: '' });
+              return;
+            }
             if (key === 'shape') {
               const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
               if (sectionNode) sectionNode.classList.toggle('shape-arch', v === 'arch');
@@ -751,6 +807,38 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
             if (fieldDef.type === 'font') el.style.fontFamily = v || 'inherit';
             await commit({ [key]: v }, { rebuild: !!fieldDef.controls });
           });
+        });
+
+        sheet.querySelectorAll('[data-tone-preset]').forEach((button) => {
+          button.onclick = async () => {
+            const toneInput = sheet.querySelector('[data-field="tone"]');
+            const hexInput = sheet.querySelector('[data-field="toneHex"]');
+            if (!toneInput || !hexInput) return;
+            hexInput.value = '';
+            toneInput.value = button.dataset.tonePreset;
+            await commit({ tone: button.dataset.tonePreset, toneHex: '' });
+            previewBackground('');
+            const node = [...document.querySelectorAll('#app [data-sec]')].find((x) => x.dataset.sec === sectionId);
+            if (node) {
+              [...node.classList].filter((name) => name.startsWith('tone-')).forEach((name) => node.classList.remove(name));
+              if (button.dataset.tonePreset !== 'none') node.classList.add(`tone-${button.dataset.tonePreset}`);
+            }
+            sheet.querySelectorAll('[data-tone-preset]').forEach((b) => {
+              b.classList.toggle('is-selected', b === button);
+              b.setAttribute('aria-pressed', String(b === button));
+            });
+          };
+        });
+        sheet.querySelectorAll('[data-tone-wheel]').forEach((wheel) => {
+          wheel.oninput = () => {
+            const hexInput = sheet.querySelector('[data-field="toneHex"]');
+            if (!hexInput) return;
+            hexInput.value = wheel.value.toUpperCase();
+            hexInput.dispatchEvent(new Event('input', { bubbles: true }));
+            sheet.querySelectorAll('[data-tone-preset]').forEach((b) => {
+              b.classList.remove('is-selected'); b.setAttribute('aria-pressed', 'false');
+            });
+          };
         });
 
         // Both pickers write through the row's hidden field, so every control
