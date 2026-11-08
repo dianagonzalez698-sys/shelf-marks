@@ -62,31 +62,29 @@ function openBookmarkArtworkStudio() {
     challenge, labels: [...bookmarkLabels(challenge)],
   })).filter((group) => group.labels.length);
   if (!groups.length) return toast('Create a reading challenge first.');
+  const titles = new Map(groups.flatMap(({ labels }) => labels));
 
   openSheet(`<div class="bm-curator-studio bm-curator-compact">
-    <p class="lit-overline">BOOKMARK ARTWORK</p><h2>Choose the illustration</h2>
-    <div class="bm-curator-choices">
-      <label>Challenge<select id="bm-curator-challenge">${groups.map(({ challenge }, i) => `<option value="${i}">${esc(challenge.name)}</option>`).join('')}</select></label>
-      <label>Bookmark<select id="bm-curator-bookmark"></select></label>
-    </div>
+    <p class="lit-overline">THE BOOKMARK ATELIER</p><h2>Choose an illustration</h2>
+    <label class="bm-curator-one-choice" for="bm-curator-bookmark">For this bookmark
+      <select id="bm-curator-bookmark">${groups.map(({ challenge, labels }) => `<optgroup label="${attr(challenge.name)}">${labels.map(([id, meta]) => `<option value="${attr(id)}">${esc(meta.title || id)}</option>`).join('')}</optgroup>`).join('')}</select>
+    </label>
     <div class="bm-curator-focus"><div class="bm-curator-preview" id="bm-curator-preview" aria-live="polite"></div>
       <div class="bm-curator-caption"><strong id="bm-curator-name"></strong><span id="bm-curator-status"></span>
         <button type="button" id="bm-curator-pick">Choose image ↗</button>
       </div>
     </div>
     <input id="bm-curator-file" class="visually-hidden" type="file" accept="image/*">
-    <p class="bm-curator-footnote">Artwork is prepared now and appears in the collection when earned.</p>
+    <p class="bm-curator-footnote">The illustration appears when the bookmark is earned.</p>
   </div>`, {
     onMount(sheet) {
       const file = sheet.querySelector('#bm-curator-file');
-      const groupPicker = sheet.querySelector('#bm-curator-challenge');
       const bookmarkPicker = sheet.querySelector('#bm-curator-bookmark');
       const button = sheet.querySelector('#bm-curator-pick');
-      const selectedGroup = () => groups[Number(groupPicker.value)] || groups[0];
       const selectedId = () => bookmarkPicker.value;
       const show = () => {
         const id = selectedId();
-        const meta = selectedGroup().labels.find(([key]) => key === id)?.[1];
+        const meta = titles.get(id);
         const image = state.images.get(id);
         sheet.querySelector('#bm-curator-preview').innerHTML = image
           ? `<img src="${attr(image.dataUrl)}" alt="Selected bookmark artwork">`
@@ -95,14 +93,9 @@ function openBookmarkArtworkStudio() {
         sheet.querySelector('#bm-curator-status').textContent = state.unlocks.some((u) => u.id === id) ? 'Collected' : 'Not yet earned';
         button.textContent = image ? 'Replace image ↗' : 'Choose image ↗';
       };
-      const updateBookmarks = () => {
-        bookmarkPicker.innerHTML = selectedGroup().labels.map(([id, meta]) => `<option value="${attr(id)}">${esc(meta.title || id)}</option>`).join('');
-        show();
-      };
-      groupPicker.onchange = updateBookmarks;
       bookmarkPicker.onchange = show;
       button.onclick = () => { file.value = ''; file.click(); };
-      updateBookmarks();
+      show();
       file.onchange = async () => {
         const picture = file.files && file.files[0];
         const id = selectedId();
