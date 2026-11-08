@@ -45,12 +45,32 @@ export function notebookEntryView({id}) {
         <p class="hint" id="linked-journal-hint">${item.bookId ? `Writing about this book? <a href="#/book/${encodeURIComponent(item.bookId)}">Open its reading journal ↗</a>` : 'Writing a book review or tracking a reading challenge? You can do that in the book’s reading journal.'}</p>
         <label>TITLE<input name="title" required maxlength="180" placeholder="Give this piece a title…" value="${attr(item.title)}"></label>
         <label>YOUR WORDS<textarea name="body" rows="14" placeholder="Start writing…">${esc(item.body)}</textarea></label>
-        <div class="lit-form-actions"><span>Saved privately on this device</span><button class="lit-primary-action" type="submit">Save entry ↗</button></div>
+        <div class="lit-form-actions"><span id="lit-draft-status" role="status" aria-live="polite">Draft kept in this tab until you save.</span><button class="lit-primary-action" type="submit">Save entry ↗</button></div>
       </form></div>`,
     onMount(root) {
+      const form = root.querySelector('#lit-entry-form');
+      const status = root.querySelector('#lit-draft-status');
+      const draftKey = `dlp:notebook-draft:${existing?.id || 'new'}`;
+      const fields = ['kind', 'bookId', 'title', 'body'];
+      try {
+        const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+        const savedAt = existing?.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+        if (draft && draft.at > savedAt && Date.now() - draft.at < 30 * 86400000) {
+          fields.forEach(key => { if (typeof draft[key] === 'string') form.elements[key].value = draft[key]; });
+          status.textContent = 'Your unfinished draft has been restored.';
+        }
+      } catch (_) { status.textContent = 'Save your entry to keep it permanently.'; }
+      const keepDraft = () => {
+        try {
+          sessionStorage.setItem(draftKey, JSON.stringify({at:Date.now(), ...Object.fromEntries(fields.map(key => [key,form.elements[key].value]))}));
+          status.textContent = 'Draft kept in this tab. Save when ready.';
+        } catch (_) { status.textContent = 'Draft storage unavailable. Please save your entry.'; }
+      };
+      form.addEventListener('input', keepDraft);
+      form.addEventListener('change', keepDraft);
       const bookPicker = root.querySelector('[name="bookId"]');
       const linkedHint = root.querySelector('#linked-journal-hint');
-      bookPicker.addEventListener('change', () => {
+      const updateBookHint = () => {
         linkedHint.replaceChildren();
         if (!bookPicker.value) {
           linkedHint.textContent = 'Writing a book review or tracking a reading challenge? You can do that in the book’s reading journal.';
@@ -61,14 +81,17 @@ export function notebookEntryView({id}) {
         link.href = `#/book/${encodeURIComponent(bookPicker.value)}`;
         link.textContent = 'Open its reading journal ↗';
         linkedHint.append(link);
-      });
-      root.querySelector('#lit-entry-form').addEventListener('submit', async (e) => {
+      };
+      bookPicker.addEventListener('change', updateBookHint);
+      updateBookHint();
+      form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const form = e.currentTarget;
         const btn = form.querySelector('button[type=submit]');
         btn.disabled = true;
         try {
           await notebook.save({...(existing ? {id: existing.id} : {}),title:form.elements.title.value.trim(),body:form.elements.body.value,kind:form.elements.kind.value,bookId:form.elements.bookId.value});
+          try { sessionStorage.removeItem(draftKey); } catch (_) { /* entry is already saved */ }
           toast('Your writing is saved.', 'good');
           navigate('/notebook');
         } catch (_) { toast('Could not save your writing.', 'bad'); btn.disabled = false; }
