@@ -568,7 +568,7 @@ function visibleFields(def, sec) {
 // are the ones that need you to know what a bite or a drop is, and they are
 // the reason the panel reads as a console. Kept in full, put out of the way.
 const FINE_KEYS = new Set([
-  'tone', 'bgImage', 'bgScrim', 'bgInk',
+  'shape', 'tone', 'bgImage', 'bgScrim', 'bgInk',
   'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
   'curtainArt', 'curtainWhere', 'curtainDrop', 'curtainGap',
   'spacing', 'scrim', 'rotate', 'flip', 'ratio', 'dropcap', 'stagger',
@@ -582,7 +582,7 @@ function isFine(f) {
 }
 
 const STYLE_KEYS = new Set([
-  'tone', 'bgScrim', 'bgInk', 'scrim', 'ink', 'color', 'background',
+  'shape', 'tone', 'bgScrim', 'bgInk', 'scrim', 'ink', 'color', 'background',
 ]);
 const ARTWORK_KEYS = new Set([
   'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
@@ -600,7 +600,7 @@ function fieldsHtml(def, sec, mode = 'all') {
     // Existing values for all other fields remain in the saved data; they are
     // simply no longer surfaced as an intimidating grid of switches.
     const contentEssentials = new Set(['limit', 'layout', 'mode', 'columns']);
-    const styleEssentials = new Set(['tone', 'fontDisplay', 'fontBody']);
+    const styleEssentials = new Set(['shape', 'tone', 'fontDisplay', 'fontBody']);
     const artworkEssentials = new Set([
       'bgImage', 'backdrop', 'picture', 'inset', 'items', 'strip',
       'edge', 'edgeArt', 'edgeWhere', 'edgeSize',
@@ -661,8 +661,13 @@ function mediaButton(key, m, removable = false, role = '') {
 export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
   const sec = layout.getSection(pageId, sectionId);
   if (!sec) return;
-  const def = SECTION_TYPES[sec.type];
-  if (!def) return;
+  const original = SECTION_TYPES[sec.type];
+  if (!original) return;
+  // Shape is a section-wide option, including specialized blocks whose own
+  // field lists don't use COMMON_FIELDS (such as the cover hero).
+  const def = original.fields.some((field) => field.key === 'shape')
+    ? original
+    : { ...original, fields: [{ key: 'shape', label: 'Section shape', type: 'select', options: [['', 'Original shape'], ['arch', 'Tall arch']], controls: true }, ...original.fields] };
   let editingTab = mountIn ? 'content' : 'all';
 
   // Rebuilt rather than snapshotted, so returning from the picture editor
@@ -732,6 +737,10 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               const out = el.closest('.field').querySelector('[data-readout]');
               if (out) out.textContent = v;
             } else v = el.value;
+            if (key === 'shape') {
+              const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
+              if (sectionNode) sectionNode.classList.toggle('shape-arch', v === 'arch');
+            }
             // Keep the actual journal page in step with the text box without
             // replacing the entire section (which would disrupt the editor).
             if (['text', 'textarea', 'rich'].includes(fieldDef.type)) {

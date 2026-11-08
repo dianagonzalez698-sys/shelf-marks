@@ -1230,6 +1230,26 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .ed.sp-loose { padding-top: calc(var(--sp-section) * 1.6); padding-bottom: calc(var(--sp-section) * 1.6); }
 .ed.sp-flush { padding-top: 0; padding-bottom: 0; }
 
+/* Any editable editorial section may take on an architectural arch silhouette.
+   Keep the content and controls intact; only its outer silhouette changes. */
+.ed.shape-arch:not(.ed-archFeature) {
+  box-sizing: border-box;
+  width: min(100%, 720px);
+  min-height: 510px;
+  padding-top: max(var(--sp-section), 125px);
+  border-radius: 50% 50% 0 0 / 155px 155px 0 0;
+  overflow: hidden;
+  background-color: var(--tone-sage, #b1bdaa);
+}
+.ed.shape-arch.ed-bleed { max-width: 720px; }
+@media (max-width: 680px) {
+  .ed.shape-arch:not(.ed-archFeature) {
+    min-height: 420px;
+    padding-top: max(var(--sp-section), 90px);
+    border-radius: 50% 50% 0 0 / 105px 105px 0 0;
+  }
+}
+
 /* The *entire panel* is the arch: not a photo frame in a rectangular card.
    A high curved crown falls into straight sides and a quiet square foot. */
 .ed-archFeature {

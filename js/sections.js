@@ -292,7 +292,7 @@ function sectionShell(sec, inner, extraClass = '') {
     + `${photo ? ' has-bg' : ''}${onDark ? ' ed-dark' : ''}`
     + `${cut ? ` has-edge edge-${cut}` : ''}${curtain ? ` has-curtain${curtainAtBottom ? ' curtain-bottom' : ' curtain-top'}` : ''}`
     + `${band ? ' has-trim' : ''}${bandBottom ? ' has-trim-bottom' : ''}`
-    + `${bandTop ? ' has-trim-top' : ''} ${extraClass}"`
+    + `${bandTop ? ' has-trim-top' : ''}${sec.shape === 'arch' ? ' shape-arch' : ''} ${extraClass}"`
     + ` data-sec="${attr(sec.id)}"${style}>${bg}${curtain}${band}${inner}</section>`;
 }
 
@@ -396,6 +396,7 @@ const TYPE_FIELDS = TYPE_ROLES.map((r) => ({
 }));
 
 const COMMON_FIELDS = [
+  { key: 'shape', label: 'Section shape', type: 'select', options: [['', 'Original shape'], ['arch', 'Tall arch']], controls: true },
   { key: 'tone', label: 'Background colour', type: 'select', options: TONES },
   { key: 'bgImage', label: 'Background photograph', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
   { key: 'bgScrim', label: 'Darken the photograph', type: 'range', min: 0, max: 90, step: 5, when: (s) => !!(s.bgImage && s.bgImage.assetId) },
@@ -419,6 +420,7 @@ const COMMON_FIELDS = [
 // Defaults every section carries, whatever its type.
 export const SECTION_BASE = {
   visible: true,
+  shape: '',
   tone: 'none',
   spacing: '',
   bgImage: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
