@@ -3494,6 +3494,29 @@ html:not([data-theme="dark"]) .lit-writing-form form.lit-open-journal textarea[n
   .lit-open-journal .lit-form-actions { grid-column:1; grid-row:7; padding:20px 30px 38px; }
   .lit-open-journal textarea[name="bodyLeft"], .lit-open-journal textarea[name="bodyRight"] { min-height:350px; }
 }
+/* Actual journal tabs: navigate between independent writable spreads. */
+.lit-journal-tab-bar { display:flex; align-items:end; justify-content:space-between; gap:16px; margin:0 20px -1px 0; position:relative; z-index:3; }
+.lit-journal-tab-bar .lit-journal-tabs { margin:0; }
+.lit-journal-tabs button { display:grid; place-items:center; min-width:clamp(40px,5vw,65px); height:29px; padding:0 9px; border:1px solid #d9d8ca; border-bottom:0; border-radius:11px 11px 0 0; background:#e6e4d7; color:#665f55; font:600 .63rem var(--f-ui); letter-spacing:.06em; cursor:pointer; transition:background .15s,color .15s; }
+.lit-journal-tabs button:nth-child(3n) { background:#e0e5dc; }
+.lit-journal-tabs button.is-active { background:#f5f2e8; color:#473a34; height:34px; border-color:#c9c9b6; box-shadow:0 -2px 6px rgba(53,48,35,.06); }
+.lit-journal-tabs button:hover { color:var(--c-accent); }
+.lit-journal-tabs button:focus-visible,.lit-rename-tabs-toggle:focus-visible { outline:2px solid var(--c-accent); outline-offset:2px; }
+.lit-rename-tabs-toggle { border:0; border-bottom:1px solid var(--c-rule-strong); border-radius:0; padding:6px 0; background:none; color:var(--c-ink-soft); font:500 .73rem var(--f-ui); cursor:pointer; }
+.lit-tab-label-editor { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; padding:18px 20px; background:var(--c-bg-raised); border:1px solid var(--c-rule); }
+.lit-tab-label-editor[hidden] { display:none; }
+.lit-tab-label-editor label { display:grid; gap:5px; color:var(--c-ink-soft); font:600 .63rem var(--f-ui); letter-spacing:.08em; }
+.lit-tab-label-editor input { width:100%; min-width:0; border:1px solid var(--c-rule-strong); padding:8px; background:var(--c-bg); color:var(--c-ink); font:1rem var(--f-body); }
+/* Watercolor rises from the foot of the book; no rectangular top boundary. */
+.lit-writing-form form.lit-open-journal::before { content:''; position:absolute; left:0; right:0; bottom:0; height:290px; background:url('../assets/notebook-watercolor-garden.png') center bottom / 100% auto no-repeat; opacity:.38; -webkit-mask-image:linear-gradient(to bottom,transparent,rgba(0,0,0,.6) 27%,#000 65%); mask-image:linear-gradient(to bottom,transparent,rgba(0,0,0,.6) 27%,#000 65%); pointer-events:none; z-index:0; }
+.lit-open-journal .lit-journal-frontispiece::after { content:none; }
+.lit-writing-form form.lit-open-journal > * { position:relative; z-index:1; }
+@media (max-width:850px) {
+  .lit-journal-tab-bar { flex-wrap:wrap; }
+  .lit-journal-tabs { max-width:100%; overflow-x:auto; }
+  .lit-tab-label-editor { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .lit-writing-form form.lit-open-journal::before { height:210px; background-size:auto 100%; }
+}
 html:not([data-theme="dark"]) .literary-notebook .lit-writing-card[data-card-paper-tone="ivory"] { background-color: #f9f6ed; }
 html:not([data-theme="dark"]) .literary-notebook .lit-writing-card[data-card-paper-tone="rose"] { background-color: #f0e3df; }
 html:not([data-theme="dark"]) .literary-notebook .lit-writing-card[data-card-paper-tone="sage"] { background-color: #e6e9df; }

@@ -64,12 +64,14 @@ export function notebookEntryView({id}) {
   const item = existing || {kind:'reflection',title:'',body:'',bookId:''};
   const leftWriting = item.bodyLeft ?? item.body ?? '';
   const rightWriting = item.bodyRight ?? '';
+  const initialTabs = Array.from({length:6}, (_,i) => ({label:String(i+1).padStart(2,'0'), left:i === 0 ? leftWriting : '', right:i === 0 ? rightWriting : '', ...(item.journalTabs?.[i] || {})}));
   return {
     title: existing ? 'Edit writing' : 'New writing', tab:'notebook', fab:false, live:false,
     html:`<div class="lit-writing-form${existing ? ' is-decoratable' : ''}">${existing ? bookDecorMarkup(existing) : ''}<a class="lit-back" href="#/notebook">← The Notebook</a>
       <p class="lit-overline">THE WRITING DESK</p><h1>${existing ? 'Your page' : 'A blank page'}</h1>
       ${existing ? bookDecorMarkup(existing, 'toolbar') : '<p class="lit-new-paper-hint">Save your first entry, then add pictures and arrange them on the page.</p>'}
-      <div class="lit-journal-tabs" aria-hidden="true"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span><span>06</span></div>
+      <div class="lit-journal-tab-bar"><button type="button" class="lit-rename-tabs-toggle" aria-expanded="false" aria-controls="lit-tab-label-editor">Rename tabs</button><div class="lit-journal-tabs" role="tablist" aria-label="Journal page spreads">${initialTabs.map((page,i) => `<button type="button" role="tab" class="${i === 0 ? 'is-active' : ''}" aria-selected="${i === 0}" data-journal-tab="${i}" title="Open ${attr(page.label)}">${esc(page.label)}</button>`).join('')}</div></div>
+      <div id="lit-tab-label-editor" class="lit-tab-label-editor" hidden>${initialTabs.map((page,i) => `<label>Tab ${i+1}<input type="text" maxlength="16" data-tab-label="${i}" value="${attr(page.label)}" aria-label="Rename tab ${i+1}"></label>`).join('')}</div>
       <form id="lit-entry-form" class="lit-open-journal">
         <div class="lit-journal-frontispiece" aria-hidden="true"><span class="lit-journal-kicker">A COMMONPLACE BOOK</span><h2>Little things<br><em>worth keeping.</em></h2><p>An unhurried place for the words that linger.</p></div>
         <div class="lit-form-row"><label>ENTRY TYPE<select name="kind">${notebook.KINDS.map(([key,name]) => `<option value="${key}" ${item.kind === key ? 'selected' : ''}>${name}</option>`).join('')}</select></label>
@@ -85,21 +87,59 @@ export function notebookEntryView({id}) {
       const form = root.querySelector('#lit-entry-form');
       const status = root.querySelector('#lit-draft-status');
       const draftKey = `dlp:notebook-draft:${existing?.id || 'new'}`;
-      const fields = ['kind', 'bookId', 'title', 'bodyLeft', 'bodyRight'];
+      const fields = ['kind', 'bookId', 'title'];
+      let journalTabs = initialTabs.map(page => ({...page}));
+      let activeTab = 0;
+      const tabButtons = [...root.querySelectorAll('[data-journal-tab]')];
+      const captureSpread = () => {
+        journalTabs[activeTab].left = form.elements.bodyLeft.value;
+        journalTabs[activeTab].right = form.elements.bodyRight.value;
+      };
+      const showSpread = (index) => {
+        activeTab = index;
+        form.elements.bodyLeft.value = journalTabs[index].left || '';
+        form.elements.bodyRight.value = journalTabs[index].right || '';
+        tabButtons.forEach((button,i) => { button.classList.toggle('is-active',i === index); button.setAttribute('aria-selected',String(i === index)); });
+      };
       try {
         const draft = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
         const savedAt = existing?.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
         if (draft && draft.at > savedAt && Date.now() - draft.at < 30 * 86400000) {
           fields.forEach(key => { if (typeof draft[key] === 'string') form.elements[key].value = draft[key]; });
+          if (Array.isArray(draft.journalTabs)) journalTabs = initialTabs.map((page,i) => ({...page,...(draft.journalTabs[i] || {})}));
+          else { journalTabs[0].left = draft.bodyLeft ?? journalTabs[0].left; journalTabs[0].right = draft.bodyRight ?? journalTabs[0].right; }
+          activeTab = Math.max(0,Math.min(5,Number(draft.activeTab) || 0));
           status.textContent = 'Your unfinished draft has been restored.';
         }
       } catch (_) { status.textContent = 'Save your entry to keep it permanently.'; }
+      showSpread(activeTab);
       const keepDraft = () => {
+        captureSpread();
         try {
-          sessionStorage.setItem(draftKey, JSON.stringify({at:Date.now(), ...Object.fromEntries(fields.map(key => [key,form.elements[key].value]))}));
+          sessionStorage.setItem(draftKey, JSON.stringify({at:Date.now(), ...Object.fromEntries(fields.map(key => [key,form.elements[key].value])),journalTabs,activeTab}));
           status.textContent = 'Draft kept in this tab. Save when ready.';
         } catch (_) { status.textContent = 'Draft storage unavailable. Please save your entry.'; }
       };
+      tabButtons.forEach(button => button.addEventListener('click', () => {
+        const next = Number(button.dataset.journalTab);
+        if (next === activeTab) return;
+        captureSpread();
+        showSpread(next);
+        keepDraft();
+      }));
+      const renameToggle = root.querySelector('.lit-rename-tabs-toggle');
+      const labelEditor = root.querySelector('#lit-tab-label-editor');
+      renameToggle.addEventListener('click', () => {
+        labelEditor.hidden = !labelEditor.hidden;
+        renameToggle.setAttribute('aria-expanded',String(!labelEditor.hidden));
+      });
+      root.querySelectorAll('[data-tab-label]').forEach(input => input.addEventListener('input', () => {
+        const index = Number(input.dataset.tabLabel);
+        journalTabs[index].label = input.value.slice(0,16) || String(index+1).padStart(2,'0');
+        tabButtons[index].textContent = journalTabs[index].label;
+        tabButtons[index].title = `Open ${journalTabs[index].label}`;
+        keepDraft();
+      }));
       form.addEventListener('input', keepDraft);
       form.addEventListener('change', keepDraft);
       const bookPicker = root.querySelector('[name="bookId"]');
@@ -124,9 +164,9 @@ export function notebookEntryView({id}) {
         const btn = form.querySelector('button[type=submit]');
         btn.disabled = true;
         try {
-          const bodyLeft = form.elements.bodyLeft.value;
-          const bodyRight = form.elements.bodyRight.value;
-          const saved = await notebook.save({...(existing ? {id: existing.id} : {}),title:form.elements.title.value.trim(),body:[bodyLeft.trimEnd(),bodyRight.trimStart()].filter(Boolean).join('\n\n'),bodyLeft,bodyRight,kind:form.elements.kind.value,bookId:form.elements.bookId.value});
+          captureSpread();
+          const body = journalTabs.flatMap(page => [page.left.trimEnd(),page.right.trimStart()]).filter(Boolean).join('\n\n');
+          const saved = await notebook.save({...(existing ? {id: existing.id} : {}),title:form.elements.title.value.trim(),body,bodyLeft:journalTabs[0].left,bodyRight:journalTabs[0].right,journalTabs,kind:form.elements.kind.value,bookId:form.elements.bookId.value});
           try { sessionStorage.removeItem(draftKey); } catch (_) { /* entry is already saved */ }
           toast('Your writing is saved.', 'good');
           navigate(`/notebook/${encodeURIComponent(saved.id)}`);
