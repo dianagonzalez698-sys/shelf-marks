@@ -22,6 +22,7 @@ export function booksView(params = {}) {
   const customShelves = Array.isArray(state.settings.customShelves) ? state.settings.customShelves : [];
   const shelfChoices = [...STATUS, ...customShelves.map((s) => [`custom:${s.id}`, s.name])];
   const shelf = shelfChoices.some(([s]) => s === query.shelf) ? query.shelf : 'all';
+  const activeCustom = shelf.startsWith('custom:') ? customShelves.find(s=>s.id===shelf.slice(7)) : null;
   const search = String(query.search || '').trim().toLowerCase();
   const sort = query.sort === 'title' ? 'title' : 'recent';
   const all = sortedBooks();
@@ -35,8 +36,9 @@ export function booksView(params = {}) {
   return {
     title: 'My Library', tab: 'books', editorial: true, keepScroll: true,
     html: `<div class="literary-shelf">
-      <header class="lit-shelf-header"><div><p class="lit-overline">THE PERSONAL LIBRARY / ${state.settings.year}</p>
-        <h1>My <em>Bookshelf</em></h1><p>Every book has a place here, whether read, reading, or still waiting.</p></div>
+      <header class="lit-shelf-header${activeCustom ? ' lit-custom-shelf-header' : ''}"><div><p class="lit-overline">${activeCustom ? 'A PERSONAL COLLECTION' : `THE PERSONAL LIBRARY / ${state.settings.year}`}</p>
+        <h1>${activeCustom ? esc(activeCustom.name) : 'My <em>Bookshelf</em>'}</h1><p>${activeCustom ? esc(activeCustom.description || 'A gathering of books, kept together for a reason.') : 'Every book has a place here, whether read, reading, or still waiting.'}</p></div>
+        ${activeCustom && assets.src(activeCustom.coverAssetId) ? `<div class="lit-custom-shelf-art"><img src="${attr(assets.src(activeCustom.coverAssetId))}" alt="" loading="lazy"></div>` : ''}
       </header>
       <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
       <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search">⌕</button></form>
