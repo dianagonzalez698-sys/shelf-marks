@@ -25,28 +25,27 @@ export function wordsView() {
     back: true,
     editorial: true,
     html: `
-      <section class="ed">
-        <div class="ed-head ed-head-split">
-          <div>
-            <p class="ed-kicker">Kept turning up</p>
-            <h2 class="ed-title">Words</h2>
-          </div>
-          <button class="btn btn-sm btn-primary" type="button" id="new-word">Add a word</button>
-        </div>
-        ${words.length ? `<div class="list">${words.map((w) => {
+      <section class="word-cabinet">
+        <header class="word-cabinet-head">
+          <p class="lit-overline">THE LANGUAGE I KEPT FINDING</p>
+          <h1>A collection of <em>words</em></h1>
+          <p>Some words follow us from book to book. These are the ones I chose to keep.</p>
+          <button class="word-cabinet-add" type="button" id="new-word">✧ &nbsp; Keep another word</button>
+        </header>
+        ${words.length ? `<div class="word-cabinet-intro"><span>THE LITTLE LEXICON</span><span>${String(words.length).padStart(2,'0')} ENTRIES</span></div><div class="word-cabinet-grid">${words.map((w,i) => {
           const st = wordStats(w);
-          return `<article class="list-row">
-            <a class="list-row-link" href="#/word/${encodeURIComponent(w.id)}">
-              <span class="grow">
-                <span class="entry-title">${esc(w.word || 'Untitled')}</span>
-                <span class="entry-meta">${esc(w.label || '')}${w.period ? ` · ${esc(w.period)}` : ''}</span>
-                <span class="entry-meta">${st.books} book${st.books === 1 ? '' : 's'} · ${st.total} time${st.total === 1 ? '' : 's'}</span>
-              </span>
+          return `<article class="word-cabinet-entry">
+            <a href="#/word/${encodeURIComponent(w.id)}" aria-label="Open ${attr(w.word || 'Untitled word')}">
+              <span class="word-cabinet-number">${String(i+1).padStart(2,'0')} <span aria-hidden="true">❦</span></span>
+              <span class="word-cabinet-word">${esc(w.word || 'Untitled')}</span>
+              <span class="word-cabinet-label">${esc(w.label || 'A word worth keeping')}${w.period ? ` · ${esc(w.period)}` : ''}</span>
+              ${w.note ? `<span class="word-cabinet-note">${esc(w.note)}</span>` : ''}
+              <span class="word-cabinet-foot">${st.books} ${st.books === 1 ? 'book' : 'books'} <span>·</span> ${st.total} ${st.total === 1 ? 'appearance' : 'appearances'} <span class="word-cabinet-arrow" aria-hidden="true">↗</span></span>
             </a>
           </article>`;
         }).join('')}</div>`
-        : `<div class="empty"><h3>No words yet</h3>
-             <p>A word of the year is one you kept meeting — add it, then record the books you met it in.</p></div>`}
+        : `<div class="word-cabinet-empty"><span aria-hidden="true">❦</span><h2>A blank page for curious words.</h2>
+             <p>Keep the first word that catches your eye, then note every book in which it appears.</p></div>`}
       </section>`,
     onMount(root) {
       const btn = root.querySelector('#new-word');
@@ -122,9 +121,9 @@ export function openWordEditor(existing) {
       <textarea id="w-note" rows="2" placeholder="Why it stuck.">${esc(word.note || '')}</textarea></div>
 
     <p class="form-heading" style="margin-top:1.4rem">Where you met it</p>
-    <p class="small muted" style="margin-top:0">How many times the word turned up in each book. Leave a book blank if it never did.</p>
+    <p class="small muted" style="margin-top:0">Note how often the word appeared. Leave the other books blank.</p>
     ${state.books.length
-      ? `<div class="wlist">${bookRows()}</div>`
+      ? `<label class="visually-hidden" for="w-book-search">Find a book</label><input class="w-book-search" type="search" id="w-book-search" placeholder="Find a book in your library…"><div class="wlist">${bookRows()}</div><p class="small muted" id="w-no-results" hidden>No matching books.</p>`
       : '<p class="hint">No books logged yet — add some first and they will appear here.</p>'}
 
     <div class="btn-row" style="margin-top:1.2rem">
@@ -134,6 +133,16 @@ export function openWordEditor(existing) {
     ${creating ? '' : '<div class="btn-row" style="margin-top:.6rem"><button class="btn btn-danger btn-block" type="button" data-del>Remove this word</button></div>'}
   `, {
     onMount(sheet, close) {
+      const searchBooks = sheet.querySelector('#w-book-search');
+      if (searchBooks) searchBooks.addEventListener('input', () => {
+        const query = searchBooks.value.trim().toLocaleLowerCase();
+        let visible = 0;
+        sheet.querySelectorAll('.wrow').forEach(row => {
+          row.hidden = !!query && !row.textContent.toLocaleLowerCase().includes(query);
+          if (!row.hidden) visible++;
+        });
+        sheet.querySelector('#w-no-results').hidden = visible !== 0;
+      });
       sheet.querySelectorAll('[data-count]').forEach((input) => {
         input.addEventListener('input', () => {
           const n = Math.max(0, Number(input.value) || 0);
