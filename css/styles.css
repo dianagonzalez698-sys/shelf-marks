@@ -3616,6 +3616,16 @@ html:not([data-theme="dark"]) .lit-hero {
 .lit-curation-item > summary span { margin-left:10px; font:.68rem var(--f-ui); color:var(--c-ink-soft); }
 .lit-curation-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 22px; padding:22px 0 4px; }
 .lit-curation-order { display:flex; align-items:end; gap:10px; }
+/* Gentle edges only: retain the approved cabinet composition and controls. */
+.lit-cabinet-section-head { position:relative; border-top:0; padding-top:19px; }
+.lit-cabinet-section-head::before { content:''; position:absolute; left:0; top:0; width:85%; height:1px; background:linear-gradient(90deg,rgba(125,105,84,.32),rgba(125,105,84,.12) 55%,transparent); }
+.lit-cabinet-piece { position:relative; border-top:0; padding-top:33px; }
+.lit-cabinet-piece::before { content:''; position:absolute; left:0; top:0; width:65%; height:1px; background:linear-gradient(90deg,rgba(125,105,84,.25),rgba(125,105,84,.1) 55%,transparent); }
+.lit-cabinet-art { border-radius:9px 13px 8px 12px; box-shadow:3px 6px 17px rgba(60,50,42,.055); }
+.lit-cabinet-art img { border-radius:inherit; }
+.lit-cabinet-copy small { border-bottom-color:rgba(125,105,84,.25); }
+.lit-curation-tools { border-top-color:rgba(125,105,84,.24); }
+.lit-curation-body { border-color:rgba(125,105,84,.18); }
 @media (max-width:900px) {
   .lit-cabinet .lit-cabinet-heading { display:block; padding-bottom:55px; }
   .lit-cabinet-heading > p:last-child { margin-top:25px; }
