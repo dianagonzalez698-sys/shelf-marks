@@ -29,9 +29,9 @@ export function booksView(params = {}) {
   const onShelf = (b, key) => key === 'all' || (key.startsWith('custom:')
     ? (b.shelves || []).includes(key.slice(7)) : statusOf(b) === key);
   const counts = Object.fromEntries(shelfChoices.map(([key]) => [key, all.filter(b => onShelf(b,key)).length]));
-  let shown = all.filter((b) => onShelf(b, shelf)
-    && (!search || `${b.title} ${b.author} ${(b.tags || []).join(' ')}`.toLowerCase().includes(search)));
+  let shown = all.filter((b) => onShelf(b, shelf));
   if (sort === 'title') shown.sort((a,b) => a.title.localeCompare(b.title));
+  const initialVisible = shown.filter(b => !search || `${b.title} ${b.author} ${(b.tags || []).join(' ')}`.toLowerCase().includes(search)).length;
 
   return {
     title: 'My Library', tab: 'books', editorial: true, keepScroll: true,
@@ -50,8 +50,8 @@ export function booksView(params = {}) {
           </div>
         </details>
         <label>Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
-      <div class="lit-shelf-count"><span>THE CATALOGUE</span><span>${String(shown.length).padStart(2,'0')} ${shown.length === 1 ? 'VOLUME' : 'VOLUMES'}</span></div>
-      ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b,i)=>`<article class="lit-shelf-book">
+      <div class="lit-shelf-count"><span>THE CATALOGUE</span><span id="shelf-visible-count" aria-live="polite">${String(initialVisible).padStart(2,'0')} ${initialVisible === 1 ? 'VOLUME' : 'VOLUMES'}</span></div>
+      ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b,i)=>`<article class="lit-shelf-book" data-searchable="${attr(`${b.title} ${b.author} ${(b.tags || []).join(' ')}`.toLowerCase())}" ${search && !`${b.title} ${b.author} ${(b.tags || []).join(' ')}`.toLowerCase().includes(search) ? 'hidden' : ''}>
         <div class="lit-shelf-folio"><span>№ ${String(i + 1).padStart(2,'0')}</span><span data-book-folio-status="${attr(b.id)}">${esc(statusOf(b) === 'read' ? 'FINISHED' : statusOf(b) === 'reading' ? 'IN PROGRESS' : statusOf(b) === 'dnf' ? 'SET ASIDE' : 'TO BE READ')}</span></div>
         <a href="#/book/${encodeURIComponent(b.id)}" class="lit-shelf-cover">${assets.src(b.customCoverAssetId) || b.coverUrl ? `<img src="${attr(assets.src(b.customCoverAssetId) || b.coverUrl)}" alt="Cover of ${attr(b.title)}" loading="lazy">` : `<span>${esc(b.title.slice(0,1))}</span>`}</a>
         <div class="lit-shelf-info">
@@ -63,7 +63,7 @@ export function booksView(params = {}) {
               ${customShelves.map((s)=>`<label><input type="checkbox" data-book-shelf="${attr(b.id)}" value="${attr(s.id)}" ${(b.shelves || []).includes(s.id) ? 'checked' : ''}>${esc(s.name)}</label>`).join('')}
             </details>` : ''}
           </div>
-        </div></article>`).join('')}</div>` : `<div class="lit-empty-shelf"><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>${search ? 'No books matched that search.' : 'A lovely shelf waiting to be filled.'}</p></div>`}
+        </div></article>`).join('')}</div><div class="lit-empty-shelf" id="shelf-live-empty" ${initialVisible ? 'hidden' : ''}><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>No books matched that search.</p></div>` : `<div class="lit-empty-shelf"><span>Ⅰ &nbsp; Ⅱ &nbsp; Ⅲ</span><p>A lovely shelf waiting to be filled.</p></div>`}
     </div>`,
     onMount(root) {
       // Keep the reader's exact shelf, search, and sort context when opening a journal.
@@ -73,6 +73,28 @@ export function booksView(params = {}) {
         });
       });
       const form = root.querySelector('#shelf-search');
+      const searchInput = root.querySelector('#shelf-query');
+      const bookCards = [...root.querySelectorAll('.lit-shelf-book')];
+      const visibleCount = root.querySelector('#shelf-visible-count');
+      const liveEmpty = root.querySelector('#shelf-live-empty');
+      const filterAsYouType = () => {
+        const phrase = searchInput.value.trim().toLowerCase();
+        let visible = 0;
+        bookCards.forEach(card => {
+          card.hidden = !!phrase && !card.dataset.searchable.includes(phrase);
+          if (!card.hidden) visible++;
+        });
+        if (liveEmpty) liveEmpty.hidden = visible !== 0;
+        if (visibleCount && bookCards.length) visibleCount.textContent = `${String(visible).padStart(2, '0')} ${visible === 1 ? 'VOLUME' : 'VOLUMES'}`;
+      };
+      searchInput.addEventListener('input', filterAsYouType);
+      searchInput.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && searchInput.value) {
+          searchInput.value = '';
+          filterAsYouType();
+          event.preventDefault();
+        }
+      });
       const shelfManager = root.querySelector('#shelf-manager');
       root.addEventListener('pointerdown', (event) => {
         if (shelfManager.open && !shelfManager.contains(event.target)) shelfManager.open = false;

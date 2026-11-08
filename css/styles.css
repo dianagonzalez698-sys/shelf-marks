@@ -3871,11 +3871,12 @@ html:not([data-theme="dark"]) .lit-hero {
 .lit-shelf-count { display: flex; justify-content: space-between; gap: 1rem; font: 600 .67rem var(--f-ui); color: var(--c-ink-faint); letter-spacing: .17em; margin: 26px 0 17px; padding-bottom: 13px; border-bottom: 1px solid var(--c-rule-strong); }
 .lit-shelf-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); column-gap: clamp(16px,2.1vw,32px); row-gap: clamp(38px,5vw,75px); }
 .lit-shelf-book { display: flex; flex-direction: column; min-width: 0; padding-bottom: 22px; border-bottom: 1px solid var(--c-rule); }
+.lit-shelf-book[hidden], .lit-empty-shelf[hidden] { display: none !important; }
 .lit-shelf-folio { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; min-height: 25px; color: var(--c-ink-faint); font: 600 .61rem/1.3 var(--f-ui); letter-spacing: .10em; }
 .lit-shelf-folio span:first-child { color: var(--c-accent); font-family: var(--f-body); font-size: .88rem; font-style: italic; font-weight: 400; letter-spacing: 0; }
-.lit-shelf-cover { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 2/3; overflow: hidden; color: var(--c-ink-soft); text-decoration: none; background: var(--c-bg-sunk); border: 1px solid var(--c-rule); box-shadow: 5px 7px 0 color-mix(in srgb,var(--c-rule) 45%,transparent); transition: transform .22s ease, box-shadow .22s ease; }
+.lit-shelf-cover { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 2/3; overflow: hidden; color: var(--c-ink-soft); text-decoration: none; background: var(--c-bg-sunk); border: 1px solid color-mix(in srgb,var(--c-rule) 65%,transparent); box-shadow: 3px 5px 8px color-mix(in srgb,var(--c-ink) 9%,transparent); transition: transform .28s ease, box-shadow .28s ease; }
 .lit-shelf-cover::after { content: ''; position: absolute; inset: 5px; border: 1px solid color-mix(in srgb,var(--c-bg-raised) 50%,transparent); pointer-events: none; }
-.lit-shelf-cover:hover, .lit-shelf-cover:focus-visible { transform: translateY(-4px); box-shadow: 7px 11px 0 color-mix(in srgb,var(--c-rule) 45%,transparent); }
+.lit-shelf-cover:hover, .lit-shelf-cover:focus-visible { transform: translateY(-3px); box-shadow: 4px 10px 15px color-mix(in srgb,var(--c-ink) 13%,transparent); }
 .lit-shelf-cover img { width: 100%; height: 100%; object-fit: contain; }
 .lit-shelf-cover span { font: italic clamp(3rem,7vw,7rem)/1 var(--f-display); }
 .lit-shelf-info { display: flex; flex: 1; flex-direction: column; padding-top: 17px; }
