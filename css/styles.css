@@ -3356,6 +3356,59 @@ html:not([data-theme="dark"]) .literary-notebook .lit-writing-card, html:not([da
   .literary-notebook .lit-writing-grid { grid-template-columns: 1fr; }
   .literary-notebook .lit-writing-card, .literary-notebook .lit-writing-card:nth-child(n) { grid-column: 1; margin-top: 0; }
 }
+/* An open notebook, not a pile of solid paper tiles. Let the site's ivory
+   breathe between entries, and leave decoration to the user's own artwork. */
+.literary-notebook .lit-writing-grid { gap: 55px clamp(30px,5vw,90px); margin-top: 54px; }
+.literary-notebook .lit-writing-card,
+.literary-notebook .lit-writing-card:nth-child(even),
+html:not([data-theme="dark"]) .literary-notebook .lit-writing-card,
+html:not([data-theme="dark"]) .literary-notebook .lit-writing-card:nth-child(even) {
+  min-height: 0;
+  padding: 25px 0 28px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--c-rule-strong);
+  box-shadow: none;
+}
+.literary-notebook .lit-writing-card h2 { max-width: 100%; margin: 26px 0 15px; }
+.literary-notebook .lit-writing-card:hover { transform: none; }
+.literary-notebook .lit-writing-card:hover h2 { color: var(--c-accent); }
+.literary-notebook .lit-entry-foot { padding-top: 17px; margin-top: 26px; }
+.literary-notebook .lit-empty-writing,
+html:not([data-theme="dark"]) .literary-notebook .lit-empty-writing {
+  max-width: 630px;
+  margin: 30px 0 0 clamp(0px,7vw,100px);
+  padding: 54px 0 80px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--c-rule-strong);
+  box-shadow: none;
+}
+.literary-notebook .lit-empty-writing .lit-flourish { font-size: 2rem; }
+.literary-notebook .lit-empty-writing h2 { margin: 20px 0; font: 400 clamp(2.7rem,5vw,4.5rem)/1.1 var(--f-display); }
+.literary-notebook .lit-empty-writing p { max-width: 35ch; line-height: 1.6; }
+.literary-notebook .lit-empty-writing a { display: inline-block; margin-top: 18px; border-bottom: 1px solid currentColor; text-decoration: none; }
+.lit-writing-form { max-width: 1060px; }
+.lit-writing-form form,
+html:not([data-theme="dark"]) .lit-writing-form form {
+  max-width: 790px;
+  margin: 8px auto 0;
+  padding: 14px 0 40px;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--c-rule-strong);
+  box-shadow: none;
+}
+.lit-writing-form textarea[name="body"] { min-height: 430px; padding: 20px 0; }
+.lit-writing-form .lit-form-row { margin-bottom: 12px; }
+.lit-writing-form input[name="title"] { font-style: normal; font-size: clamp(2rem,3.5vw,3.2rem); }
+@media (max-width: 760px) {
+  .literary-notebook .lit-writing-grid { gap: 24px; margin-top: 35px; }
+  .literary-notebook .lit-writing-card:nth-child(n) { margin-top: 0; }
+  .literary-notebook .lit-empty-writing { margin-left: 0; }
+  .lit-writing-form form { padding-bottom: 30px; }
+}
 /* Carry the same antique paper into solid light sections without touching artwork. */
 html:not([data-theme="dark"]) .masthead,
 html:not([data-theme="dark"]) .lit-hero {
