@@ -50,9 +50,12 @@ export function bookmarksView(params = {}) {
       const manage = root.querySelector('#bm-artwork-manage');
       if (manage) manage.onclick = openBookmarkArtworkStudio;
       root.querySelectorAll('[data-bm]').forEach((btn) => {
-        btn.onclick = () => openBookmark(btn.dataset.bm);
+        btn.onclick = () => openBookmark(btn.dataset.bm, btn);
       });
-      if (focus) setTimeout(() => openBookmark(focus), 140);
+      if (focus) setTimeout(() => {
+        const anchor = [...root.querySelectorAll('[data-bm]')].find((el) => el.dataset.bm === focus);
+        openBookmark(focus, anchor);
+      }, 140);
     },
   };
 }
@@ -114,7 +117,10 @@ function openBookmarkArtworkStudio() {
   });
 }
 
-function openBookmark(id) {
+let closeBookmarkPopout = null;
+
+function openBookmark(id, anchor = null) {
+  if (closeBookmarkPopout) closeBookmarkPopout();
   const challenges = allChallenges();
   let meta = null;
   let challenge = null;
@@ -142,7 +148,13 @@ function openBookmark(id) {
     return `Keep going on ${challenge.name}.`;
   })();
 
-  openSheet(`
+  const popout = document.createElement('div');
+  popout.className = 'bookmark-popout';
+  popout.setAttribute('role', 'dialog');
+  popout.setAttribute('aria-label', `Bookmark: ${meta ? meta.title : id}`);
+  popout.tabIndex = -1;
+  popout.innerHTML = `
+    <button class="bookmark-popout-close" type="button" aria-label="Close bookmark details">×</button>
     <div class="bookmark-detail">
       <div class="bookmark-detail-visual${unlocked ? '' : ' is-waiting'}">
         ${img ? `<img src="${attr(img.dataUrl)}" alt="Bookmark artwork selected for ${attr(meta ? meta.title : id)}">` : '<span class="bookmark-detail-empty" aria-hidden="true">✧</span>'}
@@ -160,13 +172,44 @@ function openBookmark(id) {
       <div class="bookmark-detail-manage">
         <button type="button" id="bm-pick">${img ? 'Change image' : 'Add image'}</button>
         ${img ? '<button type="button" id="bm-remove">Remove</button>' : ''}
+        ${challenge ? `<a href="#/challenge/${encodeURIComponent(challenge.id)}${unlocked ? '' : '?focus=eligible'}">${unlocked ? 'Challenge' : 'Qualifying books'} ↗</a>` : ''}
       </div>
-      ${challenge ? `<a href="#/challenge/${encodeURIComponent(challenge.id)}${unlocked ? '' : '?focus=eligible'}" data-close>${unlocked ? 'Challenge' : 'Qualifying books'} ↗</a>` : ''}
     </div>
-  `, {
-    onMount(sheet, close) {
-      const file = sheet.querySelector('#bm-file');
-      const pick = sheet.querySelector('#bm-pick');
+  `;
+  document.body.appendChild(popout);
+  const close = () => {
+    popout.remove();
+    document.removeEventListener('pointerdown', dismissOutside);
+    document.removeEventListener('keydown', dismissEscape);
+    window.removeEventListener('resize', close);
+    if (closeBookmarkPopout === close) closeBookmarkPopout = null;
+  };
+  const dismissOutside = (event) => {
+    if (!popout.contains(event.target) && !anchor?.contains(event.target)) close();
+  };
+  const dismissEscape = (event) => { if (event.key === 'Escape') close(); };
+  closeBookmarkPopout = close;
+  const rect = anchor?.getBoundingClientRect();
+  const width = Math.min(345, window.innerWidth - 24);
+  const left = rect ? Math.min(window.innerWidth - width - 12, Math.max(12, rect.left + rect.width / 2 - width / 2))
+    : (window.innerWidth - width) / 2;
+  popout.style.width = `${width}px`;
+  popout.style.left = `${left}px`;
+  const top = rect ? (rect.bottom + popout.offsetHeight + 12 <= window.innerHeight
+    ? rect.bottom + 10 : rect.top - popout.offsetHeight - 10)
+    : (window.innerHeight - popout.offsetHeight) / 2;
+  popout.style.top = `${Math.max(12, top)}px`;
+  popout.querySelector('.bookmark-popout-close').onclick = close;
+  popout.querySelectorAll('a').forEach((link) => { link.onclick = close; });
+  window.addEventListener('resize', close);
+  setTimeout(() => {
+    document.addEventListener('pointerdown', dismissOutside);
+    document.addEventListener('keydown', dismissEscape);
+  }, 0);
+  popout.focus({ preventScroll: true });
+  {
+      const file = popout.querySelector('#bm-file');
+      const pick = popout.querySelector('#bm-pick');
       if (pick && file) {
         pick.onclick = () => file.click();
         file.onchange = async () => {
@@ -187,7 +230,7 @@ function openBookmark(id) {
         };
       }
 
-      const remove = sheet.querySelector('#bm-remove');
+      const remove = popout.querySelector('#bm-remove');
       if (remove) {
         remove.onclick = async () => {
           close();
@@ -206,6 +249,5 @@ function openBookmark(id) {
           }
         };
       }
-    },
-  });
+  }
 }

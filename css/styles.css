@@ -820,6 +820,30 @@ html:not([data-theme="dark"]) .screen {
 .bookmark-detail-manage { display: flex; gap: .85rem; align-items: center; flex-wrap: wrap; }
 .bookmark-detail-manage button, .bookmark-detail-manage a { border: 0; border-bottom: 1px solid currentColor; background: none; color: var(--c-accent); font: normal .73rem var(--f-ui); letter-spacing: .02em; padding: .2rem 0; text-decoration: none; cursor: pointer; }
 .bookmark-detail-manage a { margin-left: auto; }
+.bookmark-popout {
+  position: fixed; z-index: 1400;
+  padding: 1.3rem 1.1rem .9rem;
+  color: var(--c-ink);
+  background: #fcf9f2;
+  border: 1px solid #d8cdbb;
+  border-radius: 3px;
+  box-shadow: 0 8px 30px rgba(48,32,26,.14);
+  outline: none;
+}
+.bookmark-popout-close {
+  position: absolute; top: .3rem; right: .65rem;
+  border: 0; background: transparent; color: #957c70;
+  font: 1.35rem/1 var(--f-body); cursor: pointer; padding: .1rem .35rem;
+}
+.bookmark-popout .bookmark-detail { padding: .1rem 0 .65rem; }
+.bookmark-popout .bookmark-detail-copy h2 { font: normal 1.34rem/1.13 var(--f-display); margin: .2rem 0 .35rem; }
+.bookmark-popout .bookmark-detail-collection { font-size: .62rem; padding-right: 1rem; }
+.bookmark-popout .bookmark-detail-requirement { font-size: .78rem; line-height: 1.35; }
+.bookmark-popout .bookmark-detail-actions { padding-top: .5rem; }
+.bookmark-popout .bookmark-detail-manage { gap: .6rem; }
+.bookmark-popout .bookmark-detail-manage button,
+.bookmark-popout .bookmark-detail-manage a { font: normal .7rem/1.35 var(--f-ui); text-decoration: none; }
+.bookmark-popout .bookmark-detail-manage a { margin-left: auto; }
 .sheet:has(.bm-curator-compact) { width: min(calc(100% - 1.5rem), 375px); padding: 1rem 1.45rem 1.4rem; border: 1px solid #d9cbb6; background: #f9f6ef; box-shadow: 0 15px 65px rgba(48,32,26,.18); }
 .sheet:has(.bookmark-detail) { width: min(calc(100% - 1.5rem), 350px); padding: .65rem 1.05rem .95rem; border: 0; background: #fbf8f1; box-shadow: 0 10px 34px rgba(53,35,24,.12); }
 .sheet:has(.bookmark-detail) .sheet-back { margin-bottom: .4rem; font-size: .68rem; }
