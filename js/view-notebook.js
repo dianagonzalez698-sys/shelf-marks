@@ -2,11 +2,17 @@ import * as notebook from './notebook.js';
 import { state } from './state.js';
 import { esc, attr, navigate, toast } from './ui.js';
 import { bookDecorMarkup, mountBookDecor } from './book-decor.js';
+import * as assets from './assets.js';
 
 const excerpt = (value, limit = 190) => String(value || '').replace(/\s+/g, ' ').slice(0, limit);
 const kindLabel = (kind) => notebook.KINDS.find(x => x[0] === kind)?.[1] || 'Journal entry';
 const dateLabel = (s) => s ? new Date(s).toLocaleDateString(undefined, {month:'long', day:'numeric', year:'numeric'}) : '';
 const bookName = (id) => state.books.find(b => b.id === id)?.title || '';
+const CARD_PAPERS = [['default','Original paper'],['ivory','Soft ivory'],['rose','Blush parchment'],['sage','Muted sage'],['blue','Pale blue'],['plain','No texture']];
+const cardPaperStyle = (entry) => {
+  const image = assets.src(entry.cardBackgroundAssetId);
+  return image ? `background-image:url('${image}');background-size:cover;background-position:center` : '';
+};
 
 export function notebookView() {
   const entries = notebook.list();
@@ -19,8 +25,9 @@ export function notebookView() {
         <a class="lit-primary-action" href="#/notebook/new">Write a note <span>↗</span></a>
       </header>
       <div class="lit-notebook-index"><span>THE ARCHIVE</span><span>${entries.length} ${entries.length === 1 ? 'ENTRY' : 'ENTRIES'}</span></div>
+      ${entries.length ? `<details class="lit-card-design"><summary>Customize card backgrounds</summary><p>Choose a paper color, or use an image from your artwork library. Each entry can have its own background.</p><div class="lit-card-design-list">${entries.map(e => `<label>${esc(e.title || 'Untitled entry')}<select data-card-paper="${attr(e.id)}">${CARD_PAPERS.map(([value,name]) => `<option value="${value}" ${e.cardPaper === value ? 'selected' : ''}>${name}</option>`).join('')}</select><select data-card-asset="${attr(e.id)}"><option value="">No background image</option>${assets.list().map(a => `<option value="${attr(a.id)}" ${e.cardBackgroundAssetId === a.id ? 'selected' : ''}>${esc(a.name || 'Untitled image')}</option>`).join('')}</select><span class="lit-card-upload">Or upload <input type="file" accept="image/*" data-card-upload="${attr(e.id)}"></span></label>`).join('')}</div></details>` : ''}
       ${entries.length ? `<div class="lit-writing-grid">${entries.map((e,i) => `
-        <a class="lit-writing-card" href="#/notebook/${encodeURIComponent(e.id)}">
+        <a class="lit-writing-card" data-card-id="${attr(e.id)}" data-card-paper-tone="${attr(e.cardPaper || 'default')}" style="${attr(cardPaperStyle(e))}" href="#/notebook/${encodeURIComponent(e.id)}">
           <span class="lit-entry-number">${String(i+1).padStart(2,'0')} / ${esc(kindLabel(e.kind))}</span>
           <h2>${esc(e.title || 'Untitled entry')}</h2>
           <p>${esc(excerpt(e.body))}${e.body?.length > 190 ? '…' : ''}</p>
@@ -29,6 +36,25 @@ export function notebookView() {
         <h2>Begin anywhere.</h2><p>A sentence from a novel, a thought you don't want to lose, or a page of your own.</p>
         <a href="#/notebook/new">Write your first entry ↗</a></div>`}
     </div>`,
+    onMount(root) {
+      const updateCard = async (id, patch) => {
+        try {
+          const entry = await notebook.save({id, ...patch});
+          const card = [...root.querySelectorAll('[data-card-id]')].find(el => el.dataset.cardId === id);
+          if (card) { card.dataset.cardPaperTone = entry.cardPaper || 'default'; card.style.backgroundImage = assets.src(entry.cardBackgroundAssetId) ? `url("${assets.src(entry.cardBackgroundAssetId)}")` : ''; card.style.backgroundSize = 'cover'; card.style.backgroundPosition = 'center'; }
+          toast('Card background saved.', 'good');
+        } catch (_) { toast('Could not save the card background.', 'bad'); }
+      };
+      root.querySelectorAll('[data-card-paper]').forEach(el => el.addEventListener('change', () => updateCard(el.dataset.cardPaper, {cardPaper:el.value})));
+      root.querySelectorAll('[data-card-asset]').forEach(el => el.addEventListener('change', () => updateCard(el.dataset.cardAsset, {cardBackgroundAssetId:el.value})));
+      root.querySelectorAll('[data-card-upload]').forEach(el => el.addEventListener('change', async () => {
+        if (!el.files?.[0]) return;
+        try { const a = await assets.add(el.files[0], {kind:'texture'}); await updateCard(el.dataset.cardUpload, {cardBackgroundAssetId:a.id});
+          const picker = [...root.querySelectorAll('[data-card-asset]')].find(x => x.dataset.cardAsset === el.dataset.cardUpload);
+          if (picker) { picker.add(new Option(a.name || el.files[0].name, a.id)); picker.value = a.id; }
+        } catch (_) { toast('Could not add that image.', 'bad'); }
+      }));
+    },
   };
 }
 
