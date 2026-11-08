@@ -3393,6 +3393,67 @@ body.canvas-editing .lit-card-design { display: block; }
 .lit-card-design select { min-width: 0; max-width: 100%; padding: 9px; background: var(--c-bg); color: var(--c-ink); border: 1px solid var(--c-rule-strong); }
 .lit-card-upload { font: .75rem var(--f-ui); }
 .lit-card-upload input { display: block; max-width: 150px; font-size: .7rem; }
+/* The writing desk opens as a scrapbook journal: warm blush stock, a real
+   centre gutter and two facing leaves, with space for personal collage. */
+.lit-writing-form { max-width: 1380px; padding-top: 45px; }
+.lit-writing-form > .lit-overline { margin-top: 30px; }
+.lit-writing-form > h1 { margin-top: 6px; margin-bottom: 24px; }
+.lit-journal-tabs { display: flex; justify-content: flex-end; gap: 2px; margin: 0 20px -1px 0; position: relative; z-index: 2; }
+.lit-journal-tabs span { display: grid; place-items: center; width: clamp(38px,5vw,62px); height: 27px; border-radius: 11px 11px 0 0; background: #e5d6ce; color: #63544e; font: 600 .58rem var(--f-ui); letter-spacing: .1em; }
+.lit-journal-tabs span:nth-child(2n) { background: #eadad6; }
+.lit-journal-tabs span:nth-child(3n) { background: #d8ddcf; }
+.lit-journal-tabs span:first-child { background: #d2b4ab; }
+.lit-writing-form form.lit-open-journal,
+html:not([data-theme="dark"]) .lit-writing-form form.lit-open-journal {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 0 0;
+  max-width: none;
+  min-height: 780px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #d7beb9;
+  border-radius: 5px 11px 11px 5px;
+  background: linear-gradient(90deg,rgba(117,73,69,.08) 0%,transparent 4%,transparent 47.5%,rgba(93,56,54,.13) 49.7%,rgba(255,255,255,.35) 50.5%,transparent 53%),
+    linear-gradient(rgba(246,222,221,.78),rgba(246,222,221,.78)),
+    url('../assets/regency-writing-paper.webp') center / 1100px auto repeat,
+    #f6e6e2;
+  box-shadow: 0 3px 0 #e8d7d1, 0 6px 0 #d8c0b9, 0 9px 0 #eee0da, 0 18px 28px rgba(62,43,39,.15);
+  isolation: isolate;
+}
+.lit-writing-form form.lit-open-journal::after { content:''; position:absolute; inset: 0 auto 0 49.8%; width: 1.5%; pointer-events:none; background:linear-gradient(90deg,rgba(83,56,52,.10),rgba(255,255,255,.13),transparent); z-index:1; }
+.lit-open-journal .lit-journal-frontispiece { grid-column:1; grid-row:1; position:relative; min-height:425px; margin: 0; padding: clamp(40px,5vw,85px) clamp(28px,5vw,75px) 0; text-align:center; overflow:hidden; }
+.lit-journal-kicker { display:block; font: 600 .65rem var(--f-ui); letter-spacing:.28em; color:#8c6666; }
+.lit-journal-monogram { display:block; margin: 42px auto 0; font: italic 400 clamp(7rem,12vw,13rem)/1 var(--f-display); color:rgba(156,82,91,.26); transform:rotate(-9deg); }
+.lit-journal-flower { position:absolute; top:27%; right:16%; font: 3.8rem var(--f-body); color:#bd8e87; transform:rotate(15deg); opacity:.72; }
+.lit-journal-paper-slip { position:relative; width:max-content; max-width:90%; margin:-22px auto 0; padding:20px 34px 26px; background:rgba(255,250,243,.80); box-shadow:3px 5px 10px rgba(84,55,55,.09); transform:rotate(-5deg); }
+.lit-journal-paper-slip span,.lit-journal-paper-slip em { display:block; font: italic clamp(1.25rem,2.2vw,2rem)/1.25 var(--f-display); color:#624747; }
+.lit-journal-stars { display:block; margin:33px auto 0; letter-spacing:1.2rem; color:#bd8d8f; }
+.lit-open-journal .lit-form-row { grid-column:1; grid-row:2; grid-template-columns:1fr; gap:17px; align-self:end; padding:0 clamp(28px,5vw,75px); margin:0 0 12px; }
+.lit-open-journal #linked-journal-hint { grid-column:1; grid-row:3; align-self:start; max-width:36ch; margin:0 0 55px; padding:0 clamp(28px,5vw,75px); font-size:.88rem; }
+.lit-open-journal > label:has(input[name="title"]) { grid-column:2; grid-row:1; align-self:end; padding:65px clamp(35px,5vw,85px) 0; }
+.lit-open-journal > label:has(textarea[name="body"]) { grid-column:2; grid-row:2 / span 2; padding:20px clamp(35px,5vw,85px) 0; }
+.lit-open-journal .lit-form-actions { grid-column:2; grid-row:4; align-self:end; padding:25px clamp(35px,5vw,85px) 48px; }
+.lit-open-journal input[name="title"] { padding:13px 0 17px; font: italic 400 clamp(2.25rem,4vw,4rem)/1.12 var(--f-display); color:#5a3f40; border-bottom:1px solid rgba(122,84,83,.35); }
+.lit-open-journal textarea[name="body"] { min-height:380px; padding:13px 0; font: 1.22rem/1.9 var(--f-body); color:#533d3d; background:transparent; }
+.lit-open-journal label { color:#765959; }
+.lit-open-journal select { color:#583e40; }
+.lit-open-journal .lit-primary-action { white-space:nowrap; }
+@media (max-width: 850px) {
+  .lit-writing-form form.lit-open-journal { grid-template-columns:1fr; border-radius:7px; }
+  .lit-writing-form form.lit-open-journal::after { display:none; }
+  .lit-open-journal .lit-journal-frontispiece { min-height:280px; padding-top:35px; }
+  .lit-journal-monogram { margin-top:10px; font-size:7rem; }
+  .lit-journal-paper-slip { margin-top:-8px; }
+  .lit-journal-stars { margin-top:14px; }
+  .lit-open-journal .lit-form-row { grid-column:1; grid-row:2; grid-template-columns:1fr 1fr; align-self:auto; padding:18px 30px 0; }
+  .lit-open-journal #linked-journal-hint { grid-column:1; grid-row:3; padding:0 30px; margin:0 0 20px; }
+  .lit-open-journal > label:has(input[name="title"]) { grid-column:1; grid-row:4; padding:25px 30px 0; }
+  .lit-open-journal > label:has(textarea[name="body"]) { grid-column:1; grid-row:5; padding:15px 30px 0; }
+  .lit-open-journal .lit-form-actions { grid-column:1; grid-row:6; padding:20px 30px 38px; }
+  .lit-open-journal textarea[name="body"] { min-height:380px; }
+}
 html:not([data-theme="dark"]) .literary-notebook .lit-writing-card[data-card-paper-tone="ivory"] { background-color: #f9f6ed; }
 html:not([data-theme="dark"]) .literary-notebook .lit-writing-card[data-card-paper-tone="rose"] { background-color: #f0e3df; }
 html:not([data-theme="dark"]) .literary-notebook .lit-writing-card[data-card-paper-tone="sage"] { background-color: #e6e9df; }
