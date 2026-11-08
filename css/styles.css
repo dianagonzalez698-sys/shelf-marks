@@ -3637,6 +3637,39 @@ html:not([data-theme="dark"]) .lit-hero {
 .lit-curation-item > summary span { margin-left:10px; font:.68rem var(--f-ui); color:var(--c-ink-soft); }
 .lit-curation-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 22px; padding:22px 0 4px; }
 .lit-curation-order { display:flex; align-items:end; gap:10px; }
+/* A literary contents page, with flowing vignettes instead of dashboard tiles. */
+.lit-cabinet-chapter,.lit-cabinet-shelf-head { border:0; padding:0; margin:22px 0 0; color:var(--c-ink-soft); font:italic 1.7rem/1.2 var(--f-body); letter-spacing:0; }
+.lit-cabinet-chapter::before,.lit-cabinet-shelf-head::before { display:none; }
+.lit-cabinet-grid:not(.lit-cabinet-personal) { display:block; padding:25px 0 105px; }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-piece:nth-child(n) { display:grid; width:100%; max-width:none; grid-template-columns:1fr 1fr; gap:clamp(30px,7vw,120px); align-items:center; min-height:375px; padding:35px 0 55px; border:0; background:transparent; }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-piece:nth-child(2) { padding-left:clamp(0px,7vw,120px); }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-piece:nth-child(2) .lit-cabinet-art { order:2; }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-piece:nth-child(3) { padding-right:clamp(0px,9vw,140px); }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-art { width:76%; max-width:420px; aspect-ratio:1.1; min-height:0; justify-self:center; background:transparent; box-shadow:none; overflow:visible; }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-art img { position:relative; display:block; width:100%; height:100%; object-fit:cover; border:7px solid var(--c-bg-raised); box-shadow:5px 7px 17px rgba(54,46,38,.12); transform:rotate(-2deg); }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-ornament { font-size:clamp(7rem,15vw,15rem); color:rgba(125,99,78,.28); }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-copy { max-width:510px; padding:0; }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-copy h2 { font-size:clamp(3rem,5.4vw,6.4rem); line-height:1; margin:13px 0 25px; }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-copy p { font:italic 1.28rem/1.45 var(--f-body); max-width:31ch; }
+.lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-copy small { margin-top:7px; }
+.lit-cabinet-shelf-head { margin-top:0; padding:0 0 38px clamp(0px,6vw,95px); }
+.lit-cabinet-personal { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:5px clamp(35px,6vw,90px); padding:10px 0 120px; }
+.lit-shelf-vignette { grid-column:span 7; display:grid; grid-template-columns:1.15fr .85fr; align-items:center; gap:25px; padding:25px 0; min-height:280px; color:var(--c-ink); text-decoration:none; }
+.lit-shelf-vignette:nth-child(4n+2),.lit-shelf-vignette:nth-child(4n+3) { grid-column:span 5; grid-template-columns:1fr; }
+.lit-shelf-vignette:nth-child(4n+2) { margin-top:105px; }
+.lit-shelf-vignette:nth-child(4n+3) { margin-top:25px; }
+.lit-shelf-vignette:nth-child(4n+4) { margin-top:80px; }
+.lit-vignette-copy { position:relative; z-index:1; }
+.lit-vignette-number { color:var(--c-accent); font:italic 1rem var(--f-body); }
+.lit-vignette-copy h3 { margin:12px 0; font:400 clamp(2.6rem,4vw,4.9rem)/1.05 var(--f-display); letter-spacing:-.025em; }
+.lit-vignette-copy p { max-width:29ch; margin:0 0 22px; color:var(--c-ink-soft); font:italic 1.12rem/1.5 var(--f-body); }
+.lit-vignette-copy small { padding-bottom:6px; border-bottom:1px solid var(--c-rule-strong); color:var(--c-accent); font:600 .68rem var(--f-ui); }
+.lit-vignette-art { position:relative; display:grid; place-items:center; width:100%; min-height:240px; overflow:visible; }
+.lit-vignette-art > img { width:82%; height:255px; object-fit:cover; border:6px solid var(--c-bg-raised); box-shadow:6px 8px 14px rgba(53,43,35,.12); transform:rotate(3deg); }
+.lit-vignette-art > .lit-cabinet-ornament { font-size:clamp(5rem,10vw,10rem); opacity:.65; }
+.lit-vignette-art .lit-cabinet-book-collage { min-height:245px; }
+.lit-shelf-vignette:nth-child(even) .lit-vignette-art { order:-1; }
+.lit-shelf-vignette:hover h3 { color:var(--c-accent); }
 @media (max-width:900px) {
   .lit-cabinet .lit-cabinet-heading { display:block; padding-bottom:55px; }
   .lit-cabinet-heading > p:last-child { margin-top:25px; }
@@ -3644,6 +3677,11 @@ html:not([data-theme="dark"]) .lit-hero {
   .lit-cabinet-piece:nth-child(n), .lit-cabinet-personal .lit-cabinet-piece:nth-child(n) { grid-column:1; grid-template-columns:minmax(130px,.8fr) minmax(0,1fr); max-width:none; min-height:0; }
   .lit-cabinet-personal .lit-cabinet-piece:nth-child(n) { margin-top:0; }
   .lit-cabinet-personal .lit-cabinet-piece:nth-child(even) .lit-cabinet-art { width:100%; }
+  .lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-piece:nth-child(n) { grid-template-columns:minmax(125px,.8fr) minmax(0,1fr); gap:24px; padding:20px 0 45px; min-height:0; }
+  .lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-piece:nth-child(2) { padding-left:0; }
+  .lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-art { width:100%; }
+  .lit-cabinet-personal { grid-template-columns:1fr; gap:12px; }
+  .lit-shelf-vignette:nth-child(n) { grid-column:1; grid-template-columns:1.2fr .8fr; margin-top:0; }
 }
 @media (max-width:570px) {
   .lit-cabinet-piece:nth-child(n), .lit-cabinet-personal .lit-cabinet-piece:nth-child(n) { grid-template-columns:1fr; }
@@ -3651,6 +3689,12 @@ html:not([data-theme="dark"]) .lit-hero {
   .lit-curation-fields { grid-template-columns:1fr; }
   .lit-curation-editor-list { grid-template-columns:1fr; }
   #lit-curation-create > div { flex-wrap:wrap; }
+  .lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-piece:nth-child(n) { grid-template-columns:1fr; }
+  .lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-piece:nth-child(2) .lit-cabinet-art { order:0; }
+  .lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-art { width:58%; margin:0 auto; aspect-ratio:1.2; }
+  .lit-cabinet-grid:not(.lit-cabinet-personal) .lit-cabinet-copy h2 { font-size:clamp(3rem,12vw,4.5rem); }
+  .lit-shelf-vignette:nth-child(n) { grid-template-columns:1fr; }
+  .lit-shelf-vignette:nth-child(even) .lit-vignette-art { order:0; }
 }
 @media (max-width: 850px) {
   .lit-hero { grid-template-columns: 1fr; min-height: unset; padding: 25px 24px; }

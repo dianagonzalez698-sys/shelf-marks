@@ -1,4 +1,4 @@
-import { allChallenges, bookmarkStats, state, saveSettings, uid } from './state.js';
+import { state, saveSettings, uid } from './state.js';
 import { esc, attr, toast } from './ui.js';
 import * as assets from './assets.js';
 
@@ -8,12 +8,10 @@ const FEATURES = [
   {id:'words',number:'III',label:'LANGUAGE',title:'Words of the Year',description:'Curious words, gathered like pressed flowers.',href:'#/words',ornament:'✦'},
 ];
 const TONES = [['paper','Original ivory'],['sage','Sage'],['rose','Rose'],['blue','Pale blue'],['ochre','Warm ochre']];
-const countFor = (id,marks) => id === 'challenges' ? `${allChallenges().length} challenges` : id === 'bookmarks' ? `${marks.collected} / ${marks.total} collected` : `${state.words.length} words`;
 const assetPicker = (id) => `<option value="">No cover image</option>${assets.list().map(a=>`<option value="${attr(a.id)}" ${id === a.id ? 'selected' : ''}>${esc(a.name || 'Untitled image')}</option>`).join('')}`;
 const shelfHref = (id) => `#/books?shelf=${encodeURIComponent(`custom:${id}`)}`;
 
 export function collectionsView() {
-  const marks = bookmarkStats();
   const shelves = Array.isArray(state.settings.customShelves) ? state.settings.customShelves : [];
   const featureDesign = state.settings.collectionDesign || {};
   const items = [...FEATURES.map(f=>({...f,...featureDesign[f.id],type:'feature'})), ...shelves.map(s=>({...s,type:'shelf',title:s.name,label:'PERSONAL SHELF',href:shelfHref(s.id),description:s.description || 'A personal collection, still growing.',ornament:'❦'}))];
@@ -31,7 +29,14 @@ export function collectionsView() {
     <div class="lit-cabinet-art">${artFor(item)}</div>
     <div class="lit-cabinet-copy"><span class="lit-cabinet-index">${item.type === 'feature' ? item.number : String(index - FEATURES.length + 1).padStart(2,'0')} &nbsp; / &nbsp; ${esc(item.label)}</span>
       <h2 data-preview-title="${attr(item.id)}">${esc(item.title)}</h2><p data-preview-description="${attr(item.id)}">${esc(item.description)}</p>
-      <small>${item.type === 'feature' ? esc(countFor(item.id,marks)) : `${booksOn(item.id).length} ${booksOn(item.id).length === 1 ? 'book' : 'books'}`} <span aria-hidden="true">↗</span></small></div>
+      <small>Explore <span aria-hidden="true">↗</span></small></div>
+  </a>`;
+  const shelfVignette = (item,index) => `<a class="lit-shelf-vignette" data-collection-id="${attr(item.id)}" data-collection-tone="${attr(item.tone || 'paper')}" href="${attr(item.href)}">
+    <div class="lit-vignette-copy"><span class="lit-vignette-number">No. ${String(index + 1).padStart(2,'0')}</span>
+      <h3 data-preview-title="${attr(item.id)}">${esc(item.title)}</h3>
+      <p data-preview-description="${attr(item.id)}">${esc(item.description)}</p>
+      <small>Open shelf ↗</small></div>
+    <div class="lit-vignette-art">${artFor(item)}</div>
   </a>`;
   const editor = (item) => `<details class="lit-curation-item" data-editor="${attr(item.id)}"><summary>${esc(item.title)} <span>${item.type === 'shelf' ? 'Personal shelf' : 'Collection'}</span></summary>
     <div class="lit-curation-fields">${item.type === 'shelf' ? `<label>Shelf name<input maxlength="45" data-edit-field="name" data-item-id="${attr(item.id)}" value="${attr(item.name)}"></label>` : ''}
@@ -47,10 +52,10 @@ export function collectionsView() {
     html:`<div class="literary-notebook lit-collections lit-cabinet">
       <header class="lit-page-heading lit-cabinet-heading"><p class="lit-overline">THE CABINET OF CURIOSITIES</p><h1>Collected <em>things</em></h1>
         <p>A personal archive of little fascinations, literary projects, and books kept close.</p></header>
-      <div class="lit-cabinet-section-head"><span>THE COLLECTIONS</span><span>${FEATURES.length} CURATED ROOMS</span></div>
+      <div class="lit-cabinet-section-head lit-cabinet-chapter"><span>In the cabinet</span></div>
       <div class="lit-cabinet-grid">${items.filter(item=>item.type==='feature').map(card).join('')}</div>
-      <div class="lit-cabinet-section-head lit-cabinet-shelf-head"><span>PERSONAL SHELVES</span><span>${shelves.length} ${shelves.length === 1 ? 'SHELF' : 'SHELVES'}</span></div>
-      ${shelves.length ? `<div class="lit-cabinet-grid lit-cabinet-personal">${items.filter(item=>item.type==='shelf').map((item,i)=>card(item,i + FEATURES.length)).join('')}</div>` : `<div class="lit-cabinet-empty"><span>✧</span><p>A place for favorite categories—cozy mysteries, rereads, treasured covers, or whatever catches your fancy.</p><a href="#/books">Visit the library ↗</a></div>`}
+      <div class="lit-cabinet-section-head lit-cabinet-shelf-head"><span>From my own shelves</span></div>
+      ${shelves.length ? `<div class="lit-cabinet-personal">${items.filter(item=>item.type==='shelf').map(shelfVignette).join('')}</div>` : `<div class="lit-cabinet-empty"><span>✧</span><p>A place for favorite categories—cozy mysteries, rereads, treasured covers, or whatever catches your fancy.</p><a href="#/books">Visit the library ↗</a></div>`}
       <details class="lit-curation-tools" id="lit-curation-tools"><summary>✧ Organize & personalize</summary><div class="lit-curation-body">
         <p>Make each collection your own. Covers and paper colors stay independent; your books and reading records are unchanged.</p>
         <form id="lit-curation-create"><label for="lit-new-shelf">New personal shelf</label><div><input id="lit-new-shelf" required maxlength="45" placeholder="e.g. Cozy mysteries"><button type="submit">Create shelf</button></div></form>
