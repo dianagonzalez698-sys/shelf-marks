@@ -314,6 +314,19 @@ export function customizeView() {
         }
       };
       syncNavigation();
+      const syncButtons = () => {
+        const font = getToken('--f-ui');
+        const size = getToken('--fs-button');
+        const weight = getToken('--fw-button');
+        const sample = root.querySelector('[data-preview-role="buttons"] strong');
+        const saveButton = root.querySelector('#studio-save');
+        [sample, saveButton].filter(Boolean).forEach((element) => {
+          element.style.fontFamily = font;
+          element.style.fontSize = size;
+          element.style.fontWeight = weight;
+        });
+      };
+      syncButtons();
       const saveStatus = root.querySelector('#studio-save-status');
       const noteChange = () => { saveStatus.textContent = 'Changes made. Select Save changes to confirm.'; };
       root.querySelector('#studio-save').onclick = async () => {
@@ -387,6 +400,7 @@ export function customizeView() {
         const commit = (value) => {
           setToken(name, value);
           if (name === '--f-ui' || name === '--fs-nav' || name === '--fw-nav') syncNavigation();
+          if (name === '--f-ui' || name === '--fs-button' || name === '--fw-button') syncButtons();
           noteChange();
           markDirty(row);
           if (name.includes('banner') || name.includes('bm') || name.includes('--f-') || name.includes('--c-')) {
