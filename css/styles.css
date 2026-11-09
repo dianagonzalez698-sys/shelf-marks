@@ -4700,3 +4700,23 @@ html:not([data-theme="dark"]) .lit-hero {
   font-family:var(--f-ui);
   font-style:var(--fi-ui, normal);
 }
+
+/* The Italic toggle must control subtitles and progress notes; never force italics. */
+#app [data-sec] .ed-sub,
+#app [data-sec] .measure-foot { font-style:var(--fi-body, normal); }
+
+/* Readable small-print baseline in Settings, Layouts and Design Mode. */
+#app .form-heading, #app .section-meta, #app .label,
+#app .section-kicker, #app .ed-meta, #app .ed-kicker,
+#app .lit-overline, #app .measure-head .ed-kicker,
+#app .studio-small-label, #app .settings-label,
+#app .tick-note, #app .m-cap, #app .marginalia {
+  font-size:max(1rem, calc(var(--fs-label) * var(--fz-ui, 1)));
+  line-height:1.4;
+  letter-spacing:min(var(--ls-label, .12em), .16em);
+}
+#app .tiny, #app .hint, #app .measure-pct,
+#app .measure-foot, #app .goal-pct,
+#app .canvas-section-label { font-size:max(.98rem, var(--fs-tiny));line-height:1.45; }
+#app .measure-stat { font-size:max(2rem, var(--fs-stat)); }
+#app .ed-sub { font-size:max(1.1rem, calc(1em * var(--fz-body, 1))); }

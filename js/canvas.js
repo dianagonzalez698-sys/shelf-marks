@@ -397,7 +397,7 @@ function paintPanel() {
       };
       panel.querySelector('#canvas-text-size').onchange = e => updateStyle({ [role.size]: String(Number(e.target.value) / 100) });
       panel.querySelector('#canvas-text-weight').onchange = e => updateStyle({ [role.weight]: e.target.value });
-      panel.querySelector('#canvas-text-italic').onchange = e => updateStyle({ [role.italic]: e.target.checked ? 'italic' : '' });
+      panel.querySelector('#canvas-text-italic').onchange = e => updateStyle({ [role.italic]: e.target.checked ? 'italic' : 'normal' });
       panel.querySelector('#canvas-text-color').oninput = e => updateStyle({ [role.ink]: e.target.value });
       panel.querySelector('#canvas-text-style-reset').onclick = () => {
         updateStyle(Object.fromEntries([role.font, role.size, role.weight, role.italic, role.ink].map(k => [k, ''])));
