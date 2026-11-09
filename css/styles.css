@@ -4934,3 +4934,74 @@ body.canvas-editing .canvas-panel .canvas-field-group {
 body.canvas-editing .canvas-section-label {background:#e4ece3;border-left-color:#526d5b;}
 body.canvas-editing .canvas-panel-tabs button.active {color:#a83f62;border-bottom-color:#a83f62;}
 body.canvas-editing .canvas-panel-links a {color:#526d5b;}
+
+/* Final editor calibration: dusty olive, larger EB Garamond, Paper Cake titles. */
+body.canvas-editing {
+  --design-forest:#6b7053;
+  --design-sage:#e2e6d5;
+  --design-ivory:#fffaf5;
+  --design-ink:#3e352d;
+  --design-line:#d6cfc1;
+}
+body.canvas-editing .canvas-toolbar {
+  background:#6b7053;
+  border-bottom-color:#aeb69b;
+  color:#fffaf5;
+}
+body.canvas-editing .canvas-toolbar button {color:#545a40;border-color:#c9d0ba;}
+body.canvas-editing .canvas-toolbar button:hover {background:#e2e6d5;border-color:#aeb69b;}
+body.canvas-editing .canvas-panel {
+  background:#fffaf5;
+  color:#3e352d;
+  border-right-color:#d6cfc1;
+}
+body.canvas-editing .canvas-panel .canvas-panel-head strong,
+body.canvas-editing .canvas-panel .canvas-section-inspector h2,
+body.canvas-editing .canvas-panel h2 {
+  font-family:'Paper Cake','Snell Roundhand',cursive;
+  font-size:clamp(1.85rem,2.6vw,2.35rem);
+  color:#545a40;
+  line-height:1.35;
+}
+body.canvas-editing .canvas-panel h3,
+body.canvas-editing .canvas-panel .canvas-section-label strong,
+body.canvas-editing .canvas-panel .canvas-sty-head,
+body.canvas-editing .canvas-panel .canvas-field-group {
+  font-family:'EB Garamond',Georgia,serif;
+  font-size:max(1.24rem,20px);
+  font-weight:600;
+  line-height:1.35;
+  letter-spacing:0;
+  color:#454533;
+}
+body.canvas-editing .canvas-panel label,
+body.canvas-editing .canvas-panel p,
+body.canvas-editing .canvas-panel .canvas-panel-hint,
+body.canvas-editing .canvas-panel .canvas-section-label,
+body.canvas-editing .canvas-panel .type-row-label,
+body.canvas-editing .canvas-panel .canvas-kind-badge,
+body.canvas-editing .canvas-panel .canvas-layer-name {
+  font-family:'EB Garamond',Georgia,serif;
+  font-size:max(1.08rem,17px);
+  line-height:1.45;
+  color:#463d35;
+  letter-spacing:0;
+}
+body.canvas-editing .canvas-panel button:not(.face-btn):not(.sty-face):not(.type-face),
+body.canvas-editing .canvas-panel input,
+body.canvas-editing .canvas-panel select,
+body.canvas-editing .canvas-panel textarea,
+body.canvas-editing .canvas-toolbar button {
+  font-family:'EB Garamond',Georgia,serif;
+  font-size:max(1.08rem,17px);
+}
+body.canvas-editing .canvas-panel .canvas-panel-hint {color:#60564d;}
+body.canvas-editing .canvas-section-label {background:#e2e6d5;border-left-color:#6b7053;}
+body.canvas-editing .canvas-panel .canvas-panel-head,
+body.canvas-editing .canvas-panel .canvas-panel-links a {color:#545a40;}
+body.canvas-editing .canvas-toolbar-title {
+  font-family:'Paper Cake','Snell Roundhand',cursive;
+  font-size:1.35rem;
+  letter-spacing:0;
+}
+body.canvas-editing .canvas-save-state {font-size:1.05rem;color:#f8f5ec;}
