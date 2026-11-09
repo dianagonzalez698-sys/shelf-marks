@@ -4673,3 +4673,30 @@ html:not([data-theme="dark"]) .lit-hero {
 .canvas-text-style-controls .canvas-text-color { display:flex;justify-content:space-between;align-items:center;gap:15px; }
 .canvas-text-style-controls .canvas-text-color input { width:64px;height:38px;padding:3px;background:var(--c-bg-field);border:1px solid var(--c-rule-strong); }
 .canvas-text-style-reset { align-self:start;background:none;border:0;padding:5px 0;color:var(--c-ink-soft);text-decoration:underline;font:400 .85rem var(--f-body);text-align:left;cursor:pointer; }
+
+/* Legible house minimums for tiny decorative labels (not a new setting to hunt for). */
+.ed-kicker, .ed-meta, .lit-overline, .measure-head .ed-kicker {
+  font-size:max(1rem, calc(var(--fs-label) * var(--fz-ui, 1)));
+  line-height:1.35;
+  letter-spacing:min(var(--ls-eyebrow), .18em);
+}
+.measure-pct { font-size:max(.95rem, var(--fs-small)); }
+.measure-foot { font-size:max(.95rem, var(--fs-small)); }
+.canvas-panel .canvas-field-group, .canvas-panel .canvas-section-label,
+.canvas-panel .sty-head, .canvas-panel .type-row-label {
+  font-size:max(.95rem, 14px);
+  letter-spacing:.08em;
+}
+.canvas-panel .canvas-panel-hint { font-size:max(.94rem, 14px);line-height:1.45; }
+.canvas-panel .face-btn, .canvas-panel .ink-dot { font-size:max(1rem, 15px); }
+.canvas-panel .face-group, .canvas-panel .canvas-field-group { line-height:1.35; }
+.type-quick-size { display:grid;gap:5px;padding:8px 4px 2px; }
+.type-quick-size label { display:flex;justify-content:space-between;gap:12px;font:500 .98rem/1.3 var(--f-body);color:var(--c-ink); }
+.type-quick-size output { color:var(--c-ink-soft);font-size:.9rem; }
+.type-quick-size input { width:100%;accent-color:var(--c-accent); }
+
+/* Section-level UI font selections must take priority over global site-label samples. */
+#app [data-sec] .ed-meta, #app [data-sec] .lit-overline {
+  font-family:var(--f-ui);
+  font-style:var(--fi-ui, normal);
+}

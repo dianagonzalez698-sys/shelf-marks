@@ -273,6 +273,10 @@ function roleControlHtml(r, secId, fieldLabel) {
         aria-label="${esc(fieldLabel)} colour"></button>
     </div>
     ${hidden}
+    ${r.size ? `<div class="type-quick-size">
+      <label>Size <output data-quick-output="${attr(r.size)}">${cur(r.size) ? Math.round(Number(cur(r.size)) * 100) : 100}%</output></label>
+      <input type="range" min="70" max="200" step="5" value="${cur(r.size) ? Math.round(Number(cur(r.size)) * 100) : 100}" data-quick-size="${attr(r.size)}">
+    </div>` : ''}
     <div class="type-pop" data-pop="face" hidden>${stylePanelHtml(face, r, secId, cur)}</div>
     <div class="type-pop" data-pop="ink" hidden>${inkPickerHtml(ink, `hex-${secId}-${r.ink}`)}</div>
   </div>`;
@@ -633,7 +637,7 @@ function fieldsHtml(def, sec, mode = 'all') {
     // Existing values for all other fields remain in the saved data; they are
     // simply no longer surfaced as an intimidating grid of switches.
     const contentEssentials = new Set(['limit', 'layout', 'mode', 'columns']);
-    const styleEssentials = new Set(['shape', 'tone', 'fontDisplay', 'fontBody']);
+    const styleEssentials = new Set(['shape', 'tone', 'fontDisplay', 'fontBody', 'fontUi', 'fontScript']);
     const artworkEssentials = new Set([
       'bgImage', 'backdrop', 'picture', 'inset', 'items', 'strip',
       'edge', 'edgeArt', 'edgeWhere', 'edgeSize',
@@ -878,6 +882,15 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
           const inkPop = row.querySelector('[data-pop="ink"]');
           const faceKey = faceBtn.dataset.face;
           const inkKey = inkBtn.dataset.inkopen;
+
+          const quickSize = row.querySelector('[data-quick-size]');
+          if (quickSize) {
+            quickSize.addEventListener('input', () => {
+              const percent = Number(quickSize.value);
+              row.querySelector('[data-quick-output]').textContent = percent + '%';
+              writeField(quickSize.dataset.quickSize, String(percent / 100));
+            });
+          }
 
           // Only one panel open at a time, across every row.
           const toggle = (pop) => {
