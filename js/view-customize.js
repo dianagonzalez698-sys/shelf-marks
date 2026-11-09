@@ -171,11 +171,12 @@ function typographyGroup(g) {
   const extra = g.tokens.filter((token) => !used.has(token.var));
   return `<section class="studio-edit-panel" data-studio-panel="typography" hidden>
     <h3>Fonts & text</h3>
-    <p class="studio-panel-help">Select the words you recognize, then change their size or boldness. Your changes appear on the page immediately.</p>
+    <p class="studio-panel-help">Select the words you recognize, then change their font, size or boldness. The example below uses the same settings as that text on your site.</p>
     <div class="field studio-type-picker">
       <label for="studio-type-target">Which text do you want to edit?</label>
       <select id="studio-type-target">${TYPE_TARGETS.map((target) => `<option value="${attr(target.id)}">${esc(target.name)}</option>`).join('')}</select>
     </div>
+    <p class="studio-type-guide">Editing “Label size” or “Nav letterspacing” as words? Choose <b>Setting names in Design Studio</b>. Editing the “More typography options” heading? Choose <b>“More typography options” heading</b>. To change spacing between the actual Journal / Library navigation links, choose <b>Top navigation</b>.</p>
     ${TYPE_TARGETS.map((target, index) => `<div class="studio-type-target" data-type-target="${attr(target.id)}" ${index ? 'hidden' : ''}>
       <p class="studio-type-example" data-preview-role="${attr(target.id)}"><span>Example on your site</span><strong>${esc(target.example)}</strong></p>
       <div class="studio-body">${target.vars.map((name) => g.tokens.find((token) => token.var === name)).filter(Boolean).map(control).join('')}</div>
