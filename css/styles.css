@@ -1235,6 +1235,7 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .studio-type-example span { color: var(--c-ink-faint); font: 400 .78rem/1.3 var(--f-body); }
 .studio-type-example strong { font-weight: inherit; }
 .studio-type-example[data-preview-role="navigation"] strong { font-family: var(--f-ui); font-size: var(--fs-nav); font-weight: var(--fw-nav); letter-spacing: var(--ls-nav); text-transform: var(--tt-label); }
+.studio-type-example[data-preview-role="buttons"] strong { font-family: var(--f-ui); font-size: var(--fs-button); font-weight: var(--fw-button); letter-spacing: var(--ls-label); text-transform: var(--tt-label); }
 .studio-edit-panel h3 { margin: 0; font: 400 clamp(1.5rem, 3vw, 2.05rem)/1.1 var(--f-display); }
 .studio-panel-help { max-width: 55ch; color: var(--c-ink-soft); margin: .4rem 0 1.3rem; font: 400 var(--fs-small)/1.5 var(--f-body); }
 .studio-edit-panel .studio-body { gap: .75rem; }
@@ -3090,7 +3091,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 /* Buttons read as editorial labels, not as interface chrome. */
 .btn {
   font-family: var(--f-ui);
-  font-weight: 600;
+  font-weight: var(--fw-button);
   letter-spacing: var(--ls-label);
   text-transform: var(--tt-label);
 }
