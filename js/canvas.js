@@ -3,8 +3,9 @@
 import * as store from './store.js';
 import * as assets from './assets.js';
 import * as theme from './theme.js';
+import { FONT_STACKS } from './theme.js';
 import * as layout from './layout.js';
-import { typeList, SECTION_TYPES } from './sections.js';
+import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './sections.js';
 import { openSectionEditor } from './view-layout.js';
 import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } from './ui.js';
 
@@ -344,14 +345,69 @@ function paintPanel() {
     const sec = layout.getSection(activePage, selectedText.sectionId);
     const field = SECTION_TYPES[sec?.type]?.fields.find((f) => f.key === selectedText.key);
     if (!sec) { panelMode = 'sections'; render(); return; }
+
     const label = field?.label || selectedText.key.replace(/([A-Z])/g, ' $1');
+    const role = roleForKey(selectedText.key);
+    const currentFont = role ? String(sec[role.font] || '') : '';
+    const currentWeight = role ? String(sec[role.weight] || '') : '';
+    const currentSize = role ? Math.round((Number(sec[role.size]) || 1) * 100) : 100;
+    const currentInk = role ? String(sec[role.ink] || '') : '';
+    const fontOptions = FONT_STACKS.map(f => `<option value="${esc(f.value)}" ${f.value === currentFont ? 'selected' : ''}>${esc(f.label)}</option>`).join('');
     panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT TEXT</strong><button type="button" data-canvas="text-back">← Back</button></div>
       <p class="canvas-section-label">${esc(SECTION_TYPES[sec.type]?.label || 'Section')}<strong>${esc(label)}</strong></p>
-      <p class="canvas-panel-hint">Edit these words below. Typography, colors and visual styling are in the section's Style tab.</p>
+      <p class="canvas-panel-hint">Change the words or their styling right here. Your homepage is the preview.</p>
       <div id="canvas-inline-text" class="canvas-inline-text" contenteditable="true" role="textbox" aria-label="${esc(label)}" aria-multiline="${!!field?.multiline}">${rich(sec[selectedText.key] || '')}</div>
+      ${role ? `<div class="canvas-text-style-controls">
+        <h3>Font &amp; styling</h3>
+        <p>Changes other ${esc(role.label.toLowerCase())} in this section too.</p>
+        <label>Font
+          <select id="canvas-text-font"><option value="" ${!currentFont ? 'selected' : ''}>Match site font</option>
+          ${currentFont && !FONT_STACKS.some(f => f.value === currentFont) ? `<option selected value="${esc(currentFont)}">Current custom font</option>` : ''}
+          ${fontOptions}</select>
+        </label>
+        <label>Size <output id="canvas-text-size-value">${currentSize}%</output>
+          <input id="canvas-text-size" type="range" min="60" max="200" step="5" value="${currentSize}">
+        </label>
+        <label>Boldness
+          <select id="canvas-text-weight"><option value="" ${!currentWeight ? 'selected' : ''}>Match site</option>
+          ${[['400','Regular'],['500','Medium'],['600','Semibold'],['700','Bold'],['800','Extra bold']].map(([w,n]) => `<option value="${w}" ${w===currentWeight?'selected':''}>${n}</option>`).join('')}</select>
+        </label>
+        <label class="canvas-text-italic"><input id="canvas-text-italic" type="checkbox" ${String(sec[role.italic] || '') === 'italic' ? 'checked' : ''}> Italic</label>
+        <label class="canvas-text-color">Text color
+          <input id="canvas-text-color" type="color" value="${/^#[a-f0-9]{6}$/i.test(currentInk) ? currentInk : '#49312b'}">
+        </label>
+        <button class="canvas-text-style-reset" type="button" id="canvas-text-style-reset">Use site styling</button>
+      </div>` : '<p class="canvas-panel-hint">For more styling options, open this section.</p>'}
       <button type="button" class="canvas-text-done" data-canvas="text-save">Save text</button>`;
     const input = panel.querySelector('#canvas-inline-text');
     const target = { ...selectedText };
+    if (role) {
+      const updateStyle = (patch) => {
+        layout.updateSection(activePage, target.sectionId, patch).then(() => {
+          const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
+          if (block) applySectionVars(block, layout.getSection(activePage, target.sectionId));
+        }).catch(() => toast('Could not save that typography change.', 'bad'));
+      };
+      panel.querySelector('#canvas-text-font').onchange = e => updateStyle({ [role.font]: e.target.value });
+      panel.querySelector('#canvas-text-size').oninput = e => {
+        const value = Number(e.target.value);
+        panel.querySelector('#canvas-text-size-value').textContent = value + '%';
+        const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
+        if (block) block.style.setProperty(role.role === 'Display' ? '--fz-display' : role.role === 'Ui' ? '--fz-ui' : '--fz-body', String(value / 100));
+      };
+      panel.querySelector('#canvas-text-size').onchange = e => updateStyle({ [role.size]: String(Number(e.target.value) / 100) });
+      panel.querySelector('#canvas-text-weight').onchange = e => updateStyle({ [role.weight]: e.target.value });
+      panel.querySelector('#canvas-text-italic').onchange = e => updateStyle({ [role.italic]: e.target.checked ? 'italic' : '' });
+      panel.querySelector('#canvas-text-color').oninput = e => updateStyle({ [role.ink]: e.target.value });
+      panel.querySelector('#canvas-text-style-reset').onclick = () => {
+        updateStyle(Object.fromEntries([role.font, role.size, role.weight, role.italic, role.ink].map(k => [k, ''])));
+        panel.querySelector('#canvas-text-font').value = '';
+        panel.querySelector('#canvas-text-size').value = '100';
+        panel.querySelector('#canvas-text-size-value').textContent = '100%';
+        panel.querySelector('#canvas-text-weight').value = '';
+        panel.querySelector('#canvas-text-italic').checked = false;
+      };
+    }
     // The page itself is the preview. Update the rendered words during typing
     // without re-rendering the inspector and stealing the caret.
     input.addEventListener('input', () => {
