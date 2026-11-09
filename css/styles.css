@@ -24,43 +24,43 @@
      from Porcelain and Mahogany so the whole page stays in one family. */
 
   /* surfaces — Porcelain and two neighbours */
-  --c-bg:            #f5f5f1;   /* cool ivory paper */
-  --c-bg-sunk:       #e9eae4;   /* a shade deeper, for recesses */
-  --c-bg-raised:     #fcfcf9;   /* a shade lighter, for panels */
-  --c-bg-field:      #fcfcf9;
+  --c-bg:            #f7f1e8;   /* cool ivory paper */
+  --c-bg-sunk:       #eee8dd;   /* a shade deeper, for recesses */
+  --c-bg-raised:     #fffcf6;   /* a shade lighter, for panels */
+  --c-bg-field:      #fffcf6;
 
   /* ink — Mahogany, lightened twice */
-  --c-ink:           #4b2828;   /* Mahogany */
-  --c-ink-soft:      #6e4a44;
-  --c-ink-faint:     #85625a;   /* kept just past 4.5:1 on Porcelain */
+  --c-ink:           #49312b;   /* Mahogany */
+  --c-ink-soft:      #526b48;
+  --c-ink-faint:     #78645c;   /* kept just past 4.5:1 on Porcelain */
 
   /* lines — Porcelain pulled toward Mahogany */
-  --c-rule:          #e3d6c3;
-  --c-rule-strong:   #c9b79e;
+  --c-rule:          #ddd0bd;
+  --c-rule-strong:   #bda88f;
 
   /* the editorial banner — Olive Velvet, the one green that holds small text */
-  --c-banner-bg:     #536e50;   /* Olive Velvet */
-  --c-banner-ink:    #f8f0e4;   /* Porcelain */
-  --c-banner-ink-dim:#e6ece1;   /* the eyebrow is small — it needs the lift */
+  --c-banner-bg:     #526b48;   /* Olive Velvet */
+  --c-banner-ink:    #f7f1e8;   /* Porcelain */
+  --c-banner-ink-dim:#e9eedc;   /* the eyebrow is small — it needs the lift */
   /* Honey Ochre brightened, for the banner title and its swash. Display sizes
      only — at label size it would fall under the contrast floor. */
-  --c-banner-accent: #f0cc7f;
+  --c-banner-accent: #deb45f;
   --banner-swash-display: inline-block;
   --banner-swash-scale:   1.9;   /* multiple of the title size */
 
   /* accent — Burnt Apricot, deepened so links and buttons stay legible.
      The literal #d4763c lives on the bookmarks, where it carries no text. */
-  --c-accent:        #a8482a;
-  --c-accent-ink:    #fdf6ee;
-  --c-accent-soft:   #f3e0d4;
-  --c-accent-deep:   #8a3820;
+  --c-accent:        #526b48;
+  --c-accent-ink:    #fffaf2;
+  --c-accent-soft:   #e4ebd9;
+  --c-accent-deep:   #3d5135;
 
   /* the rest of the palette, for ornament */
-  --c-rose:          #c9787e;   /* Faded Rose */
-  --c-blue:          #7d9fcf;   /* Powder Blue */
-  --c-terracotta:    #d4763c;   /* Burnt Apricot */
-  --c-gold:          #e0b35a;   /* Honey Ochre */
-  --c-sage:          #536e50;   /* Olive Velvet — also "complete" */
+  --c-rose:          #d87989;   /* Faded Rose */
+  --c-blue:          #749bcb;   /* Powder Blue */
+  --c-terracotta:    #d77a42;   /* Burnt Apricot */
+  --c-gold:          #deb45f;   /* Honey Ochre */
+  --c-sage:          #879d79;   /* Olive Velvet — also "complete" */
 
   /* Text-safe versions of the lighter swatches. The literal hues stay for
      fills and dots, where nothing has to be read against them. */
@@ -86,9 +86,9 @@
      the whole declaration invalid and the frame silently vanishes. */
   --ornate-width:    clamp(16px, 13cqw, 64px);
 
-  --c-rose-ink:      #a14a52;
-  --c-blue-ink:      #44648f;
-  --c-gold-ink:      #8a6420;
+  --c-rose-ink:      #9d3854;
+  --c-blue-ink:      #385b83;
+  --c-gold-ink:      #806020;
 
   /* Tinted papers for section grounds. Light washes keep Mahogany readable;
      olive and ink are full strength and carry Porcelain text instead. */
@@ -103,7 +103,7 @@
 
   --c-danger:        #8e2f2f;
   --c-danger-soft:   #f3dfdc;
-  --c-success:       #536e50;
+  --c-success:       #526b48;
 
   /* bookmark palette — the six character colours, each with a legible ink */
   --c-bm1-bg: #8fa58b;  --c-bm1-ink: #f8f0e4;   /* Wallpaper Sage */
@@ -4648,3 +4648,14 @@ html:not([data-theme="dark"]) .lit-hero {
   .layout-studio-page .lay-type-size-control label { grid-column:1/-1; }
   .layout-studio-page .lay-type-size-control input { grid-column:1; }
 }
+
+/* Optional explicit palette application, with existing personal overrides preserved. */
+.studio-original-palette {
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.8rem 0 1rem;margin:.25rem 0 .5rem;border-bottom:1px solid var(--c-rule);
+}
+.studio-original-palette-copy { display:grid;gap:.2rem; }
+.studio-original-palette-copy strong { font:500 1.05rem var(--f-body);color:var(--c-ink); }
+.studio-original-palette-copy span { font:.88rem/1.4 var(--f-body);color:var(--c-ink-soft); }
+.studio-original-palette .btn { font-size:.76rem;white-space:nowrap; }
+@media(max-width:640px){.studio-original-palette{align-items:stretch;flex-direction:column}.studio-original-palette .btn{width:100%}}

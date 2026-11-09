@@ -3,7 +3,7 @@
 // visible the instant it moves. Nothing here is part of the reading experience.
 
 import {
-  THEME_SCHEMA, CONTENT_SCHEMA, FONT_STACKS, PRESETS, MODES,
+  THEME_SCHEMA, CONTENT_SCHEMA, FONT_STACKS, PRESETS, MODES, ORIGINAL_PALETTE,
   getToken, isOverridden, setToken, setTokens, setContent, getContent,
   getMode, setMode, resolvedMode,
   applyPreset, reset, download, importJson, exportJson, saveNow,
@@ -225,6 +225,10 @@ function group(g) {
   return `<section class="studio-edit-panel" data-studio-panel="${attr(g.id)}" ${g.id === 'palette' ? '' : 'hidden'}>
     <h3>${esc(GROUP_GUIDE[g.id][0])}</h3>
     <p class="studio-panel-help">${esc(GROUP_GUIDE[g.id][1])}</p>
+    ${g.id === 'palette' ? `<div class="studio-original-palette">
+      <div class="studio-original-palette-copy"><strong>Original reading-room colors</strong><span>Ivory, mahogany, olive, rose, blue and apricot.</span></div>
+      <button class="btn" type="button" id="studio-apply-original-colors">Apply original palette</button>
+    </div>` : ''}
     <div class="studio-body">${front.map(control).join('')}</div>
     ${extra.length ? `<details class="studio-advanced"><summary>Fine-tune ${esc(GROUP_GUIDE[g.id][0].toLowerCase())} <span>${extra.length} more settings</span></summary>
       <div class="studio-body">${extra.map(control).join('')}</div></details>` : ''}
@@ -375,6 +379,11 @@ export function customizeView() {
       syncButtons();
       const saveStatus = root.querySelector('#studio-save-status');
       const noteChange = () => { saveStatus.textContent = 'Changes made. Select Save changes to confirm.'; };
+      root.querySelector('#studio-apply-original-colors')?.addEventListener('click', async () => {
+        await setTokens(ORIGINAL_PALETTE);
+        toast('Original palette applied. Your other design settings are unchanged.', 'good');
+        navigateReload();
+      });
       root.querySelector('#studio-save').onclick = async () => {
         const button = root.querySelector('#studio-save');
         button.disabled = true;

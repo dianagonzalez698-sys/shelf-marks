@@ -390,6 +390,35 @@ export const ALL_TOKENS = THEME_SCHEMA.flatMap((g) => g.tokens);
 
 /* --------------------------------------------------------- presets ------- */
 
+export const ORIGINAL_PALETTE = {
+  '--c-bg': '#f7f1e8',
+  '--c-bg-sunk': '#eee8dd',
+  '--c-bg-raised': '#fffcf6',
+  '--c-bg-field': '#fffcf6',
+  '--c-ink': '#49312b',
+  '--c-ink-soft': '#526b48',
+  '--c-ink-faint': '#78645c',
+  '--c-rule': '#ddd0bd',
+  '--c-rule-strong': '#bda88f',
+  '--c-banner-bg': '#526b48',
+  '--c-banner-ink': '#f7f1e8',
+  '--c-banner-ink-dim': '#e9eedc',
+  '--c-banner-accent': '#deb45f',
+  '--c-accent': '#526b48',
+  '--c-accent-ink': '#fffaf2',
+  '--c-accent-soft': '#e4ebd9',
+  '--c-accent-deep': '#3d5135',
+  '--c-rose': '#d87989',
+  '--c-blue': '#749bcb',
+  '--c-terracotta': '#d77a42',
+  '--c-gold': '#deb45f',
+  '--c-sage': '#879d79',
+  '--c-rose-ink': '#9d3854',
+  '--c-blue-ink': '#385b83',
+  '--c-gold-ink': '#806020',
+  '--c-success': '#526b48'
+};
+
 export const PRESETS = {
   'literary-whimsy': {
     label: 'Literary Whimsy',
@@ -417,7 +446,7 @@ export const PRESETS = {
   },
   'reading-room': {
     label: 'A Reading Room',
-    note: 'The house style — Porcelain, Olive Velvet and Burnt Apricot.',
+    note: 'The original romantic reading-room colors, richer and less dusty.',
     tokens: {},
   },
   'velvet-library': {
