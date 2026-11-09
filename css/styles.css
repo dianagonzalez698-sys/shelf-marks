@@ -4751,3 +4751,6 @@ body.canvas-editing #app .settings-dashboard .settings-disclosure > summary[data
 }
 #canvas-panel #settings-style-size { width:100%; accent-color:var(--c-accent); }
 #canvas-panel #settings-style-color { width:100%;height:46px; }
+
+/* Keep the entire editable Settings title in the selected font. */
+#app .settings-heading h1 em {font-family:inherit;font-style:inherit;font-weight:inherit;letter-spacing:inherit;}
