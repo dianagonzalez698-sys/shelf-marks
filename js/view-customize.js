@@ -33,13 +33,19 @@ const TOKEN_HELP = {
   '--fs-wordmark': 'Size of “Diana’s Lit Picks” in the top navigation.',
   '--fs-display': 'Size of large section headings, such as “The Year So Far”.',
   '--fs-body': 'Size of paragraphs and descriptive text throughout the site.',
-  '--fs-label': 'Small labels throughout the site, including field labels.',
+  '--fs-label': 'Small metadata labels elsewhere on the site, not the Design Studio controls.',
   '--fs-nav': 'Size of the main navigation links at the top.',
   '--fw-display': 'Thickness of large display headings.',
   '--fi-display': 'Upright or italic display headings.',
   '--fw-body': 'Thickness of paragraph text.',
   '--fi-body': 'Upright or italic paragraph text.',
-  '--fw-label': 'Boldness of small field labels and metadata.',
+  '--fw-label': 'Boldness of metadata labels elsewhere on the site.',
+  '--f-studio-field': 'Font for settings such as “Label size” and “Nav letterspacing”.',
+  '--fs-studio-field': 'Size of setting names such as “Label size” and “Nav letterspacing”.',
+  '--fw-studio-field': 'Boldness of the setting names in this editor.',
+  '--f-studio-advanced': 'Font for the “More typography options” expandable heading.',
+  '--fs-studio-advanced': 'Size of the “More typography options” heading.',
+  '--fw-studio-advanced': 'Boldness of the “More typography options” heading.',
   '--fw-nav': 'JOURNAL, LIBRARY, NOTEBOOK, COLLECTIONS and SETTINGS at the top.',
   '--fs-button': 'Text inside buttons, including SAVE CHANGES.',
   '--fw-button': 'Boldness of button text, including SAVE CHANGES.',
@@ -90,8 +96,10 @@ function control(token) {
         ${tokenLabel(token, id, dirty)}
         <span class="token-control">
           <select id="${id}" data-role="select">
+            ${token.var === '--f-studio-field' ? `<option value="var(--f-body)" ${current === 'var(--f-body)' ? 'selected' : ''}>Match body font</option>` : ''}
+            ${token.var === '--f-studio-advanced' ? `<option value="var(--f-ui)" ${current === 'var(--f-ui)' ? 'selected' : ''}>Match interface font</option>` : ''}
             ${FONT_STACKS.map((f) => `<option value="${attr(f.value)}" ${f.value === current ? 'selected' : ''}>${esc(f.label)}</option>`).join('')}
-            ${FONT_STACKS.some((f) => f.value === current) ? '' : `<option value="${attr(current)}" selected>Custom</option>`}
+            ${FONT_STACKS.some((f) => f.value === current) || current === 'var(--f-body)' || current === 'var(--f-ui)' ? '' : `<option value="${attr(current)}" selected>Custom</option>`}
           </select>
         </span>
         ${fontSample(token)}
@@ -147,10 +155,12 @@ const KEY_CONTROLS = {
 
 const TYPE_TARGETS = [
   { id: 'site-name', name: 'Site name', example: 'Diana’s Lit Picks', vars: ['--f-script', '--fs-wordmark'] },
-  { id: 'navigation', name: 'Top navigation', example: 'JOURNAL · LIBRARY · NOTEBOOK · COLLECTIONS · SETTINGS', vars: ['--f-ui', '--fs-nav', '--fw-nav'] },
+  { id: 'navigation', name: 'Top navigation', example: 'JOURNAL · LIBRARY · NOTEBOOK · COLLECTIONS · SETTINGS', vars: ['--f-ui', '--fs-nav', '--fw-nav', '--ls-nav'] },
   { id: 'buttons', name: 'Buttons', example: 'SAVE CHANGES', vars: ['--fs-button', '--fw-button'] },
   { id: 'studio-titles', name: 'Expandable Design Studio titles', example: 'PREVIEW & OPTIONAL STARTING STYLES', vars: ['--fs-studio-summary', '--fw-studio-summary'] },
-  { id: 'field-labels', name: 'Field labels', example: 'Display line height · Label case · Headline case', vars: ['--fs-label', '--fw-label'] },
+  { id: 'field-labels', name: 'Setting names in Design Studio', example: 'Label size · More text settings · Nav letterspacing', vars: ['--f-studio-field', '--fs-studio-field', '--fw-studio-field'] },
+  { id: 'more-options', name: '“More typography options” heading', example: 'MORE TYPOGRAPHY OPTIONS · 11 ADDITIONAL SETTINGS', vars: ['--f-studio-advanced', '--fs-studio-advanced', '--fw-studio-advanced'] },
+  { id: 'site-labels', name: 'Small labels elsewhere on site', example: 'READING PROGRESS · BOOKMARKS EARNED', vars: ['--fs-label', '--fw-label'] },
   { id: 'save-message', name: 'Save message', example: 'Changes made. Select Save changes to confirm.', vars: ['--fs-studio-help', '--fw-studio-help'] },
   { id: 'headlines', name: 'Page headlines', example: 'The Year So Far', vars: ['--f-display', '--fs-display', '--fw-display', '--fi-display'] },
   { id: 'paragraphs', name: 'Paragraph text', example: 'A little reading adventure, kept for good.', vars: ['--f-body', '--fs-body', '--fw-body', '--fi-body'] },
@@ -301,16 +311,19 @@ export function customizeView() {
         const font = getToken('--f-ui');
         const size = getToken('--fs-nav');
         const weight = getToken('--fw-nav');
+        const spacing = getToken('--ls-nav');
         document.querySelectorAll('.masthead-link').forEach((link) => {
           link.style.fontFamily = font;
           link.style.fontSize = size;
           link.style.fontWeight = weight;
+          link.style.letterSpacing = spacing;
         });
         const sample = root.querySelector('[data-preview-role="navigation"] strong');
         if (sample) {
           sample.style.fontFamily = font;
           sample.style.fontSize = size;
           sample.style.fontWeight = weight;
+          sample.style.letterSpacing = spacing;
         }
       };
       syncNavigation();
@@ -399,7 +412,7 @@ export function customizeView() {
 
         const commit = (value) => {
           setToken(name, value);
-          if (name === '--f-ui' || name === '--fs-nav' || name === '--fw-nav') syncNavigation();
+          if (name === '--f-ui' || name === '--fs-nav' || name === '--fw-nav' || name === '--ls-nav') syncNavigation();
           if (name === '--f-ui' || name === '--fs-button' || name === '--fw-button') syncButtons();
           noteChange();
           markDirty(row);
