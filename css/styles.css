@@ -4731,3 +4731,23 @@ html:not([data-theme="dark"]) .lit-hero {
 #app .settings-dashboard .settings-disclosure .hint,
 #app .settings-dashboard .settings-footnote { font-size:1rem;line-height:1.6; }
 #app .settings-dashboard .settings-design-card > .lit-primary-action {font-size:1rem;line-height:1.4;letter-spacing:.055em;}
+
+/* Settings text is directly selectable during Design Mode. */
+body.canvas-editing #app .settings-dashboard [data-settings-style] {
+  cursor:pointer;
+  outline:1px dashed transparent;
+  outline-offset:5px;
+  transition:outline-color .15s ease;
+}
+body.canvas-editing #app .settings-dashboard [data-settings-style]:hover {
+  outline-color:var(--c-accent);
+}
+body.canvas-editing #app .settings-dashboard .settings-disclosure > summary[data-settings-style] { cursor:pointer; }
+#canvas-panel label:has(#settings-style-font),
+#canvas-panel label:has(#settings-style-size),
+#canvas-panel label:has(#settings-style-weight),
+#canvas-panel label:has(#settings-style-color) {
+  display:grid;gap:9px;margin:15px 0;font-size:1rem;
+}
+#canvas-panel #settings-style-size { width:100%; accent-color:var(--c-accent); }
+#canvas-panel #settings-style-color { width:100%;height:46px; }

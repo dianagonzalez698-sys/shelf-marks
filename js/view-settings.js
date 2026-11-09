@@ -8,6 +8,7 @@ import { estimate } from './store.js';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
 import * as theme from './theme.js';
+import { attachSettingsDesign } from './canvas.js';
 
 function numberField(id, label, value, { min = 0, max = 9999, hint = '' } = {}) {
   return `<div class="field">
@@ -93,6 +94,7 @@ export function settingsView() {
     },
 
     onMount(root) {
+      attachSettingsDesign(root);
       const report = root.querySelector('#system-appearance-report');
       const showDetectedMode = () => {
         if (!report) return;

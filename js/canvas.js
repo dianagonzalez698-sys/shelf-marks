@@ -9,6 +9,89 @@ import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './section
 import { openSectionEditor } from './view-layout.js';
 import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } from './ui.js';
 
+
+// Settings has no editorial layout records, but its visible typography is editable
+// in Design Mode. These stable groups preserve normal form actions and their data.
+const SETTINGS_STYLE_KEY = 'lit-picks-settings-text-v1';
+const SETTINGS_STYLE_GROUPS = [
+  ['eyebrow','Page eyebrow','.settings-heading .lit-overline'],
+  ['page-title','Settings title','.settings-heading h1'],
+  ['page-description','Settings introduction','.settings-heading > p:last-child'],
+  ['card-number','Section numbers','.settings-card-head > span'],
+  ['card-heading','Card headings','.settings-card-head h2'],
+  ['card-description','Card descriptions','.settings-card > p'],
+  ['action','Design Mode button','.settings-design-card > .lit-primary-action'],
+  ['section-toggle','Expandable section labels','.settings-disclosure > summary'],
+  ['form-label','Reading goal labels','.settings-goals-card .field > label'],
+  ['appearance-label','Appearance label','.settings-mode-field > label'],
+  ['supporting','Explanatory notes','.settings-card .hint'],
+  ['tool-link','Design tool links','.settings-link-grid a'],
+  ['footnote','Page footnote','.settings-footnote'],
+];
+let settingsStyleSelected = null;
+function settingsStyles() {
+  try { return JSON.parse(localStorage.getItem(SETTINGS_STYLE_KEY) || '{}') || {}; }
+  catch (_) { return {}; }
+}
+function applySettingsStyle(id) {
+  const props = settingsStyles()[id] || {};
+  document.querySelectorAll('#app [data-settings-style="'+id+'"]').forEach(node => {
+    for (const property of ['fontFamily','fontSize','fontWeight','fontStyle','color']) {
+      if (props[property]) node.style[property] = props[property];
+      else node.style.removeProperty(property);
+    }
+  });
+}
+function updateSettingsStyle(id, prop, value) {
+  const all = settingsStyles();
+  const next = { ...(all[id] || {}) };
+  if (value) next[prop] = value;
+  else delete next[prop];
+  all[id] = next;
+  try { localStorage.setItem(SETTINGS_STYLE_KEY, JSON.stringify(all)); }
+  catch (_) { toast('Could not save Settings text style on this device.', 'bad'); }
+  applySettingsStyle(id);
+}
+export function attachSettingsDesign(root) {
+  if (!root) return;
+  for (const [id,,selector] of SETTINGS_STYLE_GROUPS) {
+    root.querySelectorAll(selector).forEach(el => { el.dataset.settingsStyle = id; });
+    applySettingsStyle(id);
+  }
+}
+function paintSettingsStylePanel(panel) {
+  const row = SETTINGS_STYLE_GROUPS.find(r => r[0] === settingsStyleSelected);
+  if (!row) return;
+  const current = settingsStyles()[settingsStyleSelected] || {};
+  const example = document.querySelector('#app [data-settings-style="'+settingsStyleSelected+'"]');
+  const effectiveSize = example ? Math.round(parseFloat(getComputedStyle(example).fontSize)) : 16;
+  const fontOptions = FONT_STACKS.map(f => `<option value="${esc(f.value)}" ${f.value === current.fontFamily ? 'selected' : ''}>${esc(f.label)}</option>`).join('');
+  panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT SETTINGS TEXT</strong><button type="button" data-canvas="settings-style-back">← Back</button></div>
+    <p class="canvas-panel-hint">Editing: <strong>${esc(row[1])}</strong>. Changes appear immediately and stay on this device.</p>
+    <label>Font<select id="settings-style-font"><option value="">Match site</option>${fontOptions}</select></label>
+    <label>Size <output id="settings-style-size-val">${effectiveSize}px</output><input id="settings-style-size" type="range" min="12" max="72" step="1" value="${effectiveSize}"></label>
+    <label>Boldness<select id="settings-style-weight">
+      <option value="">Match site</option>
+      ${[['400','Regular'],['500','Medium'],['600','Semibold'],['700','Bold'],['800','Extra bold']].map(([n,label]) => `<option value="${n}" ${current.fontWeight===n?'selected':''}>${label}</option>`).join('')}
+    </select></label>
+    <label class="canvas-text-italic"><input id="settings-style-italic" type="checkbox" ${current.fontStyle === 'italic' ? 'checked' : ''}> Italic</label>
+    <label>Text color<input id="settings-style-color" type="color" value="${/^#[a-f0-9]{6}$/i.test(current.color || '') ? current.color : '#4b2828'}"></label>
+    <button type="button" class="canvas-text-style-reset" id="settings-style-reset">Reset this text style</button>`;
+  panel.querySelector('#settings-style-font').onchange = e => updateSettingsStyle(settingsStyleSelected, 'fontFamily', e.target.value);
+  panel.querySelector('#settings-style-size').oninput = e => {
+    panel.querySelector('#settings-style-size-val').textContent = e.target.value+'px';
+    updateSettingsStyle(settingsStyleSelected, 'fontSize', e.target.value+'px');
+  };
+  panel.querySelector('#settings-style-weight').onchange = e => updateSettingsStyle(settingsStyleSelected, 'fontWeight', e.target.value);
+  panel.querySelector('#settings-style-italic').onchange = e => updateSettingsStyle(settingsStyleSelected, 'fontStyle', e.target.checked ? 'italic' : 'normal');
+  panel.querySelector('#settings-style-color').oninput = e => updateSettingsStyle(settingsStyleSelected, 'color', e.target.value);
+  panel.querySelector('#settings-style-reset').onclick = () => {
+    const all = settingsStyles(); delete all[settingsStyleSelected];
+    localStorage.setItem(SETTINGS_STYLE_KEY, JSON.stringify(all));
+    applySettingsStyle(settingsStyleSelected);paintSettingsStylePanel(panel);
+  };
+}
+
 const records = new Map();
 let activePage = null;
 let simplePage = false;
@@ -332,6 +415,7 @@ function paintPanel() {
     <span class="canvas-layer-order"><button type="button" data-layer-visible="${esc(x.id)}" aria-label="${x.hidden ? 'Show' : 'Hide'} this layer" aria-pressed="${!x.hidden}" title="${x.hidden ? 'Show layer' : 'Hide layer'}">${x.hidden ? '◌' : '◉'}</button><button type="button" data-layer-move="1" data-layer-id="${esc(x.id)}" aria-label="Bring this layer forward" title="Bring forward" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-layer-move="-1" data-layer-id="${esc(x.id)}" aria-label="Send this layer backward" title="Send backward" ${index === ordered.length - 1 ? 'disabled' : ''}>↓</button></span>
   </div>`).join('');
   panel.hidden = false;
+  if (panelMode === 'settings-style' && settingsStyleSelected) { paintSettingsStylePanel(panel); return; }
   if (simplePage && panelMode !== 'selected') {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>PAGE ACCENTS</strong></div>
       <p class="canvas-panel-hint">Add a handwritten note or decorative artwork to this page. Your books, forms and lists stay editable through their usual controls.</p>
@@ -626,8 +710,17 @@ function ensureTools() {
   panel.id = 'canvas-panel'; panel.className = 'canvas-panel'; panel.hidden = true;
   document.body.append(bar, panel);
   document.addEventListener('click', (e) => {
+    if (editing && simplePage && activePage.includes('settings')) {
+      const target = e.target.closest('[data-settings-style]');
+      if (target && !e.target.closest('input,select,button,[contenteditable]')) {
+        e.preventDefault();
+        settingsStyleSelected = target.dataset.settingsStyle;
+        panelMode = 'settings-style';selected = null;render();return;
+      }
+    }
     const action = e.target.closest('[data-canvas]')?.dataset.canvas;
     if (!action || !editing) return;
+    if (action === 'settings-style-back') {settingsStyleSelected=null;panelMode='add';render();}
     if (action === 'text') add('text');
     if (action === 'image') picker();
     if (action === 'section') sectionPicker();
@@ -743,10 +836,10 @@ function ensureTools() {
   });
 }
 
-export function setPage(pageId, { simple = false } = {}) { activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; advancedOpen = false; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; saveState = 'saved'; render(); }
+export function setPage(pageId, { simple = false } = {}) { settingsStyleSelected = null; activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; advancedOpen = false; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; saveState = 'saved'; render(); }
 export function setEditing(next) {
   editing = next;
-  if (next) { panelMode = 'sections'; selectedSectionId = null; selectedText = null; }
+  if (next) { panelMode = simplePage ? 'add' : 'sections'; settingsStyleSelected = null; selectedSectionId = null; selectedText = null; }
   ensureTools();
   document.body.classList.toggle('canvas-editing', next);
   if (!next) selected = null;
