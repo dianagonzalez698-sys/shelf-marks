@@ -2,12 +2,25 @@
    Network-first on purpose: when you're online you always get the current
    version, and the cache is only a fallback when you're not. */
 
-const VERSION = 'lit-picks-v42';
+const VERSION = 'lit-picks-v43';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './css/styles.css',
+  './css/paper-cake.css',
+  './assets/fonts/paper-cake/PaperCake-Fine.woff2',
+  './assets/fonts/paper-cake/PaperCake-FineOblique.woff2',
+  './assets/fonts/paper-cake/PaperCake-Regular.woff2',
+  './assets/fonts/paper-cake/PaperCake-Oblique.woff2',
+  './assets/fonts/paper-cake/PaperCake-WideFine.woff2',
+  './assets/fonts/paper-cake/PaperCake-WideFineOblique.woff2',
+  './assets/fonts/paper-cake/PaperCake-Wide.woff2',
+  './assets/fonts/paper-cake/PaperCake-WideOblique.woff2',
+  './assets/fonts/paper-cake/PaperCakeCaps-Regular.woff2',
+  './assets/fonts/paper-cake/PaperCakeCaps-Thicker.woff2',
+  './assets/fonts/paper-cake/PaperCakeCaps-Upright.woff2',
+  './assets/fonts/paper-cake/PaperCakeCaps-ThickerUpright.woff2',
   './js/app.js',
   './js/ui.js',
   './js/state.js',

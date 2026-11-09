@@ -1,0 +1,16 @@
+/* Licensed Paper Cake webfont kit. Keep the supplied faces distinct;
+   browsers must not synthesize bold or oblique calligraphy. */
+@font-face { font-family: 'Paper Cake'; src: url('../assets/fonts/paper-cake/PaperCake-Fine.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Paper Cake'; src: url('../assets/fonts/paper-cake/PaperCake-FineOblique.woff2') format('woff2'); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Paper Cake'; src: url('../assets/fonts/paper-cake/PaperCake-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Paper Cake'; src: url('../assets/fonts/paper-cake/PaperCake-Oblique.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+
+@font-face { font-family: 'Paper Cake Wide'; src: url('../assets/fonts/paper-cake/PaperCake-WideFine.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Paper Cake Wide'; src: url('../assets/fonts/paper-cake/PaperCake-WideFineOblique.woff2') format('woff2'); font-weight: 300; font-style: italic; font-display: swap; }
+@font-face { font-family: 'Paper Cake Wide'; src: url('../assets/fonts/paper-cake/PaperCake-Wide.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Paper Cake Wide'; src: url('../assets/fonts/paper-cake/PaperCake-WideOblique.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+
+@font-face { font-family: 'Paper Cake Caps'; src: url('../assets/fonts/paper-cake/PaperCakeCaps-Regular.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Paper Cake Caps'; src: url('../assets/fonts/paper-cake/PaperCakeCaps-Thicker.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Paper Cake Caps Upright'; src: url('../assets/fonts/paper-cake/PaperCakeCaps-Upright.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Paper Cake Caps Upright'; src: url('../assets/fonts/paper-cake/PaperCakeCaps-ThickerUpright.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }

@@ -65,6 +65,16 @@ export const FONT_STACKS = [
   // Synthetic bolding and machine-slanted calligraphy are the thing this
   // metadata exists to prevent.
 
+  /* ------- licensed Paper Cake webfonts ------- */
+  { group: 'Paper Cake collection', label: 'Paper Cake Script', weights: [300, 400], italic: true,
+    value: "'Paper Cake', 'Snell Roundhand', cursive" },
+  { group: 'Paper Cake collection', label: 'Paper Cake Wide Script', weights: [300, 400], italic: true,
+    value: "'Paper Cake Wide', 'Snell Roundhand', cursive" },
+  { group: 'Paper Cake collection', label: 'Paper Cake Caps', weights: [400, 700], italic: false,
+    value: "'Paper Cake Caps', 'Bodoni Moda', serif" },
+  { group: 'Paper Cake collection', label: 'Paper Cake Caps Upright', weights: [400, 700], italic: false,
+    value: "'Paper Cake Caps Upright', 'Bodoni Moda', serif" },
+
   /* ------- ornamental display script ------- */
   { group: 'Ornamental script', label: 'Monsieur La Doulaise', weights: [400], italic: false,
     value: "'Monsieur La Doulaise', 'Snell Roundhand', 'Apple Chancery', cursive" },
