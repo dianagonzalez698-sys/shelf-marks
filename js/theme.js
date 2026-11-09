@@ -701,6 +701,20 @@ export async function setContent(key, value) {
   await persist();
 }
 
+// An explicit checkpoint for the Design Studio's Save button. Editing still
+// previews and autosaves, but this awaits the durable IndexedDB write.
+export async function saveNow() {
+  writeLocal();
+  if (persistTimer) { clearTimeout(persistTimer); persistTimer = null; }
+  await store.put('meta', {
+    id: META_ID,
+    tokens: state.tokens,
+    content: state.content,
+    mode: state.mode,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 export async function applyPreset(id, year) {
   const preset = PRESETS[id];
   if (!preset) return false;

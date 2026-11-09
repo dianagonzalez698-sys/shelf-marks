@@ -6,7 +6,7 @@ import {
   THEME_SCHEMA, CONTENT_SCHEMA, FONT_STACKS, PRESETS, MODES,
   getToken, isOverridden, setToken, setTokens, setContent, getContent,
   getMode, setMode, resolvedMode,
-  applyPreset, reset, download, importJson, exportJson,
+  applyPreset, reset, download, importJson, exportJson, saveNow,
 } from './theme.js';
 import { state } from './state.js';
 import { esc, attr, toast, confirmSheet, bookmarkArt, lockedArt, checkBadge, progressLine, openSheet } from './ui.js';
@@ -30,6 +30,17 @@ const TOKEN_HELP = {
   '--f-display': 'Large titles and editorial headings.',
   '--f-body': 'Paragraphs, descriptions and journal writing.',
   '--f-ui': 'Navigation, labels, buttons and form controls.',
+  '--fs-wordmark': 'Size of “Diana’s Lit Picks” in the top navigation.',
+  '--fs-display': 'Size of large section headings, such as “The Year So Far”.',
+  '--fs-body': 'Size of paragraphs and descriptive text throughout the site.',
+  '--fs-label': 'Size of small uppercase labels and metadata.',
+  '--fs-nav': 'Size of the main navigation links at the top.',
+  '--fw-display': 'Thickness of large display headings.',
+  '--fi-display': 'Upright or italic display headings.',
+  '--fw-body': 'Thickness of paragraph text.',
+  '--fi-body': 'Upright or italic paragraph text.',
+  '--fw-label': 'Thickness of small labels and navigation details.',
+  '--fi-ui': 'Upright or italic navigation and interface labels.',
   '--h-banner': 'The height of the large banner at the top.',
   '--fs-banner-title': 'The main title inside that banner.',
   '--paper-texture-opacity': 'How visible the paper grain looks.',
@@ -38,6 +49,18 @@ const TOKEN_HELP = {
 function tokenLabel(token, id, dirty) {
   return `<label for="${id}">${esc(token.label)} ${dirty}${TOKEN_HELP[token.var]
     ? `<small class="studio-control-hint">${esc(TOKEN_HELP[token.var])}</small>` : ''}</label>`;
+}
+
+const FONT_SAMPLES = {
+  '--f-script': ["Diana’s Lit Picks", '--f-script'],
+  '--f-display': ['A Year in Books', '--f-display'],
+  '--f-body': ['A little reading adventure, kept for good.', '--f-body'],
+  '--f-ui': ['JOURNAL  ·  LIBRARY  ·  SETTINGS', '--f-ui'],
+};
+
+function fontSample(token) {
+  const sample = FONT_SAMPLES[token.var];
+  return sample ? `<div class="studio-font-sample" style="font-family:var(${sample[1]});">${esc(sample[0])}</div>` : '';
 }
 
 function control(token) {
@@ -64,6 +87,7 @@ function control(token) {
             ${FONT_STACKS.some((f) => f.value === current) ? '' : `<option value="${attr(current)}" selected>Custom</option>`}
           </select>
         </span>
+        ${fontSample(token)}
       </div>`;
 
     case 'select':
@@ -194,6 +218,11 @@ export function customizeView() {
           </section>
         </div>
 
+        <div class="studio-save-row">
+          <p id="studio-save-status" role="status" aria-live="polite">Changes preview live and are saved on this device.</p>
+          <button class="btn btn-primary" type="button" id="studio-save">Save changes</button>
+        </div>
+
         <details class="studio-group studio-extras"><summary>Preview & optional starting styles</summary><div class="studio-body">
         ${preview()}
         <section class="type-direction">
@@ -229,6 +258,20 @@ export function customizeView() {
 
     onMount(root) {
       const year = state.settings.year;
+      const saveStatus = root.querySelector('#studio-save-status');
+      const noteChange = () => { saveStatus.textContent = 'Changes made. Select Save changes to confirm.'; };
+      root.querySelector('#studio-save').onclick = async () => {
+        const button = root.querySelector('#studio-save');
+        button.disabled = true;
+        try {
+          await saveNow();
+          saveStatus.textContent = 'Saved to this browser.';
+          toast('Design saved.', 'good');
+        } catch (_) {
+          saveStatus.textContent = 'Could not confirm the save. Please export a backup.';
+          toast('Save could not be confirmed. Export a backup to be safe.', 'bad');
+        } finally { button.disabled = false; }
+      };
       root.querySelector('#use-editorial-type').onclick = async () => {
         await setTokens({
           '--f-script': "'Mrs Saint Delafield', 'Imperial Script', 'Snell Roundhand', cursive",
@@ -264,6 +307,7 @@ export function customizeView() {
       };
       root.querySelector('#mode-choice').onchange = async (event) => {
         await setMode(event.target.value);
+        noteChange();
         repaintPreview();
         toast('Appearance updated.', 'good', 1800);
       };
@@ -281,6 +325,7 @@ export function customizeView() {
 
         const commit = (value) => {
           setToken(name, value);
+          noteChange();
           markDirty(row);
           if (name.includes('banner') || name.includes('bm') || name.includes('--f-') || name.includes('--c-')) {
             repaintPreview();
@@ -318,6 +363,7 @@ export function customizeView() {
         const input = row.querySelector('input');
         input.addEventListener('input', () => {
           setContent(key, input.value);
+          noteChange();
           // Shell text (wordmark, nav, banner) is re-filled from the content map.
           import('./theme.js').then((m) => m.applyContent(year));
           repaintPreview();
