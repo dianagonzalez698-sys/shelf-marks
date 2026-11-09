@@ -16,6 +16,9 @@ import { studioNav } from './studio-nav.js';
 function numericValue(token) {
   const raw = getToken(token.var);
   const n = parseFloat(raw);
+  if (token.unit === 'rem' && raw.endsWith('px') && Number.isFinite(n)) {
+    return n / (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16);
+  }
   if (Number.isFinite(n) && !raw.includes('clamp')) return n;
   return token.approx != null ? token.approx : (token.min || 0);
 }
@@ -120,12 +123,14 @@ function control(token) {
     case 'ratio': {
       const unit = token.unit || '';
       const value = numericValue(token);
+      const isFontSize = token.var.startsWith('--fs-') && unit === 'rem';
+      const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
       return `<div class="token-row" data-token="${attr(token.var)}" data-unit="${attr(unit)}">
         ${tokenLabel(token, id, dirty)}
         <span class="token-control">
           <input type="range" id="${id}" data-role="range"
                  min="${token.min}" max="${token.max}" step="${token.step}" value="${value}">
-          <span class="token-value" data-role="readout">${value}${esc(unit)}</span>
+          ${isFontSize ? `<span class="studio-font-px"><input type="number" data-role="font-px" aria-label="${attr(token.label)} in pixels" min="${Math.round(token.min * rootPx)}" max="${Math.round(token.max * rootPx)}" step="1" value="${Math.round(value * rootPx)}"><span>px</span></span>` : `<span class="token-value" data-role="readout">${value}${esc(unit)}</span>`}
         </span>
       </div>`;
     }
@@ -410,6 +415,7 @@ export function customizeView() {
         const selectEl = row.querySelector('[data-role="select"]');
         const rangeEl = row.querySelector('[data-role="range"]');
         const readout = row.querySelector('[data-role="readout"]');
+        const pixelEl = row.querySelector('[data-role="font-px"]');
 
         const commit = (value) => {
           setToken(name, value);
@@ -442,7 +448,19 @@ export function customizeView() {
           rangeEl.addEventListener('input', () => {
             const v = `${rangeEl.value}${unit}`;
             if (readout) readout.textContent = v;
+            if (pixelEl) pixelEl.value = String(Math.round(Number(rangeEl.value) * (parseFloat(getComputedStyle(document.documentElement).fontSize) || 16)));
             commit(v);
+          });
+        }
+        if (pixelEl) {
+          pixelEl.addEventListener('change', () => {
+            const px = Number(pixelEl.value);
+            if (!Number.isFinite(px) || px <= 0) return;
+            const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+            const clamped = Math.max(Number(pixelEl.min), Math.min(Number(pixelEl.max), px));
+            pixelEl.value = String(Math.round(clamped));
+            rangeEl.value = String(clamped / rootPx);
+            commit(`${Number((clamped / rootPx).toFixed(4))}rem`);
           });
         }
       });
