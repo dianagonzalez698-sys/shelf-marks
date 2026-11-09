@@ -69,7 +69,7 @@ export function layoutView(params = {}) {
     back: true,
     live: false,
     html: `
-      <div class="ed sp-tight form-wrap">
+      <div class="ed sp-tight form-wrap layout-studio-page">
         ${studioNav('layout')}
         <div class="ed-head" style="margin-bottom:1.2rem">
           <p class="ed-kicker">Composition</p>

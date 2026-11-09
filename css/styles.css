@@ -4565,3 +4565,63 @@ html:not([data-theme="dark"]) .lit-hero {
   font-family: var(--f-studio-picker); font-size: var(--fs-studio-picker);
   font-weight: var(--fw-studio-picker);
 }
+
+
+/* Consistent font-family and italic controls for every text choice. */
+:root {
+  --fw-script: 400;
+  --fi-script: normal;
+  --f-button: var(--f-ui);
+  --fi-button: normal;
+  --fi-studio-tab: normal;
+  --fi-studio-heading: normal;
+  --fi-studio-panel-title: normal;
+  --fi-studio-picker: normal;
+  --fi-studio-instructions: normal;
+  --fi-studio-summary: normal;
+  --fi-studio-field: normal;
+  --fi-studio-advanced: normal;
+  --f-site-label: var(--f-ui);
+  --fi-site-label: normal;
+  --f-studio-help: var(--f-body);
+  --fi-studio-help: normal;
+  --fi-nav: normal;
+  --f-layout-title: var(--f-display);
+  --fs-layout-title: 2.9rem;
+  --fw-layout-title: 400;
+  --fi-layout-title: normal;
+  --f-layout-description: var(--f-body);
+  --fs-layout-description: 1.25rem;
+  --fw-layout-description: 400;
+  --fi-layout-description: italic;
+}
+.site-wordmark, .wordmark, .brand-script { font-style:var(--fi-script);font-weight:var(--fw-script); }
+.btn, button.btn { font-family:var(--f-button);font-style:var(--fi-button); }
+.studio-nav .studio-tab { font-style:var(--fi-studio-tab); }
+.form-wrap > .section-head .section-title { font-style:var(--fi-studio-heading); }
+.studio-edit-panel h3 { font-style:var(--fi-studio-panel-title); }
+.studio-picker-row label, .studio-type-picker label { font-style:var(--fi-studio-picker); }
+.studio-edit-panel .studio-panel-help, .studio-picker-note, .studio-type-guide { font-style:var(--fi-studio-instructions); }
+.studio-group > summary { font-style:var(--fi-studio-summary); }
+.studio-edit-panel .token-row > label { font-style:var(--fi-studio-field); }
+.studio-edit-panel .studio-advanced > summary { font-style:var(--fi-studio-advanced); }
+.lit-overline, .ed-meta { font-family:var(--f-site-label);font-style:var(--fi-site-label); }
+.studio-save-row p { font-family:var(--f-studio-help);font-style:var(--fi-studio-help); }
+.top-nav a, .site-nav a { font-style:var(--fi-nav); }
+.layout-studio-page > .ed-head .ed-title { font-family:var(--f-layout-title);font-size:var(--fs-layout-title);font-weight:var(--fw-layout-title);font-style:var(--fi-layout-title);text-transform:none; }
+.layout-studio-page > .ed-head .ed-sub { font-family:var(--f-layout-description);font-size:var(--fs-layout-description);font-weight:var(--fw-layout-description);font-style:var(--fi-layout-description);line-height:1.5;max-width:74ch; }
+.studio-type-example[data-preview-role="site-name"] strong { font-style:var(--fi-script);font-weight:var(--fw-script); }
+.studio-type-example[data-preview-role="buttons"] strong { font-family:var(--f-button);font-style:var(--fi-button); }
+.studio-type-example[data-preview-role="studio-tab"] strong { font-style:var(--fi-studio-tab); }
+.studio-type-example[data-preview-role="studio-heading"] strong { font-style:var(--fi-studio-heading); }
+.studio-type-example[data-preview-role="studio-panel"] strong { font-style:var(--fi-studio-panel-title); }
+.studio-type-example[data-preview-role="studio-picker"] strong { font-style:var(--fi-studio-picker); }
+.studio-type-example[data-preview-role="studio-instructions"] strong { font-style:var(--fi-studio-instructions); }
+.studio-type-example[data-preview-role="studio-titles"] strong { font-style:var(--fi-studio-summary); }
+.studio-type-example[data-preview-role="field-labels"] strong { font-style:var(--fi-studio-field); }
+.studio-type-example[data-preview-role="more-options"] strong { font-style:var(--fi-studio-advanced); }
+.studio-type-example[data-preview-role="site-labels"] strong { font-family:var(--f-site-label);font-style:var(--fi-site-label); }
+.studio-type-example[data-preview-role="save-message"] strong { font-family:var(--f-studio-help);font-style:var(--fi-studio-help); }
+.studio-type-example[data-preview-role="navigation"] strong { font-style:var(--fi-nav); }
+.studio-type-example[data-preview-role="studio-layout-title"] strong { font-family:var(--f-layout-title);font-size:var(--fs-layout-title);font-weight:var(--fw-layout-title);font-style:var(--fi-layout-title); }
+.studio-type-example[data-preview-role="studio-layout-description"] strong { font-family:var(--f-layout-description);font-size:var(--fs-layout-description);font-weight:var(--fw-layout-description);font-style:var(--fi-layout-description); }
