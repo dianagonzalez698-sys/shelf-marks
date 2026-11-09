@@ -167,7 +167,7 @@ function typographyGroup(g) {
       <select id="studio-type-target">${TYPE_TARGETS.map((target) => `<option value="${attr(target.id)}">${esc(target.name)}</option>`).join('')}</select>
     </div>
     ${TYPE_TARGETS.map((target, index) => `<div class="studio-type-target" data-type-target="${attr(target.id)}" ${index ? 'hidden' : ''}>
-      <p class="studio-type-example"><span>Example on your site</span>${esc(target.example)}</p>
+      <p class="studio-type-example" data-preview-role="${attr(target.id)}"><span>Example on your site</span><strong>${esc(target.example)}</strong></p>
       <div class="studio-body">${target.vars.map((name) => g.tokens.find((token) => token.var === name)).filter(Boolean).map(control).join('')}</div>
     </div>`).join('')}
     ${extra.length ? `<details class="studio-advanced"><summary>More typography options <span>${extra.length} additional settings</span></summary><div class="studio-body">${extra.map(control).join('')}</div></details>` : ''}
