@@ -20,6 +20,26 @@ function numericValue(token) {
   return token.approx != null ? token.approx : (token.min || 0);
 }
 
+const TOKEN_HELP = {
+  '--c-bg': 'The background behind the whole journal.',
+  '--c-bg-raised': 'Cards and surfaces that sit above the page.',
+  '--c-ink': 'Main titles and readable text.',
+  '--c-ink-soft': 'Subtitles and supporting text.',
+  '--c-accent': 'Progress bars, active choices and small highlights.',
+  '--f-script': 'The decorative script used in the site name.',
+  '--f-display': 'Large titles and editorial headings.',
+  '--f-body': 'Paragraphs, descriptions and journal writing.',
+  '--f-ui': 'Navigation, labels, buttons and form controls.',
+  '--h-banner': 'The height of the large banner at the top.',
+  '--fs-banner-title': 'The main title inside that banner.',
+  '--paper-texture-opacity': 'How visible the paper grain looks.',
+};
+
+function tokenLabel(token, id, dirty) {
+  return `<label for="${id}">${esc(token.label)} ${dirty}${TOKEN_HELP[token.var]
+    ? `<small class="studio-control-hint">${esc(TOKEN_HELP[token.var])}</small>` : ''}</label>`;
+}
+
 function control(token) {
   const id = `tk-${token.var.replace(/[^a-z0-9]/gi, '')}`;
   const current = getToken(token.var);
@@ -28,7 +48,7 @@ function control(token) {
   switch (token.type) {
     case 'color':
       return `<div class="token-row" data-token="${attr(token.var)}">
-        <label for="${id}">${esc(token.label)} ${dirty}</label>
+        ${tokenLabel(token, id, dirty)}
         <span class="token-control">
           <input type="color" id="${id}" value="${attr(/^#[0-9a-f]{6}$/i.test(current) ? current : '#000000')}" data-role="color">
           <input type="text" value="${attr(current)}" data-role="text" spellcheck="false" aria-label="${attr(token.label)} value">
@@ -37,7 +57,7 @@ function control(token) {
 
     case 'font':
       return `<div class="token-row is-wide" data-token="${attr(token.var)}">
-        <label for="${id}">${esc(token.label)} ${dirty}</label>
+        ${tokenLabel(token, id, dirty)}
         <span class="token-control">
           <select id="${id}" data-role="select">
             ${FONT_STACKS.map((f) => `<option value="${attr(f.value)}" ${f.value === current ? 'selected' : ''}>${esc(f.label)}</option>`).join('')}
@@ -48,7 +68,7 @@ function control(token) {
 
     case 'select':
       return `<div class="token-row" data-token="${attr(token.var)}">
-        <label for="${id}">${esc(token.label)} ${dirty}</label>
+        ${tokenLabel(token, id, dirty)}
         <span class="token-control">
           <select id="${id}" data-role="select">
             ${token.options.map(([v, l]) => `<option value="${attr(v)}" ${String(v) === String(current).trim() ? 'selected' : ''}>${esc(l)}</option>`).join('')}
@@ -62,7 +82,7 @@ function control(token) {
       const unit = token.unit || '';
       const value = numericValue(token);
       return `<div class="token-row" data-token="${attr(token.var)}" data-unit="${attr(unit)}">
-        <label for="${id}">${esc(token.label)} ${dirty}</label>
+        ${tokenLabel(token, id, dirty)}
         <span class="token-control">
           <input type="range" id="${id}" data-role="range"
                  min="${token.min}" max="${token.max}" step="${token.step}" value="${value}">
@@ -76,14 +96,35 @@ function control(token) {
   }
 }
 
+const GROUP_GUIDE = {
+  palette: ['Page colors', 'Change the backgrounds, text colors and accents used throughout Shelf Marks.'],
+  banner: ['Top banner', 'Change the height, headline and decorative details of the opening banner.'],
+  typography: ['Fonts & text', 'Choose the fonts used across the site. For one specific heading, use Edit on that page.'],
+  layout: ['Spacing & shape', 'Adjust the overall width, corners and spacing shared across pages.'],
+  bookmarks: ['Bookmark display', 'Change how large bookmarks appear and how they are arranged.'],
+  frames: ['Picture frames', 'Adjust the colors and proportions of the decorative frame styles.'],
+  'bookmark-colours': ['Bookmark colors', 'Change the six built-in bookmark color combinations.'],
+  wording: ['Page wording', 'Edit the titles, subtitles and navigation labels shown across the journal.'],
+};
+
+const KEY_CONTROLS = {
+  palette: ['--c-bg', '--c-bg-raised', '--c-ink', '--c-ink-soft', '--c-accent'],
+  banner: ['--c-banner-bg', '--c-banner-ink', '--h-banner', '--fs-banner-title'],
+  typography: ['--f-script', '--f-display', '--f-body', '--f-ui'],
+  layout: [], bookmarks: [], frames: [], 'bookmark-colours': [],
+};
+
 function group(g) {
-  return `<details class="studio-group" ${g.id === 'palette' ? 'open' : ''}>
-    <summary>${esc(g.label)}</summary>
-    <div class="studio-body">
-      ${g.note ? `<p class="hint" style="margin:0 0 .3rem">${esc(g.note)}</p>` : ''}
-      ${g.tokens.map(control).join('')}
-    </div>
-  </details>`;
+  const primary = KEY_CONTROLS[g.id] || [];
+  const front = primary.length ? primary.map((key) => g.tokens.find((t) => t.var === key)).filter(Boolean) : g.tokens.slice(0, 4);
+  const extra = g.tokens.filter((t) => !front.includes(t));
+  return `<section class="studio-edit-panel" data-studio-panel="${attr(g.id)}" ${g.id === 'palette' ? '' : 'hidden'}>
+    <h3>${esc(GROUP_GUIDE[g.id][0])}</h3>
+    <p class="studio-panel-help">${esc(GROUP_GUIDE[g.id][1])}</p>
+    <div class="studio-body">${front.map(control).join('')}</div>
+    ${extra.length ? `<details class="studio-advanced"><summary>Fine-tune ${esc(GROUP_GUIDE[g.id][0].toLowerCase())} <span>${extra.length} more settings</span></summary>
+      <div class="studio-body">${extra.map(control).join('')}</div></details>` : ''}
+  </section>`;
 }
 
 function preview() {
@@ -118,23 +159,29 @@ export function customizeView() {
           <p class="section-sub">Choose a detail below. Changes appear immediately and stay on this device.</p>
         </div></div>
 
-        <h2 class="form-heading">Appearance</h2>
-        <div class="seg" id="mode-seg" role="group" aria-label="Appearance">
-          ${MODES.map(([v, label]) => `<button type="button" data-mode="${attr(v)}"
-            aria-pressed="${getMode() === v}">${esc(label)}</button>`).join('')}
-        </div>
-        <p class="hint">
-          “Follow my device” changes automatically with your system setting.
-          Showing <b id="mode-now">${esc(resolvedMode())}</b> right now.
-        </p>
-
-        <div style="margin-top:var(--sp-section)">
+        <div class="studio-simple-workbench">
+          <div class="studio-picker-row">
+            <div class="field">
+              <label for="studio-area">What would you like to change?</label>
+              <select id="studio-area">
+                ${THEME_SCHEMA.map((g) => `<option value="${attr(g.id)}">${esc(GROUP_GUIDE[g.id][0])}</option>`).join('')}
+                <option value="wording">Page wording</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="mode-choice">Light or dark appearance</label>
+              <select id="mode-choice">
+                ${MODES.map(([v, label]) => `<option value="${attr(v)}" ${getMode() === v ? 'selected' : ''}>${esc(label)}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <p class="studio-picker-note">Site-wide settings are below. To change just one section, open that page and select its text or artwork.</p>
           ${THEME_SCHEMA.map(group).join('')}
 
-          <details class="studio-group">
-            <summary>Page wording</summary>
+          <section class="studio-edit-panel" data-studio-panel="wording" hidden>
+            <h3>Page wording</h3>
+            <p class="studio-panel-help">Change titles, subtitles and navigation labels without changing their styling.</p>
             <div class="studio-body">
-              <p class="hint" style="margin:0 0 .3rem">Titles and labels shown around the journal.</p>
               ${CONTENT_SCHEMA.map((c) => `
                 <div class="token-row is-wide" data-content-key="${attr(c.key)}">
                   <label for="ct-${attr(c.key)}">${esc(c.label)}</label>
@@ -144,10 +191,10 @@ export function customizeView() {
                   ${c.hint ? `<p class="hint" style="grid-column:1/-1;margin:0">${esc(c.hint)}</p>` : ''}
                 </div>`).join('')}
             </div>
-          </details>
+          </section>
         </div>
 
-        <details class="studio-group"><summary>Preview sample & style starting points</summary><div class="studio-body">
+        <details class="studio-group studio-extras"><summary>Preview & optional starting styles</summary><div class="studio-body">
         ${preview()}
         <section class="type-direction">
           <p class="lit-overline">THE NEW HOUSE STYLE</p>
@@ -166,17 +213,17 @@ export function customizeView() {
 
         </div></details>
 
-        <h2 class="form-heading">Keep or share this design</h2>
-        <div class="btn-row">
-          <button class="btn" type="button" id="export">Export design</button>
-          <button class="btn" type="button" id="import">Import design</button>
-          <button class="btn btn-danger" type="button" id="reset">Reset to defaults</button>
-        </div>
-        <input type="file" id="design-file" accept="application/json,.json" class="visually-hidden">
-        <p class="hint">
-          Exported settings are a small JSON file — the same one the Import button reads.
-          Your design also travels inside the ordinary backup in Settings.
-        </p>
+        <details class="studio-group studio-extras"><summary>Save, restore or reset design</summary>
+          <div class="studio-body">
+            <div class="btn-row">
+              <button class="btn" type="button" id="export">Export design</button>
+              <button class="btn" type="button" id="import">Import design</button>
+              <button class="btn btn-danger" type="button" id="reset">Reset to defaults</button>
+            </div>
+            <input type="file" id="design-file" accept="application/json,.json" class="visually-hidden">
+            <p class="hint">Your design is also included when you export a full backup from Settings.</p>
+          </div>
+        </details>
       </section>
     `,
 
@@ -210,19 +257,16 @@ export function customizeView() {
       };
 
       /* ---- appearance ---- */
-      const modeSeg = root.querySelector('#mode-seg');
-      modeSeg.querySelectorAll('[data-mode]').forEach((btn) => {
-        btn.onclick = async () => {
-          await setMode(btn.dataset.mode);
-          modeSeg.querySelectorAll('[data-mode]').forEach((b) => {
-            b.setAttribute('aria-pressed', String(b.dataset.mode === btn.dataset.mode));
-          });
-          const now = root.querySelector('#mode-now');
-          if (now) now.textContent = resolvedMode();
-          repaintPreview();
-          toast(`Appearance: ${esc(btn.textContent.trim().toLowerCase())}.`, 'good', 1800);
-        };
-      });
+      root.querySelector('#studio-area').onchange = (event) => {
+        root.querySelectorAll('[data-studio-panel]').forEach((panel) => {
+          panel.hidden = panel.dataset.studioPanel !== event.target.value;
+        });
+      };
+      root.querySelector('#mode-choice').onchange = async (event) => {
+        await setMode(event.target.value);
+        repaintPreview();
+        toast('Appearance updated.', 'good', 1800);
+      };
 
       /* ---- token controls ---- */
       root.querySelectorAll('[data-token]').forEach((row) => {

@@ -1212,6 +1212,27 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 .studio-preview-banner .banner-title { font-size: clamp(1.7rem, 5vw, 2.6rem); }
 .studio-preview-body { padding: 1.1rem; }
 
+/* A single, task-led workbench instead of an accordion of settings. */
+.studio-simple-workbench { border: 1px solid var(--c-rule); border-radius: var(--r-sm); padding: clamp(1rem, 3vw, 1.6rem); background: var(--c-bg-raised); }
+.studio-picker-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: .8rem 1.2rem; }
+.studio-picker-row .field { margin: 0; }
+.studio-picker-row label { display: block; margin: 0 0 .4rem; font: 500 var(--fs-small)/1.3 var(--f-ui); letter-spacing: 0; text-transform: none; }
+.studio-picker-row select { width: 100%; max-width: none; }
+.studio-picker-note { margin: .85rem 0 0; font: 400 var(--fs-small)/1.45 var(--f-body); color: var(--c-ink-soft); }
+.studio-edit-panel { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--c-rule); }
+.studio-edit-panel[hidden] { display: none !important; }
+.studio-edit-panel h3 { margin: 0; font: 400 clamp(1.5rem, 3vw, 2.05rem)/1.1 var(--f-display); }
+.studio-panel-help { max-width: 55ch; color: var(--c-ink-soft); margin: .4rem 0 1.3rem; font: 400 var(--fs-small)/1.5 var(--f-body); }
+.studio-edit-panel .studio-body { gap: .75rem; }
+.studio-edit-panel .token-row { padding: .45rem 0; border-bottom: 1px solid var(--c-rule); }
+.studio-control-hint { display: block; color: var(--c-ink-faint); font: 400 .78rem/1.4 var(--f-body); margin-top: .2rem; }
+.studio-advanced { margin-top: 1rem; }
+.studio-advanced > summary { cursor: pointer; padding: .8rem 0; color: var(--c-ink-soft); font: 500 var(--fs-small)/1.3 var(--f-ui); }
+.studio-advanced > summary span { font-weight: 400; color: var(--c-ink-faint); margin-left: .5rem; }
+.studio-advanced .studio-body { padding-top: .5rem; }
+.studio-extras { margin-top: 1rem; }
+@media (max-width: 600px) { .studio-picker-row { grid-template-columns: 1fr; } .studio-edit-panel .token-row { grid-template-columns: 1fr; } .studio-edit-panel .token-control { width: 100%; } .studio-edit-panel .token-row input[type="range"] { flex: 1; min-width: 0; } }
+
 .studio-group { border-top: var(--rule-w) solid var(--c-rule); }
 .studio-group > summary {
   cursor: pointer; list-style: none;
