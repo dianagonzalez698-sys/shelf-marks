@@ -31,6 +31,7 @@ export function buildBackup() {
     assets: assets.snapshot(),
     layouts: layout.snapshot(),
     canvas: canvas.snapshot(),
+    settingsTextStyles: canvas.settingsTextStylesSnapshot(),
     notebook: notebook.snapshot(),
     words: state.words.map((w) => ({ ...w })),
   };
@@ -173,6 +174,10 @@ export async function importBackup(text) {
       themeChanged = true;
     }
   }
+  let settingsTextStylesChanged = false;
+  if (data.settingsTextStyles && typeof data.settingsTextStyles === 'object') {
+    settingsTextStylesChanged = canvas.adoptSettingsTextStyles(data.settingsTextStyles);
+  }
   const unlockedNow = await syncUnlocks();
   emitChange();
 
@@ -187,6 +192,7 @@ export async function importBackup(text) {
     notebook: pick(notebookRows),
     settingsChanged,
     themeChanged,
+    settingsTextStylesChanged,
     newlyUnlocked: unlockedNow.length,
     exportedAt: data.exportedAt || null,
   };

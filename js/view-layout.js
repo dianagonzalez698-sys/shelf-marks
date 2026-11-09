@@ -320,7 +320,7 @@ function stylePanelHtml(face, r, secId, cur) {
 
       <p class="sty-head">Style</p>
       <div class="sty-chips">
-        ${chip(r.italic, '', 'Normal', !ital)}
+        ${chip(r.italic, 'normal', 'Normal', !ital)}
         ${chip(r.italic, 'italic', 'Italic', ital, !canItalic)}
       </div>
       ${canItalic ? '' : '<p class="hint">This family has no true italic, so the option is off rather than faked by slanting it.</p>'}

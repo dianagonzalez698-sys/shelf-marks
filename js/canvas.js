@@ -13,6 +13,7 @@ import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } fro
 // Settings has no editorial layout records, but its visible typography is editable
 // in Design Mode. These stable groups preserve normal form actions and their data.
 const SETTINGS_STYLE_KEY = 'lit-picks-settings-text-v1';
+const SETTINGS_STYLE_DATE_KEY = 'lit-picks-settings-text-updated-v1';
 const SETTINGS_STYLE_GROUPS = [
   ['eyebrow','Page eyebrow','.settings-heading .lit-overline'],
   ['page-title','Settings title','.settings-heading h1'],
@@ -48,9 +49,29 @@ function updateSettingsStyle(id, prop, value) {
   if (value) next[prop] = value;
   else delete next[prop];
   all[id] = next;
-  try { localStorage.setItem(SETTINGS_STYLE_KEY, JSON.stringify(all)); }
+  try { localStorage.setItem(SETTINGS_STYLE_KEY, JSON.stringify(all));
+    localStorage.setItem(SETTINGS_STYLE_DATE_KEY, new Date().toISOString()); }
   catch (_) { toast('Could not save Settings text style on this device.', 'bad'); }
   applySettingsStyle(id);
+}
+// Include page-specific text edits in the ordinary device backup. Prior backups
+// without this optional field continue to import exactly as before.
+export function settingsTextStylesSnapshot() {
+  let updatedAt = '';
+  try { updatedAt = localStorage.getItem(SETTINGS_STYLE_DATE_KEY) || ''; } catch (_) { /* private mode */ }
+  return { styles: settingsStyles(), updatedAt };
+}
+export function adoptSettingsTextStyles(payload) {
+  const incoming = payload && payload.styles;
+  if (!incoming || typeof incoming !== 'object' || Array.isArray(incoming)) return false;
+  try {
+    const localDate = localStorage.getItem(SETTINGS_STYLE_DATE_KEY) || '';
+    if (localDate && (!payload.updatedAt || payload.updatedAt <= localDate)) return false;
+    localStorage.setItem(SETTINGS_STYLE_KEY, JSON.stringify(incoming));
+    localStorage.setItem(SETTINGS_STYLE_DATE_KEY, payload.updatedAt || new Date().toISOString());
+    document.querySelectorAll('#app [data-settings-style]').forEach(node => applySettingsStyle(node.dataset.settingsStyle));
+    return true;
+  } catch (_) { return false; }
 }
 export function attachSettingsDesign(root) {
   if (!root) return;
@@ -88,6 +109,7 @@ function paintSettingsStylePanel(panel) {
   panel.querySelector('#settings-style-reset').onclick = () => {
     const all = settingsStyles(); delete all[settingsStyleSelected];
     localStorage.setItem(SETTINGS_STYLE_KEY, JSON.stringify(all));
+    localStorage.setItem(SETTINGS_STYLE_DATE_KEY, new Date().toISOString());
     applySettingsStyle(settingsStyleSelected);paintSettingsStylePanel(panel);
   };
 }
@@ -418,7 +440,7 @@ function paintPanel() {
   if (panelMode === 'settings-style' && settingsStyleSelected) { paintSettingsStylePanel(panel); return; }
   if (simplePage && panelMode !== 'selected') {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>PAGE ACCENTS</strong></div>
-      <p class="canvas-panel-hint">Add a handwritten note or decorative artwork to this page. Your books, forms and lists stay editable through their usual controls.</p>
+      <p class="canvas-panel-hint">${activePage.includes("settings") ? "Click any heading, label or description on this page to change its font, size, weight or color. Forms still work normally." : "Add text or artwork here. Books, forms and lists remain editable through their usual controls."}</p>
       <div class="canvas-panel-tabs"><button type="button" data-canvas="tab-add" class="${panelMode !== 'layers' ? 'active' : ''}">Add</button><button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button></div>
       ${panelMode === 'layers'
         ? `<div class="canvas-layer-list">${data().length ? layerRows(data()) : '<p>No page accents yet.</p>'}</div>`
@@ -668,7 +690,10 @@ function sectionPicker() {
   modal.className = 'canvas-picker';
   modal.innerHTML = `<div class="canvas-picker-dialog" role="dialog" aria-modal="true" aria-label="Add a section">
     <div class="canvas-panel-head"><strong>Add a section</strong><button type="button" data-close>×</button></div>
-    <p class="canvas-panel-hint">Choose a starting point. Every section can be rearranged and edited later.</p>
+    <p class="canvas-panel-hint">Choose a starting point. You can rearrange or edit it afterward.</p>
+    <label class="canvas-picker-search-label" for="canvas-section-search">Find a section</label>
+    <input id="canvas-section-search" type="search" placeholder="Search by name or description" autocomplete="off">
+    <p class="canvas-section-search-count" aria-live="polite"></p>
     <div class="canvas-section-options"></div></div>`;
   const options = modal.querySelector('.canvas-section-options');
   types.forEach((type) => {
@@ -690,8 +715,24 @@ function sectionPicker() {
         toast('Section added at the bottom of the page.', 'good');
       } catch (_) { b.disabled = false; toast('Could not add this section.', 'bad'); }
     };
+    b.dataset.searchText = (type.label + ' ' + (type.blurb || '')).toLowerCase();
     options.appendChild(b);
   });
+  const search = modal.querySelector('#canvas-section-search');
+  const count = modal.querySelector('.canvas-section-search-count');
+  const filter = () => {
+    const query = search.value.trim().toLowerCase();
+    let visible = 0;
+    options.querySelectorAll('button').forEach(button => {
+      button.hidden = !button.dataset.searchText.includes(query);
+      if (!button.hidden) visible++;
+    });
+    count.textContent = visible ? `${visible} section${visible === 1 ? '' : 's'} available` : 'No matching sections. Try another word.';
+  };
+  search.addEventListener('input', filter);
+  filter();
+  requestAnimationFrame(() => search.focus());
+  modal.addEventListener('keydown', e => { if (e.key === 'Escape') modal.remove(); });
   modal.querySelector('[data-close]').onclick = () => modal.remove();
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);

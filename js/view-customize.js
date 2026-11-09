@@ -368,11 +368,13 @@ export function customizeView() {
         const size = getToken('--fs-nav');
         const weight = getToken('--fw-nav');
         const spacing = getToken('--ls-nav');
+        const italic = getToken('--fi-nav') || 'normal';
         document.querySelectorAll('.masthead-link').forEach((link) => {
           link.style.fontFamily = font;
           link.style.fontSize = size;
           link.style.fontWeight = weight;
           link.style.letterSpacing = spacing;
+          link.style.fontStyle = italic;
         });
         const sample = root.querySelector('[data-preview-role="navigation"] strong');
         if (sample) {
@@ -380,11 +382,13 @@ export function customizeView() {
           sample.style.fontSize = size;
           sample.style.fontWeight = weight;
           sample.style.letterSpacing = spacing;
+          sample.style.fontStyle = italic;
         }
       };
       syncNavigation();
       const syncButtons = () => {
-        const font = getToken('--f-ui');
+        const font = getToken('--f-button') || getToken('--f-ui');
+        const italic = getToken('--fi-button') || 'normal';
         const size = getToken('--fs-button');
         const weight = getToken('--fw-button');
         const sample = root.querySelector('[data-preview-role="buttons"] strong');
@@ -393,11 +397,12 @@ export function customizeView() {
           element.style.fontFamily = font;
           element.style.fontSize = size;
           element.style.fontWeight = weight;
+          element.style.fontStyle = italic;
         });
       };
       syncButtons();
       const saveStatus = root.querySelector('#studio-save-status');
-      const noteChange = () => { saveStatus.textContent = 'Changes made. Select Save changes to confirm.'; };
+      const noteChange = () => { saveStatus.textContent = 'Saved automatically on this device. Export a backup to transfer your design.'; };
       root.querySelector('#studio-apply-original-colors')?.addEventListener('click', async () => {
         await setTokens(ORIGINAL_PALETTE);
         toast('Rose palette applied. Your other design settings are unchanged.', 'good');
@@ -408,7 +413,7 @@ export function customizeView() {
         button.disabled = true;
         try {
           await saveNow();
-          saveStatus.textContent = 'Saved to this browser.';
+          saveStatus.textContent = 'All design changes are saved on this device.';
           toast('Design saved.', 'good');
         } catch (_) {
           saveStatus.textContent = 'Could not confirm the save. Please export a backup.';
@@ -434,6 +439,8 @@ export function customizeView() {
         const fresh = document.createElement('div');
         fresh.innerHTML = preview();
         host.replaceWith(fresh.firstElementChild);
+        syncNavigation();
+        syncButtons();
       };
 
       const markDirty = (row) => {
@@ -473,14 +480,17 @@ export function customizeView() {
         const pixelEl = row.querySelector('[data-role="font-px"]');
 
         const commit = (value) => {
-          setToken(name, value);
-          if (name === '--f-ui' || name === '--fs-nav' || name === '--fw-nav' || name === '--ls-nav') syncNavigation();
-          if (name === '--f-ui' || name === '--fs-button' || name === '--fw-button') syncButtons();
+          setToken(name, value).catch(() => {
+            toast('This change could not be saved. Export a backup before leaving.', 'bad');
+            saveStatus.textContent = 'Save failed. Please export a backup.';
+          });
+          if (['--f-ui', '--fs-nav', '--fw-nav', '--ls-nav', '--fi-nav'].includes(name)) syncNavigation();
+          if (['--f-ui', '--f-button', '--fi-button', '--fs-button', '--fw-button'].includes(name)) syncButtons();
           noteChange();
           markDirty(row);
-          if (name.includes('banner') || name.includes('bm') || name.includes('--f-') || name.includes('--c-')) {
-            repaintPreview();
-          }
+          // Every typography control, including size, weight and spacing,
+          // must update the same preview that the user is editing.
+          repaintPreview();
         };
 
         if (colorEl) {
@@ -492,8 +502,16 @@ export function customizeView() {
         if (textEl) {
           textEl.addEventListener('change', () => {
             const v = textEl.value.trim();
-            if (colorEl && /^#[0-9a-f]{6}$/i.test(v)) colorEl.value = v;
-            commit(v);
+            const valid = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(v);
+            if (!valid) {
+              textEl.value = getToken(name);
+              toast('Enter a color such as #A83F62 (six hex digits).', 'bad');
+              return;
+            }
+            const normalized = v.length === 4 ? '#' + [...v.slice(1)].map(c => c + c).join('') : v;
+            if (colorEl) colorEl.value = normalized;
+            textEl.value = normalized;
+            commit(normalized);
           });
         }
         if (selectEl) {

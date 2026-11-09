@@ -5074,3 +5074,109 @@ body.canvas-editing .canvas-section-options button:hover {
   background:#f9f5ed;
   border-color:#a83f62;
 }
+
+/* Unified editor controls: predictable sizing, obvious affordances and readable
+   typography in every Design Mode panel (not individual one-off labels). */
+body.canvas-editing .canvas-panel,
+body.canvas-editing .canvas-picker-dialog {
+  --editor-type: 'EB Garamond', Georgia, serif;
+  font-family: var(--editor-type);
+}
+body.canvas-editing .canvas-panel :is(label, .hint, small, summary, output, .canvas-field-group, .canvas-kind-badge),
+body.canvas-editing .canvas-picker-dialog :is(label, .hint, small, output) {
+  font-family: var(--editor-type);
+  font-size: clamp(16px, 1.08rem, 19px);
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+body.canvas-editing .canvas-panel :is(button, select, input, textarea),
+body.canvas-editing .canvas-picker-dialog :is(button, select, input, textarea) {
+  font-family: var(--editor-type);
+  font-size: clamp(16px, 1.08rem, 19px);
+}
+body.canvas-editing .canvas-panel :is(button, select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), textarea),
+body.canvas-editing .canvas-picker-dialog :is(button, select, input:not([type="checkbox"]):not([type="radio"]):not([type="range"])) {
+  min-height: 40px;
+}
+body.canvas-editing .canvas-panel :is(button, input, select, textarea):focus-visible,
+body.canvas-editing .canvas-picker-dialog :is(button, input, select):focus-visible {
+  outline: 2px solid var(--design-rose);
+  outline-offset: 3px;
+}
+body.canvas-editing .canvas-panel :is(input[type="checkbox"], input[type="radio"]),
+body.canvas-editing .canvas-picker-dialog :is(input[type="checkbox"], input[type="radio"]) {
+  width: 19px;
+  height: 19px;
+  accent-color: var(--design-rose);
+}
+body.canvas-editing .canvas-panel .canvas-section-list .canvas-section-select small {
+  font-size: 16px;
+  line-height: 1.35;
+}
+body.canvas-editing .canvas-panel .canvas-section-list .canvas-section-select strong,
+body.canvas-editing .canvas-section-options strong {
+  font-family: var(--editor-type);
+  font-size: 20px;
+  font-weight: 600;
+}
+body.canvas-editing .canvas-picker-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(820px, calc(100vw - 32px));
+  max-height: min(84vh, 800px);
+  overflow: hidden;
+  padding: clamp(16px, 2.5vw, 28px);
+}
+body.canvas-editing .canvas-picker-dialog .canvas-section-options {
+  overflow-y: auto;
+  min-height: 0;
+  padding: 2px;
+  align-content: start;
+}
+body.canvas-editing .canvas-picker-dialog .canvas-section-options button[hidden] {
+  display: none !important;
+}
+body.canvas-editing .canvas-picker-search-label {
+  display: block;
+  margin: 2px 0 4px;
+  font-weight: 600;
+}
+body.canvas-editing #canvas-section-search {
+  width: 100%;
+  padding: 9px 12px;
+  background: #fffdf9;
+  border: 1px solid #bdb6a4;
+  color: #3e352d;
+}
+body.canvas-editing .canvas-section-search-count {
+  margin: 4px 0 8px;
+  font: 400 16px/1.3 'EB Garamond',Georgia,serif;
+  color: #5e634a;
+}
+body.canvas-editing .canvas-picker-dialog .canvas-section-options span {
+  font: 400 17px/1.35 'EB Garamond', Georgia, serif;
+  color: #625950;
+}
+body.canvas-editing .canvas-panel .canvas-add-card,
+body.canvas-editing .canvas-picker-dialog .canvas-section-options button {
+  text-align: left;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+body.canvas-editing .canvas-picker-dialog .canvas-section-options button:focus-visible {
+  outline: 2px solid var(--design-rose);
+}
+body.canvas-editing #app .settings-dashboard [data-settings-style] {
+  cursor: pointer;
+}
+body.canvas-editing #app .settings-dashboard [data-settings-style]:hover {
+  outline: 1px dashed var(--design-rose);
+  outline-offset: 3px;
+}
+@media (max-width: 680px) {
+  body.canvas-editing .canvas-picker-dialog .canvas-section-options { grid-template-columns: 1fr; }
+  body.canvas-editing .canvas-picker-dialog { max-height: 78vh; }
+}
+
+body.canvas-editing .canvas-picker-dialog .canvas-picker-grid { overflow-y:auto; min-height:0; }
+body.canvas-editing .canvas-picker-dialog > .canvas-panel-head { flex:none; }
+body.canvas-editing .canvas-picker-dialog > .canvas-panel-hint { flex:none; }

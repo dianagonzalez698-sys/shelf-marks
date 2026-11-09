@@ -2,7 +2,7 @@
 
 import { state, saveSettings, pruneUnlocks, bookmarkStats } from './state.js';
 import { esc, attr, toast, openSheet, confirmSheet } from './ui.js';
-import { exportBackup, importBackup, readFile } from './backup.js';
+import { exportBackup, importBackup, parseBackup, readFile } from './backup.js';
 import { quarters, formatDateTime } from './periods.js';
 import { estimate } from './store.js';
 import * as layout from './layout.js';
@@ -187,6 +187,13 @@ export function settingsView() {
         if (!f) return;
         try {
           const text = await readFile(f);
+          const incoming = parseBackup(text);
+          const approved = await confirmSheet({
+            title: 'Import this backup?',
+            body: `This file contains ${incoming.books.length} books and was exported ${incoming.exportedAt ? formatDateTime(incoming.exportedAt) : 'on an unknown date'}. Newer records and design settings may replace versions on this device. Existing books that are not in the file will stay here.`,
+            confirm: 'Import backup',
+          });
+          if (!approved) { file.value = ''; return; }
           const res = await importBackup(text);
           file.value = '';
           const row = (label, g) => `<li><span>${label}</span>
@@ -201,6 +208,7 @@ export function settingsView() {
               ${row('Bookmark photos', res.images)}
             </ul>
             <p class="small muted">
+              ${res.settingsTextStylesChanged ? 'Your Settings page typography was restored. ' : ''}
               ${res.settingsChanged ? 'Goals were newer in that file, so they were updated. ' : 'Your goals on this device were newer, so they were kept. '}
               ${res.themeChanged ? 'The design settings in that file were newer and have been applied. ' : ''}
               ${res.newlyUnlocked ? `${res.newlyUnlocked} new bookmark${res.newlyUnlocked === 1 ? '' : 's'} unlocked by the merged books.` : ''}
@@ -212,7 +220,7 @@ export function settingsView() {
           openSheet(`
             <h2>Import failed</h2>
             <p class="small">${esc(err.message || 'That file could not be read.')}</p>
-            <p class="small muted">Nothing on this device was changed.</p>
+            <p class="small muted">Check your journal before trying again. If the import stopped partway through, some records may have been updated.</p>
             <button class="btn btn-block" type="button" data-close>Close</button>
           `);
         }
