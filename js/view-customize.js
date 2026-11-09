@@ -33,13 +33,20 @@ const TOKEN_HELP = {
   '--fs-wordmark': 'Size of “Diana’s Lit Picks” in the top navigation.',
   '--fs-display': 'Size of large section headings, such as “The Year So Far”.',
   '--fs-body': 'Size of paragraphs and descriptive text throughout the site.',
-  '--fs-label': 'Size of small uppercase labels and metadata.',
+  '--fs-label': 'Small labels throughout the site, including field labels.',
   '--fs-nav': 'Size of the main navigation links at the top.',
   '--fw-display': 'Thickness of large display headings.',
   '--fi-display': 'Upright or italic display headings.',
   '--fw-body': 'Thickness of paragraph text.',
   '--fi-body': 'Upright or italic paragraph text.',
-  '--fw-label': 'Thickness of small labels and navigation details.',
+  '--fw-label': 'Boldness of small field labels and metadata.',
+  '--fw-nav': 'JOURNAL, LIBRARY, NOTEBOOK, COLLECTIONS and SETTINGS at the top.',
+  '--fs-button': 'Text inside buttons, including SAVE CHANGES.',
+  '--fw-button': 'Boldness of button text, including SAVE CHANGES.',
+  '--fs-studio-summary': 'The expandable titles PREVIEW & OPTIONAL STARTING STYLES and SAVE, RESTORE OR RESET DESIGN.',
+  '--fw-studio-summary': 'Boldness of the expandable Design Studio titles.',
+  '--fs-studio-help': 'The message next to SAVE CHANGES.',
+  '--fw-studio-help': 'Boldness of the save confirmation message.',
   '--fi-ui': 'Upright or italic navigation and interface labels.',
   '--h-banner': 'The height of the large banner at the top.',
   '--fs-banner-title': 'The main title inside that banner.',
@@ -123,7 +130,7 @@ function control(token) {
 const GROUP_GUIDE = {
   palette: ['Page colors', 'Change the backgrounds, text colors and accents used throughout Shelf Marks.'],
   banner: ['Top banner', 'Change the height, headline and decorative details of the opening banner.'],
-  typography: ['Fonts & text', 'Choose the fonts used across the site. For one specific heading, use Edit on that page.'],
+  typography: ['Fonts & text', 'Choose the exact text you want to change. Size and boldness are grouped by where the words appear.'],
   layout: ['Spacing & shape', 'Adjust the overall width, corners and spacing shared across pages.'],
   bookmarks: ['Bookmark display', 'Change how large bookmarks appear and how they are arranged.'],
   frames: ['Picture frames', 'Adjust the colors and proportions of the decorative frame styles.'],
@@ -138,7 +145,37 @@ const KEY_CONTROLS = {
   layout: [], bookmarks: [], frames: [], 'bookmark-colours': [],
 };
 
+const TYPE_TARGETS = [
+  { id: 'site-name', name: 'Site name', example: 'Diana’s Lit Picks', vars: ['--f-script', '--fs-wordmark'] },
+  { id: 'navigation', name: 'Top navigation', example: 'JOURNAL · LIBRARY · NOTEBOOK · COLLECTIONS · SETTINGS', vars: ['--f-ui', '--fs-nav', '--fw-nav'] },
+  { id: 'buttons', name: 'Buttons', example: 'SAVE CHANGES', vars: ['--fs-button', '--fw-button'] },
+  { id: 'studio-titles', name: 'Expandable Design Studio titles', example: 'PREVIEW & OPTIONAL STARTING STYLES', vars: ['--fs-studio-summary', '--fw-studio-summary'] },
+  { id: 'field-labels', name: 'Field labels', example: 'Display line height · Label case · Headline case', vars: ['--fs-label', '--fw-label'] },
+  { id: 'save-message', name: 'Save message', example: 'Changes made. Select Save changes to confirm.', vars: ['--fs-studio-help', '--fw-studio-help'] },
+  { id: 'headlines', name: 'Page headlines', example: 'The Year So Far', vars: ['--f-display', '--fs-display', '--fw-display', '--fi-display'] },
+  { id: 'paragraphs', name: 'Paragraph text', example: 'A little reading adventure, kept for good.', vars: ['--f-body', '--fs-body', '--fw-body', '--fi-body'] },
+];
+
+function typographyGroup(g) {
+  const used = new Set(TYPE_TARGETS.flatMap((target) => target.vars));
+  const extra = g.tokens.filter((token) => !used.has(token.var));
+  return `<section class="studio-edit-panel" data-studio-panel="typography" hidden>
+    <h3>Fonts & text</h3>
+    <p class="studio-panel-help">Select the words you recognize, then change their size or boldness. Your changes appear on the page immediately.</p>
+    <div class="field studio-type-picker">
+      <label for="studio-type-target">Which text do you want to edit?</label>
+      <select id="studio-type-target">${TYPE_TARGETS.map((target) => `<option value="${attr(target.id)}">${esc(target.name)}</option>`).join('')}</select>
+    </div>
+    ${TYPE_TARGETS.map((target, index) => `<div class="studio-type-target" data-type-target="${attr(target.id)}" ${index ? 'hidden' : ''}>
+      <p class="studio-type-example"><span>Example on your site</span>${esc(target.example)}</p>
+      <div class="studio-body">${target.vars.map((name) => g.tokens.find((token) => token.var === name)).filter(Boolean).map(control).join('')}</div>
+    </div>`).join('')}
+    ${extra.length ? `<details class="studio-advanced"><summary>More typography options <span>${extra.length} additional settings</span></summary><div class="studio-body">${extra.map(control).join('')}</div></details>` : ''}
+  </section>`;
+}
+
 function group(g) {
+  if (g.id === 'typography') return typographyGroup(g);
   const primary = KEY_CONTROLS[g.id] || [];
   const front = primary.length ? primary.map((key) => g.tokens.find((t) => t.var === key)).filter(Boolean) : g.tokens.slice(0, 4);
   const extra = g.tokens.filter((t) => !front.includes(t));
@@ -303,6 +340,11 @@ export function customizeView() {
       root.querySelector('#studio-area').onchange = (event) => {
         root.querySelectorAll('[data-studio-panel]').forEach((panel) => {
           panel.hidden = panel.dataset.studioPanel !== event.target.value;
+        });
+      };
+      root.querySelector('#studio-type-target').onchange = (event) => {
+        root.querySelectorAll('[data-type-target]').forEach((panel) => {
+          panel.hidden = panel.dataset.typeTarget !== event.target.value;
         });
       };
       root.querySelector('#mode-choice').onchange = async (event) => {
