@@ -4772,3 +4772,107 @@ body.canvas-editing #app .settings-dashboard .settings-disclosure > summary[data
   border-color:var(--c-accent-deep);
   color:var(--c-accent-ink) !important;
 }
+
+/* Design Mode's own palette (independent of the reader's page-color settings). */
+body.canvas-editing {
+  --design-rose:#a83f62;
+  --design-rose-dark:#852a4c;
+  --design-blush:#f7dee5;
+  --design-forest:#3c5949;
+  --design-sage:#dce9dd;
+  --design-ivory:#fff9f5;
+  --design-ink:#4b2828;
+  --design-line:#d9b8bf;
+}
+body.canvas-editing .canvas-toolbar {
+  background:var(--design-forest);
+  color:var(--design-ivory);
+  border-bottom:2px solid #a9c0ab;
+  box-shadow:0 4px 16px #243e3026;
+}
+body.canvas-editing .canvas-toolbar-title {color:#fff9f5;letter-spacing:.13em;}
+body.canvas-editing .canvas-save-state {color:#e4eee5;}
+body.canvas-editing .canvas-toolbar button {
+  background:var(--design-ivory);
+  color:var(--design-forest);
+  border:1px solid #d1e0d0;
+}
+body.canvas-editing .canvas-toolbar button:hover {background:var(--design-sage);border-color:#aec8af;}
+body.canvas-editing .canvas-toolbar button[data-canvas="finish"] {
+  background:var(--design-rose);
+  color:#fff9f5;
+  border-color:var(--design-rose);
+}
+body.canvas-editing .canvas-toolbar button[data-canvas="finish"]:hover {
+  background:var(--design-rose-dark);
+  border-color:var(--design-rose-dark);
+}
+body.canvas-editing .canvas-panel {
+  background:var(--design-ivory);
+  color:var(--design-ink);
+  border-color:var(--design-line);
+  box-shadow:4px 0 16px #3c59491c;
+}
+body.canvas-editing .canvas-panel-head,
+body.canvas-editing .canvas-panel h3,
+body.canvas-editing .canvas-panel h2 {color:var(--design-forest);}
+body.canvas-editing .canvas-panel-hint {color:#795b5e;}
+body.canvas-editing .canvas-panel-tabs,
+body.canvas-editing .canvas-panel-links,
+body.canvas-editing .canvas-section-list {border-color:var(--design-line);}
+body.canvas-editing .canvas-panel-tabs button {color:#705c60;}
+body.canvas-editing .canvas-panel-tabs button.active {
+  color:var(--design-rose);
+  border-bottom-color:var(--design-rose);
+}
+body.canvas-editing .canvas-panel input,
+body.canvas-editing .canvas-panel textarea,
+body.canvas-editing .canvas-panel select {
+  border-color:#d4b8be;
+  background:#fffdfb;
+  color:var(--design-ink);
+}
+body.canvas-editing .canvas-panel input:focus,
+body.canvas-editing .canvas-panel textarea:focus,
+body.canvas-editing .canvas-panel select:focus {
+  outline:2px solid var(--design-rose);
+  outline-offset:1px;
+}
+body.canvas-editing .canvas-panel input[type="range"],
+body.canvas-editing .canvas-panel input[type="checkbox"] {accent-color:var(--design-rose);}
+body.canvas-editing .canvas-section-label {
+  background:var(--design-sage);
+  border-left-color:var(--design-forest);
+}
+body.canvas-editing .canvas-add-card,
+body.canvas-editing .canvas-section-list button,
+body.canvas-editing .canvas-layer-row {
+  background:#fffdfb !important;
+  border-color:var(--design-line) !important;
+}
+body.canvas-editing .canvas-add-card:hover,
+body.canvas-editing .canvas-section-list button:hover {
+  background:var(--design-blush) !important;
+  border-color:var(--design-rose) !important;
+}
+body.canvas-editing .canvas-panel-links a,
+body.canvas-editing .canvas-panel .canvas-live-dot {color:var(--design-forest);}
+body.canvas-editing .canvas-text-done,
+body.canvas-editing .canvas-panel button.canvas-text-done {
+  background:var(--design-rose) !important;
+  color:var(--design-ivory) !important;
+  border-color:var(--design-rose) !important;
+}
+body.canvas-editing .canvas-panel .canvas-text-style-reset {color:var(--design-rose);}
+body.canvas-editing .canvas-text-target {
+  outline-color:var(--design-rose);
+  background:#f7dee540;
+}
+body.canvas-editing [data-sec].canvas-section-selected {
+  outline-color:var(--design-rose);
+}
+body.canvas-editing #app .settings-dashboard [data-settings-style]:hover {
+  outline-color:var(--design-rose);
+}
+body.canvas-editing .canvas-picker-dialog {background:var(--design-ivory);border-color:var(--design-line);}
+body.canvas-editing .canvas-picker-dialog h3 {color:var(--design-forest);}
