@@ -226,8 +226,8 @@ function group(g) {
     <h3>${esc(GROUP_GUIDE[g.id][0])}</h3>
     <p class="studio-panel-help">${esc(GROUP_GUIDE[g.id][1])}</p>
     ${g.id === 'palette' ? `<div class="studio-original-palette">
-      <div class="studio-original-palette-copy"><strong>Original reading-room colors</strong><span>Ivory, mahogany, olive, rose, blue and apricot.</span></div>
-      <button class="btn" type="button" id="studio-apply-original-colors">Apply original palette</button>
+      <div class="studio-original-palette-copy"><strong>Rose reading-room colors</strong><span>Warm ivory, mahogany and rose-pink accents, with green and blue details.</span></div>
+      <button class="btn" type="button" id="studio-apply-original-colors">Apply rose palette</button>
     </div>` : ''}
     <div class="studio-body">${front.map(control).join('')}</div>
     ${extra.length ? `<details class="studio-advanced"><summary>Fine-tune ${esc(GROUP_GUIDE[g.id][0].toLowerCase())} <span>${extra.length} more settings</span></summary>
@@ -341,6 +341,25 @@ export function customizeView() {
     `,
 
     onMount(root) {
+      // One-time update for this browser's Design Studio only. Do not reset
+      // readers' personalized palettes while they use the journal.
+      try {
+        const roseMarker = 'lit-picks-rose-colors-v1';
+        if (localStorage.getItem(roseMarker) !== 'done') {
+          const colors = THEME_SCHEMA.find((group) => group.id === 'palette').tokens;
+          const changes = Object.fromEntries(colors.map((token) => [token.var, null]));
+          changes['--c-bg-field'] = null;
+          changes['--c-success'] = null;
+          Object.entries(ORIGINAL_PALETTE).forEach(([name, value]) => {
+            if (name in changes) changes[name] = value;
+          });
+          setTokens(changes).then(() => {
+            localStorage.setItem(roseMarker, 'done');
+            navigateReload();
+          }).catch(() => {/* Keep the current saved colors if writing fails. */});
+          return;
+        }
+      } catch (_) {/* Storage disabled: keep the current appearance. */}
       const year = state.settings.year;
       // The masthead sits outside this view. Keep its typography and this
       // example in sync even if a previous stylesheet is still HTTP-cached.
@@ -381,7 +400,7 @@ export function customizeView() {
       const noteChange = () => { saveStatus.textContent = 'Changes made. Select Save changes to confirm.'; };
       root.querySelector('#studio-apply-original-colors')?.addEventListener('click', async () => {
         await setTokens(ORIGINAL_PALETTE);
-        toast('Original palette applied. Your other design settings are unchanged.', 'good');
+        toast('Rose palette applied. Your other design settings are unchanged.', 'good');
         navigateReload();
       });
       root.querySelector('#studio-save').onclick = async () => {

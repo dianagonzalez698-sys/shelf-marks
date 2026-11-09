@@ -31,7 +31,7 @@
 
   /* ink — Mahogany, lightened twice */
   --c-ink:           #49312b;   /* Mahogany */
-  --c-ink-soft:      #526b48;
+  --c-ink-soft:      #66514d;
   --c-ink-faint:     #78645c;   /* kept just past 4.5:1 on Porcelain */
 
   /* lines — Porcelain pulled toward Mahogany */
@@ -50,10 +50,10 @@
 
   /* accent — Burnt Apricot, deepened so links and buttons stay legible.
      The literal #d4763c lives on the bookmarks, where it carries no text. */
-  --c-accent:        #526b48;
-  --c-accent-ink:    #fffaf2;
-  --c-accent-soft:   #e4ebd9;
-  --c-accent-deep:   #3d5135;
+  --c-accent:        #a83f62;
+  --c-accent-ink:    #fff9f5;
+  --c-accent-soft:   #f7dee5;
+  --c-accent-deep:   #852a4c;
 
   /* the rest of the palette, for ornament */
   --c-rose:          #d87989;   /* Faded Rose */
