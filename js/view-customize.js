@@ -295,6 +295,25 @@ export function customizeView() {
 
     onMount(root) {
       const year = state.settings.year;
+      // The masthead sits outside this view. Keep its typography and this
+      // example in sync even if a previous stylesheet is still HTTP-cached.
+      const syncNavigation = () => {
+        const font = getToken('--f-ui');
+        const size = getToken('--fs-nav');
+        const weight = getToken('--fw-nav');
+        document.querySelectorAll('.masthead-link').forEach((link) => {
+          link.style.fontFamily = font;
+          link.style.fontSize = size;
+          link.style.fontWeight = weight;
+        });
+        const sample = root.querySelector('[data-preview-role="navigation"] strong');
+        if (sample) {
+          sample.style.fontFamily = font;
+          sample.style.fontSize = size;
+          sample.style.fontWeight = weight;
+        }
+      };
+      syncNavigation();
       const saveStatus = root.querySelector('#studio-save-status');
       const noteChange = () => { saveStatus.textContent = 'Changes made. Select Save changes to confirm.'; };
       root.querySelector('#studio-save').onclick = async () => {
@@ -367,6 +386,7 @@ export function customizeView() {
 
         const commit = (value) => {
           setToken(name, value);
+          if (name === '--f-ui' || name === '--fs-nav' || name === '--fw-nav') syncNavigation();
           noteChange();
           markDirty(row);
           if (name.includes('banner') || name.includes('bm') || name.includes('--f-') || name.includes('--c-')) {
