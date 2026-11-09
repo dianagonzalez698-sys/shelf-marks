@@ -4720,3 +4720,14 @@ html:not([data-theme="dark"]) .lit-hero {
 #app .canvas-section-label { font-size:max(.98rem, var(--fs-tiny));line-height:1.45; }
 #app .measure-stat { font-size:max(2rem, var(--fs-stat)); }
 #app .ed-sub { font-size:max(1.1rem, calc(1em * var(--fz-body, 1))); }
+
+/* Settings legibility: target its font shorthands directly. */
+#app .settings-dashboard .settings-card-head > span { font-size:1rem;line-height:1.4;letter-spacing:.11em; }
+#app .settings-dashboard .settings-disclosure > summary { font-size:1.06rem;line-height:1.5;letter-spacing:.015em; }
+#app .settings-dashboard .settings-mode-field > label,
+#app .settings-dashboard .settings-goals-card .field > label,
+#app .settings-dashboard .settings-link-grid a { font-size:1.05rem;line-height:1.45;letter-spacing:.035em; }
+#app .settings-dashboard .settings-mode-field .hint,
+#app .settings-dashboard .settings-disclosure .hint,
+#app .settings-dashboard .settings-footnote { font-size:1rem;line-height:1.6; }
+#app .settings-dashboard .settings-design-card > .lit-primary-action {font-size:1rem;line-height:1.4;letter-spacing:.055em;}
