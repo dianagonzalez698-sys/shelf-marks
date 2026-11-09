@@ -251,6 +251,7 @@ export const THEME_SCHEMA = [
       { var: '--fs-layout-description', label: 'Layouts description size', type: 'length', min: 0.75, max: 2.4, step: .05, unit: 'rem' },
       { var: '--fw-layout-description', label: 'Layouts description boldness', type: 'select', options: [['400', 'Regular'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']] },
       { var: '--fi-layout-description', label: 'Layouts description italic style', type: 'select', options: [['normal', 'Normal'], ['italic', 'Italic']] },
+      { var: '--fs-layout-list', label: 'Layouts section list text size', type: 'length', min: 16, max: 30, step: 1, unit: 'px' },
       { var: '--f-script', label: 'Wordmark script', type: 'font' },
       { var: '--f-display', label: 'Display serif (headings)', type: 'font' },
       { var: '--f-body', label: 'Body text', type: 'font' },

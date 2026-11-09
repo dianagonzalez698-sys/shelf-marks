@@ -6,7 +6,7 @@ import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
-import { fontWeights, fontHasItalic } from './theme.js';
+import { fontWeights, fontHasItalic, getToken, setToken } from './theme.js';
 import { esc, attr, toast, openSheet, confirmSheet, navigate, render, rich, richValue } from './ui.js';
 import { studioNav } from './studio-nav.js';
 
@@ -99,6 +99,13 @@ export function layoutView(params = {}) {
           ${custom ? '<button class="btn btn-danger" type="button" id="lay-reset">Reset page</button>' : ''}
         </div>
 
+        <div class="lay-type-size-control">
+          <label for="lay-type-size">Text size for the section list</label>
+          <input type="range" id="lay-type-size" min="16" max="30" step="1" value="${Math.round(parseFloat(getToken('--fs-layout-list')) || 20)}" aria-describedby="lay-type-size-hint">
+          <output for="lay-type-size" id="lay-type-size-value">${Math.round(parseFloat(getToken('--fs-layout-list')) || 20)}px</output>
+          <p id="lay-type-size-hint">Changes section names, descriptions, and small action labels below.</p>
+        </div>
+
         ${sections.some((x) => x.visible === false)
           ? `<p class="notice" style="margin-bottom:1rem"><strong>Some sections are hidden.</strong>
               Anything inside a hidden section — pictures included — won't appear on the page.
@@ -123,6 +130,15 @@ export function layoutView(params = {}) {
       };
 
       root.querySelector('#lay-add').onclick = () => openTypePicker(pageId);
+      const listSizeControl = root.querySelector('#lay-type-size');
+      listSizeControl?.addEventListener('input', (event) => {
+        const size = Number(event.target.value);
+        document.documentElement.style.setProperty('--fs-layout-list', size + 'px');
+        root.querySelector('#lay-type-size-value').textContent = size + 'px';
+      });
+      listSizeControl?.addEventListener('change', (event) => {
+        setToken('--fs-layout-list', event.target.value + 'px');
+      });
 
       const resetBtn = root.querySelector('#lay-reset');
       if (resetBtn) {
