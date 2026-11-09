@@ -5180,3 +5180,15 @@ body.canvas-editing #app .settings-dashboard [data-settings-style]:hover {
 body.canvas-editing .canvas-picker-dialog .canvas-picker-grid { overflow-y:auto; min-height:0; }
 body.canvas-editing .canvas-picker-dialog > .canvas-panel-head { flex:none; }
 body.canvas-editing .canvas-picker-dialog > .canvas-panel-hint { flex:none; }
+
+/* Functional editor labels stay upright and legible; decorative script belongs
+   to the journal pages, never to the control that explains how to edit them. */
+body.canvas-editing .canvas-panel .canvas-panel-head strong {
+  font: 600 19px/1.25 'EB Garamond',Georgia,serif;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  color: #4f563e;
+}
+body.canvas-editing .canvas-panel .canvas-section-inspector h2 {
+  font: 600 23px/1.25 'EB Garamond',Georgia,serif;
+}

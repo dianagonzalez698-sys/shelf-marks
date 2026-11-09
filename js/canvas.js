@@ -439,7 +439,7 @@ function paintPanel() {
   panel.hidden = false;
   if (panelMode === 'settings-style' && settingsStyleSelected) { paintSettingsStylePanel(panel); return; }
   if (simplePage && panelMode !== 'selected') {
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>PAGE ACCENTS</strong></div>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>${activePage.includes("settings") ? "PAGE DESIGN" : "PAGE ACCENTS"}</strong></div>
       <p class="canvas-panel-hint">${activePage.includes("settings") ? "Click any heading, label or description on this page to change its font, size, weight or color. Forms still work normally." : "Add text or artwork here. Books, forms and lists remain editable through their usual controls."}</p>
       <div class="canvas-panel-tabs"><button type="button" data-canvas="tab-add" class="${panelMode !== 'layers' ? 'active' : ''}">Add</button><button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button></div>
       ${panelMode === 'layers'
