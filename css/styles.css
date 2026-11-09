@@ -4876,3 +4876,61 @@ body.canvas-editing #app .settings-dashboard [data-settings-style]:hover {
 }
 body.canvas-editing .canvas-picker-dialog {background:var(--design-ivory);border-color:var(--design-line);}
 body.canvas-editing .canvas-picker-dialog h3 {color:var(--design-forest);}
+
+/* Softer sage + Paper Cake / EB Garamond editor typography. */
+body.canvas-editing {
+  --design-forest:#526d5b;
+  --design-sage:#e4ece3;
+  --design-ivory:#fff9f5;
+  --design-line:#d1c9ba;
+}
+body.canvas-editing .canvas-toolbar {
+  background:#526d5b;
+  border-bottom-color:#a9bfa9;
+}
+body.canvas-editing .canvas-save-state {color:#f1f5ee;}
+body.canvas-editing .canvas-toolbar button {
+  color:#526d5b;
+  border-color:#c7d7c7;
+}
+body.canvas-editing .canvas-toolbar button:hover {background:#e4ece3;border-color:#a4bba4;}
+body.canvas-editing .canvas-panel {background:#fff9f5;color:#4b2828;font-family:'EB Garamond',Georgia,serif;}
+body.canvas-editing .canvas-panel label,
+body.canvas-editing .canvas-panel p,
+body.canvas-editing .canvas-panel select,
+body.canvas-editing .canvas-panel input,
+body.canvas-editing .canvas-panel textarea,
+body.canvas-editing .canvas-panel button:not(.face-btn):not(.sty-face):not(.type-face),
+body.canvas-editing .canvas-panel a,
+body.canvas-editing .canvas-panel .canvas-panel-hint,
+body.canvas-editing .canvas-panel .type-quick-size label,
+body.canvas-editing .canvas-toolbar button,
+body.canvas-editing .canvas-save-state {
+  font-family:'EB Garamond',Georgia,serif;
+}
+body.canvas-editing .canvas-toolbar-title {
+  font-family:'Paper Cake Caps','EB Garamond',serif;
+  font-size:1.1rem;
+  letter-spacing:.08em;
+}
+body.canvas-editing .canvas-panel .canvas-panel-head strong,
+body.canvas-editing .canvas-panel .canvas-section-inspector h2,
+body.canvas-editing .canvas-panel h2,
+body.canvas-editing .canvas-panel h3 {
+  font-family:'Paper Cake','Snell Roundhand',cursive;
+  font-weight:400;
+  font-size:clamp(1.55rem,2.5vw,2rem);
+  line-height:1.3;
+  letter-spacing:0;
+  color:#526d5b;
+}
+body.canvas-editing .canvas-panel .canvas-section-label strong,
+body.canvas-editing .canvas-panel .canvas-section-label,
+body.canvas-editing .canvas-panel .canvas-sty-head,
+body.canvas-editing .canvas-panel .canvas-field-group {
+  font-family:'Paper Cake Caps','EB Garamond',serif;
+  letter-spacing:.025em;
+}
+body.canvas-editing .canvas-section-label {background:#e4ece3;border-left-color:#526d5b;}
+body.canvas-editing .canvas-panel-tabs button.active {color:#a83f62;border-bottom-color:#a83f62;}
+body.canvas-editing .canvas-panel-links a {color:#526d5b;}
