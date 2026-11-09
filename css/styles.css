@@ -4484,3 +4484,84 @@ html:not([data-theme="dark"]) .lit-hero {
   .settings-link-grid { grid-template-columns: 1fr; }
   .settings-heading h1 { font-size: clamp(3.2rem,13vw,5rem); }
 }
+
+
+/* Design Studio typography: one clearly named role per visible text area.
+   Defaults follow existing site styles until the owner changes a control. */
+:root {
+  --f-studio-tab: var(--f-ui);
+  --fs-studio-tab: var(--fs-label);
+  --fw-studio-tab: var(--fw-label);
+  --ls-studio-tab: var(--ls-label);
+  --f-studio-summary: var(--f-ui);
+  --ls-studio-summary: var(--ls-label);
+  --f-studio-heading: var(--f-display);
+  --fs-studio-heading: var(--fs-display);
+  --fw-studio-heading: var(--fw-display);
+  --f-studio-panel-title: var(--f-display);
+  --fs-studio-panel-title: clamp(1.5rem, 3vw, 2.05rem);
+  --fw-studio-panel-title: 400;
+  --f-studio-instructions: var(--f-body);
+  --fs-studio-instructions: var(--fs-small);
+  --fw-studio-instructions: 400;
+  --f-studio-picker: var(--f-ui);
+  --fs-studio-picker: var(--fs-small);
+  --fw-studio-picker: 500;
+}
+.studio-nav .studio-tab {
+  font-family: var(--f-studio-tab);
+  font-size: var(--fs-studio-tab);
+  font-weight: var(--fw-studio-tab);
+  letter-spacing: var(--ls-studio-tab);
+}
+.studio-group > summary {
+  font-family: var(--f-studio-summary);
+  letter-spacing: var(--ls-studio-summary);
+}
+.form-wrap > .section-head .section-title {
+  font-family: var(--f-studio-heading);
+  font-size: var(--fs-studio-heading);
+  font-weight: var(--fw-studio-heading);
+}
+.studio-edit-panel h3 {
+  font-family: var(--f-studio-panel-title);
+  font-size: var(--fs-studio-panel-title);
+  font-weight: var(--fw-studio-panel-title);
+}
+.studio-edit-panel .studio-panel-help,
+.studio-picker-note, .studio-type-guide {
+  font-family: var(--f-studio-instructions);
+  font-size: var(--fs-studio-instructions);
+  font-weight: var(--fw-studio-instructions);
+}
+.studio-picker-row label, .studio-type-picker label {
+  font-family: var(--f-studio-picker);
+  font-size: var(--fs-studio-picker);
+  font-weight: var(--fw-studio-picker);
+}
+.studio-type-example[data-preview-role="studio-tab"] strong {
+  font-family: var(--f-studio-tab); font-size: var(--fs-studio-tab);
+  font-weight: var(--fw-studio-tab); letter-spacing: var(--ls-studio-tab);
+  text-transform: var(--tt-label);
+}
+.studio-type-example[data-preview-role="studio-titles"] strong {
+  font-family: var(--f-studio-summary); font-size: var(--fs-studio-summary);
+  font-weight: var(--fw-studio-summary); letter-spacing: var(--ls-studio-summary);
+  text-transform: var(--tt-label);
+}
+.studio-type-example[data-preview-role="studio-heading"] strong {
+  font-family: var(--f-studio-heading); font-size: var(--fs-studio-heading);
+  font-weight: var(--fw-studio-heading);
+}
+.studio-type-example[data-preview-role="studio-panel"] strong {
+  font-family: var(--f-studio-panel-title); font-size: var(--fs-studio-panel-title);
+  font-weight: var(--fw-studio-panel-title);
+}
+.studio-type-example[data-preview-role="studio-instructions"] strong {
+  font-family: var(--f-studio-instructions); font-size: var(--fs-studio-instructions);
+  font-weight: var(--fw-studio-instructions);
+}
+.studio-type-example[data-preview-role="studio-picker"] strong {
+  font-family: var(--f-studio-picker); font-size: var(--fs-studio-picker);
+  font-weight: var(--fw-studio-picker);
+}

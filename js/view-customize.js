@@ -54,6 +54,24 @@ const TOKEN_HELP = {
   '--fw-button': 'Boldness of button text, including SAVE CHANGES.',
   '--fs-studio-summary': 'The expandable titles PREVIEW & OPTIONAL STARTING STYLES and SAVE, RESTORE OR RESET DESIGN.',
   '--fw-studio-summary': 'Boldness of the expandable Design Studio titles.',
+  '--f-studio-tab': 'Only the DESIGN, LAYOUTS and PICTURES tabs above the editor.',
+  '--fs-studio-tab': 'Size of DESIGN, LAYOUTS and PICTURES; does not affect Journal or Library.',
+  '--fw-studio-tab': 'Boldness of the three Design Studio tabs.',
+  '--ls-studio-tab': 'Space between letters in DESIGN, LAYOUTS and PICTURES.',
+  '--f-studio-summary': 'The two bottom expandable headings: Preview and Save/Restore.',
+  '--ls-studio-summary': 'Letter spacing in both bottom expandable headings.',
+  '--f-studio-heading': 'The large DESIGN STUDIO page title.',
+  '--fs-studio-heading': 'Size of the large DESIGN STUDIO page title.',
+  '--fw-studio-heading': 'Boldness of the large DESIGN STUDIO page title.',
+  '--f-studio-panel-title': 'The FONTS & TEXT, PAGE COLORS and other editing panel headings.',
+  '--fs-studio-panel-title': 'Size of the editing panel heading.',
+  '--fw-studio-panel-title': 'Boldness of the editing panel heading.',
+  '--f-studio-instructions': 'Explanatory paragraphs within the Design Studio.',
+  '--fs-studio-instructions': 'Size of the instructions beneath section headings.',
+  '--fw-studio-instructions': 'Boldness of explanatory text inside the Design Studio.',
+  '--f-studio-picker': 'Labels above the main dropdowns.',
+  '--fs-studio-picker': 'Size of WHAT WOULD YOU LIKE TO CHANGE? and LIGHT OR DARK APPEARANCE.',
+  '--fw-studio-picker': 'Boldness of the dropdown labels.',
   '--fs-studio-help': 'The message next to SAVE CHANGES.',
   '--fw-studio-help': 'Boldness of the save confirmation message.',
   '--fi-ui': 'Upright or italic navigation and interface labels.',
@@ -99,10 +117,10 @@ function control(token) {
         ${tokenLabel(token, id, dirty)}
         <span class="token-control">
           <select id="${id}" data-role="select">
-            ${token.var === '--f-studio-field' ? `<option value="var(--f-body)" ${current === 'var(--f-body)' ? 'selected' : ''}>Match body font</option>` : ''}
-            ${token.var === '--f-studio-advanced' ? `<option value="var(--f-ui)" ${current === 'var(--f-ui)' ? 'selected' : ''}>Match interface font</option>` : ''}
+            ${current === 'var(--f-body)' || current === 'var(--f-ui)' || current === 'var(--f-display)'
+              ? `<option value="${attr(current)}" selected>Match ${current === 'var(--f-body)' ? 'body' : current === 'var(--f-ui)' ? 'interface' : 'heading'} font</option>` : ''}
             ${FONT_STACKS.map((f) => `<option value="${attr(f.value)}" ${f.value === current ? 'selected' : ''}>${esc(f.label)}</option>`).join('')}
-            ${FONT_STACKS.some((f) => f.value === current) || current === 'var(--f-body)' || current === 'var(--f-ui)' ? '' : `<option value="${attr(current)}" selected>Custom</option>`}
+            ${FONT_STACKS.some((f) => f.value === current) || /^var\(--f-(?:body|ui|display)\)$/.test(current) ? '' : `<option value="${attr(current)}" selected>Custom</option>`}
           </select>
         </span>
         ${fontSample(token)}
@@ -162,7 +180,12 @@ const TYPE_TARGETS = [
   { id: 'site-name', name: 'Site name', example: 'Diana’s Lit Picks', vars: ['--f-script', '--fs-wordmark'] },
   { id: 'navigation', name: 'Top navigation', example: 'JOURNAL · LIBRARY · NOTEBOOK · COLLECTIONS · SETTINGS', vars: ['--f-ui', '--fs-nav', '--fw-nav', '--ls-nav'] },
   { id: 'buttons', name: 'Buttons', example: 'SAVE CHANGES', vars: ['--fs-button', '--fw-button'] },
-  { id: 'studio-titles', name: 'Expandable Design Studio titles', example: 'PREVIEW & OPTIONAL STARTING STYLES', vars: ['--fs-studio-summary', '--fw-studio-summary'] },
+  { id: 'studio-tab', name: 'DESIGN / LAYOUTS / PICTURES tabs', example: 'DESIGN  ·  LAYOUTS  ·  PICTURES', vars: ['--f-studio-tab', '--fs-studio-tab', '--fw-studio-tab', '--ls-studio-tab'] },
+  { id: 'studio-heading', name: '“Design Studio” main heading', example: 'Design Studio', vars: ['--f-studio-heading', '--fs-studio-heading', '--fw-studio-heading'] },
+  { id: 'studio-panel', name: '“Fonts & text” section heading', example: 'Fonts & text', vars: ['--f-studio-panel-title', '--fs-studio-panel-title', '--fw-studio-panel-title'] },
+  { id: 'studio-picker', name: 'Dropdown labels above selectors', example: 'What would you like to change? · Light or dark appearance', vars: ['--f-studio-picker', '--fs-studio-picker', '--fw-studio-picker'] },
+  { id: 'studio-instructions', name: 'Instruction & explanatory text', example: 'Select the words you recognize, then choose a font and size.', vars: ['--f-studio-instructions', '--fs-studio-instructions', '--fw-studio-instructions'] },
+  { id: 'studio-titles', name: 'Bottom expandable titles (Preview / Save)', example: 'PREVIEW & OPTIONAL STARTING STYLES   ·   SAVE, RESTORE OR RESET DESIGN', vars: ['--f-studio-summary', '--fs-studio-summary', '--fw-studio-summary', '--ls-studio-summary'] },
   { id: 'field-labels', name: 'Setting names in Design Studio', example: 'Label size · More text settings · Nav letterspacing', vars: ['--f-studio-field', '--fs-studio-field', '--fw-studio-field'] },
   { id: 'more-options', name: '“More typography options” heading', example: 'MORE TYPOGRAPHY OPTIONS · 11 ADDITIONAL SETTINGS', vars: ['--f-studio-advanced', '--fs-studio-advanced', '--fw-studio-advanced'] },
   { id: 'site-labels', name: 'Small labels elsewhere on site', example: 'READING PROGRESS · BOOKMARKS EARNED', vars: ['--fs-label', '--fw-label'] },
@@ -176,12 +199,14 @@ function typographyGroup(g) {
   const extra = g.tokens.filter((token) => !used.has(token.var));
   return `<section class="studio-edit-panel" data-studio-panel="typography" hidden>
     <h3>Fonts & text</h3>
-    <p class="studio-panel-help">Select the words you recognize, then change their font, size or boldness. The example below uses the same settings as that text on your site.</p>
+    <p class="studio-panel-help">Pick the exact text to edit. Its preview and controls appear below.</p>
     <div class="field studio-type-picker">
       <label for="studio-type-target">Which text do you want to edit?</label>
-      <select id="studio-type-target">${TYPE_TARGETS.map((target) => `<option value="${attr(target.id)}">${esc(target.name)}</option>`).join('')}</select>
+      <select id="studio-type-target">
+        <optgroup label="YOUR WEBSITE">${TYPE_TARGETS.filter((target) => !target.id.startsWith('studio-') && !['field-labels', 'more-options', 'save-message'].includes(target.id)).map((target) => `<option value="${attr(target.id)}">${esc(target.name)}</option>`).join('')}</optgroup>
+        <optgroup label="DESIGN STUDIO INTERFACE">${TYPE_TARGETS.filter((target) => target.id.startsWith('studio-') || ['field-labels', 'more-options', 'save-message'].includes(target.id)).map((target) => `<option value="${attr(target.id)}">${esc(target.name)}</option>`).join('')}</optgroup>
+      </select>
     </div>
-    <p class="studio-type-guide">Editing “Label size” or “Nav letterspacing” as words? Choose <b>Setting names in Design Studio</b>. Editing the “More typography options” heading? Choose <b>“More typography options” heading</b>. To change spacing between the actual Journal / Library navigation links, choose <b>Top navigation</b>.</p>
     ${TYPE_TARGETS.map((target, index) => `<div class="studio-type-target" data-type-target="${attr(target.id)}" ${index ? 'hidden' : ''}>
       <p class="studio-type-example" data-preview-role="${attr(target.id)}"><span>Example on your site</span><strong>${esc(target.example)}</strong></p>
       <div class="studio-body">${target.vars.map((name) => g.tokens.find((token) => token.var === name)).filter(Boolean).map(control).join('')}</div>
