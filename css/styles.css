@@ -4754,3 +4754,21 @@ body.canvas-editing #app .settings-dashboard .settings-disclosure > summary[data
 
 /* Keep the entire editable Settings title in the selected font. */
 #app .settings-heading h1 em {font-family:inherit;font-style:inherit;font-weight:inherit;letter-spacing:inherit;}
+
+/* One brand accent for every primary call to action, regardless of element type. */
+#app .btn-primary,
+#app .lit-primary-action,
+#app a.lit-primary-action,
+#app button.btn-primary {
+  background:var(--c-accent);
+  border-color:var(--c-accent);
+  color:var(--c-accent-ink) !important;
+}
+#app .btn-primary:hover,
+#app .lit-primary-action:hover,
+#app a.lit-primary-action:hover,
+#app button.btn-primary:hover {
+  background:var(--c-accent-deep);
+  border-color:var(--c-accent-deep);
+  color:var(--c-accent-ink) !important;
+}
