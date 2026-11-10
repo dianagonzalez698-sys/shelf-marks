@@ -339,16 +339,17 @@ function startPointer(e, node, item) {
   const bounds = host.getBoundingClientRect();
   const resize = !item.fullWidth && e.target.classList.contains('canvas-resize');
   const startX = e.clientX, startY = e.clientY;
-  const origin = { x: item.x, y: item.y, width: item.width, bottom: item.fullWidth ? bounds.bottom - node.getBoundingClientRect().bottom : 0 };
+  const canvasScale = Number(getComputedStyle(document.getElementById('app')).zoom) || 1;
+  const origin = { x: item.x, y: item.y, width: item.width, bottom: item.fullWidth ? (bounds.bottom - node.getBoundingClientRect().bottom) / canvasScale : 0 };
   node.setPointerCapture(e.pointerId);
   const move = (ev) => {
     const dx = ev.clientX - startX, dy = ev.clientY - startY;
     if (!moved && Math.abs(dx) + Math.abs(dy) < 3) return;
     if (!moved) { checkpoint(); moved = true; }
     const patch = resize
-      ? { width: clamp(origin.width + dx, 60, 1200) }
+      ? { width: clamp(origin.width + dx / canvasScale, 60, 1200) }
       : item.fullWidth
-        ? { anchorBottom: Math.round(origin.bottom - dy) }
+        ? { anchorBottom: Math.round(origin.bottom - dy / canvasScale) }
         : { x: clamp(origin.x + dx / Math.max(bounds.width, 1) * 100, 0, 100), y: clamp(origin.y + dy / Math.max(bounds.height, 1) * 100, 0, 100) };
     Object.assign(item, patch);
     if (resize) node.style.width = `${patch.width}px`;
@@ -757,7 +758,7 @@ function syncCanvasFit() {
     const offset = Math.ceil(sidebarWidth + 18);
     const scale = Math.min(1, Math.max(.48, (window.innerWidth - offset - 18) / window.innerWidth));
     app.style.setProperty('--canvas-fit-scale', String(scale));
-    app.style.setProperty('--canvas-fit-offset', offset + 'px');
+    app.style.setProperty('--canvas-fit-offset', Math.round(offset / scale) + 'px');
     document.body.classList.add('canvas-fit-page');
   }
   const button = document.querySelector('[data-canvas="toggle-fit"]');
@@ -896,7 +897,7 @@ function ensureTools() {
     let moved = false;
     const move = (event) => {
       if (event.pointerId !== e.pointerId) return;
-      const next = Math.max(-200, Math.min(400, Math.round(initial + event.clientY - startY)));
+      const next = Math.max(-200, Math.min(400, Math.round(initial + (event.clientY - startY) / (Number(getComputedStyle(document.getElementById('app')).zoom) || 1))));
       if (Math.abs(event.clientY - startY) > 3) moved = true;
       latest = next;
       owner.style.setProperty('--cur-offset', `${latest}px`);
