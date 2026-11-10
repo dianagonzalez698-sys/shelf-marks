@@ -740,12 +740,38 @@ function sectionPicker() {
   document.body.appendChild(modal);
 }
 
+// Keep the page's original layout width; scale the entire rendered page only
+// while the inspector is open. This is a viewport fit, never a saved design edit.
+let canvasFitEnabled = true;
+function syncCanvasFit() {
+  const app = document.getElementById('app');
+  const panel = document.getElementById('canvas-panel');
+  if (!app) return;
+  const fit = editing && canvasFitEnabled && window.innerWidth > 850 && panel && !panel.hidden;
+  if (!fit) {
+    app.style.removeProperty('--canvas-fit-scale');
+    app.style.removeProperty('--canvas-fit-offset');
+    document.body.classList.remove('canvas-fit-page');
+  } else {
+    const sidebarWidth = panel.getBoundingClientRect().width || 460;
+    const offset = Math.ceil(sidebarWidth + 18);
+    const scale = Math.min(1, Math.max(.48, (window.innerWidth - offset - 18) / window.innerWidth));
+    app.style.setProperty('--canvas-fit-scale', String(scale));
+    app.style.setProperty('--canvas-fit-offset', offset + 'px');
+    document.body.classList.add('canvas-fit-page');
+  }
+  const button = document.querySelector('[data-canvas="toggle-fit"]');
+  if (button) { button.textContent = canvasFitEnabled ? '100%' : 'Fit page'; button.title = canvasFitEnabled ? 'Show page at actual size' : 'Fit the entire page beside the editor'; }
+}
+window.addEventListener('resize', syncCanvasFit);
+
 function ensureTools() {
   if (document.getElementById('canvas-toolbar')) return;
   const bar = document.createElement('div');
   bar.id = 'canvas-toolbar'; bar.className = 'canvas-toolbar';
   bar.innerHTML = `<span class="canvas-toolbar-title">DESIGN MODE</span>
     <span class="canvas-save-state">Editing this page · Saved locally</span>
+    <button type="button" data-canvas="toggle-fit" title="Show page at actual size">100%</button>
     <button type="button" data-canvas="undo" title="Undo (⌘/Ctrl+Z)" aria-label="Undo">↶</button>
     <button type="button" data-canvas="redo" title="Redo (⌘/Ctrl+Shift+Z or Ctrl+Y)" aria-label="Redo">↷</button>
     <button type="button" data-canvas="finish">Done</button>`;
@@ -786,6 +812,7 @@ function ensureTools() {
       const name = document.getElementById('canvas-site-name')?.value.trim();
       if (name) theme.setContent('siteName', name).then(() => toast('Site name saved.', 'good'));
     }
+    if (action === 'toggle-fit') { canvasFitEnabled = !canvasFitEnabled; syncCanvasFit(); }
     if (action === 'finish') document.getElementById('edit-page')?.click();
     if (action === 'remove' && selected) removeSelected();
     if (action === 'deselect') select(null);
@@ -926,6 +953,7 @@ export function setEditing(next) {
   // the old panel here or it remains floating over unrelated pages.
   const panel = document.getElementById('canvas-panel');
   if (panel) panel.hidden = !next;
+  syncCanvasFit();
   render();
 }
 export function refresh() { if (activePage) render({ preservePanel: panelMode === 'section' || panelMode === 'text' }); }
