@@ -752,16 +752,16 @@ export const SECTION_TYPES = {
   /* 6. Decorative interlude ------------------------------------------------ */
   interlude: {
     label: 'Decorative interlude',
-    blurb: 'A narrow band — a strip of image, or just an ornament.',
+    blurb: 'A decorative picture or divider between sections.',
     create: () => ({
       mode: 'ornament',
       note: '',
       strip: media({ ratio: '21/9', frame: 'none', shadow: false }),
     }),
     fields: [
-      { key: 'mode', label: 'Kind', type: 'select', options: [['ornament', 'Ornament rule'], ['lace', 'Lace band'], ['vine', 'Vine band'], ['strip', 'Image strip'], ['rule', 'Plain rule']] },
+      { key: 'mode', label: 'Show', type: 'select', options: [['ornament', 'Decorative flourish'], ['lace', 'Lace decoration'], ['vine', 'Leaf decoration'], ['strip', 'My picture'], ['rule', 'Simple line']] },
       { key: 'note', label: 'Handwritten note', type: 'rich', styleRole: 'Body' },
-      { key: 'strip', label: 'Strip image', type: 'media', size: '1800 × 260 px' },
+      { key: 'strip', label: 'Main picture', type: 'media', size: '1800 × 260 px' },
       ...COMMON_FIELDS,
     ],
     render(sec) {
