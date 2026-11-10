@@ -5,8 +5,8 @@ import * as assets from './assets.js';
 import * as theme from './theme.js';
 import { FONT_STACKS } from './theme.js';
 import * as layout from './layout.js';
-import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './sections.js?v=77';
-import { openSectionEditor } from './view-layout.js?v=77';
+import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './sections.js?v=78';
+import { openSectionEditor } from './view-layout.js?v=78';
 import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } from './ui.js';
 
 
@@ -540,10 +540,9 @@ function paintPanel() {
     const sections = layout.get(activePage).filter((s) => s.visible !== false);
     const order = sections.findIndex((s) => s.id === selectedSectionId) + 1;
     const label = SECTION_TYPES[sec.type]?.label || 'Section';
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>SECTION ${order} OF ${sections.length}</strong><div class="canvas-panel-actions"><button type="button" data-canvas="section-back">← All sections</button><button type="button" data-canvas="section-exit" aria-label="Exit section editor">×</button></div></div>
-      <p class="canvas-section-label">Editing: <strong>${esc(label)}</strong></p>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>Edit section</strong><div class="canvas-panel-actions"><button type="button" data-canvas="section-back">← Page</button><button type="button" data-canvas="section-exit" aria-label="Close section editor">×</button></div></div>
       <div class="canvas-section-inspector"></div>
-      <button type="button" class="canvas-delete-section" data-canvas="delete-section">Remove this section</button>`;
+      <details class="studio-danger"><summary>Remove section</summary><p>Remove ${esc(label)} from this page?</p><button type="button" class="canvas-delete-section" data-canvas="delete-section">Remove ${esc(label)}</button></details>`;
     // Wire navigation at its source. On a small screen the panel is an
     // independently scrollable tray, so delegated document clicks are not a
     // reliable substitute for a working, obvious back/close control.
@@ -566,8 +565,8 @@ function paintPanel() {
       <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
     </div>`;
   if (panelMode !== 'selected' || !item) {
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>DESIGN STUDIO</strong><button type="button" data-canvas="finish" aria-label="Exit design mode">× Exit</button></div>${tabs}` +
-      (panelMode === 'sections' ? `<h3>Your page</h3><p class="canvas-panel-hint">Select any section below—or click an open area of it on the page—to edit it here.</p>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>Design editor</strong><button type="button" data-canvas="finish" aria-label="Exit design mode">× Exit</button></div>${tabs}` +
+      (panelMode === 'sections' ? `<h3>Sections</h3><p class="canvas-panel-hint">Click a section on the page to edit it.</p>
         <div class="canvas-section-list">${layout.get(activePage).filter((s) => s.visible !== false).map((s, i, arr) => `<div class="canvas-section-row" draggable="true" data-section-row="${esc(s.id)}">
           <span class="canvas-section-number" title="Drag to reorder">${sectionBadge(s.type)}</span>
           <button type="button" class="canvas-section-select" data-canvas-section="${esc(s.id)}"><strong>${esc(SECTION_TYPES[s.type]?.label || 'Section')}${arr.filter((x) => x.type === s.type).length > 1 ? ` <em class="canvas-duplicate">${arr.filter((x) => x.type === s.type).findIndex((x) => x.id === s.id) + 1} of ${arr.filter((x) => x.type === s.type).length}</em>` : ''}</strong><small>${esc(String(s.title || s.heading || s.text || SECTION_TYPES[s.type]?.blurb || '').replace(/<[^>]*>/g,'').slice(0,55))}</small></button>
