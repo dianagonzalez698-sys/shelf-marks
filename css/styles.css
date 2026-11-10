@@ -5019,11 +5019,11 @@ body.canvas-editing .canvas-panel .canvas-panel-head strong {
 }
 body.canvas-editing .canvas-panel h3,
 body.canvas-editing .canvas-panel .canvas-section-inspector h2 {
-  font:600 1.42rem/1.2 'EB Garamond',Georgia,serif;
+  font:600 1.2rem/1.2 'EB Garamond',Georgia,serif;
   letter-spacing:0;
 }
 body.canvas-editing .canvas-panel .canvas-panel-hint {
-  font:400 1.16rem/1.5 'EB Garamond',Georgia,serif;
+  font:400 1rem/1.45 'EB Garamond',Georgia,serif;
 }
 body.canvas-editing .canvas-panel .canvas-section-list .canvas-section-select strong {
   display:block;
@@ -5039,15 +5039,15 @@ body.canvas-editing .canvas-panel .canvas-section-list .canvas-section-select sm
   margin-top:4px;
 }
 body.canvas-editing .canvas-panel .canvas-add-card strong {
-  font:600 1.25rem/1.3 'EB Garamond',Georgia,serif;
+  font:600 1.08rem/1.3 'EB Garamond',Georgia,serif;
   color:#443a32;
 }
 body.canvas-editing .canvas-panel .canvas-add-card span {
-  font:400 1.08rem/1.4 'EB Garamond',Georgia,serif;
+  font:400 .96rem/1.4 'EB Garamond',Georgia,serif;
   color:#60564d;
 }
 body.canvas-editing .canvas-panel .canvas-panel-tabs button {
-  font:600 1.13rem/1.3 'EB Garamond',Georgia,serif;
+  font:600 1rem/1.3 'EB Garamond',Georgia,serif;
 }
 body.canvas-editing .canvas-picker-dialog,
 body.canvas-editing .canvas-picker-dialog button,
@@ -5063,11 +5063,11 @@ body.canvas-editing .canvas-picker-dialog .canvas-panel-hint {
   font:400 1.16rem/1.45 'EB Garamond',Georgia,serif;
 }
 body.canvas-editing .canvas-section-options strong {
-  font:600 1.24rem/1.3 'EB Garamond',Georgia,serif;
+  font:600 1.08rem/1.3 'EB Garamond',Georgia,serif;
   color:#403830;
 }
 body.canvas-editing .canvas-section-options span {
-  font:400 1.05rem/1.4 'EB Garamond',Georgia,serif;
+  font:400 .95rem/1.4 'EB Garamond',Georgia,serif;
   color:#645b51;
 }
 body.canvas-editing .canvas-section-options button:hover {
@@ -5082,10 +5082,10 @@ body.canvas-editing .canvas-picker-dialog {
   --editor-type: 'EB Garamond', Georgia, serif;
   font-family: var(--editor-type);
 }
-body.canvas-editing .canvas-panel :is(label, .hint, small, summary, output, .canvas-field-group, .canvas-kind-badge),
+body.canvas-editing .canvas-panel :is(label, p, .hint, small, summary, output, .canvas-field-group, .canvas-kind-badge, .canvas-section-label),
 body.canvas-editing .canvas-picker-dialog :is(label, .hint, small, output) {
   font-family: var(--editor-type);
-  font-size: clamp(16px, 1.08rem, 19px);
+  font-size: clamp(14px, .96rem, 16px);
   line-height: 1.4;
   letter-spacing: 0;
 }
@@ -5110,13 +5110,13 @@ body.canvas-editing .canvas-picker-dialog :is(input[type="checkbox"], input[type
   accent-color: var(--design-rose);
 }
 body.canvas-editing .canvas-panel .canvas-section-list .canvas-section-select small {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.35;
 }
 body.canvas-editing .canvas-panel .canvas-section-list .canvas-section-select strong,
 body.canvas-editing .canvas-section-options strong {
   font-family: var(--editor-type);
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 600;
 }
 body.canvas-editing .canvas-picker-dialog {
@@ -5150,11 +5150,11 @@ body.canvas-editing #canvas-section-search {
 }
 body.canvas-editing .canvas-section-search-count {
   margin: 4px 0 8px;
-  font: 400 16px/1.3 'EB Garamond',Georgia,serif;
+  font: 400 14px/1.3 'EB Garamond',Georgia,serif;
   color: #5e634a;
 }
 body.canvas-editing .canvas-picker-dialog .canvas-section-options span {
-  font: 400 17px/1.35 'EB Garamond', Georgia, serif;
+  font: 400 15px/1.35 'EB Garamond', Georgia, serif;
   color: #625950;
 }
 body.canvas-editing .canvas-panel .canvas-add-card,
@@ -5184,11 +5184,11 @@ body.canvas-editing .canvas-picker-dialog > .canvas-panel-hint { flex:none; }
 /* Functional editor labels stay upright and legible; decorative script belongs
    to the journal pages, never to the control that explains how to edit them. */
 body.canvas-editing .canvas-panel .canvas-panel-head strong {
-  font: 600 19px/1.25 'EB Garamond',Georgia,serif;
+  font: 600 17px/1.25 'EB Garamond',Georgia,serif;
   letter-spacing: .055em;
   text-transform: uppercase;
   color: #4f563e;
 }
 body.canvas-editing .canvas-panel .canvas-section-inspector h2 {
-  font: 600 23px/1.25 'EB Garamond',Georgia,serif;
+  font: 600 20px/1.25 'EB Garamond',Georgia,serif;
 }
