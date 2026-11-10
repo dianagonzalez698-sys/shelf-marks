@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES, applySectionVars } from './sections.js?v=81';
+import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES, applySectionVars, renderSection } from './sections.js?v=82';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
@@ -646,19 +646,23 @@ function fieldsHtml(def, sec, mode = 'all') {
       'curtainArt', 'curtainWhere', 'curtainOffset',
     ]);
     const chosen = all.filter((f) => mode === 'content'
-      ? content(f) || contentEssentials.has(f.key)
+      ? (sec.type === 'interlude' && f.key === 'mode' ? false : content(f) || contentEssentials.has(f.key))
       : mode === 'style' ? styleEssentials.has(f.key)
-      : mode === 'artwork' ? artworkEssentials.has(f.key)
+      : mode === 'artwork' ? artworkEssentials.has(f.key) || (sec.type === 'interlude' && f.key === 'mode')
       : false);
     if (!chosen.length && mode !== 'artwork') return `<p class="canvas-panel-hint">${mode === 'content' ? 'This section draws its words from your reading records, so there is no text to rewrite here.' : mode === 'style' ? 'This section uses the journal’s shared visual style.' : 'No additional options for this section.'}</p>`;
-    const draw = (f) => fieldControl(f, sec[f.key], sec.id, { inlineStyle: false });
+    const draw = (f) => {
+      const label = sec.type === 'interlude' && f.key === 'strip' ? 'Band artwork'
+        : sec.type === 'interlude' && f.key === 'bgImage' ? 'Background behind band' : f.label;
+      return fieldControl(label === f.label ? f : { ...f, label }, sec[f.key], sec.id, { inlineStyle: false });
+    };
     if (mode === 'style') {
       const appearance = chosen.filter((f) => f.type !== 'typeface');
       const typography = chosen.filter((f) => f.type === 'typeface');
       return `${appearance.length ? '<p class="canvas-field-group">Background</p>' + appearance.map(draw).join('') : ''}
         ${typography.length ? '<p class="canvas-field-group">Fonts & text colors</p>' + typography.map(draw).join('') : ''}`;
     }
-    if (mode === 'artwork') return `${sec.edge && sec.edge !== 'none' ? `<p class="canvas-panel-hint canvas-edge-help">${sec.edge === 'curtain' ? 'Place the curtain at the top or bottom.' : sec.edge === 'artwork' ? 'Choose which edge gets your artwork.' : 'This shapes the bottom edge.'}</p>` : ''}
+    if (mode === 'artwork') return `${sec.type === 'interlude' ? '<p class="canvas-panel-hint">Choose how this narrow band appears. Band artwork is shown when <strong>Image strip</strong> is selected; the background photograph sits behind it.</p>' : ''}${sec.edge && sec.edge !== 'none' ? `<p class="canvas-panel-hint canvas-edge-help">${sec.edge === 'curtain' ? 'Place the curtain at the top or bottom.' : sec.edge === 'artwork' ? 'Choose which edge gets your artwork.' : 'This shapes the bottom edge.'}</p>` : ''}
       ${chosen.length ? chosen.map(draw).join('') : '<p class="canvas-panel-hint">No built-in picture slots in this section.</p>'}
       <div class="canvas-artwork-cta"><p>Add freeform artwork—curtains, cloud borders, illustrations or decorative cutouts—and position it anywhere in this section.</p>
       <button type="button" data-canvas="image">＋ Place artwork here</button></div>`;
@@ -762,6 +766,15 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
         // Saving the underlying record alone does not repaint this page.
         const previewNode = [...document.querySelectorAll('#app [data-sec]')].find((node) => node.dataset.sec === sectionId);
         if (previewNode) applySectionVars(previewNode, fresh);
+        if (previewNode && fresh.type === 'interlude' && ('mode' in patch)) {
+          const template = document.createElement('template');
+          template.innerHTML = renderSection(fresh).trim();
+          const updated = template.content.firstElementChild;
+          if (updated) {
+            if (previewNode.classList.contains('canvas-section-selected')) updated.classList.add('canvas-section-selected');
+            previewNode.replaceWith(updated);
+          }
+        }
         if (warnBox) warnBox.innerHTML = warningsHtml(fresh);
         // A control that decides which other controls apply redraws the panel,
         // so the sheet never shows settings that cannot do anything.
@@ -1111,6 +1124,22 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
                   if (curtain) curtain.style.display = oldDisplay || '';
                 };
               }
+              // Render the actual section temporarily for every image choice.
+              // This also shows a strip even if its previous mode was an ornament.
+              const currentSection = layout.getSection(pageId, sectionId);
+              if (currentSection) {
+                const previewSection = { ...currentSection,
+                  [base]: idx === undefined ? { ...media(current), assetId: chosenId } : (currentSection[base] || []).map((item, i) => i === Number(idx) ? { ...media(item), assetId: chosenId } : item) };
+                if (base === 'strip' && chosenId) previewSection.mode = 'strip';
+                const template = document.createElement('template');
+                template.innerHTML = renderSection(previewSection).trim();
+                const nextNode = template.content.firstElementChild;
+                if (nextNode) {
+                  if (sectionNode.classList.contains('canvas-section-selected')) nextNode.classList.add('canvas-section-selected');
+                  sectionNode.replaceWith(nextNode);
+                  return () => { if (nextNode.isConnected) nextNode.replaceWith(sectionNode); };
+                }
+              }
               const oldUrl = assets.src(current?.assetId);
               const images = [...sectionNode.querySelectorAll('img')].filter((img) => oldUrl && img.src === oldUrl);
               const originals = images.map((img) => img.src);
@@ -1122,7 +1151,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
             };
             openMediaEditor(current, async (next, tweaks = {}) => {
               const fresh = layout.getSection(pageId, sectionId);
-              if (idx === undefined) await commit({ [base]: next, ...tweaks }, { rebuild: true });
+              if (idx === undefined) await commit({ [base]: next, ...(base === 'strip' && next.assetId ? { mode: 'strip' } : {}), ...tweaks }, { rebuild: true });
               else {
                 const list = [...(fresh[base] || [])];
                 list[Number(idx)] = next;
