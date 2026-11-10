@@ -1129,7 +1129,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               const currentSection = layout.getSection(pageId, sectionId);
               if (currentSection) {
                 const previewSection = { ...currentSection,
-                  [base]: idx === undefined ? { ...media(current), assetId: chosenId } : (currentSection[base] || []).map((item, i) => i === Number(idx) ? { ...media(item), assetId: chosenId } : item) };
+                  [base]: idx === undefined ? { ...media(current), ...tweaks, assetId: chosenId } : (currentSection[base] || []).map((item, i) => i === Number(idx) ? { ...media(item), assetId: chosenId } : item) };
                 if (base === 'strip' && chosenId) previewSection.mode = 'strip';
                 const template = document.createElement('template');
                 template.innerHTML = renderSection(previewSection).trim();
@@ -1326,7 +1326,7 @@ export function openMediaEditor(value, onSave, { role = '', size = '', previewSe
       let saved = false;
       const preview = () => {
         if (restorePreview) restorePreview();
-        restorePreview = previewSelection ? previewSelection(draft.assetId, curtainTweaks) : null;
+        restorePreview = previewSelection ? previewSelection(draft.assetId, { ...draft, ...curtainTweaks }) : null;
       };
       const observer = new MutationObserver(() => {
         if (sheet.isConnected) return;
@@ -1394,6 +1394,7 @@ export function openMediaEditor(value, onSave, { role = '', size = '', previewSe
             const out = sheet.querySelector(`[data-out="${key}"]`);
             if (out) out.textContent = el.value;
           } else draft[key] = el.value;
+          preview();
         });
       });
 
