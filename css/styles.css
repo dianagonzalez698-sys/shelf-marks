@@ -5602,3 +5602,81 @@ body.canvas-editing .ed.has-curtain .ed-curtain:hover::after {
 @media (max-width:899px) {
   .sheet-host .sheet.simple-picture-editor {width:min(96vw,420px) !important;max-height:88dvh !important;}
 }
+
+
+/* Compact typography throughout Design Mode. Keep the artwork's own fonts untouched. */
+body.canvas-editing .canvas-panel {
+  font: 400 14px/1.35 'EB Garamond',Georgia,serif !important;
+}
+body.canvas-editing .canvas-panel .canvas-panel-head strong {
+  font-size:16px !important;
+}
+body.canvas-editing .canvas-panel .canvas-panel-head button {
+  font-size:13px !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-inspector > h2 {
+  font-size:20px !important;
+  margin-bottom:9px !important;
+}
+body.canvas-editing .canvas-panel .canvas-inspector-tabs button,
+body.canvas-editing .canvas-panel .canvas-main-tabs button {
+  font:600 15px/1.15 'EB Garamond',Georgia,serif !important;
+  padding:9px 5px !important;
+  min-height:39px !important;
+}
+body.canvas-editing .canvas-panel #sec-fields .field-label,
+body.canvas-editing .canvas-panel #sec-fields .field > label,
+body.canvas-editing .canvas-panel .type-row-label,
+body.canvas-editing .canvas-panel .canvas-field-group > legend {
+  font-size:13px !important;
+}
+body.canvas-editing .canvas-panel #sec-fields input:not([type="range"]):not([type="checkbox"]):not([type="color"]),
+body.canvas-editing .canvas-panel #sec-fields textarea,
+body.canvas-editing .canvas-panel #sec-fields select,
+body.canvas-editing .canvas-panel #sec-fields .rich-input {
+  font:400 15px/1.25 'EB Garamond',Georgia,serif !important;
+  padding:8px 10px !important;
+  min-height:37px !important;
+}
+body.canvas-editing .canvas-panel #sec-fields .rich-input {min-height:43px !important;}
+body.canvas-editing .canvas-panel #sec-fields .rich-bar button,
+body.canvas-editing .canvas-panel #sec-fields .field button,
+body.canvas-editing .canvas-panel .canvas-section-moves button {
+  font-size:14px !important;
+  min-height:32px !important;
+}
+body.canvas-editing .canvas-panel #sec-fields .field {margin-bottom:11px !important;}
+body.canvas-editing .canvas-panel #sec-fields .media-pick {
+  min-height:48px !important;font-size:14px !important;
+}
+body.canvas-editing .canvas-panel #sec-fields .field:has([data-field="curtainOffset"]) label {
+  font-size:15px !important;
+}
+body.canvas-editing .canvas-panel .canvas-panel-hint,
+body.canvas-editing .canvas-panel .canvas-section-inspector p,
+body.canvas-editing .canvas-panel .canvas-section-select small,
+body.canvas-editing .canvas-panel .studio-danger,
+body.canvas-editing .canvas-panel .studio-danger p {
+  font-size:13px !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-select strong {font-size:15px !important;}
+body.canvas-editing .canvas-panel .canvas-section-select {min-height:42px !important;}
+body.canvas-editing .canvas-panel .canvas-section-row {padding:2px 0 !important;}
+body.canvas-editing .canvas-panel .canvas-delete-section {font-size:13px !important;}
+.simple-picture-editor {font-size:14px !important;}
+.simple-picture-editor .simple-picker-heading h2 {font-size:20px !important;}
+.simple-picture-editor .simple-picker-intro {font-size:13px !important;}
+.simple-picture-editor .simple-position-main {padding:10px !important;}
+.simple-picture-editor .simple-position-main label {font-size:15px !important;margin-bottom:6px !important;}
+.simple-picture-editor .simple-curtain-row label {font-size:13px !important;}
+.simple-picture-editor .simple-range-ends {font-size:12px !important;}
+.simple-picture-editor .simple-fit-more > summary,
+.simple-picture-editor .simple-gallery > summary,
+.simple-picture-editor .picture-tips > summary {font-size:14px !important;padding:8px 10px !important;}
+.simple-picture-editor .simple-gallery > summary span {font-size:12px !important;}
+.simple-picture-editor .simple-curtain-fit h3 {font-size:16px !important;}
+.simple-picture-editor .canvas-upload-choice {font-size:13px !important;min-height:32px !important;}
+.simple-picture-editor .picture-tips {font-size:12px !important;}
+.simple-picture-editor .simple-picker-actions .btn {font-size:14px !important;min-height:36px !important;}
+body.canvas-editing .canvas-panel .canvas-section-inspector .face-btn,
+body.canvas-editing .canvas-panel .canvas-section-inspector .ink-dot {font-size:13px !important;}
