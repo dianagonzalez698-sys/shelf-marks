@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from './sections.js?v=78';
+import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES, applySectionVars } from './sections.js?v=81';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
@@ -758,6 +758,10 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
       const commit = async (patch, { rebuild = false } = {}) => {
         await layout.updateSection(pageId, sectionId, patch);
         const fresh = layout.getSection(pageId, sectionId);
+        // Apply section typography and colours to the visible canvas immediately.
+        // Saving the underlying record alone does not repaint this page.
+        const previewNode = [...document.querySelectorAll('#app [data-sec]')].find((node) => node.dataset.sec === sectionId);
+        if (previewNode) applySectionVars(previewNode, fresh);
         if (warnBox) warnBox.innerHTML = warningsHtml(fresh);
         // A control that decides which other controls apply redraws the panel,
         // so the sheet never shows settings that cannot do anything.
@@ -827,7 +831,8 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
             // replacing the entire section (which would disrupt the editor).
             if (['text', 'textarea', 'rich'].includes(fieldDef.type)) {
               const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
-              const visible = [...(sectionNode?.querySelectorAll('[data-edit]') || [])].find(node => node.dataset.edit === key);
+              const previewKey = key === 'eyebrow' ? 'kicker' : key;
+              const visible = [...(sectionNode?.querySelectorAll('[data-edit]') || [])].find(node => node.dataset.edit === previewKey);
               if (visible) visible.innerHTML = rich(v);
             }
             if (fieldDef.type === 'font') el.style.fontFamily = v || 'inherit';
@@ -1025,7 +1030,8 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
 
           box.addEventListener('input', () => {
             const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
-            const visible = [...(sectionNode?.querySelectorAll('[data-edit]') || [])].find(node => node.dataset.edit === key);
+            const previewKey = key === 'eyebrow' ? 'kicker' : key;
+            const visible = [...(sectionNode?.querySelectorAll('[data-edit]') || [])].find(node => node.dataset.edit === previewKey);
             if (visible) visible.innerHTML = rich(richValue(box.innerHTML));
           });
 
