@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from './sections.js?v=75';
+import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from './sections.js?v=76';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
@@ -641,7 +641,7 @@ function fieldsHtml(def, sec, mode = 'all') {
     const artworkEssentials = new Set([
       'bgImage', 'backdrop', 'picture', 'inset', 'items', 'strip',
       'edge', 'edgeArt', 'edgeWhere', 'edgeSize',
-      'curtainArt', 'curtainWhere',
+      'curtainArt', 'curtainWhere', 'curtainOffset',
     ]);
     const chosen = all.filter((f) => mode === 'content'
       ? content(f) || contentEssentials.has(f.key)
@@ -812,6 +812,10 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               });
               await commit(hex ? { tone: 'none', toneHex: hex } : { toneHex: '' });
               return;
+            }
+            if (key === 'curtainOffset') {
+              const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
+              if (sectionNode) sectionNode.style.setProperty('--cur-offset', `${v}px`);
             }
             if (key === 'shape') {
               const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
