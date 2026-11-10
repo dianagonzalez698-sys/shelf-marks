@@ -1071,6 +1071,31 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               ? layout.getSection(pageId, sectionId)[base]
               : (layout.getSection(pageId, sectionId)[base] || [])[Number(idx)];
             const fieldDef = def.fields.find((x) => x.key === base) || {};
+            const previewSelection = (chosenId) => {
+              const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find((node) => node.dataset.sec === sectionId);
+              if (!sectionNode) return () => {};
+              const chosenUrl = assets.src(chosenId);
+              if (base === 'curtainArt') {
+                const previous = sectionNode.style.getPropertyValue('--cur-img');
+                const curtain = sectionNode.querySelector('.ed-curtain');
+                const oldDisplay = curtain?.style.display;
+                sectionNode.style.setProperty('--cur-img', chosenUrl ? `url("${chosenUrl.replace(/"/g, '%22')}")` : 'none');
+                if (curtain) curtain.style.display = chosenUrl ? '' : 'none';
+                return () => {
+                  if (previous) sectionNode.style.setProperty('--cur-img', previous);
+                  else sectionNode.style.removeProperty('--cur-img');
+                  if (curtain) curtain.style.display = oldDisplay || '';
+                };
+              }
+              const oldUrl = assets.src(current?.assetId);
+              const images = [...sectionNode.querySelectorAll('img')].filter((img) => oldUrl && img.src === oldUrl);
+              const originals = images.map((img) => img.src);
+              images.forEach((img) => { if (chosenUrl) img.src = chosenUrl; else img.style.visibility = 'hidden'; });
+              return () => images.forEach((img, index) => {
+                img.src = originals[index];
+                img.style.removeProperty('visibility');
+              });
+            };
             openMediaEditor(current, async (next) => {
               const fresh = layout.getSection(pageId, sectionId);
               if (idx === undefined) await commit({ [base]: next }, { rebuild: true });
@@ -1081,7 +1106,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               }
               refreshPanel();
               render();
-            }, { role: fieldDef.role || '', size: fieldDef.size || '' });
+            }, { role: fieldDef.role || '', size: fieldDef.size || '', previewSelection });
           };
         });
 
@@ -1122,7 +1147,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
 
 /* ------------------------------------------------------ media editor ---- */
 
-export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
+export function openMediaEditor(value, onSave, { role = '', size = '', previewSelection = null } = {}) {
   const m = media(value || {});
   const library = assets.list();
   // Each picture role has different rendering capabilities. In particular,
@@ -1144,6 +1169,7 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
 
   openSheet(`
     <h2>${isCurtain ? 'Curtain artwork' : isTrim ? 'Edge artwork' : isBackdrop ? 'Section background' : 'Picture'}</h2>
+    <p class="hint media-preview-note">Select an image to preview it on the page. Save picture to keep it, or Cancel to return to your previous choice.</p>
     ${size ? `<p class="hint" style="margin-top:-.3rem">This slot looks best at <b>${esc(size)}</b>.
       Bigger is fine — it is scaled down when you add it to the library.</p>` : ''}
 
@@ -1225,6 +1251,19 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
   `, {
     onMount(sheet, close) {
       const draft = { ...m };
+      sheet.classList.add('media-live-preview');
+      let restorePreview = null;
+      let saved = false;
+      const preview = () => {
+        if (restorePreview) restorePreview();
+        restorePreview = previewSelection ? previewSelection(draft.assetId) : null;
+      };
+      const observer = new MutationObserver(() => {
+        if (sheet.isConnected) return;
+        observer.disconnect();
+        if (!saved && restorePreview) restorePreview();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
 
       sheet.querySelector('[data-media-upload]').onchange = async (e) => {
         const file = e.target.files?.[0];
@@ -1251,7 +1290,9 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
           button.onclick = () => {
             draft.assetId = asset.id;
             sheet.querySelectorAll('[data-pick]').forEach((b) => b.classList.toggle('is-on', b === button));
+            preview();
           };
+          preview();
           toast('Picture uploaded. Choose Save picture to place it.', 'good');
         } catch (err) { toast(err.message || 'Could not upload that picture.', 'bad'); }
       };
@@ -1260,6 +1301,7 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
         btn.onclick = () => {
           draft.assetId = btn.dataset.pick || null;
           sheet.querySelectorAll('[data-pick]').forEach((b) => b.classList.toggle('is-on', b === btn));
+          preview();
         };
       });
 
@@ -1279,6 +1321,9 @@ export function openMediaEditor(value, onSave, { role = '', size = '' } = {}) {
         // Save before closing: closing returns to the panel underneath and
         // rebuilds it, so committing afterwards would rebuild from stale data
         // and the picture would look as though it had not been placed.
+        if (restorePreview) restorePreview();
+        restorePreview = null;
+        saved = true;
         await onSave(draft);
         close();
         toast('Picture placed.', 'good', 1600);

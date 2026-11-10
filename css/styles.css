@@ -5192,3 +5192,40 @@ body.canvas-editing .canvas-panel .canvas-panel-head strong {
 body.canvas-editing .canvas-panel .canvas-section-inspector h2 {
   font: 600 20px/1.25 'EB Garamond',Georgia,serif;
 }
+
+
+/* Readable section-editor tabs, regardless of inherited Paper Cake typography. */
+body.canvas-editing .canvas-panel .canvas-inspector-tabs button {
+  font: 600 1.18rem/1.2 'EB Garamond', Georgia, serif !important;
+  letter-spacing: .01em !important;
+  text-transform: none !important;
+  padding: 13px 6px !important;
+  min-height: 48px;
+  color: #514c40 !important;
+}
+body.canvas-editing .canvas-panel .canvas-inspector-tabs button.active {
+  color: #a83f62 !important;
+  border-bottom-color: #a83f62 !important;
+}
+.ed.has-curtain {
+  --cur-lift: var(--cur-lift-user, clamp(18px, 3.66vw, 96px));
+}
+
+/* Keep the page visible while comparing picture choices. */
+@media (min-width: 900px) {
+  .sheet-host:has(.media-live-preview) {
+    justify-content: flex-end;
+    align-items: stretch;
+    background: rgba(36,28,21,.08);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .sheet-host .sheet.media-live-preview {
+    width: min(430px, 38vw);
+    max-height: 100vh;
+    height: 100%;
+    border-radius: 0;
+    padding: 1.5rem;
+  }
+}
+.media-preview-note { color: #52604c; }

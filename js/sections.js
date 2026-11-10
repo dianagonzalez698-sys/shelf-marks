@@ -257,6 +257,7 @@ function sectionShell(sec, inner, extraClass = '') {
       styles.push(
         `--cur-img:url('${attr(url)}')`,
         `--cur-h:${drop}vw`,
+        `--cur-lift-user:${Math.max(0, Math.min(140, Number(sec.curtainLift ?? 72)))}px`,
         `--cur-side:${(sideFrac * 100).toFixed(2)}%`,
         // Your own adjustment to the reserved space. The measurement below
         // reads the hem from the picture, but how close text should sit to
@@ -432,6 +433,7 @@ const COMMON_FIELDS = [
   { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
   { key: 'curtainWhere', label: 'Curtain placement', type: 'select', options: CURTAIN_WHERE, when: (s) => s.edge === 'curtain' },
   { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainLift', label: 'Lift curtain over previous section (px)', type: 'range', min: 0, max: 140, step: 2, when: (s) => s.edge === 'curtain' },
   { key: 'curtainGap', label: 'Space between curtain and text', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
 
   { key: 'spacing', label: 'Vertical space', type: 'select', options: SPACING },
@@ -459,6 +461,7 @@ export const SECTION_BASE = {
   curtainArt: media({ assetId: null, ratio: 'auto', frame: 'none', shadow: false }),
   curtainWhere: 'top',
   curtainDrop: 30,
+  curtainLift: 72,
   curtainGap: 0,
   edgeV: 3,
   fontDisplay: '',
@@ -591,6 +594,7 @@ export const SECTION_TYPES = {
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
       { key: 'curtainWhere', label: 'Curtain placement', type: 'select', options: CURTAIN_WHERE, when: (s) => s.edge === 'curtain' },
       { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainLift', label: 'Lift curtain over previous section (px)', type: 'range', min: 0, max: 140, step: 2, when: (s) => s.edge === 'curtain' },
       { key: 'curtainGap', label: 'Space between curtain and text', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
       { key: 'showInset', label: 'Show a framed photo on top', type: 'bool' },
       { key: 'inset', label: 'Framed photo', type: 'media', size: '900 × 1125 px' },
@@ -1342,6 +1346,7 @@ export const SECTION_TYPES = {
       { key: 'curtainArt', label: 'Curtain picture', type: 'media', role: 'curtain', size: '2400 × 1000 px, transparent PNG', when: (s) => s.edge === 'curtain' },
       { key: 'curtainWhere', label: 'Curtain placement', type: 'select', options: CURTAIN_WHERE, when: (s) => s.edge === 'curtain' },
       { key: 'curtainDrop', label: 'How far the curtain hangs', type: 'range', min: 8, max: 60, step: 1, when: (s) => s.edge === 'curtain' },
+  { key: 'curtainLift', label: 'Lift curtain over previous section (px)', type: 'range', min: 0, max: 140, step: 2, when: (s) => s.edge === 'curtain' },
       { key: 'curtainGap', label: 'Space between curtain and text', type: 'range', min: -180, max: 120, step: 4, when: (s) => s.edge === 'curtain' },
       ...TYPE_FIELDS,
     ],
