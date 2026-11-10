@@ -5229,3 +5229,163 @@ body.canvas-editing .canvas-panel .canvas-inspector-tabs button.active {
   }
 }
 .media-preview-note { color: #52604c; }
+
+
+/* Design Studio refresh: quiet, Canva-like controls; ornament stays on the page. */
+body.canvas-editing .canvas-panel {
+  width: min(392px, 34vw);
+  background: #fffdf8;
+  border-right: 1px solid #ded7c9;
+  box-shadow: 7px 0 24px rgba(56, 51, 42, .08);
+}
+body.canvas-editing .canvas-panel .canvas-panel-head {
+  background: #fffdf8;
+  border-bottom: 1px solid #e4ded3;
+  position: sticky;
+  top: 0;
+  z-index: 6;
+}
+body.canvas-editing .canvas-panel .canvas-panel-head strong,
+body.canvas-editing .canvas-panel .canvas-section-inspector h2 {
+  font: 600 20px/1.25 'EB Garamond', Georgia, serif !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: #3d4436 !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-label {
+  background: #f1f2e9 !important;
+  border-left: 3px solid #858c71 !important;
+  padding: 12px 15px !important;
+}
+body.canvas-editing .canvas-panel .canvas-panel-hint {
+  font: 400 16px/1.4 'EB Garamond', Georgia, serif !important;
+  color: #686256 !important;
+}
+body.canvas-editing .canvas-panel .canvas-inspector-tabs {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  padding: 4px;
+  gap: 3px;
+  border: 1px solid #e1dacd;
+  background: #f5f1e9;
+  border-radius: 9px;
+}
+body.canvas-editing .canvas-panel .canvas-inspector-tabs button {
+  font: 600 17px/1.2 'EB Garamond',Georgia,serif !important;
+  min-height: 39px !important;
+  border: 0 !important;
+  border-radius: 6px;
+  padding: 8px 3px !important;
+}
+body.canvas-editing .canvas-panel .canvas-inspector-tabs button.active {
+  color: #3d4436 !important;
+  background: #fffdf8;
+  box-shadow: 0 1px 5px #332b201b;
+}
+body.canvas-editing .canvas-panel #sec-fields { margin-top: 14px !important; }
+body.canvas-editing .canvas-panel #sec-fields .field {
+  margin-bottom: 12px;
+}
+body.canvas-editing .canvas-panel #sec-fields input,
+body.canvas-editing .canvas-panel #sec-fields select,
+body.canvas-editing .canvas-panel #sec-fields textarea {
+  border-radius: 5px;
+}
+body.canvas-editing .canvas-panel .canvas-section-list {
+  display: grid;
+  gap: 0;
+}
+body.canvas-editing .canvas-panel .canvas-section-row {
+  border-bottom: 1px solid #e7e0d5;
+}
+body.canvas-editing .canvas-panel .canvas-section-select {
+  min-height: 60px;
+}
+body.canvas-editing .canvas-panel .canvas-section-select strong {
+  font: 600 17px/1.2 'EB Garamond',Georgia,serif !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-select small {
+  font: 400 14px/1.2 'EB Garamond',Georgia,serif !important;
+  color: #766f61 !important;
+}
+body.canvas-editing .canvas-panel .canvas-panel-tabs button {
+  font: 600 17px/1.2 'EB Garamond',Georgia,serif !important;
+}
+/* Asset chooser: thumbnail first, short labels, controls on one sheet. */
+.sheet-host .sheet.simple-picture-editor {
+  --c-ink: #3e3b34;
+  background: #fffdf8;
+  border-left: 1px solid #e2dbcd;
+  padding: 20px 22px;
+}
+.simple-picture-editor .simple-picker-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.simple-picture-editor .simple-picker-heading h2 {
+  font: 600 25px/1.15 'EB Garamond',Georgia,serif !important;
+  margin: 0;
+  color: #3e4437;
+}
+.simple-picture-editor .simple-picker-heading span {
+  color:#536148;background:#e7eadf;padding:5px 9px;border-radius:30px;
+  font: 600 12px/1 'EB Garamond',Georgia,serif;
+}
+.simple-picture-editor .simple-picker-intro {
+  font: 400 16px/1.35 'EB Garamond',Georgia,serif;
+  color:#716b60;margin:6px 0 12px;
+}
+.simple-picture-editor .canvas-upload-choice {
+  margin:0 0 10px;min-height:43px;display:grid;place-items:center;
+  border:1px dashed #c4b8a4;background:#f8f5ef;color:#7e4e5c;
+  font:600 16px/1.2 'EB Garamond',Georgia,serif;
+}
+.simple-picture-editor .asset-picker {
+  grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-height:240px;
+  border:0;padding:2px;background:transparent;
+}
+.simple-picture-editor .asset-opt {min-width:0;}
+.simple-picture-editor .asset-opt-thumb {
+  border-radius:5px;aspect-ratio:1.1;
+  border:2px solid transparent;
+  transition:border-color .13s;
+}
+.simple-picture-editor .asset-opt:hover .asset-opt-thumb {border-color:#b3b5a1;}
+.simple-picture-editor .asset-opt.is-on .asset-opt-thumb {border-color:#af4167;box-shadow:0 0 0 1px white inset;}
+.simple-picture-editor .asset-opt-name {
+  font:400 12px/1.2 'EB Garamond',Georgia,serif;
+  color:#655f55;margin-top:4px;
+}
+.simple-picture-editor .simple-curtain-fit {
+  border-top:1px solid #e5dfd4;margin-top:14px;padding-top:12px;
+}
+.simple-picture-editor .simple-curtain-fit h3 {
+  font:600 19px/1.2 'EB Garamond',Georgia,serif;color:#3c4535;margin:0 0 9px;
+}
+.simple-picture-editor .simple-curtain-row {
+  margin-bottom:10px;
+}
+.simple-picture-editor .simple-curtain-row label {
+  display:flex;justify-content:space-between;
+  font:500 15px/1.2 'EB Garamond',Georgia,serif;
+  color:#4d4a41;margin-bottom:5px;
+}
+.simple-picture-editor .simple-curtain-row input {width:100%;accent-color:#a83f62;}
+.simple-picture-editor .picture-tips {
+  margin:10px 0;border-top:1px solid #e5dfd4;padding-top:10px;
+  font:400 14px/1.3 'EB Garamond',Georgia,serif;color:#746b5f;
+}
+.simple-picture-editor .picture-tips summary {cursor:pointer;font-weight:600;}
+.simple-picture-editor .picture-tips p {margin:6px 0 0;}
+.simple-picture-editor .simple-picker-actions {
+  position:sticky;bottom:-20px;background:#fffdf8;
+  margin:12px -22px -20px;padding:12px 22px 18px;
+  border-top:1px solid #e5dfd4;
+}
+.simple-picture-editor .simple-picker-actions .btn {
+  font:600 17px/1.2 'EB Garamond',Georgia,serif;
+  min-height:42px;border-radius:5px;
+}
+@media (max-width:899px) {
+  body.canvas-editing .canvas-panel {width:min(100%,420px);}
+  .sheet-host .sheet.simple-picture-editor {width:min(100vw,450px);max-height:92dvh;}
+}
