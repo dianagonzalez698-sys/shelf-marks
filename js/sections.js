@@ -86,8 +86,10 @@ const ROLE_FOR_KEY = {
   note: 'Body', caption: 'Body', quote: 'Body',
 };
 
-export function roleForKey(key) {
-  const name = ROLE_FOR_KEY[key];
+export function roleForKey(key, sectionType = '') {
+  const name = key === 'text' && sectionType === 'statement' ? 'Display'
+    : key === 'text' && sectionType === 'note' ? 'Script'
+    : ROLE_FOR_KEY[key];
   return name ? TYPE_ROLES.find((r) => r.role === name) || null : null;
 }
 

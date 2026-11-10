@@ -1448,7 +1448,7 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 }
 .lit-arch-copy .ed-title { color: inherit; font-size: clamp(2.8rem, 4.7vw, 4.6rem); line-height: 1.07; }
 .lit-arch-copy .ed-kicker, .lit-arch-body { color: inherit; }
-.lit-arch-body { max-width: 37ch; line-height: 1.7; font-size: clamp(1rem, 1.6vw, 1.28rem); margin: 1.4rem auto 0; }
+.lit-arch-body { max-width: 37ch; line-height: 1.7; font-size: calc(clamp(1rem, 1.6vw, 1.28rem) * var(--fz-body, 1)); margin: 1.4rem auto 0; }
 .lit-arch-flourish { display: block; margin-top: 1.4rem; font-size: 1.8rem; opacity: .65; }
 .lit-arch-flip .lit-arch-copy { margin-left: auto; margin-right: clamp(0px, 3vw, 70px); }
 @media (max-width: 680px) {
@@ -1599,8 +1599,8 @@ input[type="range"] { width: 100%; min-height: 32px; accent-color: var(--c-accen
 }
 .ed-sub {
   margin: .35rem 0 0;
-  font-size: calc(1em * var(--fz-body, 1));
-  font-style: italic;
+  font-size: calc(1.1rem * var(--fz-body, 1));
+  font-style: var(--fi-body, normal);
   color: var(--c-body-ink, var(--c-ink-soft));
 }
 .ed-meta {
@@ -1626,13 +1626,13 @@ a.ed-meta:hover { color: var(--c-accent); }
 /* Handwritten marginalia. */
 .marginalia {
   font-family: var(--f-script);
-  font-size: 1.5rem;
+  font-size: calc(1.5rem * var(--fz-script, 1));
   line-height: 1.25;
   color: var(--c-accent);
   transform: rotate(var(--m-rot, -2deg));
   margin: 1rem 0 0;
 }
-.marginalia.big { font-size: clamp(1.7rem, 4vw, 2.9rem); margin: 0; }
+.marginalia.big { font-size: calc(clamp(1.7rem, 4vw, 2.9rem) * var(--fz-script, 1)); margin: 0; }
 .marginalia.center { text-align: center; }
 .ed-dark .marginalia { color: var(--c-banner-accent); }
 
@@ -1687,8 +1687,8 @@ a.ed-meta:hover { color: var(--c-accent); }
 .hero-sub {
   margin: 1rem 0 0;
   font-family: var(--f-body);
-  font-style: italic;
-  font-size: var(--fs-banner-sub);
+  font-style: var(--fi-body, normal);
+  font-size: calc(var(--fs-banner-sub) * var(--fz-body, 1));
   color: var(--c-body-ink, var(--c-banner-ink-dim));
 }
 
@@ -1761,9 +1761,9 @@ a.ed-meta:hover { color: var(--c-accent); }
   letter-spacing: var(--ls-display);
   text-wrap: balance;
 }
-.st-medium p { font-size: clamp(1.6rem, 4vw, 2.6rem); max-width: 24ch; }
-.st-large  p { font-size: clamp(2rem, 6vw, 4rem);     max-width: 18ch; }
-.st-huge   p { font-size: clamp(2.4rem, 9vw, 6rem);   max-width: 14ch; }
+.st-medium p { font-size: calc(clamp(1.6rem, 4vw, 2.6rem) * var(--fz-display, 1)); max-width: 24ch; }
+.st-large  p { font-size: calc(clamp(2rem, 6vw, 4rem) * var(--fz-display, 1)); max-width: 18ch; }
+.st-huge   p { font-size: calc(clamp(2.4rem, 9vw, 6rem) * var(--fz-display, 1)); max-width: 14ch; }
 .st-caps   p { text-transform: uppercase; }
 .st-quote  { position: relative; padding-left: .7em; }
 .st-quote p { font-style: italic; }
@@ -1776,7 +1776,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 }
 .st-script p {
   font-family: var(--f-script); line-height: 1.1;
-  font-size: clamp(2.4rem, 8vw, 5.5rem); letter-spacing: 0; max-width: 16ch;
+  font-size: calc(clamp(2.4rem, 8vw, 5.5rem) * var(--fz-display, 1)); letter-spacing: 0; max-width: 16ch;
 }
 .statement cite {
   display: block; margin-top: 1.2rem;
@@ -4201,7 +4201,7 @@ html:not([data-theme="dark"]) .lit-hero {
 /* Optional additions to the original homepage, not forced default blocks. */
 .lit-optional-notebook { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); gap: clamp(30px,6vw,100px); padding: clamp(50px,8vw,130px) clamp(25px,8vw,130px); background: var(--c-bg-raised); }
 .lit-optional-intro h2 { font: 400 clamp(3rem,5vw,6rem)/1 var(--f-display); letter-spacing: -.04em; margin: 20px 0; }
-.lit-optional-intro p { font: 1.3rem/1.5 var(--f-body); color: var(--c-ink-soft); }
+.lit-optional-intro p { font: 1.3rem/1.5 var(--f-body); font-size:calc(1.3rem * var(--fz-body, 1)); color: var(--c-ink-soft); }
 .lit-optional-intro>a { display: inline-block; font: .76rem var(--f-ui); color: var(--c-accent); margin-top: 20px; }
 .lit-optional-entries { align-self: center; }
 .lit-optional-entry { display: block; color: var(--c-ink); text-decoration: none; padding: 25px 0; border-bottom: 1px solid var(--c-rule-strong); }
@@ -4719,7 +4719,7 @@ html:not([data-theme="dark"]) .lit-hero {
 #app .measure-foot, #app .goal-pct,
 #app .canvas-section-label { font-size:max(.98rem, var(--fs-tiny));line-height:1.45; }
 #app .measure-stat { font-size:max(2rem, var(--fs-stat)); }
-#app .ed-sub { font-size:max(1.1rem, calc(1em * var(--fz-body, 1))); }
+#app .ed-sub { font-size:calc(1.1rem * var(--fz-body, 1)); }
 
 /* Settings legibility: target its font shorthands directly. */
 #app .settings-dashboard .settings-card-head > span { font-size:1rem;line-height:1.4;letter-spacing:.11em; }

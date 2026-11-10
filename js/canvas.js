@@ -453,7 +453,7 @@ function paintPanel() {
     if (!sec) { panelMode = 'sections'; render(); return; }
 
     const label = field?.label || selectedText.key.replace(/([A-Z])/g, ' $1');
-    const role = roleForKey(selectedText.key);
+    const role = roleForKey(selectedText.key, sec.type);
     const currentFont = role ? String(sec[role.font] || '') : '';
     const currentWeight = role ? String(sec[role.weight] || '') : '';
     const currentSize = role ? Math.round((Number(sec[role.size]) || 1) * 100) : 100;
@@ -499,7 +499,7 @@ function paintPanel() {
         const value = Number(e.target.value);
         panel.querySelector('#canvas-text-size-value').textContent = value + '%';
         const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
-        if (block) block.style.setProperty(role.role === 'Display' ? '--fz-display' : role.role === 'Ui' ? '--fz-ui' : '--fz-body', String(value / 100));
+        if (block) block.style.setProperty({ Display: '--fz-display', Ui: '--fz-ui', Script: '--fz-script', Body: '--fz-body' }[role.role] || '--fz-body', String(value / 100));
       };
       panel.querySelector('#canvas-text-size').onchange = e => updateStyle({ [role.size]: String(Number(e.target.value) / 100) });
       panel.querySelector('#canvas-text-weight').onchange = e => updateStyle({ [role.weight]: e.target.value });
