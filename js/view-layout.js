@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from './sections.js?v=76';
+import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from './sections.js?v=77';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
@@ -564,9 +564,11 @@ function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
         <p class="hint">Choose a preset or enter your own hex code.</p>
       </div>`;
     }
-    case 'range':
-      return `<div class="field"><label for="${id}">${esc(f.label)} <span class="token-value" data-readout>${esc(value)}</span></label>
-        <input type="range" id="${id}" data-field="${attr(f.key)}" min="${f.min}" max="${f.max}" step="${f.step}" value="${attr(value)}"></div>`;
+    case 'range': {
+      const rangeValue = value ?? (f.key === 'curtainOffset' ? 0 : f.min);
+      return `<div class="field"><label for="${id}">${esc(f.label)} <span class="token-value" data-readout>${esc(rangeValue)}</span></label>
+        <input type="range" id="${id}" data-field="${attr(f.key)}" min="${f.min}" max="${f.max}" step="${f.step}" value="${attr(rangeValue)}"></div>`;
+    }
     case 'media':
       return `<div class="field"><span class="field-label">${esc(f.label)}</span>
         ${mediaButton(f.key, value, false, f.role)}
