@@ -17,7 +17,7 @@ import { bookmarksView } from './view-bookmarks.js';
 import { settingsView } from './view-settings.js';
 import { customizeView } from './view-customize.js';
 import { assetsView } from './view-assets.js';
-import { layoutView } from './view-layout.js?v=78';
+import { layoutView } from './view-layout.js?v=81';
 import { wordsView, wordDetailView } from './view-words.js';
 import { notebookView, notebookEntryView } from './view-notebook.js';
 import { collectionsView } from './view-collections.js';
