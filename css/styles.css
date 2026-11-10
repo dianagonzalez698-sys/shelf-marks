@@ -5752,3 +5752,6 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   .sheet-host:has(.sheet.media-live-preview) { justify-content: flex-end; align-items: stretch; }
   .sheet-host .sheet.media-live-preview { height: 100%; max-height: 100dvh; }
 }
+
+.simple-picture-editor .simple-remove-image { display:block; width:100%; margin:12px 0 0; border:1px solid #cdb7b9; background:transparent; color:#9b385c; font:600 15px/1.2 'EB Garamond',Georgia,serif; padding:9px 12px; border-radius:5px; cursor:pointer; }
+.simple-picture-editor .simple-remove-image:hover { background:#f8e9ed; }
