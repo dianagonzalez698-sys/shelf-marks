@@ -652,8 +652,8 @@ function fieldsHtml(def, sec, mode = 'all') {
       : false);
     if (!chosen.length && mode !== 'artwork') return `<p class="canvas-panel-hint">${mode === 'content' ? 'This section draws its words from your reading records, so there is no text to rewrite here.' : mode === 'style' ? 'This section uses the journal’s shared visual style.' : 'No additional options for this section.'}</p>`;
     const draw = (f) => {
-      const label = sec.type === 'interlude' && f.key === 'strip' ? 'Band artwork'
-        : sec.type === 'interlude' && f.key === 'bgImage' ? 'Background behind band' : f.label;
+      const label = sec.type === 'interlude' && f.key === 'strip' ? 'Main picture'
+        : sec.type === 'interlude' && f.key === 'bgImage' ? 'Background picture (optional)' : f.label;
       return fieldControl(label === f.label ? f : { ...f, label }, sec[f.key], sec.id, { inlineStyle: false });
     };
     if (mode === 'style') {
@@ -662,7 +662,7 @@ function fieldsHtml(def, sec, mode = 'all') {
       return `${appearance.length ? '<p class="canvas-field-group">Background</p>' + appearance.map(draw).join('') : ''}
         ${typography.length ? '<p class="canvas-field-group">Fonts & text colors</p>' + typography.map(draw).join('') : ''}`;
     }
-    if (mode === 'artwork') return `${sec.type === 'interlude' ? '<p class="canvas-panel-hint">Choose how this narrow band appears. Band artwork is shown when <strong>Image strip</strong> is selected; the background photograph sits behind it.</p>' : ''}${sec.edge && sec.edge !== 'none' ? `<p class="canvas-panel-hint canvas-edge-help">${sec.edge === 'curtain' ? 'Place the curtain at the top or bottom.' : sec.edge === 'artwork' ? 'Choose which edge gets your artwork.' : 'This shapes the bottom edge.'}</p>` : ''}
+    if (mode === 'artwork') return `${sec.type === 'interlude' ? '<p class="canvas-panel-hint">This is the decorative section between two parts of your page. Choose <strong>My picture</strong> to show your own artwork. Use <strong>Main picture</strong> to change it. The optional background is a separate image behind it.</p>' : ''}${sec.edge && sec.edge !== 'none' ? `<p class="canvas-panel-hint canvas-edge-help">${sec.edge === 'curtain' ? 'Place the curtain at the top or bottom.' : sec.edge === 'artwork' ? 'Choose which edge gets your artwork.' : 'This shapes the bottom edge.'}</p>` : ''}
       ${chosen.length ? chosen.map(draw).join('') : '<p class="canvas-panel-hint">No built-in picture slots in this section.</p>'}
       <div class="canvas-artwork-cta"><p>Add freeform artwork—curtains, cloud borders, illustrations or decorative cutouts—and position it anywhere in this section.</p>
       <button type="button" data-canvas="image">＋ Place artwork here</button></div>`;
