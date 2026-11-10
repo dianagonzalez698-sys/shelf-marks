@@ -74,7 +74,7 @@ function paintSheet() {
     + `${html}</div>`;
   host.hidden = false;
   document.body.classList.add('sheet-open');
-  document.body.style.overflow = sheet.classList.contains('media-live-preview') ? '' : 'hidden';
+  document.body.style.overflow = 'hidden';
 
   const sheet = host.querySelector('.sheet');
   sheet.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', popSheet));
@@ -84,6 +84,8 @@ function paintSheet() {
   document.addEventListener('keydown', onSheetKey);
 
   if (top.onMount) top.onMount(sheet, popSheet);
+  // Picture inspectors leave the page scrollable and interactive.
+  document.body.style.overflow = sheet.classList.contains('media-live-preview') ? '' : 'hidden';
 }
 
 function popSheet() {
