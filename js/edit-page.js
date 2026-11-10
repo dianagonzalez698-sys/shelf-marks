@@ -9,7 +9,7 @@
 // click away through the section's own Settings button, which opens the same
 // (now much shorter) panel.
 
-import { richValue, toast, esc, attr } from './ui.js?v=87';
+import { richValue, toast, esc, attr } from './ui.js';
 import * as layout from './layout.js';
 import { openSectionEditor } from './view-layout.js?v=88';
 import { HOME_PAGE_ID } from './view-home.js';
