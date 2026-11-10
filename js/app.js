@@ -4,7 +4,7 @@ import { load, onChange, saveSettings, state } from './state.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
-import * as canvas from './canvas.js?v=92';
+import * as canvas from './canvas.js?v=94';
 import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
@@ -21,7 +21,7 @@ import { layoutView } from './view-layout.js?v=88';
 import { wordsView, wordDetailView } from './view-words.js';
 import { notebookView, notebookEntryView } from './view-notebook.js';
 import { collectionsView } from './view-collections.js';
-import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=92';
+import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=94';
 import { wireEditing } from './ui.js';
 
 route('/', homeView);
