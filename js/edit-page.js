@@ -9,13 +9,13 @@
 // click away through the section's own Settings button, which opens the same
 // (now much shorter) panel.
 
-import { richValue, toast, esc, attr } from './ui.js';
+import { richValue, toast, esc, attr } from './ui.js?v=87';
 import * as layout from './layout.js';
-import { openSectionEditor } from './view-layout.js?v=86';
+import { openSectionEditor } from './view-layout.js?v=87';
 import { HOME_PAGE_ID } from './view-home.js';
 import { roleForKey, applySectionVars } from './sections.js?v=86';
 import { FONT_STACKS, fontWeights, fontHasItalic } from './theme.js';
-import * as canvas from './canvas.js?v=86';
+import * as canvas from './canvas.js?v=87';
 
 let on = false;
 let pageId = HOME_PAGE_ID;
