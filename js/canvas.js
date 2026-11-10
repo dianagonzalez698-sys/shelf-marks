@@ -5,8 +5,8 @@ import * as assets from './assets.js';
 import * as theme from './theme.js';
 import { FONT_STACKS } from './theme.js';
 import * as layout from './layout.js';
-import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './sections.js?v=75';
-import { openSectionEditor } from './view-layout.js?v=75';
+import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './sections.js?v=76';
+import { openSectionEditor } from './view-layout.js?v=76';
 import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } from './ui.js';
 
 
@@ -849,6 +849,42 @@ function ensureTools() {
     layout.reorderSection(activePage, id, destination).then(() => refreshPage());
   });
   document.addEventListener('dragend', () => { draggedSection = null; });
+  // A curtain is part of the next section even when painted over the one
+  // above. Clicking the cloth selects its actual owner; dragging moves it.
+  document.getElementById('app')?.addEventListener('pointerdown', (e) => {
+    if (!editing || e.button !== 0) return;
+    const curtain = e.target.closest('.ed-curtain');
+    const owner = curtain?.closest('[data-sec]');
+    if (!curtain || !owner) return;
+    const id = owner.dataset.sec;
+    const sec = layout.getSection(activePage, id);
+    if (!sec || sec.edge !== 'curtain') return;
+    e.preventDefault();
+    e.stopPropagation();
+    const startY = e.clientY;
+    const initial = Number(sec.curtainOffset ?? 0);
+    let latest = initial;
+    let moved = false;
+    const move = (event) => {
+      if (event.pointerId !== e.pointerId) return;
+      const next = Math.max(-200, Math.min(400, Math.round(initial + event.clientY - startY)));
+      if (Math.abs(event.clientY - startY) > 3) moved = true;
+      latest = next;
+      owner.style.setProperty('--cur-offset', `${latest}px`);
+    };
+    const end = (event) => {
+      if (event.pointerId !== e.pointerId) return;
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', end);
+      document.removeEventListener('pointercancel', end);
+      if (event.type === 'pointercancel') { owner.style.setProperty('--cur-offset', `${initial}px`); return; }
+      if (!moved) { inspectSection(id); return; }
+      layout.updateSection(activePage, id, { curtainOffset: latest }).then(() => inspectSection(id));
+    };
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', end);
+    document.addEventListener('pointercancel', end);
+  });
   document.getElementById('app')?.addEventListener('click', (e) => {
     if (!editing || e.target.closest('[data-edit],.canvas-item,a,button,input,select,textarea,[contenteditable]')) return;
     const sec = e.target.closest('[data-sec]');
