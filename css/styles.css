@@ -5389,3 +5389,12 @@ body.canvas-editing .canvas-panel .canvas-panel-tabs button {
   body.canvas-editing .canvas-panel {width:min(100%,420px);}
   .sheet-host .sheet.simple-picture-editor {width:min(100vw,450px);max-height:92dvh;}
 }
+
+/* Physically move the whole curtain, independently from its size or overlap. */
+.ed.has-curtain .ed-curtain { transform: translateY(var(--cur-offset, 0px)); }
+.ed.has-curtain.curtain-bottom .ed-curtain { transform: translateY(var(--cur-offset, 0px)) scaleY(-1); }
+body.canvas-editing .ed.has-curtain .ed-curtain { pointer-events:auto;cursor:grab;touch-action:none; }
+body.canvas-editing .ed.has-curtain .ed-curtain:active { cursor:grabbing; }
+body.canvas-editing .ed.has-curtain .ed-curtain:hover { outline:2px dashed rgba(168,63,98,.5);outline-offset:-3px; }
+body.canvas-editing .canvas-panel [data-field="curtainOffset"] {accent-color:#a83f62;}
+body.canvas-editing .canvas-panel .canvas-section-inspector .field:has([data-field="curtainOffset"]) {padding:12px;background:#f2f3ea;border:1px solid #d8ddcc;border-radius:7px;}
