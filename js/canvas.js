@@ -284,7 +284,7 @@ function elFor(item) {
   node.className = `canvas-item canvas-${item.type}${item.type === 'image' ? frameClass(item.frame) : ''}${item.locked ? ' is-locked' : ''}`;
   if (item.hidden) node.hidden = true;
   node.dataset.canvasId = item.id;
-  node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${clamp(item.y, 0, 100)}%;width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
+  node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${item.fullWidth && Number.isFinite(item.anchorBottom) ? 'auto' : `${clamp(item.y, 0, 100)}%`};${item.fullWidth && Number.isFinite(item.anchorBottom) ? `bottom:${item.anchorBottom}px;` : ''}width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
   node.classList.toggle('is-full-width', !!item.fullWidth);
   if (item.type === 'image') {
     const src = assets.src(item.assetId);
@@ -339,7 +339,7 @@ function startPointer(e, node, item) {
   const bounds = host.getBoundingClientRect();
   const resize = !item.fullWidth && e.target.classList.contains('canvas-resize');
   const startX = e.clientX, startY = e.clientY;
-  const origin = { x: item.x, y: item.y, width: item.width };
+  const origin = { x: item.x, y: item.y, width: item.width, bottom: item.fullWidth ? bounds.bottom - node.getBoundingClientRect().bottom : 0 };
   node.setPointerCapture(e.pointerId);
   const move = (ev) => {
     const dx = ev.clientX - startX, dy = ev.clientY - startY;
@@ -347,9 +347,12 @@ function startPointer(e, node, item) {
     if (!moved) { checkpoint(); moved = true; }
     const patch = resize
       ? { width: clamp(origin.width + dx, 60, 1200) }
-      : { x: clamp(origin.x + dx / Math.max(bounds.width, 1) * 100, 0, 100), y: clamp(origin.y + dy / Math.max(bounds.height, 1) * 100, 0, 100) };
+      : item.fullWidth
+        ? { anchorBottom: Math.round(origin.bottom - dy) }
+        : { x: clamp(origin.x + dx / Math.max(bounds.width, 1) * 100, 0, 100), y: clamp(origin.y + dy / Math.max(bounds.height, 1) * 100, 0, 100) };
     Object.assign(item, patch);
     if (resize) node.style.width = `${patch.width}px`;
+    else if (item.fullWidth) { node.style.top = 'auto'; node.style.bottom = `${patch.anchorBottom}px`; }
     else { node.style.left = `${patch.x}%`; node.style.top = `${patch.y}%`; }
   };
   const stop = () => {
