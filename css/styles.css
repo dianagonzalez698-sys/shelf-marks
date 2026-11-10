@@ -5680,3 +5680,66 @@ body.canvas-editing .canvas-panel .canvas-delete-section {font-size:13px !import
 .simple-picture-editor .simple-picker-actions .btn {font-size:14px !important;min-height:36px !important;}
 body.canvas-editing .canvas-panel .canvas-section-inspector .face-btn,
 body.canvas-editing .canvas-panel .canvas-section-inspector .ink-dot {font-size:13px !important;}
+
+
+/* Design studio density pass: slim section rows and correctly centred reorder arrows. */
+body.canvas-editing .canvas-panel .canvas-section-list {margin-top:8px !important;}
+body.canvas-editing .canvas-panel .canvas-section-list > h3 {font-size:17px !important;margin:5px 0 !important;}
+body.canvas-editing .canvas-panel .canvas-panel-hint {font-size:12px !important;margin:2px 0 7px !important;}
+body.canvas-editing .canvas-panel .canvas-section-row {
+  grid-template-columns:26px minmax(0,1fr) 25px !important;
+  gap:6px !important;
+  min-height:47px !important;
+  padding:3px 0 !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-row > .canvas-section-icon,
+body.canvas-editing .canvas-panel .canvas-section-row > [aria-label="Drag to reorder"] {
+  width:26px !important;height:26px !important;min-width:26px !important;
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  padding:0 !important;font-size:13px !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-row .canvas-section-select {
+  min-height:38px !important;
+  padding:3px 4px !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-select strong {font-size:14px !important;line-height:1.15 !important;}
+body.canvas-editing .canvas-panel .canvas-section-select small {font-size:12px !important;line-height:1.15 !important;}
+body.canvas-editing .canvas-panel .canvas-section-moves {
+  width:25px !important;display:flex !important;flex-direction:column !important;gap:3px !important;
+  align-items:center !important;justify-content:center !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-moves button,
+body.canvas-editing .canvas-panel .canvas-section-list .canvas-section-moves button {
+  display:flex !important;
+  align-items:center !important;justify-content:center !important;
+  width:25px !important;height:23px !important;min-width:25px !important;
+  min-height:23px !important;max-height:23px !important;
+  margin:0 !important;padding:0 !important;
+  line-height:1 !important;font-size:15px !important;text-align:center !important;
+}
+body.canvas-editing .canvas-panel .canvas-inspector-tabs {
+  margin:0 0 7px !important;
+  padding:2px !important;gap:1px !important;
+}
+body.canvas-editing .canvas-panel .canvas-inspector-tabs button {
+  padding:5px 3px !important;
+  min-height:30px !important;
+  font-size:14px !important;
+  line-height:1.1 !important;
+}
+body.canvas-editing .canvas-panel .canvas-section-inspector > h2 {
+  font-size:18px !important;
+  line-height:1.15 !important;
+  margin:0 0 6px !important;
+}
+body.canvas-editing .canvas-panel .canvas-panel-head {
+  min-height:43px !important;
+  margin-bottom:9px !important;
+  padding:7px 12px !important;
+}
+body.canvas-editing .canvas-panel .canvas-panel-head button {min-height:27px !important;padding:3px 7px !important;}
+body.canvas-editing .canvas-panel .canvas-section-inspector {padding-top:0 !important;}
+body.canvas-editing .canvas-panel #sec-fields .field {margin-bottom:8px !important;}
+body.canvas-editing .canvas-panel #sec-fields .rich-bar {margin-bottom:3px !important;}
+body.canvas-editing .canvas-panel #sec-fields .rich-bar button {min-height:29px !important;min-width:29px !important;padding:3px !important;}
+body.canvas-editing .canvas-panel #sec-fields .rich-input {min-height:35px !important;padding:6px 9px !important;}
