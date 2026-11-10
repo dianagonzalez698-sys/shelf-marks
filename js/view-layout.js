@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from './sections.js?v=77';
+import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES } from './sections.js?v=78';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
@@ -690,7 +690,7 @@ function mediaButton(key, m, removable = false, role = '') {
       <span class="media-thumb">${url
         ? `<img src="${attr(url)}" alt="">`
         : '<span class="media-thumb-empty">empty</span>'}</span>
-      <span class="media-label">${esc(a ? a.name : 'Choose a picture')}</span>
+      <span class="media-label">${esc(a ? a.name : 'Choose image')}</span>
       <span class="media-meta">${esc(meta)}</span>
     </button>
     ${removable ? `<button class="icon-btn" type="button" data-rmmedia="${attr(key)}" aria-label="Remove picture">×</button>` : ''}
@@ -718,7 +718,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
     const fresh = layout.getSection(pageId, sectionId) || sec;
     return `
     <h2>${esc(def.label)}</h2>
-    <p class="small muted">${esc(def.blurb)}</p>
+    ${mountIn ? '' : `<p class="small muted">${esc(def.blurb)}</p>`}
     <div id="sec-warnings">${warningsHtml(fresh)}</div>
     ${mountIn ? `<div class="canvas-inspector-tabs" role="group" aria-label="Section settings">
       <button type="button" data-inspector-tab="content" class="${editingTab === 'content' ? 'active' : ''}">Text</button>
@@ -1084,19 +1084,21 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               if (base === 'curtainArt') {
                 const previous = sectionNode.style.getPropertyValue('--cur-img');
                 const oldLift = sectionNode.style.getPropertyValue('--cur-lift-user');
+                const oldOffset = sectionNode.style.getPropertyValue('--cur-offset');
                 const oldDrop = sectionNode.style.getPropertyValue('--cur-h');
                 const oldGap = sectionNode.style.getPropertyValue('--cur-gap');
                 const curtain = sectionNode.querySelector('.ed-curtain');
                 const oldDisplay = curtain?.style.display;
                 sectionNode.style.setProperty('--cur-img', chosenUrl ? `url("${chosenUrl.replace(/"/g, '%22')}")` : 'none');
                 if (Number.isFinite(tweaks.curtainLift)) sectionNode.style.setProperty('--cur-lift-user', `${tweaks.curtainLift}px`);
+                if (Number.isFinite(tweaks.curtainOffset)) sectionNode.style.setProperty('--cur-offset', `${tweaks.curtainOffset}px`);
                 if (Number.isFinite(tweaks.curtainDrop)) sectionNode.style.setProperty('--cur-h', `${tweaks.curtainDrop}vw`);
                 if (Number.isFinite(tweaks.curtainGap)) sectionNode.style.setProperty('--cur-gap', `${tweaks.curtainGap}px`);
                 if (curtain) curtain.style.display = chosenUrl ? '' : 'none';
                 return () => {
                   if (previous) sectionNode.style.setProperty('--cur-img', previous);
                   else sectionNode.style.removeProperty('--cur-img');
-                  for (const [key, value] of [['--cur-lift-user', oldLift], ['--cur-h', oldDrop], ['--cur-gap', oldGap]]) {
+                  for (const [key, value] of [['--cur-lift-user', oldLift], ['--cur-offset', oldOffset], ['--cur-h', oldDrop], ['--cur-gap', oldGap]]) {
                     if (value) sectionNode.style.setProperty(key, value);
                     else sectionNode.style.removeProperty(key);
                   }
@@ -1185,26 +1187,36 @@ export function openMediaEditor(value, onSave, { role = '', size = '', previewSe
 
   openSheet(`
     <div class="simple-picker-heading"><h2>${isCurtain ? 'Curtain' : isTrim ? 'Edge decoration' : isBackdrop ? 'Background' : 'Picture'}</h2><span>Live preview</span></div>
-    <p class="simple-picker-intro">Choose a picture. See it on your page before saving.</p>
-
-    <label class="canvas-upload-choice">＋ Upload image
-      <input type="file" data-media-upload accept="image/*" class="visually-hidden"></label>
-    <div class="asset-picker">
-      <button class="asset-opt${!m.assetId ? ' is-on' : ''}" type="button" data-pick="">
-        <span class="asset-opt-thumb asset-opt-none">None</span></button>
-      ${library.map((a) => `<button class="asset-opt${m.assetId === a.id ? ' is-on' : ''}" type="button" data-pick="${attr(a.id)}">
-        <span class="asset-opt-thumb"><img src="${attr(a.dataUrl)}" alt=""></span>
-        <span class="asset-opt-name" title="${attr(a.name)}">${esc(a.name)}</span></button>`).join('')}
-    </div>
-    ${library.length ? '' : '<p class="hint">No pictures saved yet. Upload one above to use it here.</p>'}
-
+    <p class="simple-picker-intro">${isCurtain ? 'Drag the curtain on your page or move it below.' : 'Choose artwork and see it on the page.'}</p>
     ${isCurtain ? `<div class="simple-curtain-fit">
-      <h3>Adjust the fit</h3>
-      <div class="simple-curtain-row"><label>Overlap above <output data-curtain-out="curtainLift">${Number(sectionValues.curtainLift ?? 72)}</output> px</label><input type="range" data-curtain="curtainLift" min="0" max="140" step="2" value="${Number(sectionValues.curtainLift ?? 72)}"></div>
-      <div class="simple-curtain-row"><label>How far it hangs <output data-curtain-out="curtainDrop">${Number(sectionValues.curtainDrop ?? 30)}</output></label><input type="range" data-curtain="curtainDrop" min="6" max="70" step="1" value="${Number(sectionValues.curtainDrop ?? 30)}"></div>
-      <div class="simple-curtain-row"><label>Space below <output data-curtain-out="curtainGap">${Number(sectionValues.curtainGap ?? 0)}</output></label><input type="range" data-curtain="curtainGap" min="0" max="120" step="2" value="${Number(sectionValues.curtainGap ?? 0)}"></div>
+      <div class="simple-curtain-row simple-position-main">
+        <label>Move curtain <output data-curtain-out="curtainOffset">${Number(sectionValues.curtainOffset ?? 0)}</output> px</label>
+        <input type="range" data-curtain="curtainOffset" min="-200" max="400" step="2" value="${Number(sectionValues.curtainOffset ?? 0)}" aria-label="Move curtain up or down">
+        <div class="simple-range-ends"><span>↑ Up</span><span>Down ↓</span></div>
+      </div>
+      <details class="simple-fit-more">
+        <summary>More curtain adjustments</summary>
+        <div class="simple-curtain-row"><label>Overlap above <output data-curtain-out="curtainLift">${Number(sectionValues.curtainLift ?? 72)}</output> px</label><input type="range" data-curtain="curtainLift" min="0" max="140" step="2" value="${Number(sectionValues.curtainLift ?? 72)}"></div>
+        <div class="simple-curtain-row"><label>How far it hangs <output data-curtain-out="curtainDrop">${Number(sectionValues.curtainDrop ?? 30)}</output></label><input type="range" data-curtain="curtainDrop" min="6" max="70" step="1" value="${Number(sectionValues.curtainDrop ?? 30)}"></div>
+        <div class="simple-curtain-row"><label>Space below <output data-curtain-out="curtainGap">${Number(sectionValues.curtainGap ?? 0)}</output></label><input type="range" data-curtain="curtainGap" min="0" max="120" step="2" value="${Number(sectionValues.curtainGap ?? 0)}"></div>
+      </details>
     </div>` : ''}
-    <details class="picture-tips"><summary>Image tips</summary><p>${isCurtain ? 'Use a transparent PNG, ideally 2400 × 1000 px.' : size ? `Recommended: ${esc(size)}.` : 'A clear, high-resolution image works best.'}</p></details>
+    <details class="simple-gallery" ${isCurtain && m.assetId ? '' : 'open'}>
+      <summary>${isCurtain ? 'Change curtain image' : 'Choose an image'} <span>${isCurtain && m.assetId ? 'Selected image' : ''}</span></summary>
+      <div class="simple-gallery-body">
+        <label class="canvas-upload-choice">＋ Upload image
+          <input type="file" data-media-upload accept="image/*" class="visually-hidden"></label>
+        <div class="asset-picker">
+          <button class="asset-opt${!m.assetId ? ' is-on' : ''}" type="button" data-pick="">
+            <span class="asset-opt-thumb asset-opt-none">None</span></button>
+          ${library.map((a) => `<button class="asset-opt${m.assetId === a.id ? ' is-on' : ''}" type="button" data-pick="${attr(a.id)}">
+            <span class="asset-opt-thumb"><img src="${attr(a.dataUrl)}" alt=""></span>
+            <span class="asset-opt-name" title="${attr(a.name)}">${esc(a.name)}</span></button>`).join('')}
+        </div>
+        ${library.length ? '' : '<p class="hint">No saved pictures yet. Upload one to get started.</p>'}
+      </div>
+    </details>
+    <details class="picture-tips"><summary>Image dimensions</summary><p>${isCurtain ? 'Transparent PNG, ideally 2400 × 1000 px.' : size ? `Recommended: ${esc(size)}.` : 'Use a high-resolution image.'}</p></details>
 
     ${isInset ? `<div class="field" style="margin-top:1.1rem">
       <label for="m-frame">Frame</label>
@@ -1263,13 +1275,14 @@ export function openMediaEditor(value, onSave, { role = '', size = '', previewSe
 
     <div class="btn-row simple-picker-actions">
       <button class="btn grow" type="button" data-close>Cancel</button>
-      <button class="btn btn-primary grow" type="button" data-act="save">Apply image</button>
+      <button class="btn btn-primary grow" type="button" data-act="save">Save changes</button>
     </div>
   `, {
     onMount(sheet, close) {
       const draft = { ...m };
       const curtainTweaks = isCurtain ? {
         curtainLift: Number(sectionValues.curtainLift ?? 72),
+        curtainOffset: Number(sectionValues.curtainOffset ?? 0),
         curtainDrop: Number(sectionValues.curtainDrop ?? 30),
         curtainGap: Number(sectionValues.curtainGap ?? 0),
       } : {};
