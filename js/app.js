@@ -7,7 +7,7 @@ import * as layout from './layout.js';
 import * as canvas from './canvas.js?v=88';
 import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
-import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js?v=87';
+import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
 import { homeView } from './view-home.js';
 import { booksView } from './view-books.js';
 import { addView, bookFormView, rememberAddOrigin } from './view-book.js';
