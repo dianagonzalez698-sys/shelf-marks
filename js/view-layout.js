@@ -607,7 +607,7 @@ function visibleFields(def, sec) {
 const FINE_KEYS = new Set([
   'shape', 'tone', 'toneHex', 'bgImage', 'bgScrim', 'bgInk',
   'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
-  'curtainArt', 'curtainWhere', 'curtainDrop', 'curtainGap',
+  'curtainArt', 'curtainWhere', 'curtainDrop', 'curtainLift', 'curtainGap', 'curtainGap',
   'spacing', 'scrim', 'rotate', 'flip', 'ratio', 'dropcap', 'stagger',
   'showLabel', 'showNote', 'showCount', 'showWhy', 'showOutside',
   'showStats', 'showFilter', 'showBar', 'showStanding', 'showFilters',
