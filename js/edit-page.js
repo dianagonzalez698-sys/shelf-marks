@@ -15,7 +15,7 @@ import { openSectionEditor } from './view-layout.js?v=88';
 import { HOME_PAGE_ID } from './view-home.js';
 import { roleForKey, applySectionVars } from './sections.js?v=86';
 import { FONT_STACKS, fontWeights, fontHasItalic } from './theme.js';
-import * as canvas from './canvas.js?v=88';
+import * as canvas from './canvas.js?v=90';
 
 let on = false;
 let pageId = HOME_PAGE_ID;
