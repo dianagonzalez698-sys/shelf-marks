@@ -74,7 +74,7 @@ function paintSheet() {
     + `${html}</div>`;
   host.hidden = false;
   document.body.classList.add('sheet-open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = sheet.classList.contains('media-live-preview') ? '' : 'hidden';
 
   const sheet = host.querySelector('.sheet');
   sheet.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', popSheet));
