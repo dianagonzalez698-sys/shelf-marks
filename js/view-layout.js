@@ -607,7 +607,7 @@ function visibleFields(def, sec) {
 const FINE_KEYS = new Set([
   'shape', 'tone', 'toneHex', 'bgImage', 'bgScrim', 'bgInk',
   'edge', 'edgeArt', 'edgeWhere', 'edgeSize', 'edgeShift',
-  'curtainArt', 'curtainWhere', 'curtainDrop', 'curtainLift', 'curtainGap', 'curtainGap',
+  'curtainArt', 'curtainWhere', 'curtainDrop', 'curtainLift', 'curtainGap',
   'spacing', 'scrim', 'rotate', 'flip', 'ratio', 'dropcap', 'stagger',
   'showLabel', 'showNote', 'showCount', 'showWhy', 'showOutside',
   'showStats', 'showFilter', 'showBar', 'showStanding', 'showFilters',
@@ -641,7 +641,7 @@ function fieldsHtml(def, sec, mode = 'all') {
     const artworkEssentials = new Set([
       'bgImage', 'backdrop', 'picture', 'inset', 'items', 'strip',
       'edge', 'edgeArt', 'edgeWhere', 'edgeSize',
-      'curtainArt', 'curtainWhere', 'curtainDrop',
+      'curtainArt', 'curtainWhere', 'curtainDrop', 'curtainLift', 'curtainGap',
     ]);
     const chosen = all.filter((f) => mode === 'content'
       ? content(f) || contentEssentials.has(f.key)
