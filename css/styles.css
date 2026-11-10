@@ -5771,3 +5771,22 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
     z-index: 1100 !important;
   }
 }
+
+/* Design Mode: see the complete, true-proportion page next to the inspector.
+   CSS zoom affects presentation only. The page still lays out at viewport width. */
+@media (min-width: 851px) {
+  html body.canvas-editing.canvas-fit-page #app {
+    width: 100vw !important;
+    max-width: none !important;
+    margin-left: var(--canvas-fit-offset, 478px) !important;
+    zoom: var(--canvas-fit-scale, .76) !important;
+  }
+  html body.canvas-editing.canvas-fit-page .canvas-panel {
+    box-shadow: 5px 0 18px #29231b15;
+  }
+  html body.canvas-editing .canvas-toolbar [data-canvas="toggle-fit"] {
+    font: 600 14px/1 'EB Garamond', Georgia, serif !important;
+    min-width: 56px;
+    padding: 9px 12px;
+  }
+}
