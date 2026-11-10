@@ -1151,7 +1151,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
             };
             openMediaEditor(current, async (next, tweaks = {}) => {
               const fresh = layout.getSection(pageId, sectionId);
-              if (idx === undefined) await commit({ [base]: next, ...(base === 'strip' && next.assetId ? { mode: 'strip' } : {}), ...tweaks }, { rebuild: true });
+              if (idx === undefined) await commit({ [base]: next, ...(base === 'strip' && next.assetId ? { mode: 'strip' } : {}), ...(base === 'curtainArt' && !next.assetId ? { edge: 'none' } : {}), ...tweaks }, { rebuild: true });
               else {
                 const list = [...(fresh[base] || [])];
                 list[Number(idx)] = next;
@@ -1308,6 +1308,7 @@ export function openMediaEditor(value, onSave, { role = '', size = '', previewSe
       </div>
     </details>` : ''}
 
+    ${m.assetId ? `<button class="btn simple-remove-image" type="button" data-act="remove-image">${isCurtain ? 'Remove curtain' : 'Remove picture'}</button>` : ''}
     <div class="btn-row simple-picker-actions">
       <button class="btn grow" type="button" data-close>Cancel</button>
       <button class="btn btn-primary grow" type="button" data-act="save">Save changes</button>
@@ -1398,6 +1399,15 @@ export function openMediaEditor(value, onSave, { role = '', size = '', previewSe
         });
       });
 
+      const removeImage = sheet.querySelector('[data-act="remove-image"]');
+      if (removeImage) removeImage.onclick = async () => {
+        if (restorePreview) restorePreview();
+        restorePreview = null;
+        saved = true;
+        await onSave({ ...draft, assetId: null }, curtainTweaks);
+        close();
+        toast(isCurtain ? 'Curtain removed.' : 'Picture removed.', 'good');
+      };
       sheet.querySelector('[data-act="save"]').onclick = async () => {
         // Save before closing: closing returns to the panel underneath and
         // rebuilds it, so committing afterwards would rebuild from stale data
