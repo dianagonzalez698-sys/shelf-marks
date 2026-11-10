@@ -21,7 +21,7 @@ import { layoutView } from './view-layout.js?v=88';
 import { wordsView, wordDetailView } from './view-words.js';
 import { notebookView, notebookEntryView } from './view-notebook.js';
 import { collectionsView } from './view-collections.js';
-import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=88';
+import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=92';
 import { wireEditing } from './ui.js';
 
 route('/', homeView);
