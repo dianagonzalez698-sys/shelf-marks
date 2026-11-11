@@ -6136,3 +6136,42 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 #app.screen .ed-challengeHero .hero-sub {
   font-size: calc(var(--fs-banner-sub) * var(--fz-body, 1) * .9);
 }
+
+/* A light, draggable right edge for quote text in Design Mode. The chosen
+   width is stored per statement and applies outside the editor as well. */
+body.is-editing #app .ed-statement .statement p.canvas-text-target {
+  position: relative;
+  min-width: 20%;
+}
+body.is-editing #app .ed-statement .canvas-text-width-handle {
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: block;
+  box-sizing: border-box;
+  width: 16px;
+  height: 62px;
+  max-height: 70%;
+  border: 1px solid var(--c-accent);
+  border-radius: 9px;
+  background: var(--c-bg-raised);
+  box-shadow: 0 1px 5px rgb(0 0 0 / 12%);
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+  z-index: 6;
+}
+body.is-editing #app .ed-statement .canvas-text-width-handle::after {
+  content: '⋮';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 600 18px/1 var(--f-ui);
+  color: var(--c-accent);
+}
+body.is-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 3px;
+}
