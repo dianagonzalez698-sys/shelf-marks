@@ -1100,29 +1100,27 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find((node) => node.dataset.sec === sectionId);
               if (!sectionNode) return () => {};
               const chosenUrl = assets.src(chosenId);
+              // Preview through the same renderer used after saving. A section
+              // without a saved curtain has no .ed-curtain node to update,
+              // so changing CSS variables alone cannot display the artwork.
               if (base === 'curtainArt') {
-                const previous = sectionNode.style.getPropertyValue('--cur-img');
-                const oldLift = sectionNode.style.getPropertyValue('--cur-lift-user');
-                const oldOffset = sectionNode.style.getPropertyValue('--cur-offset');
-                const oldDrop = sectionNode.style.getPropertyValue('--cur-h');
-                const oldGap = sectionNode.style.getPropertyValue('--cur-gap');
-                const curtain = sectionNode.querySelector('.ed-curtain');
-                const oldDisplay = curtain?.style.display;
-                sectionNode.style.setProperty('--cur-img', chosenUrl ? `url("${chosenUrl.replace(/"/g, '%22')}")` : 'none');
-                if (Number.isFinite(tweaks.curtainLift)) sectionNode.style.setProperty('--cur-lift-user', `${tweaks.curtainLift}px`);
-                if (Number.isFinite(tweaks.curtainOffset)) sectionNode.style.setProperty('--cur-offset', `${tweaks.curtainOffset}px`);
-                if (Number.isFinite(tweaks.curtainDrop)) sectionNode.style.setProperty('--cur-h', `${tweaks.curtainDrop}vw`);
-                if (Number.isFinite(tweaks.curtainGap)) sectionNode.style.setProperty('--cur-gap', `${tweaks.curtainGap}px`);
-                if (curtain) curtain.style.display = chosenUrl ? '' : 'none';
-                return () => {
-                  if (previous) sectionNode.style.setProperty('--cur-img', previous);
-                  else sectionNode.style.removeProperty('--cur-img');
-                  for (const [key, value] of [['--cur-lift-user', oldLift], ['--cur-offset', oldOffset], ['--cur-h', oldDrop], ['--cur-gap', oldGap]]) {
-                    if (value) sectionNode.style.setProperty(key, value);
-                    else sectionNode.style.removeProperty(key);
-                  }
-                  if (curtain) curtain.style.display = oldDisplay || '';
+                const currentSection = layout.getSection(pageId, sectionId);
+                if (!currentSection) return () => {};
+                const previewSection = {
+                  ...currentSection,
+                  ...tweaks,
+                  edge: chosenId ? 'curtain' : 'none',
+                  curtainArt: { ...media(current), assetId: chosenId },
                 };
+                const template = document.createElement('template');
+                template.innerHTML = renderSection(previewSection).trim();
+                const nextNode = template.content.firstElementChild;
+                if (!nextNode) return () => {};
+                if (sectionNode.classList.contains('canvas-section-selected')) {
+                  nextNode.classList.add('canvas-section-selected');
+                }
+                sectionNode.replaceWith(nextNode);
+                return () => { if (nextNode.isConnected) nextNode.replaceWith(sectionNode); };
               }
               // Render the actual section temporarily for every image choice.
               // This also shows a strip even if its previous mode was an ornament.
