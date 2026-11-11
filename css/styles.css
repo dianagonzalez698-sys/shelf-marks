@@ -6012,6 +6012,30 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   text-transform: none;
 }
 
+/* Collections heading follows the restrained Notebook editorial typography. */
+#app .lit-cabinet .lit-cabinet-heading {
+  display: block;
+  padding: clamp(18px, 2.5vw, 36px) 0 clamp(12px, 2vw, 25px);
+  text-align: left;
+}
+#app .lit-cabinet .lit-cabinet-heading .lit-overline {
+  display: block;
+  margin: 0 0 18px;
+  font-size: .8rem;
+  line-height: 1.4;
+}
+#app .lit-cabinet .lit-cabinet-heading h1 {
+  margin: 0;
+  font: 400 clamp(2.7rem, 3.8vw, 3.65rem)/1.25 var(--f-script);
+  letter-spacing: 0;
+  text-transform: none;
+}
+#app .lit-cabinet .lit-cabinet-heading > p:last-child {
+  margin: 12px 0 0;
+  max-width: 58ch;
+  font: 400 clamp(1.05rem, 1.35vw, 1.22rem)/1.5 var(--f-body);
+}
+
 /* Challenge banner typography: direct, readable controls instead of nested
    font and color popovers inside the narrow Design Mode inspector. */
 #canvas-panel .banner-type-controls { padding: 15px 0 18px; border-top: 1px solid var(--c-rule); display: grid; gap: 12px; }
