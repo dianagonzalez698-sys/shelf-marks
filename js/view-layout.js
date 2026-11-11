@@ -17,6 +17,7 @@ function pageOptions() {
     ['home', 'The journal (home)'],
     ['directory', 'Challenge index'],
     ['books', 'My Books'],
+    ['notebook', 'The Notebook'],
     ['bookmarks', 'The bookmark archive'],
   ];
   allWords().forEach((w) => pages.push([`word:${w.id}`, `Word — ${w.word}`]));
@@ -95,7 +96,7 @@ export function layoutView(params = {}) {
 
         <div class="btn-row" style="margin-bottom:1.2rem">
           <button class="btn btn-primary" type="button" id="lay-add">Add a section</button>
-          <a class="btn" href="#/${pageId === 'directory' ? 'challenges' : pageId.startsWith('challenge:') ? `challenge/${encodeURIComponent(pageId.slice(10))}` : ''}">View page</a>
+          <a class="btn" href="#/${pageId === 'directory' ? 'challenges' : pageId === 'notebook' ? 'notebook' : pageId === 'books' ? 'books' : pageId === 'bookmarks' ? 'bookmarks' : pageId.startsWith('word:') ? `word/${encodeURIComponent(pageId.slice(5))}` : pageId.startsWith('challenge:') ? `challenge/${encodeURIComponent(pageId.slice(10))}` : ''}">View page</a>
           ${custom ? '<button class="btn btn-danger" type="button" id="lay-reset">Reset page</button>' : ''}
         </div>
 
