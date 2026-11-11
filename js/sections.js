@@ -629,7 +629,7 @@ export const SECTION_TYPES = {
           <div class="hero-type">
             ${kicker(sub(sec.eyebrow))}
             ${headline(sub(sec.title), { script: sec.script, tag: 'h1', cls: 'hero-title' })}
-            ${sec.subtitle ? `<p class="hero-sub" data-edit="subtitle">${rich(sub(sec.subtitle))}</p>` : ''}
+            <p class="hero-sub" data-edit="subtitle">${sec.subtitle ? rich(sub(sec.subtitle)) : (sec.title === 'A Year in Books' ? 'Reading however the f*ck I want…all year long' : '')}</p>
           </div>
           ${sec.showInset ? `<div class="hero-inset">${figure(sec.inset, { seed: `${sec.id}i`, eager: true })}</div>` : ''}
         </div>`, 'ed-bleed');
