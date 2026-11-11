@@ -7,7 +7,8 @@ import * as layout from './layout.js';
 import * as canvas from './canvas.js?v=113';
 import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
-import { route, startRouter, refresh, navigate, initArtFallback, setChallengeMenuTitleResolver } from './ui.js';
+import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
+import * as navigationUI from './ui.js';
 import { homeView } from './view-home.js?v=112';
 import { booksView } from './view-books.js';
 import { addView, bookFormView, rememberAddOrigin } from './view-book.js';
@@ -25,7 +26,7 @@ import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-pa
 import { wireEditing } from './ui.js';
 
 // The navigation uses the same saved banner heading as each challenge page.
-setChallengeMenuTitleResolver((challenge) => {
+navigationUI.setChallengeMenuTitleResolver?.((challenge) => {
   const hero = layout.get(`challenge:${challenge.id}`)
     .find((section) => section.type === 'challengeHero' && section.visible !== false);
   return hero?.titleText || challenge.name;
