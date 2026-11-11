@@ -411,13 +411,7 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
 .masthead-link-quiet { color: var(--c-ink-faint); }
 
 /* A compact editorial drop-down that keeps Challenges as a normal page link. */
-.masthead-menu { position: relative; display: inline-flex; align-items: center; gap: 5px; }
-.masthead-menu-toggle {
-  border: 0; background: transparent; color: var(--c-ink-soft);
-  font: 400 1.1rem/1 var(--f-body); padding: 7px 3px; cursor: pointer;
-}
-.masthead-menu:hover .masthead-menu-toggle,
-.masthead-menu-toggle[aria-expanded="true"] { color: var(--c-accent); }
+.masthead-menu { position: relative; display: inline-flex; align-items: center; }
 .masthead-dropdown {
   position: absolute; top: calc(100% + 13px); left: -18px; z-index: 1500;
   display: grid; gap: 0; width: clamp(220px, 22vw, 300px);
