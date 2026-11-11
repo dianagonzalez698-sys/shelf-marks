@@ -5967,3 +5967,11 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 /* Keep the Diana's Lit Picks wordmark clean on editor and detail pages.
    In-page navigation and the browser back button remain available. */
 .masthead-back { display: none !important; }
+
+/* Layouts studio: keep EB Garamond explanation subordinate to its heading,
+   even when a larger typography setting is saved on this device. */
+#app .layout-studio-page > .ed-head .ed-sub {
+  font-size: clamp(1.05rem, var(--fs-layout-description), 1.35rem);
+  line-height: 1.42;
+  max-width: 62ch;
+}
