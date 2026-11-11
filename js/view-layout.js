@@ -1208,6 +1208,38 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
                 sectionNode.replaceWith(nextNode);
                 return () => { if (nextNode.isConnected) nextNode.replaceWith(sectionNode); };
               }
+              // Prefer the existing picture slot for immediate preview without
+              // rebuilding DOM or losing any section interaction handlers.
+              const oldUrl = assets.src(current?.assetId);
+              const figures = [...sectionNode.querySelectorAll('.m-fig')];
+              const matched = figures.find((fig) => oldUrl && fig.querySelector('img')?.src === oldUrl);
+              const fieldOrder = (def.fields || []).filter((field) => field.type === 'media' || field.type === 'medialist');
+              const preceding = fieldOrder.slice(0, fieldOrder.findIndex((field) => field.key === base))
+                .reduce((sum, field) => sum + (field.type === 'medialist'
+                  ? (layout.getSection(pageId, sectionId)?.[field.key] || []).length : 1), 0);
+              const figureIndex = Math.max(0, preceding) + (idx === undefined ? 0 : Number(idx));
+              const target = matched || figures[figureIndex] || figures[0];
+              const box = target?.querySelector('.m-box');
+              if (box) {
+                const originalMarkup = box.innerHTML;
+                const previousStyle = target.getAttribute('style');
+                if (chosenUrl) {
+                  const img = document.createElement('img');
+                  img.className = 'm-img';
+                  img.src = chosenUrl;
+                  img.alt = assets.get(chosenId)?.name || '';
+                  img.style.objectFit = tweaks.fit === 'contain' ? 'contain' : 'cover';
+                  img.style.objectPosition = `${Number(tweaks.focalX ?? 50)}% ${Number(tweaks.focalY ?? 50)}%`;
+                  box.replaceChildren(img);
+                } else box.replaceChildren();
+                target.style.opacity = String(Number(tweaks.opacity ?? 1));
+                return () => {
+                  box.innerHTML = originalMarkup;
+                  if (previousStyle == null) target.removeAttribute('style');
+                  else target.setAttribute('style', previousStyle);
+                };
+              }
+              return () => {};
               // Render the actual section temporarily for every image choice.
               // This also shows a strip even if its previous mode was an ornament.
               const currentSection = layout.getSection(pageId, sectionId);
@@ -1246,38 +1278,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
                   else backdropNode.setAttribute('style', oldStyle);
                 };
               }
-              // A context-only section may refuse standalone rendering.
-              // Preview its actual picture slot in-place as a reliable fallback.
-              const oldUrl = assets.src(current?.assetId);
-              const figures = [...sectionNode.querySelectorAll('.m-fig')];
-              const matched = figures.find((fig) => oldUrl && fig.querySelector('img')?.src === oldUrl);
-              const fieldOrder = (def.fields || []).filter((field) => field.type === 'media' || field.type === 'medialist');
-              const preceding = fieldOrder.slice(0, fieldOrder.findIndex((field) => field.key === base))
-                .reduce((sum, field) => sum + (field.type === 'medialist'
-                  ? (layout.getSection(pageId, sectionId)?.[field.key] || []).length : 1), 0);
-              const figureIndex = Math.max(0, preceding) + (idx === undefined ? 0 : Number(idx));
-              const target = matched || figures[figureIndex] || figures[0];
-              const box = target?.querySelector('.m-box');
-              if (box) {
-                const originalMarkup = box.innerHTML;
-                const previousStyle = target.getAttribute('style');
-                if (chosenUrl) {
-                  const img = document.createElement('img');
-                  img.className = 'm-img';
-                  img.src = chosenUrl;
-                  img.alt = assets.get(chosenId)?.name || '';
-                  img.style.objectFit = tweaks.fit === 'contain' ? 'contain' : 'cover';
-                  img.style.objectPosition = `${Number(tweaks.focalX ?? 50)}% ${Number(tweaks.focalY ?? 50)}%`;
-                  box.replaceChildren(img);
-                } else box.replaceChildren();
-                target.style.opacity = String(Number(tweaks.opacity ?? 1));
-                return () => {
-                  box.innerHTML = originalMarkup;
-                  if (previousStyle == null) target.removeAttribute('style');
-                  else target.setAttribute('style', previousStyle);
-                };
-              }
-              return () => {};
+
             };
             openMediaEditor(current, async (next, tweaks = {}) => {
               const fresh = layout.getSection(pageId, sectionId);
