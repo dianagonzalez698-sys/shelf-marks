@@ -284,7 +284,11 @@ function elFor(item) {
   node.className = `canvas-item canvas-${item.type}${item.type === 'image' ? frameClass(item.frame) : ''}${item.locked ? ' is-locked' : ''}`;
   if (item.hidden) node.hidden = true;
   node.dataset.canvasId = item.id;
-  // The homepage cloud valance must remain at the top as content below grows.\n  const topCloud = item.fullWidth && item.type === 'image' && activePage === 'home'\n    && /cloud/i.test(`${assets.get(item.assetId)?.name || ''} ${assets.get(item.assetId)?.alt || ''}`);\n  const useBottom = item.fullWidth && !topCloud && Number.isFinite(item.anchorBottom);\n  node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${topCloud ? `${Number.isFinite(item.anchorTop) ? item.anchorTop : 0}px` : useBottom ? 'auto' : `${clamp(item.y, 0, 100)}%`};${useBottom ? `bottom:${item.anchorBottom}px;` : ''}width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
+  // The homepage cloud valance must remain at the top as content below grows.
+  const topCloud = item.fullWidth && item.type === 'image' && activePage === 'home'
+    && /cloud/i.test(`${assets.get(item.assetId)?.name || ''} ${assets.get(item.assetId)?.alt || ''}`);
+  const useBottom = item.fullWidth && !topCloud && Number.isFinite(item.anchorBottom);
+  node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${topCloud ? `${Number.isFinite(item.anchorTop) ? item.anchorTop : 0}px` : useBottom ? 'auto' : `${clamp(item.y, 0, 100)}%`};${useBottom ? `bottom:${item.anchorBottom}px;` : ''}width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
   node.classList.toggle('is-full-width', !!item.fullWidth);
   if (item.type === 'image') {
     const src = assets.src(item.assetId);
@@ -340,7 +344,9 @@ function startPointer(e, node, item) {
   const resize = !item.fullWidth && e.target.classList.contains('canvas-resize');
   const startX = e.clientX, startY = e.clientY;
   const canvasScale = Number(getComputedStyle(document.getElementById('app')).zoom) || 1;
-  const topCloud = item.fullWidth && item.type === 'image' && activePage === 'home'\n    && /cloud/i.test(`${assets.get(item.assetId)?.name || ''} ${assets.get(item.assetId)?.alt || ''}`);\n  const origin = { x: item.x, y: item.y, width: item.width, bottom: item.fullWidth ? (bounds.bottom - node.getBoundingClientRect().bottom) / canvasScale : 0, top: topCloud ? (node.getBoundingClientRect().top - bounds.top) / canvasScale : 0 };
+  const topCloud = item.fullWidth && item.type === 'image' && activePage === 'home'
+    && /cloud/i.test(`${assets.get(item.assetId)?.name || ''} ${assets.get(item.assetId)?.alt || ''}`);
+  const origin = { x: item.x, y: item.y, width: item.width, bottom: item.fullWidth ? (bounds.bottom - node.getBoundingClientRect().bottom) / canvasScale : 0, top: topCloud ? (node.getBoundingClientRect().top - bounds.top) / canvasScale : 0 };
   node.setPointerCapture(e.pointerId);
   const move = (ev) => {
     const dx = ev.clientX - startX, dy = ev.clientY - startY;
@@ -371,6 +377,65 @@ function startPointer(e, node, item) {
   node.addEventListener('pointercancel', stop);
 }
 
+function attachStatementWidthHandle(textEl, sectionId) {
+  if (!editing || textEl.querySelector('.canvas-text-width-handle')) return;
+  const statement = textEl.closest('.statement');
+  if (!statement) return;
+  const handle = document.createElement('span');
+  handle.className = 'canvas-text-width-handle';
+  handle.title = 'Drag sideways to change text box width';
+  handle.setAttribute('role', 'slider');
+  handle.setAttribute('aria-label', 'Quote text box width');
+  handle.setAttribute('aria-valuemin', '20');
+  handle.setAttribute('aria-valuemax', '100');
+  handle.setAttribute('tabindex', '0');
+  const widthOf = () => Math.round(textEl.getBoundingClientRect().width / Math.max(1, statement.getBoundingClientRect().width) * 100);
+  handle.setAttribute('aria-valuenow', String(Math.max(20, Math.min(100, widthOf()))));
+  const show = (pct) => {
+    const width = Math.max(20, Math.min(100, Math.round(pct)));
+    textEl.style.width = width + '%';
+    textEl.style.maxWidth = '100%';
+    handle.setAttribute('aria-valuenow', String(width));
+    return width;
+  };
+  handle.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const original = widthOf();
+    let latest = original;
+    let moved = false;
+    handle.setPointerCapture(e.pointerId);
+    const move = (event) => {
+      if (event.pointerId !== e.pointerId) return;
+      if (Math.abs(event.clientX - startX) > 2) moved = true;
+      latest = show(original + (event.clientX - startX) / Math.max(1, statement.getBoundingClientRect().width) * 100);
+    };
+    const end = (event) => {
+      if (event.pointerId !== e.pointerId) return;
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', end);
+      handle.removeEventListener('pointercancel', end);
+      if (event.type === 'pointercancel') { show(original); return; }
+      if (moved) layout.updateSection(activePage, sectionId, { textBoxWidth: latest })
+        .catch(() => toast('Could not save text box width.', 'bad'));
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+  });
+  handle.addEventListener('keydown', (e) => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const next = show(widthOf() + (e.key === 'ArrowRight' ? 5 : -5));
+    layout.updateSection(activePage, sectionId, { textBoxWidth: next })
+      .catch(() => toast('Could not save text box width.', 'bad'));
+  });
+  textEl.appendChild(handle);
+}
+
 function render({ preservePanel = false } = {}) {
   document.querySelectorAll('.canvas-layer').forEach((el) => el.remove());
   const toolbar = document.getElementById('canvas-toolbar');
@@ -390,6 +455,10 @@ function render({ preservePanel = false } = {}) {
     el.classList.toggle('canvas-section-selected', editing && (panelMode === 'section' || panelMode === 'text') && el.dataset.sec === selectedSectionId);
     el.querySelectorAll('[data-edit]').forEach((textEl) => {
       textEl.classList.toggle('canvas-text-target', editing && panelMode === 'text' && el.dataset.sec === selectedText?.sectionId && textEl.dataset.edit === selectedText?.key);
+      if (editing && el.classList.contains('ed-statement') && textEl.dataset.edit === 'text'
+          && panelMode === 'text' && el.dataset.sec === selectedText?.sectionId) {
+        attachStatementWidthHandle(textEl, el.dataset.sec);
+      }
     });
   });
   for (const item of data()) {
@@ -534,7 +603,11 @@ function paintPanel() {
     input.addEventListener('input', () => {
       const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
       const visible = [...(block?.querySelectorAll('[data-edit]') || [])].find(el => el.dataset.edit === target.key);
-      if (visible) visible.innerHTML = rich(richValue(input.innerHTML));
+      if (visible) {
+        visible.innerHTML = rich(richValue(input.innerHTML));
+        if (block?.classList.contains('ed-statement') && target.key === 'text')
+          attachStatementWidthHandle(visible, target.sectionId);
+      }
     });
     const save = async () => {
       const current = layout.getSection(activePage, target.sectionId);
