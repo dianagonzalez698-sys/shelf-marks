@@ -6015,7 +6015,7 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 /* Collections heading follows the restrained Notebook editorial typography. */
 #app .lit-cabinet .lit-cabinet-heading {
   display: block;
-  padding: clamp(18px, 2.5vw, 36px) 0 clamp(12px, 2vw, 25px);
+  padding: 0 0 clamp(10px, 1.5vw, 18px);
   text-align: left;
 }
 #app .lit-cabinet .lit-cabinet-heading .lit-overline {
