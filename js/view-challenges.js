@@ -9,9 +9,9 @@ import {
   esc, attr, toast, progressBar, progressLine, markVisual, checkBadge, checkGlyph,
   openSheet, navigate, confirmSheet, coverImg, render,
 } from './ui.js';
-import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js';
+import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js?v=117';
 import { formatDate, quarters, YEAR } from './periods.js';
-import { FILTER_TYPES, WINDOW_TYPES } from './config.js';
+import { FILTER_TYPES, WINDOW_TYPES } from './config.js?v=117';
 import { t } from './theme.js';
 import { renderSections, renderSection } from './sections.js';
 import { figure, backdrop, media } from './media.js';
