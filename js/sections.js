@@ -743,7 +743,7 @@ export const SECTION_TYPES = {
     render(sec) {
       return sectionShell(sec, `
         <blockquote class="statement st-${sec.size || 'large'} st-${sec.style || 'quote'}">
-          <p data-edit="text">${rich(sec.text || '')}</p>
+          <p data-edit="text"${Number(sec.textBoxWidth) > 0 ? ` style="width:${Math.max(20, Math.min(100, Number(sec.textBoxWidth)))}%;max-width:100%"` : ''}>${rich(sec.text || '')}</p>
           ${sec.attribution ? `<cite>${esc(sec.attribution)}</cite>` : ''}
         </blockquote>`);
     },
