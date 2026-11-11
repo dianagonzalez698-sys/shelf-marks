@@ -32,7 +32,7 @@ export function assetsView() {
     html: `
       <div class="ed sp-tight form-wrap">
         ${studioNav('assets')}
-        <div class="ed-head" style="margin-bottom:1.2rem">
+        <div class="ed-head assets-studio-head" style="margin-bottom:1.2rem">
           <p class="ed-kicker">The library</p>
           <h2 class="ed-title">Pictures</h2>
           <p class="ed-sub">Paintings, photographs, cutouts and papers. Everything here can be
