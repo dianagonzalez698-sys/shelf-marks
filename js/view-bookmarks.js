@@ -10,6 +10,7 @@ import {
 import { evaluate, bookmarkLabels } from './rules.js';
 import { renderSections } from './sections.js';
 import * as layout from './layout.js';
+import * as assets from './assets.js';
 
 export const ARCHIVE_PAGE_ID = 'bookmarks';
 import { formatDateTime } from './periods.js';
@@ -60,6 +61,69 @@ export function bookmarksView(params = {}) {
   };
 }
 
+// Choose bookmark illustrations from the journal's saved Picture Library.
+function openBookmarkImagePicker(bookmarkId) {
+  const pictures = assets.list();
+  openSheet(`
+    <div class="bm-image-library">
+      <h2>Choose bookmark artwork</h2>
+      <p class="small muted">Use a picture from your library or upload a new one.</p>
+      <div class="asset-picker" role="group" aria-label="Saved pictures">
+        ${pictures.map((picture) => `<button type="button" class="asset-opt" data-bookmark-asset="${attr(picture.id)}" aria-label="Use ${attr(picture.name || 'picture')}">
+          <span class="asset-opt-thumb"><img src="${attr(picture.dataUrl)}" alt=""></span>
+          <span class="asset-opt-name" title="${attr(picture.name || 'Picture')}">${esc(picture.name || 'Picture')}</span>
+        </button>`).join('')}
+      </div>
+      ${!pictures.length ? '<p class="hint">No pictures saved yet. Upload your first one below.</p>' : ''}
+      <div class="btn-row" style="margin-top:1rem">
+        <button type="button" class="btn grow" id="bm-library-upload">+ Upload image</button>
+        <button type="button" class="btn grow" data-close>Cancel</button>
+      </div>
+      <input type="file" accept="image/*" class="visually-hidden" id="bm-library-file">
+    </div>
+  `, {
+    onMount(sheet, close) {
+      let saving = false;
+      const choose = async (dataUrl) => {
+        if (saving || !dataUrl) return;
+        saving = true;
+        try {
+          await saveBookmarkImage(bookmarkId, dataUrl);
+          close();
+          toast('Artwork assigned to this bookmark.', 'good');
+        } catch (error) {
+          saving = false;
+          toast(error.message || 'Could not save bookmark artwork.', 'bad');
+        }
+      };
+      sheet.querySelectorAll('[data-bookmark-asset]').forEach((button) => {
+        button.onclick = () => choose(assets.src(button.dataset.bookmarkAsset));
+      });
+      const upload = sheet.querySelector('#bm-library-upload');
+      const fileInput = sheet.querySelector('#bm-library-file');
+      upload.onclick = () => { fileInput.value = ''; fileInput.click(); };
+      fileInput.onchange = async () => {
+        const file = fileInput.files?.[0];
+        if (!file || saving) return;
+        saving = true;
+        upload.disabled = true;
+        upload.textContent = 'Saving…';
+        try {
+          const picture = await assets.add(file, { kind: 'photo' });
+          await saveBookmarkImage(bookmarkId, picture.dataUrl);
+          close();
+          toast('Artwork saved to your library and bookmark.', 'good');
+        } catch (error) {
+          saving = false;
+          upload.disabled = false;
+          upload.textContent = '+ Upload image';
+          toast(error.message || 'Could not upload artwork.', 'bad');
+        }
+      };
+    },
+  });
+}
+
 function openBookmarkArtworkStudio() {
   const groups = allChallenges().map((challenge) => ({
     challenge, labels: [...bookmarkLabels(challenge)],
@@ -77,11 +141,9 @@ function openBookmarkArtworkStudio() {
         <button type="button" id="bm-curator-pick">Choose image ↗</button>
       </div>
     </div>
-    <input id="bm-curator-file" class="visually-hidden" type="file" accept="image/*">
     <p class="bm-curator-footnote">The illustration appears when the bookmark is earned.</p>
   </div>`, {
     onMount(sheet) {
-      const file = sheet.querySelector('#bm-curator-file');
       const bookmarkPicker = sheet.querySelector('#bm-curator-bookmark');
       const button = sheet.querySelector('#bm-curator-pick');
       const selectedId = () => bookmarkPicker.value;
@@ -97,22 +159,9 @@ function openBookmarkArtworkStudio() {
         button.textContent = image ? 'Replace image ↗' : 'Choose image ↗';
       };
       bookmarkPicker.onchange = show;
-      button.onclick = () => { file.value = ''; file.click(); };
+      button.onclick = () => openBookmarkImagePicker(selectedId());
       show();
-      file.onchange = async () => {
-        const picture = file.files && file.files[0];
-        const id = selectedId();
-        if (!picture || !id) return;
-        button.disabled = true; button.textContent = 'Saving…';
-        try {
-          const dataUrl = await fileToDataUrl(picture);
-          await saveBookmarkImage(id, dataUrl);
-          show();
-          toast('Artwork assigned to this bookmark.', 'good');
-        } catch (error) {
-          toast(esc(error.message || 'Could not save artwork.'), 'bad');
-        } finally { button.disabled = false; show(); }
-      };
+;
     },
   });
 }
@@ -168,7 +217,6 @@ function openBookmark(id, anchor = null) {
       </div>
     </div>
     <div class="bookmark-detail-actions">
-      <input type="file" id="bm-file" accept="image/*" class="visually-hidden">
       <div class="bookmark-detail-manage">
         <button type="button" id="bm-pick">${img ? 'Change image' : 'Add image'}</button>
         ${img ? '<button type="button" id="bm-remove">Remove</button>' : ''}
@@ -208,27 +256,11 @@ function openBookmark(id, anchor = null) {
   }, 0);
   popout.focus({ preventScroll: true });
   {
-      const file = popout.querySelector('#bm-file');
       const pick = popout.querySelector('#bm-pick');
-      if (pick && file) {
-        pick.onclick = () => file.click();
-        file.onchange = async () => {
-          const f = file.files && file.files[0];
-          if (!f) return;
-          pick.disabled = true;
-          pick.textContent = 'Saving…';
-          try {
-            const dataUrl = await fileToDataUrl(f);
-            await saveBookmarkImage(id, dataUrl);
-            close();
-            toast('Bookmark artwork saved.', 'good');
-          } catch (err) {
-            pick.disabled = false;
-            pick.textContent = img ? 'Change image' : 'Add image';
-            toast(esc(err.message || 'Could not save that photo.'), 'bad');
-          }
-        };
-      }
+      if (pick) pick.onclick = () => {
+        close();
+        openBookmarkImagePicker(id);
+      };
 
       const remove = popout.querySelector('#bm-remove');
       if (remove) {
