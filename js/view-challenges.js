@@ -375,6 +375,12 @@ export function openEditor(challenge) {
       const windowEl = sheet.querySelector('#ch-window');
       const targetEl = sheet.querySelector('#ch-target');
       const filterExtra = sheet.querySelector('#filter-extra');
+      // A title rule keeps the book names rather than only database ids,
+      // so the challenge continues to recognise a book added later.
+      const selectedTitles = new Map(((c.filter?.type === 'title' ? c.filter.titles : []) || [])
+        .filter(Boolean).map((title) => [title.trim().toLocaleLowerCase(), title.trim()]));
+      const titleKey = (title) => String(title || '').trim().toLocaleLowerCase();
+
       const windowExtra = sheet.querySelector('#window-extra');
       const targetNote = sheet.querySelector('#target-note');
       const bookmarkNote = sheet.querySelector('#bookmark-note');
@@ -386,7 +392,8 @@ export function openEditor(challenge) {
         const snapshot = {};
         sheet.querySelectorAll('#ch-form input, #ch-form select, #ch-form textarea')
           .forEach((input) => { if (input.id) snapshot[input.id] = input.value; });
-        pendingChallengeForm = { id: c.id, values: snapshot };
+        pendingChallengeForm = { id: c.id, values: snapshot,
+          selectedTitles: [...selectedTitles.values()] };
         openChallengeCoverEditor(c, document.getElementById('app'));
       };
 
@@ -405,6 +412,67 @@ export function openEditor(challenge) {
             <label for="ch-authors">Authors — one per line</label>
             <textarea id="ch-authors" rows="5" placeholder="Joan Didion&#10;Janet Malcolm">${esc(authors.join('\n'))}</textarea>
             <p class="hint">A book counts if any of these wrote it. “Didion, Joan” and “Joan Didion” both match.</p>`;
+        } else if (t === 'title') {
+          // Search and selection remain in this compact form; no second sheet
+          // and no need to navigate away to the Library.
+          filterExtra.innerHTML = `
+            <label for="ch-title-search">Find books in my Library</label>
+            <input type="search" id="ch-title-search" placeholder="Search title or author…" autocomplete="off">
+            <div id="ch-title-results" class="ch-title-results" role="group" aria-label="Library book titles"></div>
+            <div class="ch-title-picked" id="ch-title-picked" aria-live="polite"></div>
+            <label for="ch-title-manual">Or add a book title not in your Library yet</label>
+            <div class="ch-title-manual">
+              <input type="text" id="ch-title-manual" placeholder="Enter book title" autocomplete="off">
+              <button type="button" id="ch-title-add" class="btn">Add</button>
+            </div>
+            <p class="hint">A finished book counts when its title matches one of these. The reading dates and target still apply.</p>`;
+          const library = [...state.books].filter((book) => book.title).sort((a,b) =>
+            a.title.localeCompare(b.title) || String(a.author || '').localeCompare(String(b.author || '')));
+          const query = filterExtra.querySelector('#ch-title-search');
+          const results = filterExtra.querySelector('#ch-title-results');
+          const picked = filterExtra.querySelector('#ch-title-picked');
+          const paintTitles = () => {
+            picked.innerHTML = selectedTitles.size
+              ? `<p class="ch-title-count">${selectedTitles.size} selected</p>` +
+                [...selectedTitles.values()].map((title) => `<button type="button" class="ch-title-chip" data-remove-title="${attr(title)}" title="Remove this title">${esc(title)} <span aria-hidden="true">×</span></button>`).join('')
+              : '<p class="hint">No titles selected yet.</p>';
+            picked.querySelectorAll('[data-remove-title]').forEach((button) => {
+              button.onclick = () => { selectedTitles.delete(titleKey(button.dataset.removeTitle)); paintTitles(); };
+            });
+            const search = query.value.trim().toLowerCase();
+            const matches = library.filter((book) => `${book.title} ${book.author || ''}`.toLowerCase().includes(search));
+            const unique = [...new Map(matches.map((book) => [titleKey(book.title), book])).values()];
+            results.innerHTML = unique.length
+              ? unique.slice(0, 40).map((book) => {
+                const pickedAlready = selectedTitles.has(titleKey(book.title));
+                return `<button type="button" class="ch-title-result${pickedAlready ? ' is-selected' : ''}" data-add-title="${attr(book.title)}" aria-pressed="${pickedAlready}">
+                  <span class="ch-title-result-name">${esc(book.title)}<small>${esc(book.author || '')}</small></span>
+                  <span class="ch-title-result-mark">${pickedAlready ? '✓' : '+'}</span>
+                </button>`;
+              }).join('') + (unique.length > 40 ? '<p class="hint">Keep typing to narrow your results.</p>' : '')
+              : `<p class="hint">${library.length ? 'No matching books. You can add a title below.' : 'Your Library is empty. Add a title below to start.'}</p>`;
+            results.querySelectorAll('[data-add-title]').forEach((button) => {
+              button.onclick = () => {
+                const title = button.dataset.addTitle;
+                const key = titleKey(title);
+                if (selectedTitles.has(key)) selectedTitles.delete(key);
+                else selectedTitles.set(key, title.trim());
+                paintTitles();
+              };
+            });
+          };
+          query.addEventListener('input', paintTitles);
+          const manual = filterExtra.querySelector('#ch-title-manual');
+          const addTitle = () => {
+            const value = manual.value.trim();
+            if (!value) return;
+            selectedTitles.set(titleKey(value), value);
+            manual.value = '';
+            paintTitles();
+          };
+          filterExtra.querySelector('#ch-title-add').onclick = addTitle;
+          manual.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTitle(); } });
+          paintTitles();
         } else if (t === 'series') {
           const known = knownSeries();
           filterExtra.innerHTML = `
@@ -477,7 +545,12 @@ export function openEditor(challenge) {
       paintWindowExtra();
       if (pendingChallengeForm?.id === c.id) {
         const saved = pendingChallengeForm.values;
+        const titleDraft = pendingChallengeForm.selectedTitles;
         pendingChallengeForm = null;
+        if (Array.isArray(titleDraft)) {
+          selectedTitles.clear();
+          titleDraft.forEach((title) => { if (title?.trim()) selectedTitles.set(titleKey(title), title.trim()); });
+        }
         for (const [id, value] of Object.entries(saved)) {
           const input = sheet.querySelector('#' + CSS.escape(id));
           if (!input) continue;
@@ -487,6 +560,7 @@ export function openEditor(challenge) {
             if (id === 'ch-window') paintWindowExtra();
           }
         }
+        if (filterEl.value === 'title') paintFilterExtra();
         paintNotes();
       }
 
@@ -509,6 +583,12 @@ export function openEditor(challenge) {
             .split('\n').map((s) => s.trim()).filter(Boolean);
           if (!authors.length) { toast('Add at least one author.', 'bad'); return; }
           filter.authors = authors;
+        } else if (filter.type === 'title') {
+          filter.titles = [...selectedTitles.values()];
+          if (!filter.titles.length) {
+            toast('Select or add at least one book title.', 'bad');
+            return;
+          }
         } else if (filter.type === 'series') {
           const v = sheet.querySelector('#ch-series').value.trim();
           if (!v) { toast('Name the series.', 'bad'); return; }
