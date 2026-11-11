@@ -6,6 +6,7 @@
 // bookmarks, this period) read live app state — they are real features wearing
 // editorial clothes, not decoration.
 
+import * as layout from './layout.js';
 import { esc, attr, rich, progressBar, progressLine, markVisual, checkBadge, checkGlyph, coverImg } from './ui.js';
 import { figure, backdrop, media, hasAsset } from './media.js';
 import { src as assetSrc, get as getAsset } from './assets.js';
@@ -1520,6 +1521,15 @@ export function challengeSpread(c, index = 0) {
   const earned = ids.filter((id) => have.has(id)).length;
   const pct = ids.length ? Math.round((earned / ids.length) * 100) : 0;
   const picture = c.cover || media({ ratio: '4/5', frame: 'plate' });
+  // Match the wording displayed in this challenge's actual banner, including
+  // overrides made in Design Mode on the individual challenge page.
+  const detailHero = layout.get(`challenge:${c.id}`).find((section) =>
+    section.type === 'challengeHero' && section.visible !== false);
+  const displayWindow = detailHero?.showWindow === false
+    ? '' : (detailHero?.eyebrowText || describeWindow(c.window));
+  const displayTitle = detailHero?.titleText || c.name;
+  const displayBlurb = detailHero?.showBlurb === false
+    ? '' : (detailHero?.subtitleText || c.blurb || '');
 
   return `<a class="spread${index % 2 ? ' spread-flip' : ''}" href="#/challenge/${encodeURIComponent(c.id)}">
     <div class="spread-media">
@@ -1531,10 +1541,9 @@ export function challengeSpread(c, index = 0) {
       })).join('')}</span>
     </div>
     <div class="spread-body">
-      <p class="ed-kicker">${esc(describeWindow(c.window))}</p>
-      <h3 class="spread-title">${esc(c.name)}</h3>
-      ${c.blurb ? `<p class="ed-sub">${esc(c.blurb)}</p>` : ''}
-      <p class="spread-filter">${esc(describeFilter(c.filter))}</p>
+      ${displayWindow ? `<p class="ed-kicker">${esc(displayWindow)}</p>` : ''}
+      <h3 class="spread-title">${esc(displayTitle)}</h3>
+      ${displayBlurb ? `<p class="ed-sub">${esc(displayBlurb)}</p>` : ''}
       ${ids.length ? progressLine(`${earned} of ${ids.length} bookmarks`, pct, { tone: 'apricot', done: earned === ids.length })
         : `<p class="hint">${r.targetUnset ? 'No target set yet' : `${r.count} matching`}</p>`}
     </div>
