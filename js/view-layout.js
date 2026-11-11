@@ -532,6 +532,36 @@ function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
       const r = f.role || {};
       const face = String(value || '');
       const ink = String(sec_ink(secId, f.inkKey) || '');
+      if (EDITING?.type === 'challengeHero') {
+        const cur = (key) => key ? String(sec_ink(secId, key) || '') : '';
+        const field = (key, label, options) => key ? `<label class="banner-type-field">${esc(label)}<select data-field="${attr(key)}">${options.map(([v, t]) => `<option value="${attr(v)}" ${cur(key) === String(v) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>` : '';
+        const weightOptions = [['', 'Match site'], ['300', 'Light'], ['400', 'Regular'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']];
+        return `<div class="banner-type-controls">
+          <h3>${esc(f.label)}</h3>
+          <label class="banner-type-field">Font
+            <select data-field="${attr(f.key)}">${FONT_CHOICES.map((opt) => `<option value="${attr(opt.value)}" ${face === opt.value ? 'selected' : ''}>${esc(opt.label)}</option>`).join('')}</select>
+          </label>
+          <div class="banner-type-pair">
+            <label class="banner-type-field">HEX text color
+              <input class="banner-hex-input" type="text" data-field="${attr(f.inkKey)}" value="${attr(ink)}" placeholder="#E0B35A" maxlength="7" spellcheck="false">
+            </label>
+            <label class="banner-type-field banner-color-field">Color picker
+              <input type="color" data-banner-wheel="${attr(f.inkKey)}" value="${attr(/^#[0-9a-f]{6}$/i.test(ink) ? ink : '#E0B35A')}">
+            </label>
+          </div>
+          <div class="banner-type-pair">
+            ${field(r.weight, 'Weight', weightOptions)}
+            ${field(r.italic, 'Style', [['', 'Match site'], ['normal', 'Regular'], ['italic', 'Italic']])}
+          </div>
+          ${r.size ? `<label class="banner-type-field">Size <span data-banner-size-out="${attr(r.size)}">${Math.round((Number(cur(r.size)) || 1) * 100)}%</span>
+            <input type="range" data-field="${attr(r.size)}" min=".5" max="2.5" step=".05" value="${attr(cur(r.size) || '1')}">
+          </label>` : ''}
+          ${r.track ? `<label class="banner-type-field">Letter spacing
+            <input type="text" data-field="${attr(r.track)}" value="${attr(cur(r.track))}" placeholder="Match site (or 0.05em)">
+          </label>` : ''}
+          ${field(r.transform, 'Capitalization', [['', 'Match site'], ['none', 'As typed'], ['uppercase', 'UPPERCASE'], ['capitalize', 'Title Case']])}
+        </div>`;
+      }
       const name = (FONT_CHOICES.find((x) => x.value === face) || {}).label || 'Site default';
       const cur = (k) => (k ? String(sec_ink(secId, k) || '') : '');
       const weight = cur(r.weight);
