@@ -101,7 +101,26 @@ function popSheet() {
 // escaped to plain text. Sanitising happens at *render* time rather than only
 // on save, because a backup file is editable and arrives from outside.
 
-const RICH_OK = { B: 'b', STRONG: 'b', I: 'i', EM: 'i', BR: 'br' };
+const RICH_OK = { B: 'b', STRONG: 'b', I: 'i', EM: 'i', BR: 'br', SPAN: 'span' };
+// Inline font treatments are intentionally limited; never trust arbitrary
+// CSS copied into an editor or imported through a backup.
+function safeRichStyle(node) {
+  const style = node.style;
+  const safe = [];
+  const family = style.fontFamily || '';
+  if (family && family.length < 250 && /^[a-zA-Z0-9 ,"'-]+$/.test(family))
+    safe.push(['font-family', family]);
+  const size = style.fontSize || '';
+  const percent = /^(\d+(?:\.\d+)?)%$/.exec(size);
+  if (percent && Number(percent[1]) >= 50 && Number(percent[1]) <= 300)
+    safe.push(['font-size', size]);
+  if (/^#[0-9a-f]{6}$/i.test(style.color || ''))
+    safe.push(['color', style.color]);
+  if (['400','500','600','700','800','bold'].includes(style.fontWeight))
+    safe.push(['font-weight', style.fontWeight]);
+  if (style.fontStyle === 'italic') safe.push(['font-style', 'italic']);
+  return safe;
+}
 
 function cleanRich(root, out) {
   for (const node of root.childNodes) {
@@ -115,7 +134,10 @@ function cleanRich(root, out) {
       cleanRich(node, out);
       continue;
     }
-    const el = document.createElement(keep);   // rebuilt, so no attributes carry
+    const el = document.createElement(keep);   // only approved styling survives
+    if (keep === 'span') {
+      for (const [property, value] of safeRichStyle(node)) el.style.setProperty(property, value);
+    }
     if (keep !== 'br') cleanRich(node, el);
     out.appendChild(el);
   }
