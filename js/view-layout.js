@@ -1239,7 +1239,8 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
                   else target.setAttribute('style', previousStyle);
                 };
               }
-              return () => {};
+              // No existing figure (for example an ornament becoming a strip):
+              // let the section renderer create the missing picture slot.
               // Render the actual section temporarily for every image choice.
               // This also shows a strip even if its previous mode was an ornament.
               const currentSection = layout.getSection(pageId, sectionId);
