@@ -145,7 +145,6 @@ export function challengeDetailView(params) {
     html: `
       <div class="challenge-detail-toolbar" style="display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px clamp(18px, 4vw, 56px);background:var(--c-bg);border-bottom:1px solid var(--c-rule);">
         <button type="button" class="btn btn-quiet" id="edit-challenge-inline" style="font-size:14px;min-height:32px;padding:5px 12px;">Edit challenge</button>
-        <button type="button" class="btn btn-quiet" id="cover-top" style="font-size:14px;min-height:32px;padding:5px 12px;">Cover</button>
       </div>
       ${spread}
       ${unsetNotice}
@@ -173,48 +172,6 @@ export function challengeDetailView(params) {
       if (top) top.onclick = open;
       const inline = root.querySelector('#edit-challenge');
       if (inline) inline.onclick = open;
-
-      // The cover is the challenge's own artwork: it backs the spread's
-      // opening and fills its card on the index. It lives on the challenge
-      // rather than on a section, because two different sections draw it.
-      const coverBtn = root.querySelector('#cover-top');
-      if (coverBtn) {
-        coverBtn.onclick = () => openMediaEditor(
-          challenge.cover || media({ ratio: 'auto', frame: 'none', shadow: false }),
-          async (next) => {
-            try {
-              await saveChallenge({ id: challenge.id, custom: !!challenge.custom, cover: next });
-              toast('Cover saved.');
-              render();
-            } catch (_) {
-              toast('Could not save that change.', 'bad');
-            }
-          },
-          { role: 'backdrop', size: '1800 × 1100 px',
-            previewSelection(chosenId, tweaks = {}) {
-              const hero = root.querySelector('.ed-challengeHero .m-backdrop');
-              if (!hero) return () => {};
-              const previousStyle = hero.getAttribute('style');
-              const previousClass = hero.className;
-              const url = assets.src(chosenId);
-              if (url) {
-                hero.classList.remove('m-backdrop-empty');
-                hero.style.backgroundImage = `url("${url.replace(/"/g, '%22')}")`;
-              } else {
-                hero.style.backgroundImage = 'none';
-                hero.classList.add('m-backdrop-empty');
-              }
-              hero.style.backgroundPosition = `${Number(tweaks.focalX ?? 50)}% ${Number(tweaks.focalY ?? 50)}%`;
-              hero.style.opacity = String(Number(tweaks.opacity ?? 1));
-              return () => {
-                hero.className = previousClass;
-                if (previousStyle == null) hero.removeAttribute('style');
-                else hero.setAttribute('style', previousStyle);
-              };
-            },
-          },
-        );
-      }
 
       const pick = root.querySelector('#pick-eligible');
       if (pick) pick.onclick = () => openEligiblePicker(challenge);
@@ -315,6 +272,47 @@ function slug(s) {
   return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'challenge';
 }
 
+// Cover settings belong to the challenge editor, not a separate page action.
+function openChallengeCoverEditor(challenge, root) {
+  openMediaEditor(
+            challenge.cover || media({ ratio: 'auto', frame: 'none', shadow: false }),
+            async (next) => {
+              try {
+                await saveChallenge({ id: challenge.id, custom: !!challenge.custom, cover: next });
+                toast('Cover saved.');
+                render();
+              } catch (_) {
+                toast('Could not save that change.', 'bad');
+              }
+            },
+            { role: 'backdrop', size: '1800 × 1100 px',
+              previewSelection(chosenId, tweaks = {}) {
+                const hero = root.querySelector('.ed-challengeHero .m-backdrop');
+                if (!hero) return () => {};
+                const previousStyle = hero.getAttribute('style');
+                const previousClass = hero.className;
+                const url = assets.src(chosenId);
+                if (url) {
+                  hero.classList.remove('m-backdrop-empty');
+                  hero.style.backgroundImage = `url("${url.replace(/"/g, '%22')}")`;
+                } else {
+                  hero.style.backgroundImage = 'none';
+                  hero.classList.add('m-backdrop-empty');
+                }
+                hero.style.backgroundPosition = `${Number(tweaks.focalX ?? 50)}% ${Number(tweaks.focalY ?? 50)}%`;
+                hero.style.opacity = String(Number(tweaks.opacity ?? 1));
+                return () => {
+                  hero.className = previousClass;
+                  if (previousStyle == null) hero.removeAttribute('style');
+                  else hero.setAttribute('style', previousStyle);
+                };
+              },
+            },
+          );
+}
+
+let pendingChallengeForm = null;
+
 export function openEditor(challenge) {
   const creating = !challenge;
   const presetLocked = !!(challenge && challenge.preset); // keep preset shape intact
@@ -365,6 +363,12 @@ export function openEditor(challenge) {
         <p class="hint" id="bookmark-note"></p>
       </div>
 
+      ${!creating ? `<div class="field">
+        <label>Cover artwork</label>
+        <button class="btn" id="ch-edit-cover" type="button">Edit cover artwork</button>
+        <p class="hint">Choose, crop, and position the artwork for this challenge.</p>
+      </div>` : ''}
+
       <div class="btn-row" style="margin-top:.3rem">
         <button class="btn grow" type="button" data-close>Cancel</button>
         <button class="btn btn-primary grow" type="submit">${creating ? 'Create' : 'Save'}</button>
@@ -382,6 +386,17 @@ export function openEditor(challenge) {
       const targetNote = sheet.querySelector('#target-note');
       const bookmarkNote = sheet.querySelector('#bookmark-note');
       const removeButton = sheet.querySelector('#ch-remove');
+      const coverButton = sheet.querySelector('#ch-edit-cover');
+      if (coverButton) coverButton.onclick = () => {
+        // The cover picker is a nested panel. Reopening the parent rebuilds
+        // its form, so retain any unsaved text and selector edits.
+        const snapshot = {};
+        sheet.querySelectorAll('#ch-form input, #ch-form select, #ch-form textarea')
+          .forEach((input) => { if (input.id) snapshot[input.id] = input.value; });
+        pendingChallengeForm = { id: c.id, values: snapshot };
+        openChallengeCoverEditor(c, document.getElementById('app'));
+      };
+
       if (removeButton) removeButton.addEventListener('click', async () => {
         const yes = await confirmSheet({title:`Remove “${c.name}”?`,body:'Bookmarks already collected from this challenge stay in your archive.',confirm:'Remove',danger:true});
         if (!yes) return;
@@ -467,6 +482,20 @@ export function openEditor(challenge) {
       nameEl.addEventListener('input', paintNotes);
       paintFilterExtra();
       paintWindowExtra();
+      if (pendingChallengeForm?.id === c.id) {
+        const saved = pendingChallengeForm.values;
+        pendingChallengeForm = null;
+        for (const [id, value] of Object.entries(saved)) {
+          const input = sheet.querySelector('#' + CSS.escape(id));
+          if (!input) continue;
+          if (input.value !== value) {
+            input.value = value;
+            if (id === 'ch-filter') paintFilterExtra();
+            if (id === 'ch-window') paintWindowExtra();
+          }
+        }
+        paintNotes();
+      }
 
       sheet.querySelector('#ch-form').onsubmit = async (e) => {
         e.preventDefault();
