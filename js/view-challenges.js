@@ -112,7 +112,6 @@ export function challengeDetailView(params) {
 
   const r = evaluate(challenge, state.books);
   const have = unlockMap();
-  const canEdit = challenge.editable || challenge.custom;
 
   // A challenge with no target can't yield anything yet; that's a prompt to
   // finish setting it up, not editorial content, so it isn't a section.
@@ -142,8 +141,8 @@ export function challengeDetailView(params) {
     // A challenge spread is long, and saving from a sheet re-renders it.
     // Without this you are thrown back to the top every time you tick a book.
     keepScroll: true,
-    actions: `<button class="btn btn-quiet" type="button" id="cover-top">Cover</button>`
-      + (canEdit ? '<button class="btn btn-quiet" type="button" id="edit-top">Edit</button>' : ''),
+    actions: `<button class="btn btn-quiet" type="button" id="edit-top">Edit challenge</button>
+      <button class="btn btn-quiet" type="button" id="cover-top">Cover</button>`,
     html: `
       ${spread}
       ${unsetNotice}
