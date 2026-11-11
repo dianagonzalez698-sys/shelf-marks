@@ -284,7 +284,7 @@ function elFor(item) {
   node.className = `canvas-item canvas-${item.type}${item.type === 'image' ? frameClass(item.frame) : ''}${item.locked ? ' is-locked' : ''}`;
   if (item.hidden) node.hidden = true;
   node.dataset.canvasId = item.id;
-  node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${item.fullWidth && Number.isFinite(item.anchorBottom) ? 'auto' : `${clamp(item.y, 0, 100)}%`};${item.fullWidth && Number.isFinite(item.anchorBottom) ? `bottom:${item.anchorBottom}px;` : ''}width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
+  // The homepage cloud valance must remain at the top as content below grows.\n  const topCloud = item.fullWidth && item.type === 'image' && activePage === 'home'\n    && /cloud/i.test(`${assets.get(item.assetId)?.name || ''} ${assets.get(item.assetId)?.alt || ''}`);\n  const useBottom = item.fullWidth && !topCloud && Number.isFinite(item.anchorBottom);\n  node.style.cssText = `left:${item.fullWidth ? 0 : clamp(item.x, 0, 100)}%;top:${topCloud ? `${Number.isFinite(item.anchorTop) ? item.anchorTop : 0}px` : useBottom ? 'auto' : `${clamp(item.y, 0, 100)}%`};${useBottom ? `bottom:${item.anchorBottom}px;` : ''}width:${item.fullWidth ? '100%' : `${clamp(item.width, 60, 1200)}px`};opacity:${clamp(item.opacity ?? 1, 0, 1)};transform:rotate(${clamp(item.rotate || 0, -180, 180)}deg)`;
   node.classList.toggle('is-full-width', !!item.fullWidth);
   if (item.type === 'image') {
     const src = assets.src(item.assetId);
@@ -340,7 +340,7 @@ function startPointer(e, node, item) {
   const resize = !item.fullWidth && e.target.classList.contains('canvas-resize');
   const startX = e.clientX, startY = e.clientY;
   const canvasScale = Number(getComputedStyle(document.getElementById('app')).zoom) || 1;
-  const origin = { x: item.x, y: item.y, width: item.width, bottom: item.fullWidth ? (bounds.bottom - node.getBoundingClientRect().bottom) / canvasScale : 0 };
+  const topCloud = item.fullWidth && item.type === 'image' && activePage === 'home'\n    && /cloud/i.test(`${assets.get(item.assetId)?.name || ''} ${assets.get(item.assetId)?.alt || ''}`);\n  const origin = { x: item.x, y: item.y, width: item.width, bottom: item.fullWidth ? (bounds.bottom - node.getBoundingClientRect().bottom) / canvasScale : 0, top: topCloud ? (node.getBoundingClientRect().top - bounds.top) / canvasScale : 0 };
   node.setPointerCapture(e.pointerId);
   const move = (ev) => {
     const dx = ev.clientX - startX, dy = ev.clientY - startY;
@@ -348,11 +348,14 @@ function startPointer(e, node, item) {
     if (!moved) { checkpoint(); moved = true; }
     const patch = resize
       ? { width: clamp(origin.width + dx / canvasScale, 60, 1200) }
-      : item.fullWidth
-        ? { anchorBottom: Math.round(origin.bottom - dy / canvasScale) }
+      : topCloud
+        ? { anchorTop: Math.round(origin.top + dy / canvasScale) }
+        : item.fullWidth
+          ? { anchorBottom: Math.round(origin.bottom - dy / canvasScale) }
         : { x: clamp(origin.x + dx / Math.max(bounds.width, 1) * 100, 0, 100), y: clamp(origin.y + dy / Math.max(bounds.height, 1) * 100, 0, 100) };
     Object.assign(item, patch);
     if (resize) node.style.width = `${patch.width}px`;
+    else if (topCloud) { node.style.top = `${patch.anchorTop}px`; node.style.bottom = 'auto'; }
     else if (item.fullWidth) { node.style.top = 'auto'; node.style.bottom = `${patch.anchorBottom}px`; }
     else { node.style.left = `${patch.x}%`; node.style.top = `${patch.y}%`; }
   };
