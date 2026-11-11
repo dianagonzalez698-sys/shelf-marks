@@ -6062,21 +6062,21 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
    editorial proportions Diana preferred in the Design Mode preview.
    Keep these rules on the challenge index only; the home hero and individual
    challenge covers retain their own designs. */
-#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-tall {
+#app.screen:has(> .lit-challenge-invite) .ed-hero .hero-tall {
   min-height: clamp(350px, 42vw, 515px);
 }
-#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-type {
+#app.screen:has(> .lit-challenge-invite) .ed-hero .hero-type {
   padding-top: clamp(1.75rem, 4vw, 3.25rem);
   padding-bottom: clamp(1.75rem, 4vw, 3.25rem);
 }
-#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-title {
+#app.screen:has(> .lit-challenge-invite) .ed-hero .hero-title {
   font-size: calc(var(--fs-banner-title) * var(--fz-display, 1) * .78);
   line-height: 1.02;
 }
-#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-title .ed-script {
+#app.screen:has(> .lit-challenge-invite) .ed-hero .hero-title .ed-script {
   font-size: 1.2em;
 }
-#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-sub {
+#app.screen:has(> .lit-challenge-invite) .ed-hero .hero-sub {
   font-size: calc(var(--fs-banner-sub) * var(--fz-body, 1) * .9);
 }
 
