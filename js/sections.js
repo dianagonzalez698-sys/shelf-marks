@@ -267,6 +267,21 @@ function sectionShell(sec, inner, extraClass = '') {
         `--cur-arch:calc(${drop}vw * ${archFrac.toFixed(4)})`,
       );
       curtain = '<span class="ed-curtain" aria-hidden="true"></span>';
+    } else if (url) {
+      // Cloud bands and other transparent wide artwork are valid decorations
+      // even without a detected curtain opening. Draw the original image
+      // intact rather than silently omitting it from preview and publication.
+      const iw = Math.max(1, Number(asset?.w) || 2400);
+      const ih = Math.max(1, Number(asset?.h) || 700);
+      styles.push(
+        `--cur-img:url('${attr(url)}')`,
+        `--cur-h:clamp(80px, ${Math.min(65, ih / iw * 100).toFixed(3)}vw, 900px)`,
+        '--cur-side:0%',
+        '--cur-arch:0px',
+        '--cur-over:1',
+        `--cur-offset:${Math.max(-200, Math.min(400, Number(sec.curtainOffset ?? 0)))}px`,
+      );
+      curtain = '<span class="ed-curtain ed-curtain-decor" aria-hidden="true"></span>';
     }
   }
 
