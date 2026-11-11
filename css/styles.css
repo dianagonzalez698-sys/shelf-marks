@@ -5792,32 +5792,39 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 }
 
 
-/* Bookmark Archive: a restrained sketch frame. Keep the valance at a
-   readable scale; stretching the whole bitmap to the content height makes
-   its scallops huge and covers the heading. */
+/* The archive's drawing is a frame, not a photograph. The nine-slice
+   keeps the top scallops and lower hems at their drawn proportions while
+   only the long, narrow side fabric extends with the collection height. */
 .ed-bookmarks.has-curtain:not(.curtain-bottom) {
-  padding-block-start: max(
-    calc(var(--cur-arch) * .96 - var(--cur-lift) + var(--cur-clear) + var(--cur-gap, 0px) + 155px),
-    calc(var(--sp-section) + 155px));
+  padding-block-start: max(245px, var(--sp-section));
 }
 .ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain {
-  top: 28px;
-  bottom: auto;
-  left: 2.5%;
-  right: 2.5%;
-  width: 95%;
-  height: clamp(600px, 43vw, 880px);
+  top: 22px;
+  bottom: 0;
+  left: 0.8%;
+  right: 0.8%;
+  width: 98.4%;
+  height: auto;
+  box-sizing: border-box;
+  background-image: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 205px clamp(125px, 9.4vw, 195px) 110px;
+  border-image-source: var(--cur-img);
+  border-image-slice: 28% 18% 18% 18%;
+  border-image-width: 1;
+  border-image-repeat: stretch;
   transform: translateY(var(--cur-offset, 0px));
 }
 @media (max-width: 759px) {
   .ed-bookmarks.has-curtain:not(.curtain-bottom) {
-    padding-block-start: max(calc(var(--sp-section) + 65px), 115px);
+    padding-block-start: max(145px, var(--sp-section));
   }
   .ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain {
-    top: 18px;
-    left: 1%;
-    right: 1%;
-    width: 98%;
-    height: min(115vw, 720px);
+    top: 12px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    border-width: 125px 9vw 68px;
   }
 }
