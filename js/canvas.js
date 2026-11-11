@@ -29,6 +29,7 @@ const SETTINGS_STYLE_GROUPS = [
   ['tool-link','Design tool links','.settings-link-grid a'],
   ['footnote','Page footnote','.settings-footnote'],
 ];
+let inlineTextSelectionController = new AbortController();
 let settingsStyleSelected = null;
 function settingsStyles() {
   try { return JSON.parse(localStorage.getItem(SETTINGS_STYLE_KEY) || '{}') || {}; }
@@ -549,6 +550,22 @@ function paintPanel() {
       <p class="canvas-section-label">${esc(SECTION_TYPES[sec.type]?.label || 'Section')}<strong>${esc(label)}</strong></p>
       <p class="canvas-panel-hint">Change the words or their styling right here. Your homepage is the preview.</p>
       <div id="canvas-inline-text" class="canvas-inline-text" contenteditable="true" role="textbox" aria-label="${esc(label)}" aria-multiline="${!!field?.multiline}">${rich(sec[selectedText.key] || '')}</div>
+      <div class="canvas-selection-format" aria-label="Selected text formatting">
+        <p>Highlight a word or phrase above to style it separately.</p>
+        <label>Selected text font
+          <select id="canvas-selection-font"><option value="">Choose a font…</option>${FONT_STACKS.map(f => `<option value="${esc(f.value)}">${esc(f.label)}</option>`).join('')}</select>
+        </label>
+        <label>Size <select id="canvas-selection-size">
+          <option value="">Choose size…</option>
+          ${[70,80,90,100,110,125,150,175,200,250].map(n => `<option value="${n}">${n}%</option>`).join('')}
+        </select></label>
+        <div class="canvas-selection-actions">
+          <button type="button" id="canvas-selection-bold" aria-label="Bold selection">B</button>
+          <button type="button" id="canvas-selection-italic" aria-label="Italicize selection"><i>I</i></button>
+          <label class="canvas-selection-ink">Color <input id="canvas-selection-color" type="color" value="#49312b"></label>
+          <button type="button" id="canvas-selection-reset">Clear style</button>
+        </div>
+      </div>
       ${role ? `<div class="canvas-text-style-controls">
         <h3>Font &amp; styling</h3>
         <p>Changes other ${esc(role.label.toLowerCase())} in this section too.</p>
@@ -571,8 +588,59 @@ function paintPanel() {
         <button class="canvas-text-style-reset" type="button" id="canvas-text-style-reset">Use site styling</button>
       </div>` : '<p class="canvas-panel-hint">For more styling options, open this section.</p>'}
       <button type="button" class="canvas-text-done" data-canvas="text-save">Save text</button>`;
+    inlineTextSelectionController.abort();
+    inlineTextSelectionController = new AbortController();
     const input = panel.querySelector('#canvas-inline-text');
     const target = { ...selectedText };
+    let savedRange = null;
+    const ownsRange = (range) => !!(range && !range.collapsed && input.contains(range.commonAncestorContainer));
+    const rememberSelection = () => {
+      const selection = window.getSelection();
+      if (selection?.rangeCount && ownsRange(selection.getRangeAt(0)))
+        savedRange = selection.getRangeAt(0).cloneRange();
+    };
+    input.addEventListener('mouseup', rememberSelection);
+    input.addEventListener('keyup', rememberSelection);
+    document.addEventListener('selectionchange', () => {
+      if (panelMode === 'text' && document.activeElement === input) rememberSelection();
+    }, { signal: inlineTextSelectionController.signal });
+    const applySelectionStyle = (style, reset = false) => {
+      const selection = window.getSelection();
+      const current = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      const range = ownsRange(current) ? current.cloneRange() : savedRange?.cloneRange();
+      if (!ownsRange(range)) { toast('Highlight the words you want to style first.', 'bad'); return; }
+      const span = document.createElement('span');
+      if (!reset) for (const [key, value] of Object.entries(style)) span.style[key] = value;
+      // Preserve nested emphasis and surrounding words while isolating the
+      // selected text. A blank span removes inherited inline treatments only
+      // when they belong to this selection, not to the entire quotation.
+      const content = range.extractContents();
+      if (reset) {
+        const holder = document.createElement('span');
+        holder.appendChild(content);
+        holder.querySelectorAll('span').forEach(node => node.removeAttribute('style'));
+        range.insertNode(holder);
+        holder.replaceWith(...holder.childNodes);
+      } else {
+        span.appendChild(content);
+        range.insertNode(span);
+      }
+      savedRange = null;
+      input.dispatchEvent(new Event('input', { bubbles:true }));
+      input.focus();
+    };
+    panel.querySelectorAll('.canvas-selection-format button').forEach(button =>
+      button.addEventListener('mousedown', e => e.preventDefault()));
+    const inlineFont = panel.querySelector('#canvas-selection-font');
+    inlineFont.onchange = () => { if (inlineFont.value) applySelectionStyle({ fontFamily:inlineFont.value }); inlineFont.value = ''; };
+    const inlineSize = panel.querySelector('#canvas-selection-size');
+    inlineSize.onchange = () => { if (inlineSize.value) applySelectionStyle({ fontSize:inlineSize.value+'%' }); inlineSize.value = ''; };
+    panel.querySelector('#canvas-selection-bold').onclick = () => applySelectionStyle({ fontWeight:'700' });
+    panel.querySelector('#canvas-selection-italic').onclick = () => applySelectionStyle({ fontStyle:'italic' });
+    panel.querySelector('#canvas-selection-color').onchange = e => {
+      applySelectionStyle({ color:e.target.value });
+    };
+    panel.querySelector('#canvas-selection-reset').onclick = () => applySelectionStyle({}, true);
     if (role) {
       const updateStyle = (patch) => {
         layout.updateSection(activePage, target.sectionId, patch).then(() => {
