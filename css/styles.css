@@ -5792,31 +5792,32 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 }
 
 
-/* Bookmark Archive: a fitted stage frame, not a short banner.
-   The narrow ink curtain sits inside the page edges and reaches the
-   section's actual bottom even as the number of bookmarks changes. */
+/* Bookmark Archive: a restrained sketch frame. Keep the valance at a
+   readable scale; stretching the whole bitmap to the content height makes
+   its scallops huge and covers the heading. */
 .ed-bookmarks.has-curtain:not(.curtain-bottom) {
   padding-block-start: max(
-    calc(var(--cur-arch) * .92 - var(--cur-lift) + var(--cur-clear) + var(--cur-gap, 0px) + 74px),
-    calc(var(--sp-section) + 74px));
+    calc(var(--cur-arch) * .96 - var(--cur-lift) + var(--cur-clear) + var(--cur-gap, 0px) + 155px),
+    calc(var(--sp-section) + 155px));
 }
 .ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain {
-  top: 48px;
-  bottom: 0;
-  left: 4%;
-  right: 4%;
-  width: 92%;
-  height: auto;
+  top: 28px;
+  bottom: auto;
+  left: 2.5%;
+  right: 2.5%;
+  width: 95%;
+  height: clamp(600px, 43vw, 880px);
   transform: translateY(var(--cur-offset, 0px));
 }
 @media (max-width: 759px) {
   .ed-bookmarks.has-curtain:not(.curtain-bottom) {
-    padding-block-start: max(calc(var(--sp-section) + 55px), 105px);
+    padding-block-start: max(calc(var(--sp-section) + 65px), 115px);
   }
   .ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain {
-    top: 28px;
-    left: 2%;
-    right: 2%;
-    width: 96%;
+    top: 18px;
+    left: 1%;
+    right: 1%;
+    width: 98%;
+    height: min(115vw, 720px);
   }
 }
