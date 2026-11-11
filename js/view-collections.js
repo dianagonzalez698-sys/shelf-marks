@@ -37,7 +37,7 @@ export function collectionsView() {
   return {
     title:'Collections',tab:'collections',fab:false,keepScroll:true,
     html:`<div class="literary-notebook lit-collections lit-cabinet">
-      <header class="lit-page-heading lit-cabinet-heading"><p class="lit-overline">THE CABINET OF CURIOSITIES</p><h1>Collected <em>things</em></h1>
+      <header class="lit-page-heading lit-cabinet-heading"><p class="lit-overline">THE CABINET OF CURIOSITIES</p><h1>Collected things</h1>
         <p>A personal archive of little fascinations, literary projects, and books kept close.</p></header>
       <div class="lit-cabinet-section-head"><span>THE COLLECTIONS</span><span>${FEATURES.length} CURATED ROOMS</span></div>
       <div class="lit-cabinet-grid">${items.filter(item=>item.type==='feature').map(card).join('')}</div>
