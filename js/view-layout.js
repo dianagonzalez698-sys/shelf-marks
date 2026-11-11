@@ -37,6 +37,7 @@ export function layoutView(params = {}) {
   const sections = layout.get(pageId);
   const custom = layout.isCustomised(pageId);
   const isChallenge = pageId.startsWith('challenge:');
+  const isNotebook = pageId === 'notebook';
 
   const rows = sections.map((sec, i) => {
     const def = SECTION_TYPES[sec.type] || { label: sec.type, blurb: '' };
@@ -96,6 +97,7 @@ export function layoutView(params = {}) {
 
         <div class="btn-row" style="margin-bottom:1.2rem">
           <button class="btn btn-primary" type="button" id="lay-add">Add a section</button>
+          <button class="btn" type="button" id="lay-save">Save layout</button>
           <a class="btn" href="#/${pageId === 'directory' ? 'challenges' : pageId === 'notebook' ? 'notebook' : pageId === 'books' ? 'books' : pageId === 'bookmarks' ? 'bookmarks' : pageId.startsWith('word:') ? `word/${encodeURIComponent(pageId.slice(5))}` : pageId.startsWith('challenge:') ? `challenge/${encodeURIComponent(pageId.slice(10))}` : ''}">View page</a>
           ${custom ? '<button class="btn btn-danger" type="button" id="lay-reset">Reset page</button>' : ''}
         </div>
@@ -113,10 +115,15 @@ export function layoutView(params = {}) {
               Switch it back to <b>Shown</b> to bring it back.</p>`
           : ''}
 
+        ${isNotebook ? `<div class="lay-built-in-sections" aria-label="Notebook built-in sections">
+          <div class="lay-built-in-row"><div><strong>Notebook introduction</strong><p>Heading, description and Write a Note action</p></div><span>Built in</span></div>
+          <div class="lay-built-in-row"><div><strong>Entry archive</strong><p>Your saved notes and their cards</p></div><span>Built in</span></div>
+          <p class="hint">These are the Notebook's built-in areas. Additional sections can be arranged below them.</p>
+        </div>` : ''}
         ${sections.length
           ? `<ol class="lay-list">${rows}</ol>`
-          : `<div class="empty"><h3>Nothing on this page yet</h3>
-              <p>Add a section to begin composing it.</p></div>`}
+          : `<div class="empty"><h3>${isNotebook ? 'No extra sections added' : 'Nothing on this page yet'}</h3>
+              <p>${isNotebook ? 'The Notebook above is already in place. Add an editorial section if you want more content beneath its archive.' : 'Add a section to begin composing it.'}</p></div>`}
 
         <p class="hint" style="margin-top:1.4rem">
           Section types live in <code>js/sections.js</code>; the default arrangements are in
@@ -131,6 +138,13 @@ export function layoutView(params = {}) {
       };
 
       root.querySelector('#lay-add').onclick = () => openTypePicker(pageId);
+      root.querySelector('#lay-save').onclick = async () => {
+        try {
+          await layout.save(pageId, layout.get(pageId));
+          toast('Layout saved.', 'good');
+          render();
+        } catch (_) { toast('Could not save layout.', 'bad'); }
+      };
       const listSizeControl = root.querySelector('#lay-type-size');
       listSizeControl?.addEventListener('input', (event) => {
         const size = Number(event.target.value);
