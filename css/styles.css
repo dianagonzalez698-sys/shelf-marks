@@ -501,7 +501,7 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
   max-width: var(--w-content);
   margin: 0 auto;
   padding:
-    clamp(1.6rem, 3.4vw, 2.6rem)
+    clamp(.85rem, 1.8vw, 1.4rem)
     calc(var(--sp-page-x) + var(--safe-r))
     calc(var(--h-tabbar) + var(--safe-b) + 5rem)
     calc(var(--sp-page-x) + var(--safe-l));
@@ -4270,7 +4270,7 @@ html:not([data-theme="dark"]) .lit-hero {
 }
 
 /* Settings is a small editorial dashboard, not a stack of unrelated forms. */
-.settings-dashboard { width: min(1190px,100%); margin: 0 auto; padding: clamp(36px,6vw,88px) clamp(20px,5vw,65px) 90px; }
+.settings-dashboard { width: min(1190px,100%); margin: 0 auto; padding: clamp(18px,2.4vw,34px) clamp(20px,5vw,65px) 90px; }
 .settings-heading { border-bottom: 1px solid var(--c-rule-strong); padding-bottom: 34px; margin-bottom: 35px; }
 .settings-heading h1 { font: 400 clamp(3.6rem,7vw,7rem)/1 var(--f-display); letter-spacing: -.045em; margin: 14px 0 18px; }
 .settings-heading h1 em { font-family: var(--f-body); font-weight: 400; }
