@@ -44,8 +44,7 @@ export function bookmarksView(params = {}) {
     editPage: ARCHIVE_PAGE_ID,
     html: `<div class="bookmark-curator-intro">
       <span class="lit-overline">THE KEEPSAKE CABINET</span>
-      <p>Every reading accomplishment has a little work of art waiting for it.</p>
-      <button type="button" id="bm-artwork-manage">Curate bookmark artwork <span aria-hidden="true">↗</span></button>
+      <button type="button" id="bm-artwork-manage">Manage bookmark artwork <span aria-hidden="true">↗</span></button>
     </div>${renderSections(layout.get(ARCHIVE_PAGE_ID), ctx)}`,
     onMount(root) {
       const manage = root.querySelector('#bm-artwork-manage');
