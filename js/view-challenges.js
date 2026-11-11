@@ -315,7 +315,6 @@ let pendingChallengeForm = null;
 
 export function openEditor(challenge) {
   const creating = !challenge;
-  const presetLocked = !!(challenge && challenge.preset); // keep preset shape intact
   const c = challenge || {
     id: '',
     name: '',
@@ -338,20 +337,18 @@ export function openEditor(challenge) {
 
       <div class="field">
         <label for="ch-filter">Counts books where…</label>
-        <select id="ch-filter" ${presetLocked && filterType !== 'author' ? 'disabled' : ''}>
+        <select id="ch-filter" >
           ${FILTER_TYPES.map((f) => `<option value="${attr(f.value)}" ${f.value === filterType ? 'selected' : ''}>${esc(f.label)}</option>`).join('')}
         </select>
-        ${presetLocked && filterType !== 'author' ? '<p class="hint">Fixed by the preset.</p>' : ''}
       </div>
 
       <div class="field" id="filter-extra"></div>
 
       <div class="field">
         <label for="ch-window">Time window</label>
-        <select id="ch-window" ${presetLocked ? 'disabled' : ''}>
+        <select id="ch-window" >
           ${WINDOW_TYPES.map((w) => `<option value="${attr(w.value)}" ${w.value === windowType ? 'selected' : ''}>${esc(w.label)}</option>`).join('')}
         </select>
-        ${presetLocked ? '<p class="hint">Fixed by the preset.</p>' : ''}
       </div>
 
       <div class="field" id="window-extra"></div>
@@ -373,7 +370,7 @@ export function openEditor(challenge) {
         <button class="btn grow" type="button" data-close>Cancel</button>
         <button class="btn btn-primary grow" type="submit">${creating ? 'Create' : 'Save'}</button>
       </div>
-      ${!creating && c.custom ? `<details class="lit-challenge-more"><summary>More options</summary><button type="button" id="ch-remove" class="btn btn-danger btn-sm">Remove this challenge</button></details>` : ''}
+      ${!creating ? `<details class="lit-challenge-more"><summary>More options</summary><button type="button" id="ch-remove" class="btn btn-danger btn-sm">Remove this challenge</button></details>` : ''}
     </form>
   `, {
     onMount(sheet, close) {
@@ -541,22 +538,27 @@ export function openEditor(challenge) {
           win.periods = sheet.querySelector('#ch-periods').value;
         }
 
-        // A preset keeps its own window and bookmark ids — only the parts the
-        // preset marked editable are stored as an override.
-        let record;
-        if (presetLocked) {
-          record = { id: c.id, name, target, filter };
+        // All challenges are editable. Keep the original stable id and any
+        // existing bookmark identifiers so previously earned artwork survives.
+        const record = {
+          id: c.id || `${slug(name)}-${uid('c').split('_')[1]}`,
+          name,
+          custom: creating || !!c.custom,
+          filter,
+          window: win,
+          target,
+          bookmarkPrefix: c.bookmarkPrefix || c.id || null,
+        };
+        if (!record.bookmarkPrefix) record.bookmarkPrefix = record.id;
+        // Existing recurring challenges retain their awarded bookmark ids.
+        // When changing repeat frequency, new periods receive new ids.
+        if (win.type === 'recurring') {
+          if (c.bonusBookmark) record.bonusBookmark = c.bonusBookmark;
+          else record.bonusBookmark = `${record.bookmarkPrefix}-all`;
         } else {
-          record = {
-            id: c.id || `${slug(name)}-${uid('c').split('_')[1]}`,
-            name,
-            custom: true,
-            filter,
-            window: win,
-            target,
-          };
-          record.bookmarkPrefix = c.bookmarkPrefix || record.id;
-          if (win.type === 'recurring') record.bonusBookmark = `${record.bookmarkPrefix}-all`;
+          // The evaluator ignores a bonus on non-recurring challenges.
+          // Clear it in the editable record so future switching is predictable.
+          record.bonusBookmark = null;
         }
 
         try {
