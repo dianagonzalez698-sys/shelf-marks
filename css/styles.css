@@ -6442,3 +6442,60 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   padding: 2px;
   background: var(--c-bg-field);
 }
+
+
+/* Compact Library-style title picker in the challenge editor. */
+#ch-form .ch-title-results {
+  max-height: 216px;
+  overflow-y: auto;
+  margin: 7px 0 12px;
+  border: 1px solid var(--c-rule, #ddcfbe);
+  background: var(--c-bg-field, #fffcf6);
+}
+#ch-form .ch-title-result {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  min-height: 48px;
+  border: 0;
+  border-bottom: 1px solid var(--c-rule, #ddcfbe);
+  background: transparent;
+  color: var(--c-ink, #48352f);
+  text-align: left;
+  cursor: pointer;
+}
+#ch-form .ch-title-result:last-child { border-bottom: 0; }
+#ch-form .ch-title-result:hover, #ch-form .ch-title-result.is-selected {
+  background: color-mix(in srgb, var(--c-accent, #a9446a) 7%, transparent);
+}
+#ch-form .ch-title-result-name { font: 400 1rem/1.25 var(--f-body, Georgia, serif); }
+#ch-form .ch-title-result-name small {
+  display: block;
+  margin-top: 3px;
+  color: var(--c-ink-soft, #82736b);
+  font-size: .83rem;
+}
+#ch-form .ch-title-result-mark { color: var(--c-accent, #a9446a); font: 600 1.1rem var(--f-body, Georgia, serif); }
+#ch-form .ch-title-picked { margin: 0 0 14px; }
+#ch-form .ch-title-count { margin: 0 0 6px; font: 400 .82rem var(--f-body, Georgia, serif); color: var(--c-ink-soft, #82736b); }
+#ch-form .ch-title-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 5px 6px 0;
+  padding: 5px 8px;
+  border: 1px solid var(--c-rule-strong, #cbbba7);
+  background: transparent;
+  color: var(--c-ink, #48352f);
+  font: 400 .88rem/1.25 var(--f-body, Georgia, serif);
+  cursor: pointer;
+}
+#ch-form .ch-title-chip:hover { color: var(--c-accent, #a9446a); border-color: currentColor; }
+#ch-form .ch-title-manual { display: flex; gap: 8px; }
+#ch-form .ch-title-manual input { min-width: 0; flex: 1; }
+#ch-form .ch-title-manual button { flex: none; padding-inline: 15px; }
+#ch-form .ch-title-results > .hint { margin: 10px 12px; }
