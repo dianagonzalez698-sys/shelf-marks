@@ -6206,3 +6206,88 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   background-size: 100% 100%;
   background-position: top center;
 }
+
+
+/* Bookmark archive: a compact, horizontally organised keepsake index.
+   Scoped to the archive so challenge-page bookmark strips keep their sizing. */
+#app .bookmark-curator-intro {
+  padding-top: 12px;
+  padding-bottom: 2px;
+}
+#app .bookmark-curator-intro + .ed-archive:not(.has-curtain):not(.sp-flush) {
+  padding-block-start: 12px;
+}
+#app .ed-archive:not(.has-curtain) {
+  padding-block-end: 24px;
+}
+#app .ed-archive .ed-head {
+  margin-bottom: 16px;
+}
+#app .ed-archive .arc-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 22px 30px;
+}
+#app .ed-archive .arc-collection-grid > .arc-group {
+  min-width: 0;
+  margin: 0;
+  padding: 12px 0 14px;
+  border-top: 1px solid var(--c-rule);
+  border-bottom: 0;
+}
+#app .ed-archive .arc-collection-grid .ed-head-split {
+  align-items: baseline;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+#app .ed-archive .arc-collection-grid .ed-subtitle {
+  min-width: 0;
+  font-size: clamp(1.2rem, 1.45vw, 1.55rem);
+  line-height: 1.2;
+  margin: 0;
+}
+#app .ed-archive .arc-collection-grid .ed-meta {
+  flex: none;
+  white-space: nowrap;
+}
+#app .ed-archive .arc-collection-grid .bm-grid {
+  --bm-scale: .83;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(60px, 88px);
+  justify-content: start;
+  gap: 10px;
+  max-width: 100%;
+  margin: 0;
+  padding: 4px 0 9px;
+  overflow-x: auto;
+}
+#app .ed-archive .arc-collection-grid .bm-label {
+  margin-top: 5px;
+  font-size: clamp(.75rem, .85vw, .9rem);
+  line-height: 1.18;
+}
+#app .ed-archive .arc-collection-grid .bm-sub {
+  font-size: .71rem;
+  margin-top: 2px;
+}
+#app .bookmark-curator-footer {
+  padding-top: 8px;
+  padding-bottom: 32px;
+}
+@media (max-width: 1040px) {
+  #app .ed-archive .arc-collection-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  #app .ed-archive .arc-collection-grid .bm-grid {
+    grid-auto-columns: minmax(66px, 92px);
+  }
+}
+@media (max-width: 600px) {
+  #app .ed-archive .arc-collection-grid .ed-head-split { flex-wrap: wrap; }
+  #app .ed-archive .arc-collection-grid .bm-grid { gap: 8px; }
+  #app .bookmark-curator-footer { padding-bottom: 22px; }
+}
