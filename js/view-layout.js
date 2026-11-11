@@ -1157,6 +1157,28 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
                   return () => { if (nextNode.isConnected) nextNode.replaceWith(sectionNode); };
                 }
               }
+              // Context-bound challenge heroes cannot be re-rendered without
+              // their challenge record. Preview the existing background layer
+              // directly, including before any section override is saved.
+              const backdropNode = base === 'backdrop' ? sectionNode.querySelector('.hero .m-backdrop, .m-backdrop') : null;
+              if (backdropNode) {
+                const oldStyle = backdropNode.getAttribute('style');
+                const oldClass = backdropNode.className;
+                if (chosenUrl) {
+                  backdropNode.classList.remove('m-backdrop-empty');
+                  backdropNode.style.backgroundImage = `url("${chosenUrl.replace(/"/g, '%22')}")`;
+                } else {
+                  backdropNode.style.backgroundImage = 'none';
+                  backdropNode.classList.add('m-backdrop-empty');
+                }
+                backdropNode.style.backgroundPosition = `${Number(tweaks.focalX ?? 50)}% ${Number(tweaks.focalY ?? 50)}%`;
+                backdropNode.style.opacity = String(Number(tweaks.opacity ?? 1));
+                return () => {
+                  backdropNode.className = oldClass;
+                  if (oldStyle == null) backdropNode.removeAttribute('style');
+                  else backdropNode.setAttribute('style', oldStyle);
+                };
+              }
               const oldUrl = assets.src(current?.assetId);
               const images = [...sectionNode.querySelectorAll('img')].filter((img) => oldUrl && img.src === oldUrl);
               const originals = images.map((img) => img.src);
