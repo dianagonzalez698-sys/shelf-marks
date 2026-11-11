@@ -29,6 +29,7 @@ export function challengesView() {
     tab: 'challenges',
     banner: false,
     editorial: true,
+    editPage: DIRECTORY_PAGE_ID,
     html: `
       ${renderSections(sections)}
       <div class="lit-challenge-invite">
