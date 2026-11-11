@@ -3,8 +3,8 @@
 // 'change' event.
 
 import * as store from './store.js';
-import { PRESET_CHALLENGES, DEFAULT_SETTINGS } from './config.js';
-import { earnedBookmarks, bookmarkCatalog } from './rules.js';
+import { PRESET_CHALLENGES, DEFAULT_SETTINGS } from './config.js?v=117';
+import { earnedBookmarks, bookmarkCatalog } from './rules.js?v=117';
 import { quarters, inPeriod, yearPeriod } from './periods.js';
 
 export const state = {
