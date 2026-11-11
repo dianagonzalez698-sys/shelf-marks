@@ -1342,6 +1342,7 @@ export const SECTION_TYPES = {
       { key: 'scrim', label: 'Darkening over image', type: 'range', min: 0, max: 90, step: 5 },
       { key: 'showWindow', label: 'Show the time window', type: 'bool' },
       { key: 'showBlurb', label: 'Show the blurb', type: 'bool' },
+      { key: 'backdrop', label: 'Banner background image', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
       { key: 'edge', label: 'Edge treatment', type: 'select', options: EDGES, controls: true },
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
       { key: 'edgeWhere', label: 'Artwork placement — top or bottom', type: 'select', options: EDGE_WHERE, when: (s) => s.edge === 'artwork' },
@@ -1357,7 +1358,7 @@ export const SECTION_TYPES = {
     ],
     render(sec, ctx) {
       const c = ctx.challenge;
-      const cover = c.cover || media({ ratio: 'auto', frame: 'none', shadow: false });
+      const cover = sec.backdrop?.assetId ? sec.backdrop : (c.cover || media({ ratio: 'auto', frame: 'none', shadow: false }));
       return sectionShell(sec, `
         <div class="hero hero-${sec.height || 'short'} hero-${sec.align || 'left'}">
           ${backdrop(cover, { seed: c.id })}
