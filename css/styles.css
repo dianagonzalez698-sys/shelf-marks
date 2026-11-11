@@ -403,7 +403,10 @@ hr { border: 0; border-top: var(--rule-w) solid var(--c-rule); margin: var(--sp-
   border-bottom: 1px solid transparent;
   transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
 }
-.masthead-link:hover { color: var(--c-ink); }
+.masthead-link:hover,
+.masthead-link:focus-visible,
+.masthead-menu:hover > .masthead-link,
+.masthead-menu:focus-within > .masthead-link { color: var(--c-accent); }
 .masthead-link[aria-current="page"] { color: var(--c-accent); border-bottom-color: var(--c-accent); }
 .masthead-link-quiet { color: var(--c-ink-faint); }
 
