@@ -1,6 +1,7 @@
 // UI plumbing: escaping, toasts, bottom sheets, the hash router, and the
 // generated bookmark artwork.
 import * as assets from './assets.js';
+import { allChallenges } from './state.js';
 
 export function esc(value) {
   return String(value == null ? '' : value)
@@ -490,10 +491,49 @@ export function refresh() {
   render();
 }
 
+function updateChallengeMenu() {
+  const menu = document.getElementById('challenges-menu');
+  const list = document.getElementById('challenges-menu-list');
+  const toggle = document.getElementById('challenges-menu-toggle');
+  if (!menu || !list || !toggle) return;
+  const links = allChallenges().map((challenge) =>
+    `<a role="menuitem" href="#/challenge/${encodeURIComponent(challenge.id)}">${esc(challenge.name)}</a>`);
+  list.innerHTML = `<a role="menuitem" href="#/challenges">All Challenges</a>`
+    + (links.length ? '<span class="masthead-dropdown-rule"></span>' + links.join('') : '');
+  toggle.onclick = (event) => {
+    event.stopPropagation();
+    const open = menu.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', String(open));
+  };
+  list.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      menu.classList.remove('is-open');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+  if (!menu.dataset.bound) {
+    menu.dataset.bound = 'true';
+    document.addEventListener('click', (event) => {
+      if (!menu.contains(event.target)) {
+        menu.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+    menu.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        menu.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.focus();
+      }
+    });
+  }
+}
+
 function setChrome(view) {
   const app = document.getElementById('app');
   // Editorial pages drop the content gutter so sections can bleed full width.
   if (app) app.classList.toggle('is-editorial', !!view.editorial);
+  updateChallengeMenu();
   const backBtn = document.getElementById('appbar-back');
   const actions = document.getElementById('appbar-actions');
   const banner = document.getElementById('editorial-banner');
