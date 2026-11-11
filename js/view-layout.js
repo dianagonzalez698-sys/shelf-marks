@@ -1166,6 +1166,26 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
               const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find((node) => node.dataset.sec === sectionId);
               if (!sectionNode) return () => {};
               const chosenUrl = assets.src(chosenId);
+              // Backgrounds already have a stable visible layer. Update it in
+              // place so the live preview never depends on rebuilding a section,
+              // which may require reading/challenge context unavailable here.
+              if (base === 'backdrop' || base === 'bgImage') {
+                const layer = sectionNode.querySelector(base === 'backdrop'
+                  ? '.hero .m-backdrop, .m-backdrop' : ':scope > .m-backdrop');
+                if (layer) {
+                  const beforeStyle = layer.getAttribute('style');
+                  const beforeClass = layer.className;
+                  layer.classList.toggle('m-backdrop-empty', !chosenUrl);
+                  layer.style.backgroundImage = chosenUrl ? `url("${chosenUrl.replace(/"/g, '%22')}")` : 'none';
+                  layer.style.backgroundPosition = `${Number(tweaks.focalX ?? 50)}% ${Number(tweaks.focalY ?? 50)}%`;
+                  layer.style.opacity = String(Number(tweaks.opacity ?? 1));
+                  return () => {
+                    layer.className = beforeClass;
+                    if (beforeStyle == null) layer.removeAttribute('style');
+                    else layer.setAttribute('style', beforeStyle);
+                  };
+                }
+              }
               // Preview through the same renderer used after saving. A section
               // without a saved curtain has no .ed-curtain node to update,
               // so changing CSS variables alone cannot display the artwork.
@@ -1226,14 +1246,38 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
                   else backdropNode.setAttribute('style', oldStyle);
                 };
               }
+              // A context-only section may refuse standalone rendering.
+              // Preview its actual picture slot in-place as a reliable fallback.
               const oldUrl = assets.src(current?.assetId);
-              const images = [...sectionNode.querySelectorAll('img')].filter((img) => oldUrl && img.src === oldUrl);
-              const originals = images.map((img) => img.src);
-              images.forEach((img) => { if (chosenUrl) img.src = chosenUrl; else img.style.visibility = 'hidden'; });
-              return () => images.forEach((img, index) => {
-                img.src = originals[index];
-                img.style.removeProperty('visibility');
-              });
+              const figures = [...sectionNode.querySelectorAll('.m-fig')];
+              const matched = figures.find((fig) => oldUrl && fig.querySelector('img')?.src === oldUrl);
+              const fieldOrder = (def.fields || []).filter((field) => field.type === 'media' || field.type === 'medialist');
+              const preceding = fieldOrder.slice(0, fieldOrder.findIndex((field) => field.key === base))
+                .reduce((sum, field) => sum + (field.type === 'medialist'
+                  ? (layout.getSection(pageId, sectionId)?.[field.key] || []).length : 1), 0);
+              const figureIndex = Math.max(0, preceding) + (idx === undefined ? 0 : Number(idx));
+              const target = matched || figures[figureIndex] || figures[0];
+              const box = target?.querySelector('.m-box');
+              if (box) {
+                const originalMarkup = box.innerHTML;
+                const previousStyle = target.getAttribute('style');
+                if (chosenUrl) {
+                  const img = document.createElement('img');
+                  img.className = 'm-img';
+                  img.src = chosenUrl;
+                  img.alt = assets.get(chosenId)?.name || '';
+                  img.style.objectFit = tweaks.fit === 'contain' ? 'contain' : 'cover';
+                  img.style.objectPosition = `${Number(tweaks.focalX ?? 50)}% ${Number(tweaks.focalY ?? 50)}%`;
+                  box.replaceChildren(img);
+                } else box.replaceChildren();
+                target.style.opacity = String(Number(tweaks.opacity ?? 1));
+                return () => {
+                  box.innerHTML = originalMarkup;
+                  if (previousStyle == null) target.removeAttribute('style');
+                  else target.setAttribute('style', previousStyle);
+                };
+              }
+              return () => {};
             };
             openMediaEditor(current, async (next, tweaks = {}) => {
               const fresh = layout.getSection(pageId, sectionId);
