@@ -9,7 +9,7 @@
 //   name         display name
 //   blurb        one-line description
 //   filter       { type: 'any' | 'author' | 'series' | 'tag'
-//                        | 'nonfiction' | 'fiction' | 'classic' | 'reread' | 'tbr',
+//                        | 'nonfiction' | 'fiction' | 'classic' | 'reread' | 'tbr' | 'title',
 //                  authors?: [..], series?: '..', tag?: '..' }
 //   window       { type: 'year',      year }
 //                { type: 'quarter',   year, quarter: 1..4 }
@@ -129,6 +129,7 @@ export const FICTION_SUBJECT_HINTS = [
 export const FILTER_TYPES = [
   { value: 'any', label: 'Any book' },
   { value: 'author', label: 'Author is one of…' },
+  { value: 'title', label: 'Book title is one of…' },
   { value: 'series', label: 'Series is…' },
   { value: 'tag', label: 'Tag is…' },
   { value: 'nonfiction', label: 'Nonfiction' },
