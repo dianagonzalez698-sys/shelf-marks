@@ -5863,3 +5863,25 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 .screen > .lit-writing-form {
   padding-block-start: clamp(18px, 2.4vw, 34px);
 }
+
+/* Small Paper Cake labels need extra physical size to remain legible.
+   This is deliberately limited to small UI/caption lettering: headings,
+   body copy and full-size decorative script retain their chosen scale. */
+#app :is(.lit-overline, .lit-section-top, .lit-hero-edition, .lit-hero-foot,
+  .lit-entry-number, .lit-notebook-index, .lit-section-number,
+  .lit-shelf-count, .lit-shelf-folio, .lit-shelf-tabs a,
+  .lit-shelf-tabs span, .lit-shelf-tools > label,
+  .lit-shelf-add-link, .lit-shelf-manage-control > summary,
+  .lit-book-shelves summary, .lit-book-shelves label,
+  .lit-book-form-shelves label, .lit-shelf-status,
+  .shelf-status-select, .lit-cabinet-section-head,
+  .lit-cabinet-shelf-head, .book-archive-page-marker) {
+  font-size: max(0.94rem, var(--fs-label));
+  line-height: 1.4;
+}
+#app :is(.lit-shelf-tools select, .lit-shelf-manage-panel,
+  .book-search-filters label, .book-search-filters select,
+  .lit-shelf-manage-list button, .lit-shelf-manage-panel button,
+  .lit-shelf-manage-panel label) {
+  font-size: max(0.94rem, var(--fs-label));
+}
