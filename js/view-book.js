@@ -6,9 +6,9 @@ import {
 } from './state.js';
 import { esc, attr, toast, coverImg, navigate, confirmSheet, bookmarkArt, openSheet } from './ui.js';
 import { searchBooks, debounce, guessFormat } from './openlibrary.js';
-import { AUTHOR_SERIES_HINTS } from './config.js';
+import { AUTHOR_SERIES_HINTS } from './config.js?v=117';
 import { todayISO, isValidISO, formatDate } from './periods.js';
-import { bookmarkCatalog } from './rules.js';
+import { bookmarkCatalog } from './rules.js?v=117';
 import * as assets from './assets.js';
 
 // Handed from the search screen to the form screen.
