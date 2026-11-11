@@ -604,7 +604,8 @@ function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
         ${f.size ? `<p class="hint">Best at <b>${esc(f.size)}</b> each.</p>` : ''}</div>`;
     default:
       return `<div class="field"><label for="${id}">${esc(f.label)}</label>
-        <input type="text" id="${id}" data-field="${attr(f.key)}" value="${attr(value || '')}"></div>`;
+        <input type="text" id="${id}" data-field="${attr(f.key)}" value="${attr(value || '')}" placeholder="${attr(f.hint || '')}">
+        ${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ''}</div>`;
   }
 }
 
