@@ -25,6 +25,7 @@ export const DIRECTORY_PAGE_ID = 'directory';
 
 export function challengesView() {
   const sections = layout.get(DIRECTORY_PAGE_ID);
+  const challenges = allChallenges();
   return {
     title: t('challengesHeading'),
     tab: 'challenges',
@@ -32,6 +33,18 @@ export function challengesView() {
     editorial: true,
     editPage: DIRECTORY_PAGE_ID,
     html: `
+      <div class="lit-challenge-tools" aria-label="Challenge management">
+        <details class="lit-challenge-manage">
+          <summary>Manage challenges <span aria-hidden="true">⌄</span></summary>
+          <div class="lit-challenge-manage-list">
+            ${challenges.map((challenge) => `<div class="lit-challenge-manage-row">
+              <a href="#/challenge/${encodeURIComponent(challenge.id)}">${esc(challenge.name)}</a>
+              <button type="button" data-edit-challenge="${attr(challenge.id)}" aria-label="Edit ${attr(challenge.name)}">Edit</button>
+            </div>`).join('')}
+          </div>
+        </details>
+        <button type="button" class="lit-challenge-add" id="new-challenge-top">+ Add challenge</button>
+      </div>
       ${renderSections(sections)}
       <div class="lit-challenge-invite">
         <p>Have another reading ambition in mind?</p>
@@ -41,6 +54,14 @@ export function challengesView() {
     onMount(root) {
       const btn = root.querySelector('#new-challenge');
       if (btn) btn.onclick = () => openEditor(null);
+      const addTop = root.querySelector('#new-challenge-top');
+      if (addTop) addTop.onclick = () => openEditor(null);
+      root.querySelectorAll('[data-edit-challenge]').forEach((button) => {
+        button.onclick = () => {
+          const challenge = getChallenge(button.dataset.editChallenge);
+          if (challenge) openEditor(challenge);
+        };
+      });
     },
   };
 }
