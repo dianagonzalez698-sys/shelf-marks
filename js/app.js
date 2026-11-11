@@ -12,7 +12,7 @@ import { homeView } from './view-home.js?v=108';
 import { booksView } from './view-books.js';
 import { addView, bookFormView, rememberAddOrigin } from './view-book.js';
 import { bookDetailView } from './view-book-detail.js';
-import { challengesView, challengeDetailView } from './view-challenges.js?v=110';
+import { challengesView, challengeDetailView } from './view-challenges.js?v=111';
 import { bookmarksView } from './view-bookmarks.js?v=107';
 import { settingsView } from './view-settings.js';
 import { customizeView } from './view-customize.js';
