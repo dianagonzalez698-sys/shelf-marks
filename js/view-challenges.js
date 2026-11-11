@@ -33,6 +33,8 @@ export function challengesView() {
     editorial: true,
     editPage: DIRECTORY_PAGE_ID,
     html: `
+      ${renderSections(sections)}
+      <footer class="lit-challenge-invite" aria-label="Challenge management">
       <div class="lit-challenge-tools" aria-label="Challenge management">
         <details class="lit-challenge-manage">
           <summary>Manage challenges <span aria-hidden="true">⌄</span></summary>
@@ -43,19 +45,13 @@ export function challengesView() {
             </div>`).join('')}
           </div>
         </details>
-        <button type="button" class="lit-challenge-add" id="new-challenge-top">+ Add challenge</button>
+        <button type="button" class="lit-challenge-add" id="new-challenge-bottom">+ Add challenge</button>
       </div>
-      ${renderSections(sections)}
-      <div class="lit-challenge-invite">
-        <p>Have another reading ambition in mind?</p>
-        <button type="button" id="new-challenge">Begin a challenge <span aria-hidden="true">↗</span></button>
-      </div>
+      </footer>
     `,
     onMount(root) {
-      const btn = root.querySelector('#new-challenge');
-      if (btn) btn.onclick = () => openEditor(null);
-      const addTop = root.querySelector('#new-challenge-top');
-      if (addTop) addTop.onclick = () => openEditor(null);
+      const addButton = root.querySelector('#new-challenge-bottom');
+      if (addButton) addButton.onclick = () => openEditor(null);
       root.querySelectorAll('[data-edit-challenge]').forEach((button) => {
         button.onclick = () => {
           const challenge = getChallenge(button.dataset.editChallenge);
