@@ -5963,3 +5963,7 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   font: 400 1.1rem/1.35 var(--f-body);
   cursor: pointer;
 }
+
+/* Keep the Diana's Lit Picks wordmark clean on editor and detail pages.
+   In-page navigation and the browser back button remain available. */
+.masthead-back { display: none !important; }
