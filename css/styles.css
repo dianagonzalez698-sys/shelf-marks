@@ -5897,3 +5897,15 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   font-size: max(0.94rem, var(--fs-label));
   line-height: 1.4;
 }
+
+/* The new Notebook entry has its own miniature Paper Cake metadata and
+   numbered tabs; match the larger editorial label baseline here too. */
+#app :is(.lit-journal-kicker, .lit-rename-tabs-toggle,
+  .lit-journal-tabs button, .lit-journal-tabs span,
+  .lit-open-journal .lit-form-row label,
+  .lit-open-journal > label, .lit-journal-tab-bar label) {
+  font-size: max(0.94rem, calc(var(--fs-label) * var(--journal-meta-scale, 1)));
+  line-height: 1.35;
+}
+#app .lit-journal-tabs button { min-height: 37px; height: auto; }
+#app .lit-journal-tabs button.is-active { min-height: 41px; height: auto; }
