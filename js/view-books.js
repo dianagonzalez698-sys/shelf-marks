@@ -37,7 +37,7 @@ export function booksView(params = {}) {
     title: 'My Library', tab: 'books', editorial: true, keepScroll: true,
     html: `<div class="literary-shelf">
       <header class="lit-shelf-header${activeCustom ? ' lit-custom-shelf-header' : ''}"><div><p class="lit-overline">${activeCustom ? 'A PERSONAL COLLECTION' : `THE PERSONAL LIBRARY / ${state.settings.year}`}</p>
-        <h1>${activeCustom ? esc(activeCustom.name) : 'My <em>Bookshelf</em>'}</h1><p>${activeCustom ? esc(activeCustom.description || 'A gathering of books, kept together for a reason.') : 'Every book has a place here, whether read, reading, or still waiting.'}</p></div>
+        <h1>${activeCustom ? esc(activeCustom.name) : 'My Bookshelf'}</h1><p>${activeCustom ? esc(activeCustom.description || 'A gathering of books, kept together for a reason.') : 'Every book has a place here, whether read, reading, or still waiting.'}</p></div>
         ${activeCustom && assets.src(activeCustom.coverAssetId) ? `<div class="lit-custom-shelf-art"><img src="${attr(assets.src(activeCustom.coverAssetId))}" alt="" loading="lazy"></div>` : ''}
       </header>
       <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
