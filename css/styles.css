@@ -5848,3 +5848,18 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
     height: 35vw;
   }
 }
+
+/* Consistent page opening: the masthead should not be followed by a large
+   empty band just because each page uses a different layout component.
+   Keep image/curtain/flush editorial compositions in control of their own
+   clearance so decorative artwork never collides with text. */
+.screen.is-editorial > .ed:first-child:not(.has-curtain):not(.ed-hero):not(.ed-bleed):not(.sp-flush):not(.shape-arch) {
+  padding-block-start: clamp(18px, 2.4vw, 34px);
+}
+.screen.is-editorial > .literary-shelf,
+.screen.is-editorial > .literary-notebook,
+.screen.is-editorial > .book-archive-page,
+.screen > .literary-notebook,
+.screen > .lit-writing-form {
+  padding-block-start: clamp(18px, 2.4vw, 34px);
+}
