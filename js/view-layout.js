@@ -867,9 +867,17 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
             if (el.type === 'checkbox') v = el.checked;
             else if (el.type === 'range') {
               v = Number(el.value);
-              const out = el.closest('.field').querySelector('[data-readout]');
+              const out = el.closest('.field')?.querySelector('[data-readout]');
               if (out) out.textContent = v;
+              const sizeOut = sheet.querySelector(`[data-banner-size-out="${key}"]`);
+              if (sizeOut) sizeOut.textContent = Math.round(v * 100) + '%';
             } else v = el.value;
+            if (el.classList.contains('banner-hex-input')) {
+              const value = String(v).trim();
+              if (value && !/^#[0-9a-f]{6}$/i.test(value)) return;
+              const wheel = sheet.querySelector(`[data-banner-wheel="${key}"]`);
+              if (wheel && value) wheel.value = value;
+            }
             if (key === 'toneHex') {
               const hex = String(v).trim();
               if (hex && !/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(hex)) return;
@@ -903,6 +911,14 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
           });
         });
 
+        sheet.querySelectorAll('[data-banner-wheel]').forEach((wheel) => {
+          wheel.addEventListener('input', () => {
+            const textInput = [...sheet.querySelectorAll('.banner-hex-input')].find((el) => el.dataset.field === wheel.dataset.bannerWheel);
+            if (!textInput) return;
+            textInput.value = wheel.value.toUpperCase();
+            textInput.dispatchEvent(new Event('input', { bubbles: true }));
+          });
+        });
         sheet.querySelectorAll('[data-tone-preset]').forEach((button) => {
           button.onclick = async () => {
             const toneInput = sheet.querySelector('[data-field="tone"]');
