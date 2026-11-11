@@ -5985,6 +5985,13 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 #app .lay-built-in-row > span { flex: none; font: 500 .9rem/1.3 var(--f-ui); color: var(--c-ink-faint); }
 #app .lay-built-in-sections > .hint { margin: 12px 4px 4px; }
 
+/* Pictures studio: keep the description subordinate to its title. */
+#app .assets-studio-head .ed-sub {
+  font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+  line-height: 1.45;
+  max-width: 62ch;
+}
+
 /* Notebook landing page: one clean Paper Cake headline, with no side column. */
 #app .literary-notebook:not(.lit-collections) > .lit-page-heading {
   display: block;
