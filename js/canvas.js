@@ -371,6 +371,65 @@ function startPointer(e, node, item) {
   node.addEventListener('pointercancel', stop);
 }
 
+function attachStatementWidthHandle(textEl, sectionId) {
+  if (!editing || textEl.querySelector('.canvas-text-width-handle')) return;
+  const statement = textEl.closest('.statement');
+  if (!statement) return;
+  const handle = document.createElement('span');
+  handle.className = 'canvas-text-width-handle';
+  handle.title = 'Drag sideways to change text box width';
+  handle.setAttribute('role', 'slider');
+  handle.setAttribute('aria-label', 'Quote text box width');
+  handle.setAttribute('aria-valuemin', '20');
+  handle.setAttribute('aria-valuemax', '100');
+  handle.setAttribute('tabindex', '0');
+  const widthOf = () => Math.round(textEl.getBoundingClientRect().width / Math.max(1, statement.getBoundingClientRect().width) * 100);
+  handle.setAttribute('aria-valuenow', String(Math.max(20, Math.min(100, widthOf()))));
+  const show = (pct) => {
+    const width = Math.max(20, Math.min(100, Math.round(pct)));
+    textEl.style.width = width + '%';
+    textEl.style.maxWidth = '100%';
+    handle.setAttribute('aria-valuenow', String(width));
+    return width;
+  };
+  handle.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const original = widthOf();
+    let latest = original;
+    let moved = false;
+    handle.setPointerCapture(e.pointerId);
+    const move = (event) => {
+      if (event.pointerId !== e.pointerId) return;
+      if (Math.abs(event.clientX - startX) > 2) moved = true;
+      latest = show(original + (event.clientX - startX) / Math.max(1, statement.getBoundingClientRect().width) * 100);
+    };
+    const end = (event) => {
+      if (event.pointerId !== e.pointerId) return;
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', end);
+      handle.removeEventListener('pointercancel', end);
+      if (event.type === 'pointercancel') { show(original); return; }
+      if (moved) layout.updateSection(activePage, sectionId, { textBoxWidth: latest })
+        .catch(() => toast('Could not save text box width.', 'bad'));
+    };
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+  });
+  handle.addEventListener('keydown', (e) => {
+    if (!['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const next = show(widthOf() + (e.key === 'ArrowRight' ? 5 : -5));
+    layout.updateSection(activePage, sectionId, { textBoxWidth: next })
+      .catch(() => toast('Could not save text box width.', 'bad'));
+  });
+  textEl.appendChild(handle);
+}
+
 function render({ preservePanel = false } = {}) {
   document.querySelectorAll('.canvas-layer').forEach((el) => el.remove());
   const toolbar = document.getElementById('canvas-toolbar');
@@ -390,6 +449,10 @@ function render({ preservePanel = false } = {}) {
     el.classList.toggle('canvas-section-selected', editing && (panelMode === 'section' || panelMode === 'text') && el.dataset.sec === selectedSectionId);
     el.querySelectorAll('[data-edit]').forEach((textEl) => {
       textEl.classList.toggle('canvas-text-target', editing && panelMode === 'text' && el.dataset.sec === selectedText?.sectionId && textEl.dataset.edit === selectedText?.key);
+      if (editing && el.classList.contains('ed-statement') && textEl.dataset.edit === 'text'
+          && panelMode === 'text' && el.dataset.sec === selectedText?.sectionId) {
+        attachStatementWidthHandle(textEl, el.dataset.sec);
+      }
     });
   });
   for (const item of data()) {
@@ -534,7 +597,11 @@ function paintPanel() {
     input.addEventListener('input', () => {
       const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
       const visible = [...(block?.querySelectorAll('[data-edit]') || [])].find(el => el.dataset.edit === target.key);
-      if (visible) visible.innerHTML = rich(richValue(input.innerHTML));
+      if (visible) {
+        visible.innerHTML = rich(richValue(input.innerHTML));
+        if (block?.classList.contains('ed-statement') && target.key === 'text')
+          attachStatementWidthHandle(visible, target.sectionId);
+      }
     });
     const save = async () => {
       const current = layout.getSection(activePage, target.sectionId);
