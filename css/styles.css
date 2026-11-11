@@ -5993,7 +5993,9 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 }
 #app .literary-notebook:not(.lit-collections) > .lit-page-heading .lit-overline {
   display: block;
-  margin: 0 0 25px;
+  margin: 0 0 18px;
+  font-size: .8rem;
+  line-height: 1.4;
 }
 #app .literary-notebook:not(.lit-collections) > .lit-page-heading h1 {
   display: block;
