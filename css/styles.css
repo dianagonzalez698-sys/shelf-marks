@@ -6036,6 +6036,28 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   font: 400 clamp(1.05rem, 1.35vw, 1.22rem)/1.5 var(--f-body);
 }
 
+/* Library heading matches Notebook and Collections, without oversized display type. */
+#app .literary-shelf .lit-shelf-header {
+  align-items: flex-start;
+  padding-bottom: clamp(16px, 2vw, 25px);
+}
+#app .literary-shelf .lit-shelf-header .lit-overline {
+  margin: 0 0 18px;
+  font-size: .8rem;
+  line-height: 1.4;
+}
+#app .literary-shelf .lit-shelf-header h1 {
+  margin: 0;
+  font: 400 clamp(2.7rem, 3.8vw, 3.65rem)/1.25 var(--f-script);
+  letter-spacing: 0;
+  text-transform: none;
+}
+#app .literary-shelf .lit-shelf-header p:last-child {
+  margin: 12px 0 0;
+  max-width: 58ch;
+  font: 400 clamp(1.05rem, 1.35vw, 1.22rem)/1.5 var(--f-body);
+}
+
 /* Challenge banner typography: direct, readable controls instead of nested
    font and color popovers inside the narrow Design Mode inspector. */
 #canvas-panel .banner-type-controls { padding: 15px 0 18px; border-top: 1px solid var(--c-rule); display: grid; gap: 12px; }
