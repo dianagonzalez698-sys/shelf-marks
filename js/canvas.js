@@ -413,6 +413,14 @@ export function inspectSection(id) {
 }
 export function inspectText(sectionId, key) {
   if (!editing || !sectionId || !key || !layout.getSection(activePage, sectionId)) return;
+  // Challenge banner words are supplied by the challenge record until an
+  // override is entered. The generic inline editor would otherwise show an
+  // empty box and no styling controls. Open the proper banner Text panel.
+  if (layout.getSection(activePage, sectionId).type === 'challengeHero') {
+    inspectSection(sectionId);
+    document.querySelector('#canvas-panel [data-inspector-tab="content"]')?.click();
+    return;
+  }
   selectedText = { sectionId, key };
   selectedSectionId = sectionId;
   selected = null;
