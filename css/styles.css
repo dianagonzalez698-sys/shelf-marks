@@ -6119,3 +6119,20 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 #canvas-panel .banner-type-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 #canvas-panel .banner-type-field input[type="range"] { width: 100%; accent-color: var(--c-accent); }
 #canvas-panel .banner-color-field input[type="color"] { display: block; width: 100%; height: 40px; box-sizing: border-box; padding: 3px; border: 1px solid var(--c-rule-strong); background: var(--c-bg-raised); cursor: pointer; }
+
+/* Individual challenge covers match the restrained Design Mode proportions on
+   the published page, regardless of any saved per-banner size multiplier. */
+#app.screen .ed-challengeHero .hero {
+  min-height: clamp(300px, 36vw, 470px);
+}
+#app.screen .ed-challengeHero .hero-type {
+  padding-top: clamp(1.75rem, 4vw, 3.25rem);
+  padding-bottom: clamp(1.75rem, 4vw, 3.25rem);
+}
+#app.screen .ed-challengeHero .hero-title {
+  font-size: min(calc(var(--fs-banner-title) * var(--fz-display, 1) * .78), 4.5rem);
+  line-height: 1.02;
+}
+#app.screen .ed-challengeHero .hero-sub {
+  font-size: calc(var(--fs-banner-sub) * var(--fz-body, 1) * .9);
+}
