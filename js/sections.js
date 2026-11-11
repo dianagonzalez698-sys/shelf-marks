@@ -1149,7 +1149,7 @@ export const SECTION_TYPES = {
           <div class="bm-grid">${ids.map((id) => tile(id, labels.get(id), have.has(id))).join('')}</div>
         </div>`;
       }).join('');
-      return sectionShell(sec, `${head}${groups}`);
+      return sectionShell(sec, `${head}<div class="arc-collection-grid">${groups}</div>`);
     },
   },
 
