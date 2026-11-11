@@ -67,7 +67,11 @@
     <a class="wordmark" href="#/" id="wordmark" data-content="siteName">Diana's Lit Picks</a>
 
     <nav class="masthead-nav" id="masthead-nav" aria-label="Sections">
-      <a class="masthead-link" href="#/challenges" data-tab="challenges">Challenges</a>
+      <div class="masthead-menu" id="challenges-menu">
+        <a class="masthead-link" href="#/challenges" data-tab="challenges">Challenges</a>
+        <button class="masthead-menu-toggle" id="challenges-menu-toggle" type="button" aria-label="Show individual challenges" aria-expanded="false" aria-controls="challenges-menu-list">⌄</button>
+        <div class="masthead-dropdown" id="challenges-menu-list" role="menu" aria-label="Reading challenges"></div>
+      </div>
       <a class="masthead-link" href="#/books" data-tab="books">Library</a>
       <a class="masthead-link" href="#/notebook" data-tab="notebook">Notebook</a>
       <a class="masthead-link" href="#/collections" data-tab="collections">Collections</a>
