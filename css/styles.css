@@ -5792,9 +5792,9 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 }
 
 
-/* The archive's drawing is a frame, not a photograph. The nine-slice
-   keeps the top scallops and lower hems at their drawn proportions while
-   only the long, narrow side fabric extends with the collection height. */
+/* Bookmark Archive: preserve the illustration as two overlapping layers.
+   The original full-width top sits ABOVE the slender full-height side
+   drawings, so no nine-slice seam can cut through a scallop. */
 .ed-bookmarks.has-curtain:not(.curtain-bottom) {
   padding-block-start: max(245px, var(--sp-section));
 }
@@ -5805,16 +5805,34 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   right: 0.8%;
   width: 98.4%;
   height: auto;
-  box-sizing: border-box;
-  background-image: none;
-  border-style: solid;
-  border-color: transparent;
-  border-width: 205px clamp(125px, 9.4vw, 195px) 110px;
-  border-image-source: var(--cur-img);
-  border-image-slice: 28% 18% 18% 18%;
-  border-image-width: 1;
-  border-image-repeat: stretch;
+  background: none;
+  border: 0;
   transform: translateY(var(--cur-offset, 0px));
+}
+.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::before,
+.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  top: 0;
+  background-image: var(--cur-img);
+  background-repeat: no-repeat;
+}
+.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::before {
+  height: min(26vw, 540px);
+  background-position: center top;
+  background-size: 100% auto;
+  z-index: 2;
+}
+.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::after {
+  bottom: 0;
+  background-position: center top;
+  background-size: 100% 100%;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 8.5%, transparent 13%, transparent 87%, #000 91.5%, #000 100%);
+  mask-image: linear-gradient(to right, #000 0%, #000 8.5%, transparent 13%, transparent 87%, #000 91.5%, #000 100%);
+  z-index: 1;
 }
 @media (max-width: 759px) {
   .ed-bookmarks.has-curtain:not(.curtain-bottom) {
@@ -5825,6 +5843,8 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
     left: 0;
     right: 0;
     width: 100%;
-    border-width: 125px 9vw 68px;
+  }
+  .ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::before {
+    height: 35vw;
   }
 }
