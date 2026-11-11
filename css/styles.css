@@ -3884,6 +3884,22 @@ html:not([data-theme="dark"]) .lit-hero {
 .lit-curation-tools { border-top-color:rgba(125,105,84,.24); }
 .lit-curation-body { border-color:rgba(125,105,84,.18); }
 /* Reading challenges: one unobtrusive invitation and advanced actions tucked away. */
+/* Compact challenge controls, separate from the editable page artwork. */
+.lit-challenge-tools { display:flex; align-items:flex-start; justify-content:flex-end; flex-wrap:wrap; gap:12px; max-width:1440px; margin:20px auto 0; padding:0 clamp(20px,4vw,70px); position:relative; z-index:4; }
+.lit-challenge-manage { position:relative; font-family:var(--f-ui); }
+.lit-challenge-manage > summary, .lit-challenge-add { min-height:38px; padding:8px 14px; border:1px solid var(--c-rule-strong); border-radius:4px; background:var(--c-bg); color:var(--c-ink); cursor:pointer; font:600 .76rem var(--f-ui); }
+.lit-challenge-manage > summary { list-style:none; display:flex; align-items:center; gap:14px; }
+.lit-challenge-manage > summary::-webkit-details-marker { display:none; }
+.lit-challenge-manage > summary span { font-size:1rem; }
+.lit-challenge-manage > summary:hover, .lit-challenge-add:hover { color:var(--c-accent); border-color:var(--c-accent); }
+.lit-challenge-add { color:var(--c-accent); }
+.lit-challenge-manage-list { position:absolute; right:0; top:calc(100% + 5px); width:min(340px,calc(100vw - 40px)); max-height:55vh; overflow-y:auto; padding:7px 14px; background:var(--c-bg); border:1px solid var(--c-rule-strong); border-radius:5px; box-shadow:0 12px 28px rgba(45,36,29,.13); }
+.lit-challenge-manage-row { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:10px 2px; border-bottom:1px solid var(--c-rule); }
+.lit-challenge-manage-row:last-child { border-bottom:0; }
+.lit-challenge-manage-row a { color:var(--c-ink); font:500 .84rem var(--f-body); text-decoration:none; }
+.lit-challenge-manage-row a:hover { color:var(--c-accent); }
+.lit-challenge-manage-row button { border:0; background:none; color:var(--c-accent); font:600 .74rem var(--f-ui); cursor:pointer; padding:6px; }
+.lit-challenge-manage-row button:hover { text-decoration:underline; }
 .lit-challenge-invite { display:flex; align-items:center; justify-content:center; gap:22px; flex-wrap:wrap; max-width:930px; margin:55px auto 105px; padding:24px 18px; border-top:1px solid rgba(125,105,84,.22); }
 .lit-challenge-invite p { margin:0; color:var(--c-ink-soft); font:italic 1.3rem var(--f-body); }
 .lit-challenge-invite button { padding:7px 0; background:none; border:0; border-bottom:1px solid var(--c-rule-strong); color:var(--c-accent); font:600 .74rem var(--f-ui); cursor:pointer; }
