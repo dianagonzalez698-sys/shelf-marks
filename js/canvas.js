@@ -625,7 +625,11 @@ function paintPanel() {
         span.appendChild(content);
         range.insertNode(span);
       }
-      savedRange = null;
+      if (!reset) {
+        const nextRange = document.createRange();
+        nextRange.selectNodeContents(span);
+        savedRange = nextRange;
+      } else savedRange = null;
       input.dispatchEvent(new Event('input', { bubbles:true }));
       input.focus();
     };
