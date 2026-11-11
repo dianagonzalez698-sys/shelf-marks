@@ -6139,11 +6139,11 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 
 /* A light, draggable right edge for quote text in Design Mode. The chosen
    width is stored per statement and applies outside the editor as well. */
-body.is-editing #app .ed-statement .statement p.canvas-text-target {
+body.canvas-editing #app .ed-statement .statement p.canvas-text-target {
   position: relative;
   min-width: 20%;
 }
-body.is-editing #app .ed-statement .canvas-text-width-handle {
+body.canvas-editing #app .ed-statement .canvas-text-width-handle {
   position: absolute;
   right: -10px;
   top: 50%;
@@ -6162,7 +6162,7 @@ body.is-editing #app .ed-statement .canvas-text-width-handle {
   user-select: none;
   z-index: 6;
 }
-body.is-editing #app .ed-statement .canvas-text-width-handle::after {
+body.canvas-editing #app .ed-statement .canvas-text-width-handle::after {
   content: '⋮';
   position: absolute;
   inset: 0;
@@ -6171,7 +6171,7 @@ body.is-editing #app .ed-statement .canvas-text-width-handle::after {
   font: 600 18px/1 var(--f-ui);
   color: var(--c-accent);
 }
-body.is-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
+body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   outline: 2px solid var(--c-accent);
   outline-offset: 3px;
 }
