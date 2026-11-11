@@ -141,11 +141,11 @@ export function challengeDetailView(params) {
     // A challenge spread is long, and saving from a sheet re-renders it.
     // Without this you are thrown back to the top every time you tick a book.
     keepScroll: true,
-    actions: `<button class="btn btn-quiet" type="button" id="edit-top">Edit challenge</button>
-      <button class="btn btn-quiet" type="button" id="cover-top">Cover</button>`,
+    actions: '',
     html: `
-      <div class="challenge-detail-toolbar" style="display:flex;justify-content:flex-end;align-items:center;padding:10px clamp(18px, 4vw, 56px);background:var(--c-bg);border-bottom:1px solid var(--c-rule);">
+      <div class="challenge-detail-toolbar" style="display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px clamp(18px, 4vw, 56px);background:var(--c-bg);border-bottom:1px solid var(--c-rule);">
         <button type="button" class="btn btn-quiet" id="edit-challenge-inline" style="font-size:14px;min-height:32px;padding:5px 12px;">Edit challenge</button>
+        <button type="button" class="btn btn-quiet" id="cover-top" style="font-size:14px;min-height:32px;padding:5px 12px;">Cover</button>
       </div>
       ${spread}
       ${unsetNotice}
@@ -177,7 +177,7 @@ export function challengeDetailView(params) {
       // The cover is the challenge's own artwork: it backs the spread's
       // opening and fills its card on the index. It lives on the challenge
       // rather than on a section, because two different sections draw it.
-      const coverBtn = document.getElementById('cover-top');
+      const coverBtn = root.querySelector('#cover-top');
       if (coverBtn) {
         coverBtn.onclick = () => openMediaEditor(
           challenge.cover || media({ ratio: 'auto', frame: 'none', shadow: false }),
