@@ -144,6 +144,9 @@ export function challengeDetailView(params) {
     actions: `<button class="btn btn-quiet" type="button" id="edit-top">Edit challenge</button>
       <button class="btn btn-quiet" type="button" id="cover-top">Cover</button>`,
     html: `
+      <div class="challenge-detail-toolbar" style="display:flex;justify-content:flex-end;align-items:center;padding:10px clamp(18px, 4vw, 56px);background:var(--c-bg);border-bottom:1px solid var(--c-rule);">
+        <button type="button" class="btn btn-quiet" id="edit-challenge-inline" style="font-size:14px;min-height:32px;padding:5px 12px;">Edit challenge</button>
+      </div>
       ${spread}
       ${unsetNotice}
     `,
@@ -164,6 +167,8 @@ export function challengeDetailView(params) {
       }
 
       const open = () => openEditor(challenge);
+      const visibleEdit = root.querySelector('#edit-challenge-inline');
+      if (visibleEdit) visibleEdit.onclick = open;
       const top = document.getElementById('edit-top');
       if (top) top.onclick = open;
       const inline = root.querySelector('#edit-challenge');
