@@ -918,7 +918,13 @@ function ensureTools() {
   document.getElementById('app')?.addEventListener('click', (e) => {
     if (!editing || e.target.closest('[data-edit],.canvas-item,a,button,input,select,textarea,[contenteditable]')) return;
     const sec = e.target.closest('[data-sec]');
-    if (sec) inspectSection(sec.dataset.sec);
+    if (!sec) return;
+    // Clicking a photograph (or the artwork area of an image hero) opens
+    // that section's Images controls immediately, on the homepage too.
+    const photoTarget = e.target.closest('img,.m-backdrop,.m-figure,.hero-inset')
+      || (sec.classList.contains('ed-hero') && e.target.closest('.hero') && !e.target.closest('.hero-type'));
+    inspectSection(sec.dataset.sec);
+    if (photoTarget) document.querySelector('#canvas-panel [data-inspector-tab="artwork"]')?.click();
   });
   document.addEventListener('keydown', (e) => {
     if (!editing || !activePage) return;
