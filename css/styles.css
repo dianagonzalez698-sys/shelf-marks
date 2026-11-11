@@ -5998,7 +5998,7 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 #app .literary-notebook:not(.lit-collections) > .lit-page-heading h1 {
   display: block;
   margin: 0;
-  font: 400 clamp(4.1rem, 7.5vw, 7.6rem)/1.12 'Paper Cake Wide', 'Snell Roundhand', cursive;
+  font: 400 clamp(3rem, 5vw, 5.2rem)/1.12 'Paper Cake Wide', 'Snell Roundhand', cursive;
   letter-spacing: 0;
   text-transform: none;
 }
