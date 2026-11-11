@@ -14,7 +14,6 @@ import * as assets from './assets.js';
 
 export const ARCHIVE_PAGE_ID = 'bookmarks';
 import { formatDateTime } from './periods.js';
-import { fileToDataUrl } from './backup.js';
 import { t } from './theme.js';
 
 function tile(id, meta, unlocked) {
@@ -130,6 +129,7 @@ function openBookmarkArtworkStudio() {
   })).filter((group) => group.labels.length);
   if (!groups.length) return toast('Create a reading challenge first.');
   const titles = new Map(groups.flatMap(({ labels }) => labels));
+  let activeBookmarkId = null;
 
   openSheet(`<div class="bm-curator-studio bm-curator-compact">
     <p class="lit-overline">THE BOOKMARK ATELIER</p><h2>Choose an illustration</h2>
@@ -145,6 +145,7 @@ function openBookmarkArtworkStudio() {
   </div>`, {
     onMount(sheet) {
       const bookmarkPicker = sheet.querySelector('#bm-curator-bookmark');
+      if (activeBookmarkId && titles.has(activeBookmarkId)) bookmarkPicker.value = activeBookmarkId;
       const button = sheet.querySelector('#bm-curator-pick');
       const selectedId = () => bookmarkPicker.value;
       const show = () => {
@@ -158,10 +159,9 @@ function openBookmarkArtworkStudio() {
         sheet.querySelector('#bm-curator-status').textContent = state.unlocks.some((u) => u.id === id) ? 'Collected' : 'Not yet earned';
         button.textContent = image ? 'Replace image ↗' : 'Choose image ↗';
       };
-      bookmarkPicker.onchange = show;
-      button.onclick = () => openBookmarkImagePicker(selectedId());
+      bookmarkPicker.onchange = () => { activeBookmarkId = selectedId(); show(); };
+      button.onclick = () => { activeBookmarkId = selectedId(); openBookmarkImagePicker(activeBookmarkId); };
       show();
-;
     },
   });
 }
