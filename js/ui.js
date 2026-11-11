@@ -119,7 +119,7 @@ function safeRichStyle(node) {
   else {
     // Browsers serialize a chosen HEX input as rgb(...); retain that colour
     // only when all three channels are valid 8-bit integers.
-    const rgb = /^rgb\\(\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*,\\s*(\\d{1,3})\\s*\\)$/i.exec(color);
+    const rgb = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i.exec(color);
     if (rgb && rgb.slice(1).every(value => Number(value) <= 255)) {
       safe.push(['color', '#' + rgb.slice(1).map(value => Number(value).toString(16).padStart(2, '0')).join('')]);
     }
