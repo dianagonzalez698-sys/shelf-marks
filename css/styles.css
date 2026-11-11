@@ -6175,3 +6175,18 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   outline: 2px solid var(--c-accent);
   outline-offset: 3px;
 }
+
+/* Transparent cloud bands and other full-width decorations do not have a
+   cut-out arch to measure. Show their intact artwork rather than hiding it
+   when the curtain image has no frame-slice metadata. */
+#app .ed.has-curtain:has(> .ed-curtain-decor) {
+  --cur-over: 1;
+  padding-block-start: var(--sp-section);
+}
+#app .ed.has-curtain > .ed-curtain-decor {
+  left: 0;
+  width: 100%;
+  height: var(--cur-h);
+  background-size: 100% 100%;
+  background-position: top center;
+}
