@@ -6,7 +6,7 @@ import * as theme from './theme.js';
 import { FONT_STACKS } from './theme.js';
 import * as layout from './layout.js';
 import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './sections.js?v=86';
-import { openSectionEditor } from './view-layout.js?v=88';
+import { openSectionEditor } from './view-layout.js?v=95';
 import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } from './ui.js';
 
 
