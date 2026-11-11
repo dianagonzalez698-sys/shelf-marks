@@ -5837,60 +5837,34 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
 }
 
 
-/* Bookmark Archive: preserve the illustration as two overlapping layers.
-   The original full-width top sits ABOVE the slender full-height side
-   drawings, so no nine-slice seam can cut through a scallop. */
+/* Bookmark Archive curtains use the same intact, single-piece renderer as
+   every other section. The old ::before/::after treatment duplicated the
+   valance, distorted the side drapes and prevented consistent sizing. */
 .ed-bookmarks.has-curtain:not(.curtain-bottom) {
-  padding-block-start: max(245px, var(--sp-section));
+  padding-block-start: max(
+    calc(var(--cur-arch) * var(--cur-over) - var(--cur-lift)
+      + var(--cur-clear) + var(--cur-gap, 0px)),
+    var(--sp-section)
+  );
 }
-.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain {
-  top: 22px;
-  bottom: 0;
-  left: 0.8%;
-  right: 0.8%;
-  width: 98.4%;
-  height: auto;
-  background: none;
-  border: 0;
+.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain:not(.ed-curtain-decor) {
+  top: calc((var(--cur-lift) + var(--trim-bite, 3px)) * -1);
+  bottom: auto;
+  left: calc((var(--cur-over, 1) - 1) / -2 * 100%);
+  right: auto;
+  width: calc(100% * var(--cur-over, 1));
+  height: calc(var(--cur-h) * var(--cur-over, 1));
+  background-image: var(--cur-img);
+  background-size: 100% 100%;
+  background-position: top center;
+  background-repeat: no-repeat;
   transform: translateY(var(--cur-offset, 0px));
 }
-.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::before,
-.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  left: 0;
-  right: 0;
-  top: 0;
-  background-image: var(--cur-img);
-  background-repeat: no-repeat;
-}
-.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::before {
-  height: min(26vw, 540px);
-  background-position: center top;
-  background-size: 100% auto;
-  z-index: 2;
-}
-.ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::after {
-  bottom: 0;
-  background-position: center top;
-  background-size: 100% 100%;
-  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 8.5%, transparent 13%, transparent 87%, #000 91.5%, #000 100%);
-  mask-image: linear-gradient(to right, #000 0%, #000 8.5%, transparent 13%, transparent 87%, #000 91.5%, #000 100%);
-  z-index: 1;
-}
 @media (max-width: 759px) {
-  .ed-bookmarks.has-curtain:not(.curtain-bottom) {
-    padding-block-start: max(145px, var(--sp-section));
-  }
-  .ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain {
-    top: 12px;
+  .ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain:not(.ed-curtain-decor) {
     left: 0;
-    right: 0;
     width: 100%;
-  }
-  .ed-bookmarks.has-curtain:not(.curtain-bottom) > .ed-curtain::before {
-    height: 35vw;
+    height: var(--cur-h);
   }
 }
 
