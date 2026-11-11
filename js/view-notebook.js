@@ -3,6 +3,8 @@ import { state } from './state.js';
 import { esc, attr, navigate, toast } from './ui.js';
 import { bookDecorMarkup, mountBookDecor } from './book-decor.js';
 import * as assets from './assets.js';
+import * as layout from './layout.js';
+import { renderSections } from './sections.js';
 
 const excerpt = (value, limit = 190) => String(value || '').replace(/\s+/g, ' ').slice(0, limit);
 const kindLabel = (kind) => notebook.KINDS.find(x => x[0] === kind)?.[1] || 'Journal entry';
@@ -18,6 +20,7 @@ export function notebookView() {
   const entries = notebook.list();
   return {
     title: 'The Notebook', tab: 'notebook', fab: false,
+    editPage: 'notebook',
     html: `<div class="literary-notebook">
       <header class="lit-page-heading"><p class="lit-overline">THE WRITING DESK / ${state.settings.year}</p>
         <h1>The <em>Notebook</em></h1>
@@ -35,7 +38,7 @@ export function notebookView() {
         </a>`).join('')}</div>` : `<div class="lit-empty-writing"><span class="lit-flourish">❧</span>
         <h2>Begin anywhere.</h2><p>A sentence from a novel, a thought you don't want to lose, or a page of your own.</p>
         <a href="#/notebook/new">Write your first entry ↗</a></div>`}
-    </div>`,
+    </div>${renderSections(layout.get('notebook'))}`,
     onMount(root) {
       const updateCard = async (id, patch) => {
         try {
