@@ -139,11 +139,11 @@ export function challengeDetailView(params) {
     keepScroll: true,
     actions: '',
     html: `
-      <div class="challenge-detail-toolbar" style="display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:10px clamp(18px, 4vw, 56px);background:var(--c-bg);border-bottom:1px solid var(--c-rule);">
-        <button type="button" class="btn btn-quiet" id="edit-challenge-inline" style="font-size:14px;min-height:32px;padding:5px 12px;">Edit challenge</button>
-      </div>
       ${spread}
       ${unsetNotice}
+      <footer class="challenge-detail-toolbar" aria-label="Challenge settings">
+        <button type="button" id="edit-challenge-inline">Edit challenge</button>
+      </footer>
     `,
     onMount(root) {
       // Arriving from a bookmark's "Go to eligible books": the section is well
