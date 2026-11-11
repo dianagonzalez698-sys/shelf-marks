@@ -6291,3 +6291,49 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   #app .ed-archive .arc-collection-grid .bm-grid { gap: 8px; }
   #app .bookmark-curator-footer { padding-bottom: 22px; }
 }
+
+
+/* Challenges management stays quietly at the very bottom of the index. */
+#app .lit-challenge-invite {
+  max-width: var(--w-content, 1200px);
+  justify-content: flex-end;
+  margin: 28px auto 48px;
+  padding: 16px clamp(20px,4vw,70px) 8px;
+  position: relative;
+  z-index: 10;
+}
+#app .lit-challenge-invite .lit-challenge-tools {
+  margin: 0;
+  padding: 0;
+  width: auto;
+  max-width: none;
+  justify-content: flex-end;
+  gap: 12px;
+  align-items: center;
+}
+#app .lit-challenge-invite .lit-challenge-manage > summary,
+#app .lit-challenge-invite .lit-challenge-add {
+  min-height: 31px;
+  padding: 5px 8px;
+  font: 400 .83rem/1.3 var(--f-body);
+  color: var(--c-ink-soft);
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+}
+#app .lit-challenge-invite .lit-challenge-add { color: var(--c-accent); }
+#app .lit-challenge-invite .lit-challenge-manage > summary:hover,
+#app .lit-challenge-invite .lit-challenge-add:hover {
+  color: var(--c-accent);
+  border-bottom-color: currentColor;
+}
+#app .lit-challenge-invite .lit-challenge-manage-list {
+  top: auto;
+  bottom: calc(100% + 6px);
+  z-index: 11;
+}
+@media (max-width: 600px) {
+  #app .lit-challenge-invite { justify-content: center; margin-bottom: 30px; padding-inline: 16px; }
+  #app .lit-challenge-invite .lit-challenge-tools { justify-content: center; gap: 6px 14px; }
+}
