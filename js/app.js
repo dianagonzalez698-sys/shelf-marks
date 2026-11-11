@@ -7,7 +7,7 @@ import * as layout from './layout.js';
 import * as canvas from './canvas.js?v=113';
 import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
-import { route, startRouter, refresh, navigate, initArtFallback, setChallengeMenuTitleResolver } from './ui.js?v=114';
+import { route, startRouter, refresh, navigate, initArtFallback, setChallengeMenuTitleResolver } from './ui.js';
 import { homeView } from './view-home.js?v=112';
 import { booksView } from './view-books.js';
 import { addView, bookFormView, rememberAddOrigin } from './view-book.js';
@@ -22,7 +22,7 @@ import { wordsView, wordDetailView } from './view-words.js';
 import { notebookView, notebookEntryView } from './view-notebook.js';
 import { collectionsView } from './view-collections.js';
 import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=95';
-import { wireEditing } from './ui.js?v=114';
+import { wireEditing } from './ui.js';
 
 // The navigation uses the same saved banner heading as each challenge page.
 setChallengeMenuTitleResolver((challenge) => {
