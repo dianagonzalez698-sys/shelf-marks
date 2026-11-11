@@ -521,11 +521,18 @@ export function refresh() {
   render();
 }
 
+// The application's layout layer supplies titles used on custom challenge
+// covers; keep this renderer independent of the layout/sections module cycle.
+let challengeMenuTitle = (challenge) => challenge.name;
+export function setChallengeMenuTitleResolver(resolve) {
+  challengeMenuTitle = typeof resolve === 'function' ? resolve : (challenge) => challenge.name;
+}
+
 function updateChallengeMenu() {
   const list = document.getElementById('challenges-menu-list');
   if (!list) return;
   const links = allChallenges().map((challenge) =>
-    `<a role="menuitem" href="#/challenge/${encodeURIComponent(challenge.id)}">${esc(challenge.name)}</a>`);
+    `<a role="menuitem" href="#/challenge/${encodeURIComponent(challenge.id)}">${esc(challengeMenuTitle(challenge) || challenge.name)}</a>`);
   list.innerHTML = `<a role="menuitem" href="#/challenges">All Challenges</a>`
     + (links.length ? '<span class="masthead-dropdown-rule"></span>' + links.join('') : '');
 }
