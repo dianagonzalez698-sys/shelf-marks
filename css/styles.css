@@ -6058,6 +6058,28 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   font: 400 clamp(1.05rem, 1.35vw, 1.22rem)/1.5 var(--f-body);
 }
 
+/* Challenge index: the published cover should have the same restrained
+   editorial proportions Diana preferred in the Design Mode preview.
+   Keep these rules on the challenge index only; the home hero and individual
+   challenge covers retain their own designs. */
+#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-tall {
+  min-height: clamp(350px, 42vw, 515px);
+}
+#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-type {
+  padding-top: clamp(1.75rem, 4vw, 3.25rem);
+  padding-bottom: clamp(1.75rem, 4vw, 3.25rem);
+}
+#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-title {
+  font-size: calc(var(--fs-banner-title) * var(--fz-display, 1) * .78);
+  line-height: 1.02;
+}
+#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-title .ed-script {
+  font-size: 1.2em;
+}
+#app .screen:has(> .lit-challenge-invite) .ed-hero .hero-sub {
+  font-size: calc(var(--fs-banner-sub) * var(--fz-body, 1) * .9);
+}
+
 /* Challenge banner typography: direct, readable controls instead of nested
    font and color popovers inside the narrow Design Mode inspector. */
 #canvas-panel .banner-type-controls { padding: 15px 0 18px; border-top: 1px solid var(--c-rule); display: grid; gap: 12px; }
