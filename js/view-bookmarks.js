@@ -41,6 +41,7 @@ export function bookmarksView(params = {}) {
     tab: 'bookmarks',
     banner: false,
     editorial: true,
+    editPage: ARCHIVE_PAGE_ID,
     html: `<div class="bookmark-curator-intro">
       <span class="lit-overline">THE KEEPSAKE CABINET</span>
       <p>Every reading accomplishment has a little work of art waiting for it.</p>
