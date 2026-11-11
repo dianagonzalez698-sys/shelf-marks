@@ -48,6 +48,7 @@ export function matchesFilter(book, filter) {
     case 'reread': return !!book.isReread;
     case 'tbr': return !!book.isTbr;
     case 'author': return (filter.authors || []).some((a) => authorMatches(book, a));
+    case 'title': return (filter.titles || []).some((title) => norm(title) === norm(book.title));
     case 'series': return !!book.series && norm(book.series) === norm(filter.series);
     case 'tag': return (book.tags || []).some((t) => norm(t) === norm(filter.tag));
     default: return false;
@@ -68,6 +69,12 @@ export function describeFilter(filter) {
       if (!list.length) return 'No authors chosen yet';
       if (list.length === 1) return `By ${list[0]}`;
       return `By ${list.slice(0, -1).join(', ')} or ${list[list.length - 1]}`;
+    }
+    case 'title': {
+      const titles = filter.titles || [];
+      if (!titles.length) return 'No book titles chosen yet';
+      if (titles.length === 1) return `Reading “${titles[0]}”`;
+      return `${titles.length} selected book titles`;
     }
     case 'series': return `In the ${filter.series} series`;
     case 'tag': return `Tagged “${filter.tag}”`;
