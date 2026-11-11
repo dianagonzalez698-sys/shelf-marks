@@ -661,7 +661,7 @@ function fieldsHtml(def, sec, mode = 'all') {
       'curtainArt', 'curtainWhere', 'curtainOffset',
     ]);
     const chosen = all.filter((f) => mode === 'content'
-      ? (sec.type === 'challengeHero' ? f.type === 'typeface'
+      ? (sec.type === 'challengeHero' ? (f.type === 'typeface' || ['eyebrowText', 'titleText', 'subtitleText'].includes(f.key))
         : sec.type === 'interlude' && f.key === 'mode' ? false : content(f) || contentEssentials.has(f.key))
       : mode === 'style' ? (sec.type === 'challengeHero'
         ? ['shape', 'tone', 'height', 'align', 'scrim', 'showWindow', 'showBlurb'].includes(f.key)
