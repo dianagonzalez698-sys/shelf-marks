@@ -16,6 +16,7 @@ import { t } from './theme.js';
 import { renderSections, renderSection } from './sections.js';
 import { figure, backdrop, media } from './media.js';
 import * as layout from './layout.js';
+import * as assets from './assets.js';
 import { openMediaEditor } from './view-layout.js';
 
 /* ----------------------------------------------------------------- list ---- */
@@ -164,7 +165,29 @@ export function challengeDetailView(params) {
               toast('Could not save that change.', 'bad');
             }
           },
-          { role: 'backdrop', size: '1800 × 1100 px' },
+          { role: 'backdrop', size: '1800 × 1100 px',
+            previewSelection(chosenId, tweaks = {}) {
+              const hero = root.querySelector('.ed-challengeHero .m-backdrop');
+              if (!hero) return () => {};
+              const previousStyle = hero.getAttribute('style');
+              const previousClass = hero.className;
+              const url = assets.src(chosenId);
+              if (url) {
+                hero.classList.remove('m-backdrop-empty');
+                hero.style.backgroundImage = `url("${url.replace(/"/g, '%22')}")`;
+              } else {
+                hero.style.backgroundImage = 'none';
+                hero.classList.add('m-backdrop-empty');
+              }
+              hero.style.backgroundPosition = `${Number(tweaks.focalX ?? 50)}% ${Number(tweaks.focalY ?? 50)}%`;
+              hero.style.opacity = String(Number(tweaks.opacity ?? 1));
+              return () => {
+                hero.className = previousClass;
+                if (previousStyle == null) hero.removeAttribute('style');
+                else hero.setAttribute('style', previousStyle);
+              };
+            },
+          },
         );
       }
 
