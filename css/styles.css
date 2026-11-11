@@ -5943,3 +5943,23 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   #app .bookmark-curator-intro { align-items: flex-start; flex-wrap: wrap; }
   #app .bookmark-curator-intro button { text-align: left; }
 }
+
+/* Artwork management belongs after the archive rather than competing with
+   the heading at the top of the page. */
+#app .bookmark-curator-footer {
+  box-sizing: border-box;
+  max-width: var(--w-content);
+  margin: 0 auto;
+  padding: 24px calc(var(--sp-page-x) + var(--safe-r)) 70px calc(var(--sp-page-x) + var(--safe-l));
+  display: flex;
+  justify-content: flex-end;
+}
+#app .bookmark-curator-footer button {
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  padding: 6px 0;
+  background: transparent;
+  color: var(--c-accent);
+  font: 400 1.1rem/1.35 var(--f-body);
+  cursor: pointer;
+}
