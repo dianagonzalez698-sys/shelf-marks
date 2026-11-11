@@ -23,9 +23,7 @@ export function notebookView() {
     editPage: 'notebook',
     html: `<div class="literary-notebook">
       <header class="lit-page-heading"><p class="lit-overline">THE WRITING DESK / ${state.settings.year}</p>
-        <h1>The <em>Notebook</em></h1>
-        <p>A place for loose thoughts, little essays, and passages worth keeping. Notes on a particular book belong in its <a href="#/books">reading journal</a>.</p>
-        <a class="lit-primary-action" href="#/notebook/new">Write a note <span>↗</span></a>
+        <h1>THE NOTEBOOK</h1>
       </header>
       <div class="lit-notebook-index"><span>THE ARCHIVE</span><span>${entries.length} ${entries.length === 1 ? 'ENTRY' : 'ENTRIES'}</span></div>
       ${entries.length ? `<details class="lit-card-design"><summary>Customize card backgrounds</summary><p>Choose a paper color, or use an image from your artwork library. Each entry can have its own background.</p><div class="lit-card-design-list">${entries.map(e => `<label>${esc(e.title || 'Untitled entry')}<select data-card-paper="${attr(e.id)}">${CARD_PAPERS.map(([value,name]) => `<option value="${value}" ${e.cardPaper === value ? 'selected' : ''}>${name}</option>`).join('')}</select><select data-card-asset="${attr(e.id)}"><option value="">No background image</option>${assets.list().map(a => `<option value="${attr(a.id)}" ${e.cardBackgroundAssetId === a.id ? 'selected' : ''}>${esc(a.name || 'Untitled image')}</option>`).join('')}</select><span class="lit-card-upload">Or upload <input type="file" accept="image/*" data-card-upload="${attr(e.id)}"></span></label>`).join('')}</div></details>` : ''}
