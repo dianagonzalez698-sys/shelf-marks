@@ -661,8 +661,11 @@ function fieldsHtml(def, sec, mode = 'all') {
       'curtainArt', 'curtainWhere', 'curtainOffset',
     ]);
     const chosen = all.filter((f) => mode === 'content'
-      ? (sec.type === 'interlude' && f.key === 'mode' ? false : content(f) || contentEssentials.has(f.key))
-      : mode === 'style' ? styleEssentials.has(f.key)
+      ? (sec.type === 'challengeHero' ? f.type === 'typeface'
+        : sec.type === 'interlude' && f.key === 'mode' ? false : content(f) || contentEssentials.has(f.key))
+      : mode === 'style' ? (sec.type === 'challengeHero'
+        ? ['shape', 'tone', 'height', 'align', 'scrim', 'showWindow', 'showBlurb'].includes(f.key)
+        : styleEssentials.has(f.key))
       : mode === 'artwork' ? artworkEssentials.has(f.key) || (sec.type === 'interlude' && f.key === 'mode')
       : false);
     if (!chosen.length && mode !== 'artwork') return `<p class="canvas-panel-hint">${mode === 'content' ? 'This section draws its words from your reading records, so there is no text to rewrite here.' : mode === 'style' ? 'This section uses the journal’s shared visual style.' : 'No additional options for this section.'}</p>`;
@@ -671,6 +674,7 @@ function fieldsHtml(def, sec, mode = 'all') {
         : sec.type === 'interlude' && f.key === 'bgImage' ? 'Background picture (optional)' : f.label;
       return fieldControl(label === f.label ? f : { ...f, label }, sec[f.key], sec.id, { inlineStyle: false });
     };
+    if (mode === 'content' && sec.type === 'challengeHero') return '<p class="canvas-panel-hint">The words follow this challenge’s name and description. Customize each line’s font, size, weight, italic style, spacing, and color below.</p>' + chosen.map(draw).join('');
     if (mode === 'style') {
       const appearance = chosen.filter((f) => f.type !== 'typeface');
       const typography = chosen.filter((f) => f.type === 'typeface');
