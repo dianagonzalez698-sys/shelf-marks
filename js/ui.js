@@ -492,41 +492,12 @@ export function refresh() {
 }
 
 function updateChallengeMenu() {
-  const menu = document.getElementById('challenges-menu');
   const list = document.getElementById('challenges-menu-list');
-  const toggle = document.getElementById('challenges-menu-toggle');
-  if (!menu || !list || !toggle) return;
+  if (!list) return;
   const links = allChallenges().map((challenge) =>
     `<a role="menuitem" href="#/challenge/${encodeURIComponent(challenge.id)}">${esc(challenge.name)}</a>`);
   list.innerHTML = `<a role="menuitem" href="#/challenges">All Challenges</a>`
     + (links.length ? '<span class="masthead-dropdown-rule"></span>' + links.join('') : '');
-  toggle.onclick = (event) => {
-    event.stopPropagation();
-    const open = menu.classList.toggle('is-open');
-    toggle.setAttribute('aria-expanded', String(open));
-  };
-  list.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      menu.classList.remove('is-open');
-      toggle.setAttribute('aria-expanded', 'false');
-    });
-  });
-  if (!menu.dataset.bound) {
-    menu.dataset.bound = 'true';
-    document.addEventListener('click', (event) => {
-      if (!menu.contains(event.target)) {
-        menu.classList.remove('is-open');
-        toggle.setAttribute('aria-expanded', 'false');
-      }
-    });
-    menu.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        menu.classList.remove('is-open');
-        toggle.setAttribute('aria-expanded', 'false');
-        toggle.focus();
-      }
-    });
-  }
 }
 
 function setChrome(view) {
