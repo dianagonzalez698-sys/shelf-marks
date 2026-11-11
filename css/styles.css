@@ -5885,3 +5885,15 @@ body.sheet-open:has(.sheet.media-live-preview) { overflow: auto !important; }
   .lit-shelf-manage-panel label) {
   font-size: max(0.94rem, var(--fs-label));
 }
+
+/* Notebook and Collections: bring the remaining miniature captions up to
+   the same readable size as the shared editorial labels. */
+#app :is(.lit-primary-action, .lit-entry-foot,
+  .lit-collection-card > span, .lit-collection-card small,
+  .lit-cabinet-index, .lit-cabinet-copy small,
+  .lit-curation-tools > summary, .lit-curation-body label,
+  .lit-curation-item > summary span,
+  .lit-writing-form label, .lit-back) {
+  font-size: max(0.94rem, var(--fs-label));
+  line-height: 1.4;
+}
