@@ -1342,6 +1342,9 @@ export const SECTION_TYPES = {
       { key: 'scrim', label: 'Darkening over image', type: 'range', min: 0, max: 90, step: 5 },
       { key: 'showWindow', label: 'Show the time window', type: 'bool' },
       { key: 'showBlurb', label: 'Show the blurb', type: 'bool' },
+      { key: 'eyebrowText', label: 'Small banner line (optional)', type: 'text' },
+      { key: 'titleText', label: 'Banner title (optional)', type: 'text' },
+      { key: 'subtitleText', label: 'Banner subtitle (optional)', type: 'text' },
       { key: 'backdrop', label: 'Banner background image', type: 'media', role: 'backdrop', size: '1800 × 1100 px' },
       { key: 'edge', label: 'Edge treatment', type: 'select', options: EDGES, controls: true },
       { key: 'edgeArt', label: 'Artwork', type: 'media', role: 'trim', size: '1800 × 200 px, transparent PNG', when: (s) => s.edge === 'artwork' },
@@ -1364,9 +1367,9 @@ export const SECTION_TYPES = {
           ${backdrop(cover, { seed: c.id })}
           <span class="hero-scrim" style="--scrim:${Number(sec.scrim == null ? 50 : sec.scrim) / 100}"></span>
           <div class="hero-type">
-            ${sec.showWindow !== false ? kicker(describeWindow(c.window)) : ''}
-            <h1 class="hero-title">${esc(c.name)}</h1>
-            ${sec.showBlurb !== false && c.blurb ? `<p class="hero-sub">${esc(c.blurb)}</p>` : ''}
+            ${sec.showWindow !== false ? kicker(sec.eyebrowText || describeWindow(c.window), 'eyebrowText') : ''}
+            <h1 class="hero-title" data-edit="titleText">${esc(sec.titleText || c.name)}</h1>
+            ${sec.showBlurb !== false && (sec.subtitleText || c.blurb) ? `<p class="hero-sub" data-edit="subtitleText">${esc(sec.subtitleText || c.blurb)}</p>` : ''}
           </div>
         </div>`, 'ed-bleed');
     },
