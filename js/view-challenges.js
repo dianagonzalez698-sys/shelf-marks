@@ -141,8 +141,8 @@ export function challengeDetailView(params) {
     html: `
       ${spread}
       ${unsetNotice}
-      <footer class="challenge-detail-toolbar" aria-label="Challenge settings">
-        <button type="button" id="edit-challenge-inline">Edit challenge</button>
+      <footer class="challenge-detail-toolbar" aria-label="Challenge settings" style="box-sizing:border-box;display:flex;align-items:center;justify-content:flex-end;width:min(100% - 40px, 1200px);margin:32px auto 52px;padding:16px 8px 10px;border-top:1px solid var(--c-rule, #d9caba);">
+        <button type="button" id="edit-challenge-inline" class="lit-challenge-add" style="appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:34px;margin:0;padding:5px 10px;border:0;border-bottom:1px solid var(--c-rule-strong, #cbbba7);border-radius:0;background:transparent;box-shadow:none;color:var(--c-accent, #ad4069);font-family:var(--f-ui, serif);font-size:var(--fs-label, 14px);font-weight:400;letter-spacing:.08em;line-height:1.4;text-transform:none;cursor:pointer;">Edit challenge</button>
       </footer>
     `,
     onMount(root) {
