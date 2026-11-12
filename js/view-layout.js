@@ -684,7 +684,7 @@ function fieldsHtml(def, sec, mode = 'all') {
     // The section editor is for the handful of decisions made repeatedly.
     // Existing values for all other fields remain in the saved data; they are
     // simply no longer surfaced as an intimidating grid of switches.
-    const contentEssentials = new Set(['limit', 'layout', 'mode', 'columns']);
+    const contentEssentials = new Set(['limit', 'layout', 'mode', 'columns', 'descriptionSize']);
     const styleEssentials = new Set(['shape', 'tone', 'fontDisplay', 'fontBody', 'fontUi', 'fontScript']);
     const artworkEssentials = new Set([
       'bgImage', 'backdrop', 'picture', 'inset', 'items', 'strip',
