@@ -49,6 +49,11 @@ export function matchesFilter(book, filter) {
     case 'tbr': return !!book.isTbr;
     case 'author': return (filter.authors || []).some((a) => authorMatches(book, a));
     case 'title': return (filter.titles || []).some((title) => norm(title) === norm(book.title));
+    case 'publishedBefore': {
+      const year = Number(book.firstPublishYear);
+      const cutoff = Number(filter.year);
+      return Number.isInteger(year) && year !== 0 && Number.isInteger(cutoff) && cutoff > 0 && year < cutoff;
+    }
     case 'series': return !!book.series && norm(book.series) === norm(filter.series);
     case 'tag': return (book.tags || []).some((t) => norm(t) === norm(filter.tag));
     default: return false;
@@ -76,6 +81,8 @@ export function describeFilter(filter) {
       if (titles.length === 1) return `Reading “${titles[0]}”`;
       return `${titles.length} selected book titles`;
     }
+    case 'publishedBefore': return Number.isInteger(Number(filter.year)) && Number(filter.year) > 0
+      ? `First published before ${filter.year}` : 'Publication year not set';
     case 'series': return `In the ${filter.series} series`;
     case 'tag': return `Tagged “${filter.tag}”`;
     default: return filter.type;
