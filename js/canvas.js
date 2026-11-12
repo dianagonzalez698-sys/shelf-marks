@@ -5,8 +5,8 @@ import * as assets from './assets.js';
 import * as theme from './theme.js';
 import { FONT_STACKS } from './theme.js';
 import * as layout from './layout.js';
-import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './sections.js?v=87';
-import { openSectionEditor } from './view-layout.js?v=96';
+import { typeList, SECTION_TYPES, roleForKey, applySectionVars } from './sections.js?v=122';
+import { openSectionEditor } from './view-layout.js?v=122';
 import { esc, rich, richValue, toast, confirmSheet, refresh as refreshPage } from './ui.js';
 
 
