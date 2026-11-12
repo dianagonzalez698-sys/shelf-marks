@@ -15,7 +15,7 @@ import {
   bookmarkStats, allChallenges, getChallenge, sortedBooks, unlockMap,
   allWords, getWord, wordStats,
 } from './state.js';
-import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility } from './rules.js?v=117';
+import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility } from './rules.js?v=121';
 import { focusQuarter, focusBimonth, daysLeftLabel, formatDate, yearPeriod, inPeriod } from './periods.js';
 import { t, FONT_STACKS } from './theme.js';
 import * as notebook from './notebook.js';
