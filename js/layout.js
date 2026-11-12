@@ -13,7 +13,7 @@
 //   'challenge:<id>'        an override for one particular challenge
 
 import * as store from './store.js';
-import { createSection, SECTION_TYPES, migrateSection } from './sections.js?v=122';
+import { createSection, SECTION_TYPES, migrateSection } from './sections.js?v=126';
 import { media } from './media.js';
 
 const cache = new Map();
