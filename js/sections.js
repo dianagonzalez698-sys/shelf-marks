@@ -915,12 +915,13 @@ export const SECTION_TYPES = {
   challenges: {
     label: 'Challenge collection',
     blurb: 'Your challenges, each as its own small publication.',
-    create: () => ({ kicker: '', title: 'Reading Challenges', subtitle: 'Little projects to read against, all year long.', limit: 0, layout: 'editorial' }),
+    create: () => ({ kicker: '', title: 'Reading Challenges', subtitle: 'Little projects to read against, all year long.', limit: 0, layout: 'editorial', descriptionSize: 20 }),
     fields: [
       { key: 'kicker', label: 'Small label', type: 'rich', styleRole: 'Ui' },
       { key: 'title', label: 'Heading', type: 'rich', styleRole: 'Display' },
       { key: 'subtitle', label: 'Subtitle', type: 'rich', styleRole: 'Body' },
       { key: 'layout', label: 'Arrangement', type: 'select', options: [['editorial', 'Alternating spreads'], ['list', 'Compact list']] },
+      { key: 'descriptionSize', label: 'Challenge description size (px)', type: 'range', min: 14, max: 30, step: 1 },
       { key: 'limit', label: 'How many (0 = all)', type: 'range', min: 0, max: 12, step: 1 },
       ...COMMON_FIELDS,
     ],
@@ -937,7 +938,7 @@ export const SECTION_TYPES = {
               <span class="tick-body"><span class="tick-title">${esc(c.name)}</span>
               <span class="tick-note">${esc(standing)}</span></span></a>`;
           }).join('')}</div>`
-        : `<div class="spreads">${list.map((c, i) => challengeSpread(c, i)).join('')}</div>`;
+        : `<div class="spreads" style="--challenge-description-size:${Math.max(14, Math.min(30, Number(sec.descriptionSize) || 20))}px">${list.map((c, i) => challengeSpread(c, i)).join('')}</div>`;
       // No "all N" link: the masthead already carries Reading Challenges and
       // every card leads to its own, so it was a third way to the same place.
       const head = (sec.kicker || sec.title || sec.subtitle)
