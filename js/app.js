@@ -9,7 +9,7 @@ import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
 import * as navigationUI from './ui.js';
-import { homeView } from './view-home.js?v=112';
+import { homeView } from './view-home.js?v=120';
 import { booksView } from './view-books.js';
 import { addView, bookFormView, rememberAddOrigin } from './view-book.js?v=117';
 import { bookDetailView } from './view-book-detail.js';
