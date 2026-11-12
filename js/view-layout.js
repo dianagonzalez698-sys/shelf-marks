@@ -815,7 +815,18 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
         // Apply section typography and colours to the visible canvas immediately.
         // Saving the underlying record alone does not repaint this page.
         const previewNode = [...document.querySelectorAll('#app [data-sec]')].find((node) => node.dataset.sec === sectionId);
-        if (previewNode) applySectionVars(previewNode, fresh);
+        if (previewNode) {
+          applySectionVars(previewNode, fresh);
+          // The challenge index's description-size slider updates the live
+          // preview without replacing the section or closing its inspector.
+          if (fresh.type === 'challenges' && 'descriptionSize' in patch) {
+            const spreads = previewNode.querySelector('.spreads');
+            if (spreads) {
+              const px = Math.max(14, Math.min(30, Number(fresh.descriptionSize) || 20));
+              spreads.style.setProperty('--challenge-description-size', px + 'px');
+            }
+          }
+        }
         if (previewNode && fresh.type === 'interlude' && ('mode' in patch)) {
           const template = document.createElement('template');
           template.innerHTML = renderSection(fresh).trim();
