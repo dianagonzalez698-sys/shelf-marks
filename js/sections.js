@@ -8,7 +8,7 @@
 
 import * as layout from './layout.js';
 import { esc, attr, rich, progressBar, progressLine, markVisual, checkBadge, checkGlyph, coverImg } from './ui.js';
-import { figure, backdrop, media, hasAsset } from './media.js';
+import { figure, backdrop, media, hasAsset } from './media.js?v=129';
 import { src as assetSrc, get as getAsset } from './assets.js';
 import {
   state, annualProgress, quarterProgress, nonfictionProgress,
