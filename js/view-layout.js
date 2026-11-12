@@ -2,7 +2,7 @@
 // that make up each page — and place a picture into any slot.
 
 import * as layout from './layout.js';
-import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES, applySectionVars, renderSection } from './sections.js?v=126';
+import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES, applySectionVars, renderSection } from './sections.js?v=129';
 import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
@@ -740,7 +740,31 @@ function fieldsHtml(def, sec, mode = 'all', pageId = '') {
           </button>
         </div>`;
       }
-      return fieldControl(label === f.label ? f : { ...f, label }, sec[f.key], sec.id, { inlineStyle: false });
+      const control = fieldControl(label === f.label ? f : { ...f, label }, sec[f.key], sec.id, { inlineStyle: false });
+      // Picture frames live directly beside the main image, not two screens deep.
+      // No media record changes until the user actually chooses another frame.
+      if (mode === 'artwork' && sec.type === 'interlude' && f.key === 'strip') {
+        const current = media(sec.strip || {});
+        const currentFrame = current.frameAssetId ? 'custom:' + current.frameAssetId : (current.frame || 'none');
+        const customFrames = assets.list({ kind: 'cutout' })
+          .filter(a => a.hasAlpha !== false && (a.dataUrl || '').startsWith('data:image/png'));
+        if (current.frameAssetId && !customFrames.some(a => a.id === current.frameAssetId)) {
+          const existing = assets.get(current.frameAssetId);
+          if (existing) customFrames.unshift(existing);
+        }
+        return control + `<div class="field canvas-quick-frame">
+          <label for="section-quick-frame">Picture frame</label>
+          <select id="section-quick-frame" data-frame-choice aria-label="Choose picture frame">
+            ${FRAMES.map(([key, name]) => `<option value="${attr(key)}" ${currentFrame === key ? 'selected' : ''}>${esc(name)}</option>`).join('')}
+            ${customFrames.map(a => `<option value="custom:${attr(a.id)}" ${currentFrame === 'custom:' + a.id ? 'selected' : ''}>${esc(a.name)} · uploaded PNG</option>`).join('')}
+          </select>
+          <label class="canvas-frame-upload">＋ Add transparent PNG frame
+            <input type="file" data-frame-upload accept="image/png,.png" class="visually-hidden">
+          </label>
+          <p class="hint">Changes only this picture's frame. The painting stays in place.</p>
+        </div>`;
+      }
+      return control;
     };
     if (mode === 'content' && sec.type === 'challengeHero') return '<p class="canvas-panel-hint">The words follow this challenge’s name and description. Customize each line’s font, size, weight, italic style, spacing, and color below.</p>' + chosen.map(draw).join('');
     if (mode === 'style') {
@@ -895,6 +919,43 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
       };
 
       function bind() {
+        const framePicker = sheet.querySelector('[data-frame-choice]');
+        const setFrame = async (value) => {
+          const current = layout.getSection(pageId, sectionId);
+          if (!current || current.type !== 'interlude') return;
+          const frameAssetId = value.startsWith('custom:') ? value.slice(7) : null;
+          const next = { ...media(current.strip || {}), ...(frameAssetId ? { frameAssetId } : { frame: value, frameAssetId: null }) };
+          await commit({ strip: next });
+          refreshPanel();
+          render();
+        };
+        if (framePicker) framePicker.onchange = async () => {
+          try { await setFrame(framePicker.value); }
+          catch (err) { toast('Could not change the frame.', 'bad'); refreshPanel(); }
+        };
+        const frameUpload = sheet.querySelector('[data-frame-upload]');
+        if (frameUpload) frameUpload.onchange = async () => {
+          const file = frameUpload.files?.[0];
+          if (!file) return;
+          if (file.type !== 'image/png' && !/\.png$/i.test(file.name)) {
+            toast('Please choose a transparent PNG frame.', 'bad');
+            frameUpload.value = '';
+            return;
+          }
+          try {
+            const asset = await assets.add(file, { kind: 'cutout' });
+            if (!asset.hasAlpha) {
+              await assets.remove(asset.id);
+              toast('This PNG has no transparency. Please use a frame with a clear center.', 'bad');
+              return;
+            }
+            await setFrame('custom:' + asset.id);
+            toast('New frame added. Your picture is unchanged.', 'good');
+          } catch (err) {
+            toast('Could not add the PNG frame.', 'bad');
+            refreshPanel();
+          }
+        };
         const picker = sheet.querySelector('.challenge-picker');
         if (picker && pageId === 'home') {
           picker.querySelectorAll('[data-challenge-choice]').forEach(input => {
@@ -1483,7 +1544,8 @@ export function openMediaEditor(value, onSave, { role = '', size = '', previewSe
     ${isInset ? `<div class="field" style="margin-top:1.1rem">
       <label for="m-frame">Frame</label>
       <select id="m-frame" data-m="frame">
-        ${FRAMES.map(([v, l]) => `<option value="${attr(v)}" ${v === m.frame ? 'selected' : ''}>${esc(l)}</option>`).join('')}
+        ${m.frameAssetId ? '<option value="custom" selected>Uploaded PNG frame</option>' : ''}
+        ${FRAMES.map(([v, l]) => `<option value="${attr(v)}" ${!m.frameAssetId && v === m.frame ? 'selected' : ''}>${esc(l)}</option>`).join('')}
       </select>
     </div>
     <div class="grid-2">
@@ -1621,7 +1683,10 @@ export function openMediaEditor(value, onSave, { role = '', size = '', previewSe
             draft[key] = Number(el.value);
             const out = sheet.querySelector(`[data-out="${key}"]`);
             if (out) out.textContent = el.value;
-          } else draft[key] = el.value;
+          } else {
+            draft[key] = el.value;
+            if (key === 'frame' && el.value !== 'custom') draft.frameAssetId = null;
+          }
           preview();
         });
       });
