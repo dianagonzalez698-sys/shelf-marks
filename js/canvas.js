@@ -125,6 +125,7 @@ let selectedText = null;
 let panelMode = 'sections';
 let history = [];
 let future = [];
+let restoringHistory = false;
 let saveQueue = Promise.resolve();
 let saveRevision = 0;
 let saveState = 'saved';
@@ -171,7 +172,37 @@ function persist() {
   });
 }
 
-function checkpoint() { history.push(clone(data())); if (history.length > 40) history.shift(); future = []; }
+function recordHistory(entry) {
+  if (restoringHistory || !editing || !activePage) return;
+  history.push(entry);
+  if (history.length > 40) history.shift();
+  future = [];
+  paintHistoryButtons();
+}
+function checkpoint() { recordHistory({ type: 'canvas', items: clone(data()) }); }
+
+// Layout edits live in a separate store from floating artwork. Listen for
+// their before-save snapshots so Undo follows the user's actual edit order.
+document.addEventListener('lit-picks:layout-before-save', (event) => {
+  const { pageId, sections } = event.detail || {};
+  if (!restoringHistory && editing && activePage === pageId && Array.isArray(sections)) {
+    recordHistory({ type: 'layout', sections: clone(sections) });
+  }
+});
+function paintHistoryButtons() {
+  const toolbar = document.getElementById('canvas-toolbar');
+  if (!toolbar) return;
+  const undoButton = toolbar.querySelector('[data-canvas="undo"]');
+  const redoButton = toolbar.querySelector('[data-canvas="redo"]');
+  if (undoButton) {
+    undoButton.disabled = !history.length || !activePage;
+    undoButton.title = history.length ? 'Undo last design change' : 'Nothing to undo yet';
+  }
+  if (redoButton) {
+    redoButton.disabled = !future.length || !activePage;
+    redoButton.title = future.length ? 'Redo last design change' : 'Nothing to redo yet';
+  }
+}
 function change(items) {
   records.set(idFor(activePage), { id: idFor(activePage), items, updatedAt: new Date().toISOString() });
   persist(); render();
@@ -242,8 +273,30 @@ function alignSelected(where) {
   const left = where === 'left' ? 0 : where === 'right' ? width - itemWidth : (width - itemWidth) / 2;
   update(item.id, { x: clamp(left / width * 100, 0, 100) });
 }
-function undo() { if (!history.length) return; future.push(clone(data())); change(history.pop()); }
-function redo() { if (!future.length) return; history.push(clone(data())); change(future.pop()); }
+async function restoreStep(from, to) {
+  if (!from.length || restoringHistory || !activePage) return;
+  const step = from.pop();
+  restoringHistory = true;
+  try {
+    if (step.type === 'layout') {
+      const current = clone(layout.get(activePage));
+      await layout.save(activePage, clone(step.sections));
+      to.push({ type: 'layout', sections: current });
+      refreshPage();
+    } else {
+      to.push({ type: 'canvas', items: clone(data()) });
+      change(clone(step.items));
+    }
+  } catch (error) {
+    from.push(step);
+    toast('Could not restore that design change.', 'bad');
+  } finally {
+    restoringHistory = false;
+    paintHistoryButtons();
+  }
+}
+function undo() { return restoreStep(history, future); }
+function redo() { return restoreStep(future, history); }
 
 function section(id) { return [...document.querySelectorAll('#app [data-sec]')].find((el) => el.dataset.sec === id); }
 function targetSection() {
@@ -445,6 +498,7 @@ function render({ preservePanel = false } = {}) {
   if (toolbar) {
     paintSaveState();
     toolbar.querySelectorAll('[data-canvas="undo"], [data-canvas="redo"]').forEach(button => { button.hidden = !activePage; });
+    paintHistoryButtons();
   }
   if (!activePage) {
     const panel = document.getElementById('canvas-panel');
