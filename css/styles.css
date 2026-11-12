@@ -6628,3 +6628,37 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   margin: 0 -12px;
   border-bottom: 1px solid var(--c-rule, #dfd5c8);
 }
+
+/* The new picture-frame chooser is confined to the Design Mode inspector. */
+#canvas-panel .canvas-quick-frame {
+  margin: 14px 0 18px;
+  padding: 13px;
+  background: var(--c-bg-raised, #fff);
+  border: 1px solid var(--c-rule, #dfd5c8);
+  border-radius: 8px;
+}
+#canvas-panel .canvas-quick-frame > label:first-child {font-weight: 600;}
+#canvas-panel .canvas-quick-frame select { min-height: 40px; }
+#canvas-panel .canvas-frame-upload {
+  display: inline-flex;
+  width: auto;
+  margin: 10px 0 3px;
+  padding: 7px 10px;
+  border: 1px solid var(--c-rule-strong, #c9b79e);
+  border-radius: 6px;
+  background: var(--c-bg, #fdfbf8);
+  color: var(--c-ink, #49312b);
+  cursor: pointer;
+  font: 500 .9rem var(--f-body, Georgia, serif);
+}
+#canvas-panel .canvas-frame-upload:hover { border-color: var(--c-accent, #ac4269); }
+
+/* Custom PNG frames affect only the chosen image's mount, never the page layout. */
+.mf-custom .m-mount {
+  position: relative;
+  border: clamp(15px, 3.4vw, 45px) solid transparent;
+  border-image-source: var(--custom-frame-image);
+  border-image-slice: 14% 8% 14% 8%;
+  border-image-repeat: stretch;
+  filter: drop-shadow(0 5px 8px rgba(40, 27, 10, .18));
+}
