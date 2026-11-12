@@ -8,7 +8,7 @@ import { estimate } from './store.js';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
 import * as theme from './theme.js';
-import { attachSettingsDesign } from './canvas.js';
+import { attachSettingsDesign } from './canvas.js?v=131';
 
 function numberField(id, label, value, { min = 0, max = 9999, hint = '' } = {}) {
   return `<div class="field">
