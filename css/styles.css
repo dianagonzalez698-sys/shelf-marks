@@ -6473,3 +6473,38 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
 #ch-form .ch-title-manual input { min-width: 0; flex: 1; }
 #ch-form .ch-title-manual button { flex: none; padding-inline: 15px; }
 #ch-form .ch-title-results > .hint { margin: 10px 12px; }
+
+
+/* 2026-11-11: remove ~105px of unused artwork at the TOP of every hero.
+   Keep the existing typographic sizing, bottom padding and individual
+   height variants; the shorter frame re-crops the image naturally.
+   Applies equally to normal pages and the live Design Mode preview. */
+#app.screen .ed-hero .hero.hero-short,
+#app.screen .ed-challengeHero .hero.hero-short {
+  min-height: clamp(195px, calc(38vw - 105px), 315px);
+}
+#app.screen .ed-hero .hero.hero-tall,
+#app.screen .ed-challengeHero .hero.hero-tall {
+  min-height: clamp(315px, calc(62vw - 105px), 575px);
+}
+#app.screen .ed-hero .hero.hero-full,
+#app.screen .ed-challengeHero .hero.hero-full {
+  min-height: max(315px, calc(100svh - var(--h-masthead) - 105px));
+}
+/* Challenge index and challenge detail pages previously raised their
+   minimum banner heights; subtract the same amount from those overrides. */
+#app.screen:has(> .lit-challenge-invite) .ed-hero .hero.hero-short,
+#app.screen:has(> .lit-challenge-invite) .ed-hero .hero.hero-tall {
+  min-height: clamp(245px, calc(42vw - 105px), 410px);
+}
+#app.screen .ed-challengeHero .hero.hero-short,
+#app.screen .ed-challengeHero .hero.hero-tall {
+  min-height: clamp(195px, calc(36vw - 105px), 365px);
+}
+@media (max-width: 600px) {
+  /* Preserve enough room for wrapped titles at narrow viewport widths. */
+  #app.screen .ed-hero .hero,
+  #app.screen .ed-challengeHero .hero {
+    min-height: max(240px, var(--hero-min-mobile, 0px));
+  }
+}
