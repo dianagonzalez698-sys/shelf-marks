@@ -79,7 +79,7 @@ function tintFor(seed) {
 }
 
 function frameClass(m) {
-  const bits = [`mf-${m.frame || 'none'}`];
+  const bits = [m.frameAssetId && assetSrc(m.frameAssetId) ? 'mf-custom' : `mf-${m.frame || 'none'}`];
   if (m.shadow) bits.push('mf-shadow');
   if (m.tape && m.tape !== 'none') bits.push(`mf-tape-${m.tape}`);
   if (m.hideOnMobile) bits.push('hide-sm');
@@ -128,7 +128,7 @@ export function figure(m, { seed = '', className = '', eager = false } = {}) {
   // from the figure means a caption sits *below* the frame rather than being
   // printed on the moulding.
   return `<figure class="m-fig ${frameClass(descriptor)}${auto ? ' m-auto' : ''} ${className}" style="${boxStyle(descriptor)}">
-    <span class="m-mount">
+    <span class="m-mount"${descriptor.frameAssetId && assetSrc(descriptor.frameAssetId) ? ` style="--custom-frame-image:url('${attr(assetSrc(descriptor.frameAssetId))}')"` : ''}>
       <span class="m-box" style="${shapeStyle(descriptor)}">${inner}</span>
     </span>
     ${descriptor.caption ? `<figcaption class="m-cap">${esc(descriptor.caption)}</figcaption>` : ''}
