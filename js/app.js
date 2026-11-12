@@ -15,7 +15,7 @@ import { addView, bookFormView, rememberAddOrigin } from './view-book.js?v=121';
 import { bookDetailView } from './view-book-detail.js';
 import { challengesView, challengeDetailView } from './view-challenges.js?v=126';
 import { bookmarksView } from './view-bookmarks.js?v=121';
-import { settingsView } from './view-settings.js';
+import { settingsView } from './view-settings.js?v=131';
 import { customizeView } from './view-customize.js';
 import { assetsView } from './view-assets.js';
 import { layoutView } from './view-layout.js?v=130';
