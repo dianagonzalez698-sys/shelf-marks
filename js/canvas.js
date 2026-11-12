@@ -1196,7 +1196,18 @@ function ensureTools() {
   });
 }
 
-export function setPage(pageId, { simple = false } = {}) { settingsStyleSelected = null; activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; advancedOpen = false; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; saveState = 'saved'; render(); }
+export function setPage(pageId, { simple = false } = {}) {
+  // Normal live refreshes re-register the same page. Don't discard Undo
+  // history (or the selected inspector) unless we actually navigate away.
+  if (activePage === pageId && simplePage === !!simple) {
+    render({ preservePanel: panelMode === 'section' || panelMode === 'text' });
+    return;
+  }
+  settingsStyleSelected = null; activePage = pageId; simplePage = !!simple;
+  selected = null; selectedSectionId = null; selectedText = null;
+  advancedOpen = false; panelMode = simplePage ? 'add' : 'sections';
+  history = []; future = []; saveState = 'saved'; render();
+}
 export function setEditing(next) {
   editing = next;
   if (next) { panelMode = simplePage ? 'add' : 'sections'; settingsStyleSelected = null; selectedSectionId = null; selectedText = null; }
