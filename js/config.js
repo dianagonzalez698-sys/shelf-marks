@@ -130,6 +130,7 @@ export const FILTER_TYPES = [
   { value: 'any', label: 'Any book' },
   { value: 'author', label: 'Author is one of…' },
   { value: 'title', label: 'Book title is one of…' },
+  { value: 'publishedBefore', label: 'First published before…' },
   { value: 'series', label: 'Series is…' },
   { value: 'tag', label: 'Tag is…' },
   { value: 'nonfiction', label: 'Nonfiction' },
