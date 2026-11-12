@@ -13,8 +13,8 @@ import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, 
 import { formatDate, quarters, YEAR } from './periods.js';
 import { FILTER_TYPES, WINDOW_TYPES } from './config.js?v=121';
 import { t } from './theme.js';
-import { renderSections, renderSection } from './sections.js?v=126';
-import { figure, backdrop, media } from './media.js';
+import { renderSections, renderSection } from './sections.js?v=129';
+import { figure, backdrop, media } from './media.js?v=129';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
 import { openMediaEditor } from './view-layout.js';
