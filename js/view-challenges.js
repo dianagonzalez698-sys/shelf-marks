@@ -473,6 +473,13 @@ export function openEditor(challenge) {
           filterExtra.querySelector('#ch-title-add').onclick = addTitle;
           manual.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addTitle(); } });
           paintTitles();
+        } else if (t === 'publishedBefore') {
+          filterExtra.innerHTML = `
+            <label for="ch-publication-year">Published before the year</label>
+            <input type="number" id="ch-publication-year" min="1" max="2100"
+              step="1" inputmode="numeric" placeholder="e.g. 2000"
+              value="${attr(c.filter?.type === 'publishedBefore' ? c.filter.year ?? '' : '')}">
+            <p class="hint">Uses each book’s <em>First published</em> year in your Library. A book published in the selected year does not qualify; books without a publication year will not match automatically.</p>`;
         } else if (t === 'series') {
           const known = knownSeries();
           filterExtra.innerHTML = `
@@ -589,6 +596,15 @@ export function openEditor(challenge) {
             toast('Select or add at least one book title.', 'bad');
             return;
           }
+        } else if (filter.type === 'publishedBefore') {
+          const rawYear = sheet.querySelector('#ch-publication-year')?.value.trim() || '';
+          const year = Number(rawYear);
+          if (!rawYear || !Number.isInteger(year) || year < 1 || year > 2100) {
+            toast('Enter a valid publication cutoff year (1–2100).', 'bad');
+            sheet.querySelector('#ch-publication-year')?.focus();
+            return;
+          }
+          filter.year = year;
         } else if (filter.type === 'series') {
           const v = sheet.querySelector('#ch-series').value.trim();
           if (!v) { toast('Name the series.', 'bad'); return; }
