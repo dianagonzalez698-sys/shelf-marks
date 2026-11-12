@@ -587,6 +587,26 @@ function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
         <div class="type-pop" data-pop="ink" hidden>${inkPickerHtml(ink, `hex-${secId}-${f.inkKey}`)}</div>
       </div>`;
     }
+    case 'challengeSelect': {
+      const all = allChallenges();
+      const chosen = Array.isArray(value)
+        ? value.map(String).filter(id => all.some(c => String(c.id) === id)).slice(0, 5)
+        : all.slice(0, Math.min(5, Number(EDITING?.limit) > 0 ? Number(EDITING.limit) : 5)).map(c => String(c.id));
+      const rows = all.map(c => {
+        const index = chosen.indexOf(String(c.id));
+        return `<label class="challenge-pick-row">
+          <input type="checkbox" data-challenge-choice="${attr(c.id)}" ${index >= 0 ? 'checked' : ''}>
+          <span class="challenge-pick-name">${esc(c.name)}</span>
+          ${index >= 0 ? `<span class="challenge-pick-rank">${index + 1}</span>` : ''}
+        </label>`;
+      }).join('');
+      return `<div class="field challenge-picker">
+        <span class="field-label">Challenges in this section</span>
+        <p class="hint">Choose up to 5. Select them in the order you want them displayed. Add another Challenge collection section to show more elsewhere on the homepage.</p>
+        <div class="challenge-pick-count">${chosen.length} of 5 chosen</div>
+        <div class="challenge-pick-list">${rows || '<p class="hint">No challenges yet. Create one from the Challenges page.</p>'}</div>
+      </div>`;
+    }
     case 'select':
       return `<div class="field"><label for="${id}">${esc(f.label)}</label>
         <select id="${id}" data-field="${attr(f.key)}">
@@ -674,17 +694,20 @@ const ARTWORK_KEYS = new Set([
   'curtainArt', 'curtainDrop', 'curtainGap',
 ]);
 
-function fieldsHtml(def, sec, mode = 'all') {
+function fieldsHtml(def, sec, mode = 'all', pageId = '') {
   EDITING = sec;
   refreshInkSwatches();
   if (mode !== 'all') {
-    const all = def.fields.filter((f) => typeof f.when !== 'function' || f.when(sec));
+    const all = def.fields.filter((f) =>
+      (typeof f.when !== 'function' || f.when(sec))
+      && !(sec.type === 'challenges' && pageId === 'home' && f.key === 'limit')
+      && !(sec.type === 'challenges' && pageId !== 'home' && f.key === 'challengeIds'));
     const content = (f) => ['rich', 'textarea', 'text'].includes(f.type)
       || (!f.type && /title|heading|subtitle|body|text|kicker|label|intro|caption|note|eyebrow|description/i.test(f.key));
     // The section editor is for the handful of decisions made repeatedly.
     // Existing values for all other fields remain in the saved data; they are
     // simply no longer surfaced as an intimidating grid of switches.
-    const contentEssentials = new Set(['limit', 'layout', 'mode', 'columns', 'descriptionSize']);
+    const contentEssentials = new Set(['limit', 'layout', 'mode', 'columns', 'descriptionSize', 'challengeIds']);
     const styleEssentials = new Set(['shape', 'tone', 'fontDisplay', 'fontBody', 'fontUi', 'fontScript']);
     const artworkEssentials = new Set([
       'bgImage', 'backdrop', 'picture', 'inset', 'items', 'strip',
@@ -797,7 +820,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
       <button type="button" data-inspector-tab="style" class="${editingTab === 'style' ? 'active' : ''}">Look</button>
       <button type="button" data-inspector-tab="artwork" class="${editingTab === 'artwork' ? 'active' : ''}">Images</button>
     </div>` : ''}
-    <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, fresh, editingTab)}</div>
+    <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, fresh, editingTab, pageId)}</div>
     ${mountIn ? '' : `<div class="btn-row" style="margin-top:1rem"><button class="btn btn-block" type="button" data-close>Done</button></div>`}`;
   };
 
@@ -821,7 +844,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
         button.onclick = () => {
           editingTab = button.dataset.inspectorTab;
           sheet.querySelectorAll('[data-inspector-tab]').forEach((tab) => tab.classList.toggle('active', tab === button));
-          fieldBox.innerHTML = fieldsHtml(def, layout.getSection(pageId, sectionId), editingTab);
+          fieldBox.innerHTML = fieldsHtml(def, layout.getSection(pageId, sectionId), editingTab, pageId);
           bind();
         };
       });
@@ -830,7 +853,7 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
         const fresh = layout.getSection(pageId, sectionId);
         if (warnBox) warnBox.innerHTML = warningsHtml(fresh);
         if (fieldBox) {
-          fieldBox.innerHTML = fieldsHtml(def, fresh, editingTab);
+          fieldBox.innerHTML = fieldsHtml(def, fresh, editingTab, pageId);
           bind();
         }
       };
@@ -866,12 +889,47 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
         // A control that decides which other controls apply redraws the panel,
         // so the sheet never shows settings that cannot do anything.
         if (rebuild && fieldBox) {
-          fieldBox.innerHTML = fieldsHtml(def, fresh, editingTab);
+          fieldBox.innerHTML = fieldsHtml(def, fresh, editingTab, pageId);
           bind();
         }
       };
 
       function bind() {
+        const picker = sheet.querySelector('.challenge-picker');
+        if (picker && pageId === 'home') {
+          picker.querySelectorAll('[data-challenge-choice]').forEach(input => {
+            input.onchange = async () => {
+              const current = layout.getSection(pageId, sectionId);
+              const available = allChallenges();
+              const selected = Array.isArray(current.challengeIds)
+                ? current.challengeIds.map(String)
+                : available.slice(0, Math.min(5, Number(current.limit) > 0 ? Number(current.limit) : 5)).map(c => String(c.id));
+              const id = String(input.dataset.challengeChoice);
+              const next = input.checked
+                ? (selected.includes(id) ? selected : [...selected, id])
+                : selected.filter(x => x !== id);
+              if (next.length > 5) {
+                input.checked = false;
+                toast('Each section can display up to five challenges. Add another section for more.', 'bad');
+                return;
+              }
+              await commit({ challengeIds: next });
+              const live = [...document.querySelectorAll('#app [data-sec]')]
+                .find(node => node.dataset.sec === sectionId);
+              if (live) {
+                const holder = document.createElement('template');
+                holder.innerHTML = renderSection({ ...layout.getSection(pageId, sectionId), pageContext: 'home' }).trim();
+                const replacement = holder.content.firstElementChild;
+                if (replacement) {
+                  if (live.classList.contains('canvas-section-selected')) replacement.classList.add('canvas-section-selected');
+                  live.replaceWith(replacement);
+                }
+              }
+              refreshPanel();
+            };
+          });
+        }
+
         const previewBackground = (hex) => {
           const node = [...document.querySelectorAll('#app [data-sec]')].find((x) => x.dataset.sec === sectionId);
           if (!node) return;
