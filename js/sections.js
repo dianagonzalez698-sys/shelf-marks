@@ -1520,11 +1520,16 @@ export function challengeSpread(c, index = 0) {
   const ids = [...labels.keys()];
   const earned = ids.filter((id) => have.has(id)).length;
   const pct = ids.length ? Math.round((earned / ids.length) * 100) : 0;
-  const picture = c.cover || media({ ratio: '4/5', frame: 'plate' });
-  // Match the wording displayed in this challenge's actual banner, including
-  // overrides made in Design Mode on the individual challenge page.
+  // Match the individual challenge's saved hero photograph as well as its
+  // heading. Design Mode can override the hero image without updating c.cover;
+  // the homepage preview must read that same saved section first.
   const detailHero = layout.get(`challenge:${c.id}`).find((section) =>
     section.type === 'challengeHero' && section.visible !== false);
+  const savedHeroPicture = detailHero?.backdrop?.assetId ? detailHero.backdrop : null;
+  const coverPicture = savedHeroPicture || c.cover;
+  const picture = coverPicture?.assetId
+    ? media({ ...coverPicture, ratio: '4/5', frame: 'plate', shadow: true, width: 100, rotate: 0 })
+    : media({ ratio: '4/5', frame: 'plate' });
   const displayWindow = detailHero?.showWindow === false
     ? '' : (detailHero?.eyebrowText || describeWindow(c.window));
   const displayTitle = detailHero?.titleText || c.name;
