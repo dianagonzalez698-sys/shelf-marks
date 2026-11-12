@@ -6517,3 +6517,23 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   font-size: var(--challenge-description-size, 20px);
   line-height: 1.4;
 }
+
+
+/* Reading Challenges curtain: longer, slimmer, slightly deeper linework.
+   Keep the actual saved transparent artwork and its existing drag controls.
+   These rules affect rendering only: curtainOffset, curtainDrop and the
+   pointer-drag translateY remain owned by the normal editor. */
+#app .ed-challenges.has-curtain {
+  --cur-over: 1.015;
+}
+#app .ed-challenges.has-curtain > .ed-curtain:not(.ed-curtain-decor) {
+  height: calc(var(--cur-h) * var(--cur-over, 1) * 1.34);
+  filter: brightness(.86) contrast(1.08);
+  /* Do not override transform: it is the saved, draggable curtain offset. */
+}
+@media (max-width: 1000px) {
+  #app .ed-challenges.has-curtain { --cur-over: 1; }
+  #app .ed-challenges.has-curtain > .ed-curtain:not(.ed-curtain-decor) {
+    height: calc(var(--cur-h) * 1.2);
+  }
+}
