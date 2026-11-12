@@ -4,7 +4,7 @@ import { esc, attr, navigate, toast } from './ui.js';
 import { bookDecorMarkup, mountBookDecor } from './book-decor.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
-import { renderSections } from './sections.js';
+import { renderSections } from './sections.js?v=129';
 
 const excerpt = (value, limit = 190) => String(value || '').replace(/\s+/g, ' ').slice(0, limit);
 const kindLabel = (kind) => notebook.KINDS.find(x => x[0] === kind)?.[1] || 'Journal entry';
