@@ -283,6 +283,8 @@ async function restoreStep(from, to) {
       await layout.save(activePage, clone(step.sections));
       to.push({ type: 'layout', sections: current });
       refreshPage();
+      // Rebuild the inspector from restored section values as well.
+      render();
     } else {
       to.push({ type: 'canvas', items: clone(data()) });
       change(clone(step.items));
