@@ -4,7 +4,7 @@ import { load, onChange, saveSettings, state } from './state.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
-import * as canvas from './canvas.js?v=128';
+import * as canvas from './canvas.js?v=131';
 import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
@@ -22,7 +22,7 @@ import { layoutView } from './view-layout.js?v=130';
 import { wordsView, wordDetailView } from './view-words.js';
 import { notebookView, notebookEntryView } from './view-notebook.js';
 import { collectionsView } from './view-collections.js';
-import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=95';
+import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=131';
 import { wireEditing } from './ui.js';
 
 // The navigation uses the same saved banner heading as each challenge page.
