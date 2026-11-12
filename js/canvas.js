@@ -618,7 +618,7 @@ function paintPanel() {
       input.style.overflowWrap = liveCss.overflowWrap || 'break-word';
       // Keep white-on-dark quotations legible without changing their ink.
       // The live section's solid colour, when available, is used here too.
-      const ink = liveCss.color.match(/[\\d.]+/g)?.slice(0, 3).map(Number);
+      const ink = liveCss.color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
       const isLightInk = ink && ink.length === 3 &&
         ((ink[0] * 299 + ink[1] * 587 + ink[2] * 114) / 1000 > 175);
       if (isLightInk) {
@@ -687,6 +687,7 @@ function paintPanel() {
         layout.updateSection(activePage, target.sectionId, patch).then(() => {
           const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
           if (block) applySectionVars(block, layout.getSection(activePage, target.sectionId));
+          syncInlineTextPreview();
         }).catch(() => toast('Could not save that typography change.', 'bad'));
       };
       panel.querySelector('#canvas-text-font').onchange = e => updateStyle({ [role.font]: e.target.value });
