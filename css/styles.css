@@ -6508,3 +6508,12 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
     min-height: max(240px, var(--hero-min-mobile, 0px));
   }
 }
+
+
+/* Challenge-index descriptions: restrained 20px default, adjustable in
+   Design Mode's Challenge collection section (14–30px). This deliberately
+   excludes individual challenge cover subtitles and other page copy. */
+#app .spreads .spread-body > .ed-sub {
+  font-size: var(--challenge-description-size, 20px);
+  line-height: 1.4;
+}
