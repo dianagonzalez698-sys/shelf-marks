@@ -529,6 +529,11 @@ function paintPanel() {
     <span class="canvas-layer-order"><button type="button" data-layer-visible="${esc(x.id)}" aria-label="${x.hidden ? 'Show' : 'Hide'} this layer" aria-pressed="${!x.hidden}" title="${x.hidden ? 'Show layer' : 'Hide layer'}">${x.hidden ? '◌' : '◉'}</button><button type="button" data-layer-move="1" data-layer-id="${esc(x.id)}" aria-label="Bring this layer forward" title="Bring forward" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-layer-move="-1" data-layer-id="${esc(x.id)}" aria-label="Send this layer backward" title="Send backward" ${index === ordered.length - 1 ? 'disabled' : ''}>↓</button></span>
   </div>`).join('');
   panel.hidden = false;
+  const tabs = `<div class="canvas-panel-tabs">
+      <button type="button" data-canvas="tab-sections" class="${panelMode === 'sections' ? 'active' : ''}">Sections</button>
+      <button type="button" data-canvas="tab-add" class="${panelMode === 'add' ? 'active' : ''}">Add</button>
+      <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
+    </div>`;
   if (panelMode === 'settings-style' && settingsStyleSelected) { paintSettingsStylePanel(panel); return; }
   if (simplePage && panelMode !== 'selected') {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>${activePage.includes("settings") ? "PAGE DESIGN" : "PAGE ACCENTS"}</strong></div>
@@ -551,12 +556,12 @@ function paintPanel() {
     const currentSize = role ? Math.round((Number(sec[role.size]) || 1) * 100) : 100;
     const currentInk = role ? String(sec[role.ink] || '') : '';
     const fontOptions = FONT_STACKS.map(f => `<option value="${esc(f.value)}" ${f.value === currentFont ? 'selected' : ''}>${esc(f.label)}</option>`).join('');
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT TEXT</strong><button type="button" data-canvas="text-back">← Back</button></div>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT TEXT</strong><button type="button" data-canvas="text-back">← Back</button></div>${tabs}
       <p class="canvas-section-label">${esc(SECTION_TYPES[sec.type]?.label || 'Section')}<strong>${esc(label)}</strong></p>
-      <p class="canvas-panel-hint">Change the words or their styling right here. Your homepage is the preview.</p>
+      <p class="canvas-panel-hint">Edit the text below. Changes use the same fonts as your page.</p>
       <div id="canvas-inline-text" class="canvas-inline-text" contenteditable="true" role="textbox" aria-label="${esc(label)}" aria-multiline="${!!field?.multiline}">${rich(sec[selectedText.key] || '')}</div>
-      <div class="canvas-selection-format" aria-label="Selected text formatting">
-        <p>Highlight a word or phrase above to style it separately.</p>
+      <details class="canvas-selection-format canvas-selection-disclosure" aria-label="Selected text formatting"><summary>Style individual words</summary>
+        <p>Highlight words in the text box to style them separately.</p>
         <label>Selected text font
           <select id="canvas-selection-font"><option value="">Choose a font…</option>${FONT_STACKS.map(f => `<option value="${esc(f.value)}">${esc(f.label)}</option>`).join('')}</select>
         </label>
@@ -570,10 +575,10 @@ function paintPanel() {
           <label class="canvas-selection-ink">Color <input id="canvas-selection-color" type="color" value="#49312b"></label>
           <button type="button" id="canvas-selection-reset">Clear style</button>
         </div>
-      </div>
+      </details>
       ${role ? `<div class="canvas-text-style-controls">
-        <h3>Font &amp; styling</h3>
-        <p>Changes other ${esc(role.label.toLowerCase())} in this section too.</p>
+        <h3>Text appearance</h3>
+        <p>Applies to this text style in the selected section.</p>
         <label>Font
           <select id="canvas-text-font"><option value="" ${!currentFont ? 'selected' : ''}>Match site font</option>
           ${currentFont && !FONT_STACKS.some(f => f.value === currentFont) ? `<option selected value="${esc(currentFont)}">Current custom font</option>` : ''}
@@ -745,7 +750,7 @@ function paintPanel() {
     const sections = layout.get(activePage).filter((s) => s.visible !== false);
     const order = sections.findIndex((s) => s.id === selectedSectionId) + 1;
     const label = SECTION_TYPES[sec.type]?.label || 'Section';
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>Edit section</strong><div class="canvas-panel-actions"><button type="button" data-canvas="section-back">← Page</button><button type="button" data-canvas="section-exit" aria-label="Close section editor">×</button></div></div>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>Edit section</strong><div class="canvas-panel-actions"><button type="button" data-canvas="section-back">← Page</button><button type="button" data-canvas="section-exit" aria-label="Close section editor">×</button></div></div>${tabs}
       <div class="canvas-section-inspector"></div>
       <details class="studio-danger"><summary>Remove section</summary><p>Remove ${esc(label)} from this page?</p><button type="button" class="canvas-delete-section" data-canvas="delete-section">Remove ${esc(label)}</button></details>`;
     // Wire navigation at its source. On a small screen the panel is an
@@ -764,11 +769,6 @@ function paintPanel() {
     openSectionEditor(activePage, selectedSectionId, { mountIn: panel.querySelector('.canvas-section-inspector') });
     return;
   }
-  const tabs = `<div class="canvas-panel-tabs">
-      <button type="button" data-canvas="tab-sections" class="${panelMode === 'sections' ? 'active' : ''}">Sections</button>
-      <button type="button" data-canvas="tab-add" class="${panelMode === 'add' ? 'active' : ''}">Add</button>
-      <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
-    </div>`;
   if (panelMode !== 'selected' || !item) {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>Design editor</strong><button type="button" data-canvas="finish" aria-label="Exit design mode">× Exit</button></div>${tabs}` +
       (panelMode === 'sections' ? `<h3>Sections</h3><p class="canvas-panel-hint">Click a section on the page to edit it.</p>
@@ -794,15 +794,15 @@ function paintPanel() {
         <button class="canvas-add-card" type="button" data-canvas="section"><strong>＋ Section</strong><span>Build a new part of the page</span></button>
         <button class="canvas-add-card" type="button" data-canvas="text"><strong>＋ Text</strong><span>A handwritten note, heading or quote</span></button>
         <button class="canvas-add-card" type="button" data-canvas="image"><strong>＋ Floating artwork</strong><span>Place your own image anywhere on this page</span></button>
-        <details class="canvas-more-tools"><summary>More design settings</summary><div class="canvas-panel-links"><a href="#/assets">Picture library</a><a href="#/layout">Page layout</a><a href="#/customize">Site colors & fonts</a></div></details>`);
+        <details class="canvas-more-tools"><summary>Other design tools</summary><div class="canvas-panel-links"><a href="#/assets">Manage picture library</a><a href="#/layout">Advanced page layout</a><a href="#/customize">Site-wide colors & fonts</a></div></details>`);
     return;
   }
-  panel.innerHTML = `<div class="canvas-panel-head"><strong>${item.type === 'text' ? 'EDIT TEXT' : 'EDIT ARTWORK'}</strong><button type="button" data-canvas="deselect" aria-label="Back to tools">← Back</button></div>
+  panel.innerHTML = `<div class="canvas-panel-head"><strong>${item.type === 'text' ? 'EDIT TEXT' : 'EDIT ARTWORK'}</strong><button type="button" data-canvas="deselect" aria-label="Back to tools">← Back</button></div>${tabs}
     <button type="button" class="canvas-lock-action${item.locked ? ' is-locked' : ''}" data-canvas="toggle-lock" aria-pressed="${!!item.locked}"><span aria-hidden="true">${item.locked ? '🔒' : '◇'}</span><strong>${item.locked ? 'Position locked' : 'Lock position & size'}</strong><small>${item.locked ? 'Click to unlock' : 'Prevent accidental moving or resizing'}</small></button>
     ${item.type === 'image' ? `<p class="canvas-panel-hint">Drag the picture on the page to move it. Pull its corner to resize, or adjust the placement here.</p><button type="button" data-canvas="replace-art">Replace picture</button><label>Frame<select data-prop="frame"><option value="none" ${!item.frame || item.frame === 'none' ? 'selected' : ''}>No frame</option><option value="fine" ${item.frame === 'fine' ? 'selected' : ''}>Fine border</option><option value="ornate" ${item.frame === 'ornate' ? 'selected' : ''}>Carved gilt · rectangular</option><option value="gilded-round" ${item.frame === 'gilded-round' ? 'selected' : ''}>Carved gilt · round</option><option value="gilded-oval" ${item.frame === 'gilded-oval' ? 'selected' : ''}>Carved gilt · oval</option><option value="polaroid" ${item.frame === 'polaroid' ? 'selected' : ''}>Photograph mount</option></select></label>` : ''}
     ${item.type === 'text' ? `<label>Text<textarea data-prop="text" rows="2">${esc(item.text)}</textarea></label>
       <label>Font<select data-prop="font">
-      ${["'Bodoni Moda', serif", "'Cormorant Garamond', serif", "'EB Garamond', serif", "'Playfair Display', serif", "'Pinyon Script', cursive", "'Imperial Script', cursive", "'Jost', sans-serif"].map((f) => `<option value="${f}" ${f === item.font ? 'selected' : ''}>${f.split("'")[1]}</option>`).join('')}
+      ${(!FONT_STACKS.some(f => f.value === item.font) && item.font ? `<option value="${esc(item.font)}" selected>Current custom font</option>` : '') + FONT_STACKS.map(f => `<option value="${esc(f.value)}" ${f.value === item.font ? 'selected' : ''}>${esc(f.label)}</option>`).join('')}
       </select></label>
       <div class="canvas-panel-row"><label>Size<input data-prop="size" type="number" min="10" max="150" value="${item.size}" ${item.locked ? 'disabled' : ''}></label><label>Color<input data-prop="color" type="color" value="${item.color}"></label></div>
       <div class="canvas-panel-row"><label>Bold<input data-prop="weight" type="checkbox" ${item.weight >= 700 ? 'checked' : ''}></label><label>Italic<input data-prop="italic" type="checkbox" ${item.italic ? 'checked' : ''}></label></div>` : ''}
