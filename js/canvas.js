@@ -486,6 +486,11 @@ export function inspectSection(id) {
   panelMode = 'section';
   render();
 }
+// The section Text tab and clicking live text both enter the same editor.
+document.addEventListener('canvas:inspect-text', (event) => {
+  const { sectionId, key } = event.detail || {};
+  if (editing && sectionId && key) inspectText(sectionId, key);
+});
 export function inspectText(sectionId, key) {
   if (!editing || !sectionId || !key || !layout.getSection(activePage, sectionId)) return;
   // Challenge banner words are supplied by the challenge record until an
@@ -1026,7 +1031,7 @@ function ensureTools() {
         toast('Section removed from the page.', 'good');
       });
     }
-    if (action === 'text-back') { selectedText = null; panelMode = 'sections'; render(); }
+    if (action === 'text-back') { selectedText = null; panelMode = selectedSectionId ? 'section' : 'sections'; render(); }
   });
   document.addEventListener('click', (e) => {
     const visibility = e.target.closest('[data-layer-visible]');
