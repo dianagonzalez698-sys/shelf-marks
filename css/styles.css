@@ -6601,3 +6601,30 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   border: 1px dashed var(--c-rule, #dfd5c8);
   text-align: center;
 }
+
+/* Editor inspector only — no page, art, or decorative layout styles. */
+#canvas-panel .canvas-selection-disclosure {
+  display: block;
+  padding: 0;
+  margin: 10px 0 14px;
+  border: 1px solid var(--c-rule, #dfd5c8);
+  border-radius: 6px;
+  background: var(--c-bg-raised, #fff);
+}
+#canvas-panel .canvas-selection-disclosure > summary {
+  cursor: pointer;
+  padding: 11px 13px;
+  font: 600 .9rem/1.3 var(--f-body, Georgia, serif);
+  color: var(--c-ink);
+}
+#canvas-panel .canvas-selection-disclosure[open] {
+  padding: 0 12px 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(86px, .44fr);
+  gap: 9px;
+}
+#canvas-panel .canvas-selection-disclosure[open] > summary {
+  grid-column: 1 / -1;
+  margin: 0 -12px;
+  border-bottom: 1px solid var(--c-rule, #dfd5c8);
+}
