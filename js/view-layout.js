@@ -3,7 +3,7 @@
 
 import * as layout from './layout.js';
 import { SECTION_TYPES, typeList, FONT_CHOICES, TYPE_ROLES, TONE_SWATCHES, applySectionVars, renderSection } from './sections.js?v=126';
-import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js';
+import { media, FRAMES, RATIOS, TAPES, MEDIA_DEFAULTS } from './media.js?v=129';
 import * as assets from './assets.js';
 import { allChallenges, state, allWords } from './state.js';
 import { fontWeights, fontHasItalic, getToken, setToken } from './theme.js';
