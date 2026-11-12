@@ -6537,3 +6537,32 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
     height: calc(var(--cur-h) * 1.2);
   }
 }
+
+
+/* Design Mode: one obvious entry for editing a rich-text element. */
+#canvas-panel .canvas-edit-text-shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--c-rule);
+}
+#canvas-panel .canvas-edit-text-shortcut .canvas-field-label {
+  font: 400 1rem/1.2 var(--f-body);
+  color: var(--c-ink);
+}
+#canvas-panel .canvas-edit-text-shortcut button {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font: 400 .85rem/1.2 var(--f-body);
+  color: var(--c-accent);
+  background: transparent;
+  border: 1px solid var(--c-rule-strong);
+  border-radius: 3px;
+  cursor: pointer;
+}
+#canvas-panel .canvas-edit-text-shortcut button:hover,
+#canvas-panel .canvas-edit-text-shortcut button:focus-visible {
+  border-color: var(--c-accent);
+}
