@@ -7,7 +7,7 @@ import {
 import {
   esc, attr, toast, markVisual, checkBadge, openSheet, confirmSheet,
 } from './ui.js';
-import { evaluate, bookmarkLabels } from './rules.js?v=117';
+import { evaluate, bookmarkLabels } from './rules.js?v=121';
 import { renderSections } from './sections.js?v=107';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
