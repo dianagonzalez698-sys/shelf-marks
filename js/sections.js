@@ -915,20 +915,33 @@ export const SECTION_TYPES = {
   challenges: {
     label: 'Challenge collection',
     blurb: 'Your challenges, each as its own small publication.',
-    create: () => ({ kicker: '', title: 'Reading Challenges', subtitle: 'Little projects to read against, all year long.', limit: 0, layout: 'editorial', descriptionSize: 20 }),
+    create: () => ({ kicker: '', title: 'Reading Challenges', subtitle: 'Little projects to read against, all year long.', limit: 5, challengeIds: [], layout: 'editorial', descriptionSize: 20 }),
     fields: [
       { key: 'kicker', label: 'Small label', type: 'rich', styleRole: 'Ui' },
       { key: 'title', label: 'Heading', type: 'rich', styleRole: 'Display' },
       { key: 'subtitle', label: 'Subtitle', type: 'rich', styleRole: 'Body' },
       { key: 'layout', label: 'Arrangement', type: 'select', options: [['editorial', 'Alternating spreads'], ['list', 'Compact list']] },
       { key: 'descriptionSize', label: 'Challenge description size (px)', type: 'range', min: 14, max: 30, step: 1 },
+      { key: 'challengeIds', label: 'Choose challenges for this section', type: 'challengeSelect' },
       { key: 'limit', label: 'How many (0 = all)', type: 'range', min: 0, max: 12, step: 1 },
       ...COMMON_FIELDS,
     ],
     render(sec) {
       const all = allChallenges();
-      const list = Number(sec.limit) > 0 ? all.slice(0, Number(sec.limit)) : all;
-      const body = (sec.layout === 'list')
+      const isHomeCollection = sec.pageContext === 'home' || document.querySelector('#app')?.dataset?.page === 'home';
+      // The full Challenges directory remains unfiltered. On the homepage,
+      // each collection is independent, with at most five specific challenges.
+      // Older saved sections have no challengeIds and keep their prior first-N
+      // selection, capped at five. Newly added sections start unselected.
+      const list = isHomeCollection
+        ? (Array.isArray(sec.challengeIds)
+            ? sec.challengeIds.slice(0, 5).map(id => all.find(c => String(c.id) === String(id))).filter(Boolean)
+            : all.slice(0, Math.min(5, Number(sec.limit) > 0 ? Number(sec.limit) : 5)))
+        : (Number(sec.limit) > 0 ? all.slice(0, Number(sec.limit)) : all);
+      const emptyPrompt = isHomeCollection && !list.length
+        ? '<p class="canvas-panel-hint challenges-empty">Choose up to five challenges in Design Mode → Challenge collection → Text.</p>'
+        : '';
+      const body = emptyPrompt || ((sec.layout === 'list')
         ? `<div class="ticks">${list.map((c) => {
             const r = evaluate(c, state.books);
             const standing = r.recurring ? `${r.count} of ${r.target} periods`
@@ -938,7 +951,7 @@ export const SECTION_TYPES = {
               <span class="tick-body"><span class="tick-title">${esc(c.name)}</span>
               <span class="tick-note">${esc(standing)}</span></span></a>`;
           }).join('')}</div>`
-        : `<div class="spreads" style="--challenge-description-size:${Math.max(14, Math.min(30, Number(sec.descriptionSize) || 20))}px">${list.map((c, i) => challengeSpread(c, i)).join('')}</div>`;
+        : `<div class="spreads" style="--challenge-description-size:${Math.max(14, Math.min(30, Number(sec.descriptionSize) || 20))}px">${list.map((c, i) => challengeSpread(c, i)).join('')}</div>`);
       // No "all N" link: the masthead already carries Reading Challenges and
       // every card leads to its own, so it was a third way to the same place.
       const head = (sec.kicker || sec.title || sec.subtitle)
