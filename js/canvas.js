@@ -591,6 +591,43 @@ function paintPanel() {
     inlineTextSelectionController.abort();
     inlineTextSelectionController = new AbortController();
     const input = panel.querySelector('#canvas-inline-text');
+    // Render the contenteditable at the live paragraph's computed dimensions,
+    // scaled down as a whole to the inspector width. Inheriting the sidebar's
+    // generic font previously made Paper Cake and mixed-font quotes look
+    // entirely different from the published page.
+    const syncInlineTextPreview = () => {
+      const section = [...document.querySelectorAll('#app [data-sec]')]
+        .find(el => el.dataset.sec === selectedText.sectionId);
+      const live = [...(section?.querySelectorAll('[data-edit]') || [])]
+        .find(el => el.dataset.edit === selectedText.key);
+      if (!live) return;
+      const liveCss = getComputedStyle(live);
+      const sectionCss = section ? getComputedStyle(section) : null;
+      const available = Math.max(190, panel.clientWidth - 42);
+      const naturalWidth = Math.max(available, live.getBoundingClientRect().width || live.clientWidth || available);
+      const scale = Math.min(1, available / naturalWidth);
+      const properties = ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle',
+        'lineHeight', 'letterSpacing', 'wordSpacing', 'textTransform',
+        'textAlign', 'textIndent', 'textDecoration', 'fontVariant',
+        'fontKerning', 'textWrap', 'hyphens', 'color'];
+      for (const key of properties) input.style[key] = liveCss[key];
+      input.style.width = naturalWidth + 'px';
+      input.style.boxSizing = 'border-box';
+      input.style.zoom = String(scale);
+      input.style.whiteSpace = 'pre-wrap';
+      input.style.overflowWrap = liveCss.overflowWrap || 'break-word';
+      // Keep white-on-dark quotations legible without changing their ink.
+      // The live section's solid colour, when available, is used here too.
+      const ink = liveCss.color.match(/[\\d.]+/g)?.slice(0, 3).map(Number);
+      const isLightInk = ink && ink.length === 3 &&
+        ((ink[0] * 299 + ink[1] * 587 + ink[2] * 114) / 1000 > 175);
+      if (isLightInk) {
+        const background = sectionCss?.backgroundColor;
+        input.style.backgroundColor = background && background !== 'rgba(0, 0, 0, 0)'
+          ? background : '#47614c';
+      }
+    };
+    syncInlineTextPreview();
     const target = { ...selectedText };
     let savedRange = null;
     const ownsRange = (range) => !!(range && !range.collapsed && input.contains(range.commonAncestorContainer));
