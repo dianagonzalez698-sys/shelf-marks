@@ -595,7 +595,6 @@ function paintPanel() {
         <label class="canvas-text-color">Text color
           <input id="canvas-text-color" type="color" value="${/^#[a-f0-9]{6}$/i.test(currentInk) ? currentInk : '#49312b'}">
         </label>
-        <button class="canvas-text-style-reset" type="button" id="canvas-text-style-reset">Use site styling</button>
       </div>` : '<p class="canvas-panel-hint">For more styling options, open this section.</p>'}
       <button type="button" class="canvas-text-done" data-canvas="text-save">Save text</button>`;
     inlineTextSelectionController.abort();
@@ -711,14 +710,7 @@ function paintPanel() {
       panel.querySelector('#canvas-text-weight').onchange = e => updateStyle({ [role.weight]: e.target.value });
       panel.querySelector('#canvas-text-italic').onchange = e => updateStyle({ [role.italic]: e.target.checked ? 'italic' : 'normal' });
       panel.querySelector('#canvas-text-color').oninput = e => updateStyle({ [role.ink]: e.target.value });
-      panel.querySelector('#canvas-text-style-reset').onclick = () => {
-        updateStyle(Object.fromEntries([role.font, role.size, role.weight, role.italic, role.ink].map(k => [k, ''])));
-        panel.querySelector('#canvas-text-font').value = '';
-        panel.querySelector('#canvas-text-size').value = '100';
-        panel.querySelector('#canvas-text-size-value').textContent = '100%';
-        panel.querySelector('#canvas-text-weight').value = '';
-        panel.querySelector('#canvas-text-italic').checked = false;
-      };
+
     }
     // The page itself is the preview. Update the rendered words during typing
     // without re-rendering the inspector and stealing the caret.
