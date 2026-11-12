@@ -558,10 +558,10 @@ function paintPanel() {
     const fontOptions = FONT_STACKS.map(f => `<option value="${esc(f.value)}" ${f.value === currentFont ? 'selected' : ''}>${esc(f.label)}</option>`).join('');
     panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT TEXT</strong><button type="button" data-canvas="text-back">← Back</button></div>${tabs}
       <p class="canvas-section-label">${esc(SECTION_TYPES[sec.type]?.label || 'Section')}<strong>${esc(label)}</strong></p>
-      <p class="canvas-panel-hint">Change the words or their styling right here. Your homepage is the preview.</p>
+      <p class="canvas-panel-hint">Edit the text below. Changes use the same fonts as your page.</p>
       <div id="canvas-inline-text" class="canvas-inline-text" contenteditable="true" role="textbox" aria-label="${esc(label)}" aria-multiline="${!!field?.multiline}">${rich(sec[selectedText.key] || '')}</div>
-      <div class="canvas-selection-format" aria-label="Selected text formatting">
-        <p>Highlight a word or phrase above to style it separately.</p>
+      <details class="canvas-selection-format canvas-selection-disclosure" aria-label="Selected text formatting"><summary>Style individual words</summary>
+        <p>Highlight words in the text box to style them separately.</p>
         <label>Selected text font
           <select id="canvas-selection-font"><option value="">Choose a font…</option>${FONT_STACKS.map(f => `<option value="${esc(f.value)}">${esc(f.label)}</option>`).join('')}</select>
         </label>
@@ -575,10 +575,10 @@ function paintPanel() {
           <label class="canvas-selection-ink">Color <input id="canvas-selection-color" type="color" value="#49312b"></label>
           <button type="button" id="canvas-selection-reset">Clear style</button>
         </div>
-      </div>
+      </details>
       ${role ? `<div class="canvas-text-style-controls">
-        <h3>Font &amp; styling</h3>
-        <p>Changes other ${esc(role.label.toLowerCase())} in this section too.</p>
+        <h3>Text appearance</h3>
+        <p>Applies to this text style in the selected section.</p>
         <label>Font
           <select id="canvas-text-font"><option value="" ${!currentFont ? 'selected' : ''}>Match site font</option>
           ${currentFont && !FONT_STACKS.some(f => f.value === currentFont) ? `<option selected value="${esc(currentFont)}">Current custom font</option>` : ''}
