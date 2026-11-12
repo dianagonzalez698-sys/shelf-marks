@@ -703,12 +703,30 @@ function fieldsHtml(def, sec, mode = 'all') {
     const draw = (f) => {
       const label = sec.type === 'interlude' && f.key === 'strip' ? 'Main picture'
         : sec.type === 'interlude' && f.key === 'bgImage' ? 'Background picture (optional)' : f.label;
+      // A rich-text field should have one editor, not a second textarea with
+      // duplicate styling controls. Reuse the click-to-edit inspector whenever
+      // the field is visibly editable on the page.
+      const liveNode = [...document.querySelectorAll('#app [data-sec]')]
+        .find((node) => node.dataset.sec === sec.id);
+      if (mode === 'content' && f.type === 'rich'
+          && liveNode?.querySelector('[data-edit="' + f.key + '"]')) {
+        return `<div class="field canvas-edit-text-shortcut">
+          <span class="canvas-field-label">${esc(label)}</span>
+          <button type="button" class="btn" data-edit-text-key="${attr(f.key)}">
+            Edit text &amp; typography
+          </button>
+        </div>`;
+      }
       return fieldControl(label === f.label ? f : { ...f, label }, sec[f.key], sec.id, { inlineStyle: false });
     };
     if (mode === 'content' && sec.type === 'challengeHero') return '<p class="canvas-panel-hint">The words follow this challenge’s name and description. Customize each line’s font, size, weight, italic style, spacing, and color below.</p>' + chosen.map(draw).join('');
     if (mode === 'style') {
       const appearance = chosen.filter((f) => f.type !== 'typeface');
-      const typography = chosen.filter((f) => f.type === 'typeface');
+      const inlineRoles = new Set(all.filter((f) => f.type === 'rich' && f.styleRole)
+        .filter((f) => [...document.querySelectorAll('#app [data-sec]')]
+          .find((node) => node.dataset.sec === sec.id)?.querySelector('[data-edit="' + f.key + '"]'))
+        .map((f) => f.styleRole));
+      const typography = chosen.filter((f) => f.type === 'typeface' && !inlineRoles.has(f.role?.role));
       return `${appearance.length ? '<p class="canvas-field-group">Background</p>' + appearance.map(draw).join('') : ''}
         ${typography.length ? '<p class="canvas-field-group">Fonts & text colors</p>' + typography.map(draw).join('') : ''}`;
     }
@@ -780,14 +798,22 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
       <button type="button" data-inspector-tab="artwork" class="${editingTab === 'artwork' ? 'active' : ''}">Images</button>
     </div>` : ''}
     <div id="sec-fields" style="margin-top:1rem">${fieldsHtml(def, fresh, editingTab)}</div>
-    <div class="btn-row" style="margin-top:1rem">
-      <button class="btn btn-block" type="button" data-close>Done</button>
-    </div>`;
+    ${mountIn ? '' : `<div class="btn-row" style="margin-top:1rem"><button class="btn btn-block" type="button" data-close>Done</button></div>`}`;
   };
 
   const editor = {
     reopen: build,
     onMount(sheet) {
+      // Text shortcuts switch to the one rich-text inspector. The sidebar
+      // remains mounted and the original section persists unchanged.
+      sheet.addEventListener('click', (event) => {
+        const edit = event.target.closest('[data-edit-text-key]');
+        if (!edit) return;
+        event.preventDefault();
+        document.dispatchEvent(new CustomEvent('canvas:inspect-text', {
+          detail: { sectionId, key: edit.dataset.editTextKey },
+        }));
+      });
       const warnBox = sheet.querySelector('#sec-warnings');
       const fieldBox = sheet.querySelector('#sec-fields');
 
