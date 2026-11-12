@@ -529,6 +529,11 @@ function paintPanel() {
     <span class="canvas-layer-order"><button type="button" data-layer-visible="${esc(x.id)}" aria-label="${x.hidden ? 'Show' : 'Hide'} this layer" aria-pressed="${!x.hidden}" title="${x.hidden ? 'Show layer' : 'Hide layer'}">${x.hidden ? '◌' : '◉'}</button><button type="button" data-layer-move="1" data-layer-id="${esc(x.id)}" aria-label="Bring this layer forward" title="Bring forward" ${index === 0 ? 'disabled' : ''}>↑</button><button type="button" data-layer-move="-1" data-layer-id="${esc(x.id)}" aria-label="Send this layer backward" title="Send backward" ${index === ordered.length - 1 ? 'disabled' : ''}>↓</button></span>
   </div>`).join('');
   panel.hidden = false;
+  const tabs = `<div class="canvas-panel-tabs">
+      <button type="button" data-canvas="tab-sections" class="${panelMode === 'sections' ? 'active' : ''}">Sections</button>
+      <button type="button" data-canvas="tab-add" class="${panelMode === 'add' ? 'active' : ''}">Add</button>
+      <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
+    </div>`;
   if (panelMode === 'settings-style' && settingsStyleSelected) { paintSettingsStylePanel(panel); return; }
   if (simplePage && panelMode !== 'selected') {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>${activePage.includes("settings") ? "PAGE DESIGN" : "PAGE ACCENTS"}</strong></div>
@@ -551,7 +556,7 @@ function paintPanel() {
     const currentSize = role ? Math.round((Number(sec[role.size]) || 1) * 100) : 100;
     const currentInk = role ? String(sec[role.ink] || '') : '';
     const fontOptions = FONT_STACKS.map(f => `<option value="${esc(f.value)}" ${f.value === currentFont ? 'selected' : ''}>${esc(f.label)}</option>`).join('');
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT TEXT</strong><button type="button" data-canvas="text-back">← Back</button></div>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT TEXT</strong><button type="button" data-canvas="text-back">← Back</button></div>${tabs}
       <p class="canvas-section-label">${esc(SECTION_TYPES[sec.type]?.label || 'Section')}<strong>${esc(label)}</strong></p>
       <p class="canvas-panel-hint">Change the words or their styling right here. Your homepage is the preview.</p>
       <div id="canvas-inline-text" class="canvas-inline-text" contenteditable="true" role="textbox" aria-label="${esc(label)}" aria-multiline="${!!field?.multiline}">${rich(sec[selectedText.key] || '')}</div>
@@ -745,7 +750,7 @@ function paintPanel() {
     const sections = layout.get(activePage).filter((s) => s.visible !== false);
     const order = sections.findIndex((s) => s.id === selectedSectionId) + 1;
     const label = SECTION_TYPES[sec.type]?.label || 'Section';
-    panel.innerHTML = `<div class="canvas-panel-head"><strong>Edit section</strong><div class="canvas-panel-actions"><button type="button" data-canvas="section-back">← Page</button><button type="button" data-canvas="section-exit" aria-label="Close section editor">×</button></div></div>
+    panel.innerHTML = `<div class="canvas-panel-head"><strong>Edit section</strong><div class="canvas-panel-actions"><button type="button" data-canvas="section-back">← Page</button><button type="button" data-canvas="section-exit" aria-label="Close section editor">×</button></div></div>${tabs}
       <div class="canvas-section-inspector"></div>
       <details class="studio-danger"><summary>Remove section</summary><p>Remove ${esc(label)} from this page?</p><button type="button" class="canvas-delete-section" data-canvas="delete-section">Remove ${esc(label)}</button></details>`;
     // Wire navigation at its source. On a small screen the panel is an
@@ -764,11 +769,6 @@ function paintPanel() {
     openSectionEditor(activePage, selectedSectionId, { mountIn: panel.querySelector('.canvas-section-inspector') });
     return;
   }
-  const tabs = `<div class="canvas-panel-tabs">
-      <button type="button" data-canvas="tab-sections" class="${panelMode === 'sections' ? 'active' : ''}">Sections</button>
-      <button type="button" data-canvas="tab-add" class="${panelMode === 'add' ? 'active' : ''}">Add</button>
-      <button type="button" data-canvas="tab-layers" class="${panelMode === 'layers' ? 'active' : ''}">Layers</button>
-    </div>`;
   if (panelMode !== 'selected' || !item) {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>Design editor</strong><button type="button" data-canvas="finish" aria-label="Exit design mode">× Exit</button></div>${tabs}` +
       (panelMode === 'sections' ? `<h3>Sections</h3><p class="canvas-panel-hint">Click a section on the page to edit it.</p>
@@ -798,7 +798,6 @@ function paintPanel() {
     return;
   }
   panel.innerHTML = `<div class="canvas-panel-head"><strong>${item.type === 'text' ? 'EDIT TEXT' : 'EDIT ARTWORK'}</strong><button type="button" data-canvas="deselect" aria-label="Back to tools">← Back</button></div>${tabs}
-    <p class="canvas-panel-hint">Edit the selected item below. Use Sections, Add, or Layers above to switch tools.</p>
     <button type="button" class="canvas-lock-action${item.locked ? ' is-locked' : ''}" data-canvas="toggle-lock" aria-pressed="${!!item.locked}"><span aria-hidden="true">${item.locked ? '🔒' : '◇'}</span><strong>${item.locked ? 'Position locked' : 'Lock position & size'}</strong><small>${item.locked ? 'Click to unlock' : 'Prevent accidental moving or resizing'}</small></button>
     ${item.type === 'image' ? `<p class="canvas-panel-hint">Drag the picture on the page to move it. Pull its corner to resize, or adjust the placement here.</p><button type="button" data-canvas="replace-art">Replace picture</button><label>Frame<select data-prop="frame"><option value="none" ${!item.frame || item.frame === 'none' ? 'selected' : ''}>No frame</option><option value="fine" ${item.frame === 'fine' ? 'selected' : ''}>Fine border</option><option value="ornate" ${item.frame === 'ornate' ? 'selected' : ''}>Carved gilt · rectangular</option><option value="gilded-round" ${item.frame === 'gilded-round' ? 'selected' : ''}>Carved gilt · round</option><option value="gilded-oval" ${item.frame === 'gilded-oval' ? 'selected' : ''}>Carved gilt · oval</option><option value="polaroid" ${item.frame === 'polaroid' ? 'selected' : ''}>Photograph mount</option></select></label>` : ''}
     ${item.type === 'text' ? `<label>Text<textarea data-prop="text" rows="2">${esc(item.text)}</textarea></label>
