@@ -225,6 +225,14 @@ export function isCustomised(pageId) {
 }
 
 export async function save(pageId, sections) {
+  // Design Mode listens for layout changes so Undo also works for section
+  // text, frames, images, and spacing. This event is ignored outside editing.
+  const before = get(pageId);
+  if (JSON.stringify(before) !== JSON.stringify(sections)) {
+    document.dispatchEvent(new CustomEvent('lit-picks:layout-before-save', {
+      detail: { pageId, sections: before },
+    }));
+  }
   // specV marks the layout as current, so the one-time block adoption above
   // never runs again — deleting a block you don't want has to stick.
   const record = { id: pageId, sections, specV: 2, archV: 1, archPlacementV: 1, updatedAt: new Date().toISOString() };
