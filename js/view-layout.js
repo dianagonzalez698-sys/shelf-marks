@@ -610,7 +610,7 @@ function fieldControl(f, value, secId, { inlineStyle = true } = {}) {
       </div>`;
     }
     case 'range': {
-      const rangeValue = value ?? (f.key === 'curtainOffset' ? 0 : f.min);
+      const rangeValue = value ?? (f.key === 'descriptionSize' ? 20 : f.key === 'curtainOffset' ? 0 : f.min);
       return `<div class="field"><label for="${id}">${esc(f.label)} <span class="token-value" data-readout>${esc(rangeValue)}</span></label>
         <input type="range" id="${id}" data-field="${attr(f.key)}" min="${f.min}" max="${f.max}" step="${f.step}" value="${attr(rangeValue)}"></div>`;
     }
