@@ -6664,18 +6664,3 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   border-image-repeat: stretch;
   filter: drop-shadow(0 5px 8px rgba(40, 27, 10, .18));
 }
-
-
-/* Homepage: keep the restrained Design Mode fit proportions after Done.
-   The inverse width compensates for zoom so full-bleed backgrounds still
-   reach both viewport edges; the editor continues to use its own fit view.
-   No media URLs, object positions, or user decoration offsets are altered. */
-@media (min-width: 851px) {
-  body:not(.canvas-editing) #app:has(> .ed-hero) {
-    width: calc(100% / .78);
-    max-width: none;
-    margin-left: 0;
-    margin-right: 0;
-    zoom: .78;
-  }
-}
