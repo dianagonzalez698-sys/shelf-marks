@@ -18,6 +18,7 @@ import { figure, backdrop, media } from './media.js';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
 import { openMediaEditor } from './view-layout.js';
+import { searchBooks, debounce } from './openlibrary.js';
 
 /* ----------------------------------------------------------------- list ---- */
 
@@ -416,9 +417,11 @@ export function openEditor(challenge) {
           // Search and selection remain in this compact form; no second sheet
           // and no need to navigate away to the Library.
           filterExtra.innerHTML = `
-            <label for="ch-title-search">Find books in my Library</label>
+            <label for="ch-title-search">Find a book (Library or Open Library)</label>
             <input type="search" id="ch-title-search" placeholder="Search title or author…" autocomplete="off">
-            <div id="ch-title-results" class="ch-title-results" role="group" aria-label="Library book titles"></div>
+            <div id="ch-title-results" class="ch-title-results" role="group" aria-label="Your Library book titles"></div>
+            <div id="ch-openlibrary-status" class="hint" aria-live="polite"></div>
+            <div id="ch-openlibrary-results" class="ch-title-results" role="group" aria-label="Curated Open Library results" hidden></div>
             <div class="ch-title-picked" id="ch-title-picked" aria-live="polite"></div>
             <label for="ch-title-manual">Or add a book title not in your Library yet</label>
             <div class="ch-title-manual">
@@ -461,7 +464,73 @@ export function openEditor(challenge) {
               };
             });
           };
-          query.addEventListener('input', paintTitles);
+          // Search the same curated, English-first Open Library catalogue used
+          // by Add a Book. Selecting a result adds a title to the challenge
+          // rule, not a new Library record or a second editing dialog.
+          const olStatus = filterExtra.querySelector('#ch-openlibrary-status');
+          const olResults = filterExtra.querySelector('#ch-openlibrary-results');
+          let olController = null;
+          let olSequence = 0;
+          const updateRemoteMarks = () => {
+            olResults.querySelectorAll('[data-ol-title]').forEach((button) => {
+              const chosen = selectedTitles.has(titleKey(button.dataset.olTitle));
+              button.classList.toggle('is-selected', chosen);
+              button.setAttribute('aria-pressed', String(chosen));
+              button.querySelector('.ch-title-result-mark').textContent = chosen ? '✓' : '+';
+            });
+          };
+          const findRemote = debounce(async (term) => {
+            if (olController) olController.abort();
+            olController = new AbortController();
+            const requestId = ++olSequence;
+            olStatus.textContent = 'Searching Open Library…';
+            olResults.hidden = true;
+            try {
+              const matches = await searchBooks(term, { signal: olController.signal, limit: 25, language: 'en' });
+              if (requestId !== olSequence || !query.isConnected || query.value.trim() !== term) return;
+              const seen = new Set();
+              const curated = matches.filter((book) => {
+                const key = titleKey(book.title);
+                if (!key || seen.has(key)) return false;
+                seen.add(key);
+                return true;
+              }).slice(0, 10);
+              olStatus.textContent = curated.length ? 'OPEN LIBRARY · Closest matches first' : 'No Open Library matches. Try fewer words or enter the title below.';
+              olResults.hidden = !curated.length;
+              olResults.innerHTML = curated.map((book) => `<button type="button" class="ch-title-result" data-ol-title="${attr(book.title)}" aria-pressed="false">
+                ${book.coverUrl ? `<img class="ch-title-cover" src="${attr(book.coverUrl)}" alt="" loading="lazy">` : ''}
+                <span class="ch-title-result-name">${esc(book.title)}<small>${esc(book.author || 'Author unknown')}${book.firstPublishYear ? ` · ${esc(book.firstPublishYear)}` : ''}</small></span>
+                <span class="ch-title-result-mark">+</span>
+              </button>`).join('');
+              olResults.querySelectorAll('[data-ol-title]').forEach((button) => {
+                button.onclick = () => {
+                  const title = button.dataset.olTitle;
+                  const key = titleKey(title);
+                  if (selectedTitles.has(key)) selectedTitles.delete(key);
+                  else selectedTitles.set(key, title.trim());
+                  paintTitles();
+                  updateRemoteMarks();
+                };
+              });
+              updateRemoteMarks();
+            } catch (err) {
+              if (err?.name === 'AbortError' || requestId !== olSequence || !query.isConnected) return;
+              olResults.hidden = true;
+              olStatus.textContent = 'Open Library is unavailable. You can still choose a Library book or enter a title.';
+            }
+          }, 350);
+          query.addEventListener('input', () => {
+            paintTitles();
+            if (olController) olController.abort();
+            olSequence++;
+            const term = query.value.trim();
+            if (term.length < 2) {
+              findRemote.cancel();
+              olStatus.textContent = '';
+              olResults.hidden = true;
+              olResults.innerHTML = '';
+            } else findRemote(term);
+          });
           const manual = filterExtra.querySelector('#ch-title-manual');
           const addTitle = () => {
             const value = manual.value.trim();

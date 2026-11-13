@@ -41,8 +41,10 @@ export function booksView(params = {}) {
         ${activeCustom && assets.src(activeCustom.coverAssetId) ? `<div class="lit-custom-shelf-art"><img src="${attr(assets.src(activeCustom.coverAssetId))}" alt="" loading="lazy"></div>` : ''}
       </header>
       <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
-      <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search">⌕</button></form>
+      <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search my books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search my Library">⌕</button></form>
+        <a class="lit-shelf-openlibrary" href="#/add">+ Find &amp; add books</a>
         ${search ? `<a class="lit-shelf-clear" href="${filterLink(shelf, {...query, search: ''})}">Clear search ×</a>` : ''}
+        ${search ? `<a class="lit-shelf-search-openlibrary" href="#/add?search=${encodeURIComponent(query.search || '')}">Find “${esc(query.search)}” on Open Library ↗</a>` : ''}
         <details class="lit-shelf-manage-control" id="shelf-manager"><summary>✧ Edit shelves</summary>
           <div class="lit-shelf-manage-panel">
             <form id="shelf-create"><label for="shelf-name">New shelf name</label><div><input id="shelf-name" maxlength="45" placeholder="e.g. Cozy mysteries" required><button type="submit">Create shelf</button></div></form>
