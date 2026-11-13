@@ -6673,7 +6673,7 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
    Section data, art positioning, and image assets remain unchanged. */
 @media (min-width: 851px) {
   body:not(.canvas-editing) #app.home-published-fit {
-    --home-published-scale: .84;
+    --home-published-scale: .90;
     width: calc(100vw / var(--home-published-scale));
     max-width: none;
     margin-left: 0;
