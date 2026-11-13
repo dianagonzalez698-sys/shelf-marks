@@ -6730,3 +6730,18 @@ body.canvas-editing.canvas-preview-full .canvas-toolbar [data-canvas="toggle-fit
   .lit-shelf-tools .lit-shelf-openlibrary,
   .lit-shelf-tools .lit-shelf-search-openlibrary { white-space: normal; }
 }
+
+
+/* Book form: actual active challenges, not a hardcoded list of three presets. */
+.book-challenge-panel .book-classification-fields {
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--c-rule, #ded4c8);
+}
+.book-challenge-panel .book-classification-fields > .hint {
+  margin: 0 0 8px;
+}
+.book-challenge-panel .book-challenge-list > .field-label { display: block; margin-bottom: 6px; }
+.book-challenge-panel .book-challenge-list > .hint { margin: 0 0 10px; }
+.book-challenge-panel .book-challenge-choice .switch-text em { font-style: italic; }
+.book-challenge-panel .book-challenge-choice.is-automatic .switch-text em { opacity: .8; }
