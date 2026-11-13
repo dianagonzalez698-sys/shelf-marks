@@ -96,6 +96,22 @@ export function roleForKey(key, sectionType = '') {
   return name ? TYPE_ROLES.find((r) => r.role === name) || null : null;
 }
 
+/** The inherited word record is only starter copy for the editable block. */
+export function wordSectionEditableText(sec, key) {
+  if (!sec || sec.type !== 'word') return '';
+  if (sec[key]) return sec[key];
+  const w = (sec.wordId ? getWord(sec.wordId) : null) || allWords()[0];
+  if (!w) return '';
+  if (key === 'wordHeading') return `${w.label || 'Word of the Year'}${w.period ? ` · ${w.period}` : ''}`;
+  if (key === 'wordTitle') return w.word || '';
+  if (key === 'wordDescription') return w.note || '';
+  if (key === 'wordFooter') {
+    const stats = wordStats(w);
+    return stats.books ? `${stats.books} book${stats.books === 1 ? '' : 's'} · ${stats.total} time${stats.total === 1 ? '' : 's'}` : 'Nothing logged against it yet';
+  }
+  return '';
+}
+
 /** The four type roles a section can restyle, and the keys each one owns. */
 export const TYPE_ROLES = [
   { role: 'Display', label: 'Headings', font: 'fontDisplay', ink: 'inkDisplay',
