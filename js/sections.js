@@ -85,6 +85,8 @@ const ROLE_FOR_KEY = {
   title: 'Display',
   subtitle: 'Body', body: 'Body', text: 'Body',
   note: 'Body', caption: 'Body', quote: 'Body',
+  wordHeading: 'Ui', wordTitle: 'Display',
+  wordDescription: 'Body', wordFooter: 'Ui',
 };
 
 export function roleForKey(key, sectionType = '') {
@@ -92,6 +94,22 @@ export function roleForKey(key, sectionType = '') {
     : key === 'text' && sectionType === 'note' ? 'Script'
     : ROLE_FOR_KEY[key];
   return name ? TYPE_ROLES.find((r) => r.role === name) || null : null;
+}
+
+/** The inherited word record is only starter copy for the editable block. */
+export function wordSectionEditableText(sec, key) {
+  if (!sec || sec.type !== 'word') return '';
+  if (sec[key]) return sec[key];
+  const w = (sec.wordId ? getWord(sec.wordId) : null) || allWords()[0];
+  if (!w) return '';
+  if (key === 'wordHeading') return `${w.label || 'Word of the Year'}${w.period ? ` · ${w.period}` : ''}`;
+  if (key === 'wordTitle') return w.word || '';
+  if (key === 'wordDescription') return w.note || '';
+  if (key === 'wordFooter') {
+    const stats = wordStats(w);
+    return stats.books ? `${stats.books} book${stats.books === 1 ? '' : 's'} · ${stats.total} time${stats.total === 1 ? '' : 's'}` : 'Nothing logged against it yet';
+  }
+  return '';
 }
 
 /** The four type roles a section can restyle, and the keys each one owns. */
@@ -1170,13 +1188,14 @@ export const SECTION_TYPES = {
 
 
   /* 18. Word of the year --------------------------------------------------- */
-  // One word, set enormous: the thing you kept meeting all year. The subtitle
-  // leads to its own page, where every book you met it in is counted up.
+  // A standalone editable editorial composition. The word record supplies
+  // initial copy, but no text in this section navigates away.
   word: {
     label: 'Word of the year',
-    blurb: 'A single word, set large, with a picture and a link to its tally.',
+    blurb: 'A single large word with editable caption, description and artwork.',
     create: () => ({
       wordId: '',
+      wordHeading: '', wordTitle: '', wordDescription: '', wordFooter: '',
       showLabel: true,
       showNote: true,
       showCount: true,
@@ -1185,7 +1204,11 @@ export const SECTION_TYPES = {
       flip: false,
     }),
     fields: [
-      { key: 'wordId', label: 'Which word', type: 'word' },
+      { key: 'wordId', label: 'Initial word record', type: 'word' },
+      { key: 'wordHeading', label: 'Small heading', type: 'rich', styleRole: 'Ui' },
+      { key: 'wordTitle', label: 'Large word', type: 'rich', styleRole: 'Display' },
+      { key: 'wordDescription', label: 'Description', type: 'rich', multiline: true, styleRole: 'Body' },
+      { key: 'wordFooter', label: 'Bottom caption', type: 'rich', styleRole: 'Ui' },
       { key: 'align', label: 'Type alignment', type: 'select', options: [['center', 'Centred'], ['left', 'Left'], ['right', 'Right']] },
       { key: 'picture', label: 'Picture beside it', type: 'media', size: '900 × 1125 px' },
       { key: 'flip', label: 'Picture on the other side', type: 'bool' },
@@ -1212,17 +1235,20 @@ export const SECTION_TYPES = {
         </div>`);
       }
       const st = wordStats(w);
-      const href = `#/word/${encodeURIComponent(w.id)}`;
-      const tally = st.books
+       const tally = st.books
         ? `${st.books} book${st.books === 1 ? '' : 's'} · ${st.total} time${st.total === 1 ? '' : 's'}`
         : 'Nothing logged against it yet';
       const hasPic = hasAsset(sec.picture);
 
+      const heading = sec.wordHeading || `${w.label || 'Word of the Year'}${w.period ? ` · ${w.period}` : ''}`;
+      const title = sec.wordTitle || w.word;
+      const description = sec.wordDescription || w.note || '';
+      const footer = sec.wordFooter || tally;
       const type = `<div class="word-type">
-        ${sec.showLabel !== false ? kicker(`${w.label || 'Word of the Year'}${w.period ? ` · ${w.period}` : ''}`) : ''}
-        <p class="word-word">${esc(w.word)}</p>
-        ${sec.showNote !== false && w.note ? `<p class="word-note">${rich(w.note)}</p>` : ''}
-        ${sec.showCount !== false ? `<p class="word-tally"><a class="word-link" href="${href}">${esc(tally)} &rarr;</a></p>` : ''}
+        ${sec.showLabel !== false ? `<p class="ed-kicker" data-edit="wordHeading">${rich(heading)}</p>` : ''}
+        <p class="word-word" data-edit="wordTitle">${rich(title)}</p>
+        ${sec.showNote !== false ? `<p class="word-note" data-edit="wordDescription">${rich(description)}</p>` : ''}
+        ${sec.showCount !== false ? `<p class="word-tally" data-edit="wordFooter">${rich(footer)}</p>` : ''}
       </div>`;
 
       return sectionShell(sec, hasPic

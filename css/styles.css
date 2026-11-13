@@ -2925,7 +2925,7 @@ a.ed-meta:hover { color: var(--c-accent); }
   color: var(--c-body-ink, var(--c-ink-soft));
   max-width: 34ch;
 }
-.word-tally { margin: 1.3rem 0 0; }
+.word-tally { margin: 1.3rem 0 0; font-family: var(--f-ui); font-size: var(--fs-label); letter-spacing: var(--ls-label); text-transform: var(--tt-label); color: var(--c-label-ink, var(--c-accent)); }
 .word-link {
   font-family: var(--f-ui); font-size: var(--fs-label);
   letter-spacing: var(--ls-label); text-transform: var(--tt-label);

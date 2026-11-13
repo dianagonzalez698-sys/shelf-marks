@@ -1,6 +1,6 @@
 // Claude's original homepage composition remains the default. New literary
 // features are optional sections the reader chooses to add.
-import { renderSection } from './sections.js?v=126';
+import { renderSection } from './sections.js?v=131';
 import * as layout from './layout.js';
 
 export const HOME_PAGE_ID = 'home';
