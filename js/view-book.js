@@ -1,14 +1,14 @@
 // Add a book (Open Library search or by hand) and edit an existing one.
 
 import {
-  state, newBook, getBook, saveBook, deleteBook,
+  state, newBook, getBook, saveBook, deleteBook, saveChallenge,
   knownSeries, knownTags, allChallenges,
 } from './state.js';
 import { esc, attr, toast, coverImg, navigate, confirmSheet, bookmarkArt, openSheet } from './ui.js';
 import { searchBooks, debounce, guessFormat } from './openlibrary.js';
 import { AUTHOR_SERIES_HINTS } from './config.js?v=121';
 import { todayISO, isValidISO, formatDate } from './periods.js';
-import { bookmarkCatalog } from './rules.js?v=121';
+import { bookmarkCatalog, matchesFilter, describeFilter } from './rules.js?v=121';
 import * as assets from './assets.js';
 
 // Handed from the search screen to the form screen.
@@ -207,6 +207,9 @@ export function bookFormView(params = {}) {
   });
   const tagOptions = new Set([...knownTags(), ...(draft.tags || [])]);
   const personalShelves = Array.isArray(state.settings.customShelves) ? state.settings.customShelves : [];
+  // Read the same active challenge records as the Challenges pages, including
+  // edited presets and custom rules. Archived challenges never appear here.
+  const activeChallenges = allChallenges();
 
   return {
     title: editing ? 'Edit book' : 'New book',
@@ -259,9 +262,25 @@ export function bookFormView(params = {}) {
             </div>
             ${guessed ? `<p class="hint">Pre-selected from the catalog; change if needed.</p>` : ''}
           </div>
-          <label class="switch-row"><input type="checkbox" id="f-classic" ${draft.isClassic ? 'checked' : ''}><span class="switch-text">Classic<em>Classic Every Quarter</em></span></label>
-          <label class="switch-row"><input type="checkbox" id="f-reread" ${draft.isReread ? 'checked' : ''}><span class="switch-text">Re-read<em>Counts toward reading goals</em></span></label>
-          <label class="switch-row"><input type="checkbox" id="f-tbr" ${draft.isTbr ? 'checked' : ''}><span class="switch-text">From my physical TBR<em>Physical TBR Every Other Month</em></span></label>
+          <div class="book-classification-fields">
+            <p class="hint">Book classifications · used automatically by matching challenges</p>
+            <label class="switch-row"><input type="checkbox" id="f-classic" ${draft.isClassic ? 'checked' : ''}><span class="switch-text">Classic</span></label>
+            <label class="switch-row"><input type="checkbox" id="f-reread" ${draft.isReread ? 'checked' : ''}><span class="switch-text">Re-read</span></label>
+            <label class="switch-row"><input type="checkbox" id="f-tbr" ${draft.isTbr ? 'checked' : ''}><span class="switch-text">From my physical TBR</span></label>
+          </div>
+          <div class="book-challenge-list" id="book-challenge-list">
+            <p class="field-label">My reading challenges <span class="muted">(${activeChallenges.length})</span></p>
+            <p class="hint">All active challenges appear here. Checked automatically when this book matches a rule; you can include or exclude it yourself.</p>
+            ${activeChallenges.length ? activeChallenges.map(challenge => {
+              const include = (challenge.includeBooks || []).includes(draft.id);
+              const exclude = (challenge.excludeBooks || []).includes(draft.id);
+              const checked = !exclude && (include || matchesFilter(draft, challenge.filter));
+              return `<label class="switch-row book-challenge-choice">
+                <input type="checkbox" data-challenge-id="${attr(challenge.id)}" ${checked ? 'checked' : ''}>
+                <span class="switch-text">${esc(challenge.name)}<em>${esc(describeFilter(challenge.filter))}</em></span>
+              </label>`;
+            }).join('') : '<p class="hint">No active challenges yet. Create one from the Challenges page and it will appear here.</p>'}
+          </div>
         </section>
 
         <h2 class="form-heading">Reading dates</h2>
@@ -332,6 +351,48 @@ export function bookFormView(params = {}) {
       const form = root.querySelector('#book-form');
       const tags = new Set(draft.tags || []);
       let format = draft.format || '';
+      // A challenge checkbox represents the effective rule result plus any
+      // explicit book inclusion/exclusion. Only manual clicks persist
+      // overrides: routine metadata edits use the challenge rules instead.
+      const challengeChoices = new Map(activeChallenges.map(c => [c.id, c]));
+      const manualChallengeChoices = new Map();
+      const challengePreview = () => {
+        const year = Number(root.querySelector('#f-year')?.value || 0);
+        const preview = {
+          ...draft,
+          title: root.querySelector('#f-title')?.value.trim() || '',
+          author: root.querySelector('#f-author')?.value.trim() || '',
+          authors: [root.querySelector('#f-author')?.value.trim() || ''],
+          format,
+          isClassic: root.querySelector('#f-classic').checked,
+          isReread: root.querySelector('#f-reread').checked,
+          isTbr: root.querySelector('#f-tbr').checked,
+          firstPublishYear: year || null,
+          series: root.querySelector('#f-series')?.value.trim() || '',
+          tags: [...tags],
+        };
+        root.querySelectorAll('[data-challenge-id]').forEach(box => {
+          const challenge = challengeChoices.get(box.dataset.challengeId);
+          if (!challenge) return;
+          const include = (challenge.includeBooks || []).includes(draft.id);
+          const exclude = (challenge.excludeBooks || []).includes(draft.id);
+          const automatic = !exclude && (include || matchesFilter(preview, challenge.filter));
+          const checked = manualChallengeChoices.has(challenge.id) ? manualChallengeChoices.get(challenge.id) : automatic;
+          box.checked = checked;
+          box.closest('.book-challenge-choice')?.classList.toggle('is-automatic', automatic && !manualChallengeChoices.has(challenge.id));
+        });
+      };
+      root.querySelectorAll('[data-challenge-id]').forEach(box => {
+        box.addEventListener('change', () => {
+          manualChallengeChoices.set(box.dataset.challengeId, box.checked);
+          challengePreview();
+        });
+      });
+      for (const field of ['#f-title', '#f-author', '#f-year', '#f-series', '#f-classic', '#f-reread', '#f-tbr']) {
+        root.querySelector(field)?.addEventListener('input', challengePreview);
+        root.querySelector(field)?.addEventListener('change', challengePreview);
+      }
+      challengePreview();
 
       /* format segmented control */
       const seg = root.querySelector('#f-format');
@@ -341,6 +402,7 @@ export function bookFormView(params = {}) {
         seg.querySelectorAll('button').forEach((b) => {
           b.setAttribute('aria-pressed', String(b.dataset.v === v));
         });
+        challengePreview();
       };
       seg.querySelectorAll('button').forEach((b) => { b.onclick = () => setFormat(b.dataset.v); });
 
@@ -415,6 +477,7 @@ export function bookFormView(params = {}) {
             const t = chip.dataset.tag;
             if (tags.has(t)) tags.delete(t); else tags.add(t);
             renderTagChips();
+            challengePreview();
           };
         });
       };
@@ -506,8 +569,35 @@ export function bookFormView(params = {}) {
 
         try {
           const { unlocked } = await saveBook(record);
-          if (unlocked.length) {
-            celebrate(unlocked);
+          // Preserve unrelated manual selections and the rule definitions.
+          // Only checkboxes explicitly changed in this form write overrides.
+          const newUnlocks = [...unlocked];
+          const challengeFailures = [];
+          for (const [id, checked] of manualChallengeChoices) {
+            const challenge = challengeChoices.get(id);
+            if (!challenge) continue;
+            const include = new Set(challenge.includeBooks || []);
+            const exclude = new Set(challenge.excludeBooks || []);
+            const ruleMatches = matchesFilter(record, challenge.filter);
+            if (checked) {
+              exclude.delete(record.id);
+              if (!ruleMatches) include.add(record.id);
+              else include.delete(record.id);
+            } else {
+              include.delete(record.id);
+              if (ruleMatches) exclude.add(record.id);
+              else exclude.delete(record.id);
+            }
+            try {
+              const result = await saveChallenge({
+                id, includeBooks: [...include], excludeBooks: [...exclude],
+              });
+              newUnlocks.push(...(result.unlocked || []));
+            } catch (_) { challengeFailures.push(challenge.name); }
+          }
+          if (challengeFailures.length) toast('Book saved, but some challenge selections could not be updated.', 'bad');
+          if (newUnlocks.length) {
+            celebrate([...new Set(newUnlocks)]);
           } else {
             toast(editing ? 'Changes saved.' : `“${esc(title)}” added.`, 'good');
           }
