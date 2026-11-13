@@ -6673,13 +6673,13 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
    Section data, art positioning, and image assets remain unchanged. */
 @media (min-width: 851px) {
   body:not(.canvas-editing) #app.home-published-fit {
-    --home-published-scale: .78;
+    --home-published-scale: .84;
     width: calc(100vw / var(--home-published-scale));
     max-width: none;
     margin-left: 0;
     margin-right: 0;
     transform: scale(var(--home-published-scale));
     transform-origin: top left;
-    margin-bottom: calc(var(--home-original-height, 0px) * -.22);
+    margin-bottom: calc(var(--home-original-height, 0px) * (var(--home-published-scale) - 1));
   }
 }
