@@ -6666,12 +6666,12 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
 }
 
 
-/* Homepage density follows the visually restrained original Design Mode
-   fit preview, without changing the physical canvas width or scaling any
+/* Homepage density shared by Design Mode and the published page, without changing the physical canvas width or scaling any
    uploaded artwork, curtains, clouds, or saved positioning coordinates.
-   All existing user-selected section typography multipliers still apply. */
+   Both render modes inherit identical CSS sizing rules; Fit page is only
+   a visual zoom of the unchanged layout. User-selected typography still applies. */
 @media (min-width: 851px) {
-  body:not(.canvas-editing) #app.screen:has(> .ed-hero) {
+  #app.screen:has(> .ed-hero) {
     --fs-banner-title: clamp(1.65rem, 5.3vw, 3.7rem);
     --fs-banner-sub: clamp(.94rem, 1.52vw, 1.05rem);
     --fs-display: clamp(1.35rem, 2.85vw, 1.85rem);
@@ -6680,13 +6680,13 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
     --fs-body: 1.04rem;
     --fs-small: .9rem;
   }
-  body:not(.canvas-editing) #app.screen:has(> .ed-hero) .ed-hero .hero.hero-tall {
+  #app.screen:has(> .ed-hero) .ed-hero .hero.hero-tall {
     min-height: clamp(290px, calc(48vw - 82px), 470px);
   }
-  body:not(.canvas-editing) #app.screen:has(> .ed-hero) .ed-hero .hero.hero-short {
+  #app.screen:has(> .ed-hero) .ed-hero .hero.hero-short {
     min-height: clamp(205px, calc(30vw - 70px), 275px);
   }
-  body:not(.canvas-editing) #app.screen:has(> .ed-hero) .ed-hero .hero-type {
+  #app.screen:has(> .ed-hero) .ed-hero .hero-type {
     padding-block: clamp(2rem, 5.2vw, 4.3rem) clamp(1.8rem, 4.7vw, 3.5rem);
   }
 }
