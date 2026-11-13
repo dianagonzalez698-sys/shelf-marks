@@ -11,7 +11,7 @@ import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js'
 import * as navigationUI from './ui.js';
 import { homeView } from './view-home.js?v=126';
 import { booksView } from './view-books.js?v=140';
-import { addView, bookFormView, rememberAddOrigin } from './view-book.js?v=140';
+import { addView, bookFormView, rememberAddOrigin } from './view-book.js?v=141';
 import { bookDetailView } from './view-book-detail.js';
 import { challengesView, challengeDetailView } from './view-challenges.js?v=140';
 import { bookmarksView } from './view-bookmarks.js?v=121';
