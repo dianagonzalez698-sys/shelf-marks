@@ -2907,7 +2907,7 @@ a.ed-meta:hover { color: var(--c-accent); }
 .word-word {
   margin: .1em 0 0;
   font-family: var(--f-display);
-  font-size: clamp(3.2rem, 13vw, 11rem);
+  font-size: calc(clamp(3.2rem, 13vw, 11rem) * var(--fz-display, 1));
   font-weight: var(--fw-display);
   line-height: .9;
   letter-spacing: -.012em;
