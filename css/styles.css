@@ -1784,6 +1784,8 @@ a.ed-meta:hover { color: var(--c-accent); }
 .statement { margin: 0; }
 .statement p {
   margin: 0;
+  /* Display-text ink must follow the editor's per-section color choice. */
+  color: var(--c-title-ink, inherit);
   font-family: var(--f-display);
   font-weight: var(--fw-display);
   line-height: 1.08;
