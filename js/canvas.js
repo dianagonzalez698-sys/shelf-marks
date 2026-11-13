@@ -936,7 +936,7 @@ function sectionPicker() {
 
 // Keep the page's original layout width; scale the entire rendered page only
 // while the inspector is open. This is a viewport fit, never a saved design edit.
-let canvasFitEnabled = false;
+let canvasFitEnabled = true;
 function syncCanvasFit() {
   const app = document.getElementById('app');
   const panel = document.getElementById('canvas-panel');
