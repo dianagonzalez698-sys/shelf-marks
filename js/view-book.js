@@ -490,6 +490,7 @@ export function bookFormView(params = {}) {
         tags.add(v);
         newTag.value = '';
         renderTagChips();
+        challengePreview();
       };
       root.querySelector('#add-tag').onclick = addTag;
       newTag.addEventListener('keydown', (e) => {
@@ -598,7 +599,7 @@ export function bookFormView(params = {}) {
           if (challengeFailures.length) toast('Book saved, but some challenge selections could not be updated.', 'bad');
           if (newUnlocks.length) {
             celebrate([...new Set(newUnlocks)]);
-          } else {
+          } else if (!challengeFailures.length) {
             toast(editing ? 'Changes saved.' : `“${esc(title)}” added.`, 'good');
           }
           if (!editing) quickFinishedLog = false;
