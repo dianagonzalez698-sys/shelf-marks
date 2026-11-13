@@ -6658,7 +6658,7 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
 /* Custom PNG frames affect only the chosen image's mount, never the page layout. */
 .mf-custom .m-mount {
   position: relative;
-  border: clamp(15px, 3.4vw, 45px) solid transparent;
+  border: clamp(10px, 1.2vw, 20px) solid transparent;
   border-image-source: var(--custom-frame-image);
   border-image-slice: 14% 8% 14% 8%;
   border-image-repeat: stretch;
