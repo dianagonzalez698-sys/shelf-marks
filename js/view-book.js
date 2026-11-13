@@ -145,6 +145,11 @@ export function addView({ query = {} } = {}) {
           if (input.value.trim().length >= 2) run(input.value.trim());
         };
       });
+      const initialQuery = String(query.search || '').trim();
+      if (initialQuery) {
+        input.value = initialQuery;
+        if (initialQuery.length >= 2) run(initialQuery);
+      }
       setTimeout(() => input.focus(), 60);
     },
   };
