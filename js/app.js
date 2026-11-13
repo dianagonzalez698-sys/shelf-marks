@@ -4,7 +4,7 @@ import { load, onChange, saveSettings, state } from './state.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
-import * as canvas from './canvas.js?v=135';
+import * as canvas from './canvas.js?v=136';
 import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
