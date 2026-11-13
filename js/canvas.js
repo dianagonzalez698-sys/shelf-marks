@@ -936,7 +936,7 @@ function sectionPicker() {
 
 // Keep the page's original layout width; scale the entire rendered page only
 // while the inspector is open. This is a viewport fit, never a saved design edit.
-let canvasFitEnabled = true;
+let canvasFitEnabled = false;
 function syncCanvasFit() {
   const app = document.getElementById('app');
   const panel = document.getElementById('canvas-panel');
@@ -1149,6 +1149,7 @@ export function setEditing(next) {
   ensureTools();
   document.body.classList.toggle('canvas-editing', next);
   if (!next) selected = null;
+  // Actual-size canvas is the default so Done never changes layout dimensions.
   // paintPanel intentionally does nothing outside editing. Explicitly hide
   // the old panel here or it remains floating over unrelated pages.
   const panel = document.getElementById('canvas-panel');
