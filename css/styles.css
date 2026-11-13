@@ -6664,3 +6664,35 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   border-image-repeat: stretch;
   filter: drop-shadow(0 5px 8px rgba(40, 27, 10, .18));
 }
+
+
+/* Live-size Design Mode preview. The page is literally the same full-width
+   layout seen after Done. Hide the inspector rather than shrinking the site;
+   it reopens when a section or editable text is selected. */
+body.canvas-editing.canvas-preview-full .canvas-panel { display: none !important; }
+body.canvas-editing.canvas-preview-full .canvas-toolbar [data-canvas="toggle-fit"] { display: none; }
+@media (min-width: 851px) {
+  html body.canvas-editing.canvas-preview-full #app {
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    zoom: 1 !important;
+    transform: none !important;
+  }
+  body.canvas-editing.canvas-preview-full .canvas-toolbar {
+    position: fixed;
+    left: auto;
+    right: 15px;
+    top: calc(var(--h-masthead, 68px) + 12px);
+    bottom: auto;
+    width: auto;
+    max-width: calc(100vw - 30px);
+    padding: 6px 8px;
+    border-radius: 7px;
+    justify-content: flex-end;
+    gap: 6px;
+    box-shadow: 0 3px 14px #241c1826;
+  }
+  body.canvas-editing.canvas-preview-full .canvas-toolbar-title,
+  body.canvas-editing.canvas-preview-full .canvas-save-state { display: none; }
+}
