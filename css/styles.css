@@ -6665,15 +6665,28 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   filter: drop-shadow(0 5px 8px rgba(40, 27, 10, .18));
 }
 
-/* True-size editing view: the canvas keeps the published viewport width.
-   The inspector overlays its left edge instead of narrowing or rescaling
-   the site. Optional Fit page remains available for an overview. */
+
+/* Homepage density follows the visually restrained original Design Mode
+   fit preview, without changing the physical canvas width or scaling any
+   uploaded artwork, curtains, clouds, or saved positioning coordinates.
+   All existing user-selected section typography multipliers still apply. */
 @media (min-width: 851px) {
-  body.canvas-editing:not(.canvas-fit-page) #app {
-    width: 100vw !important;
-    max-width: none !important;
-    margin-left: 0 !important;
-    zoom: 1 !important;
-    transform: none !important;
+  body:not(.canvas-editing) #app.screen:has(> .ed-hero) {
+    --fs-banner-title: clamp(1.65rem, 5.3vw, 3.7rem);
+    --fs-banner-sub: clamp(.94rem, 1.52vw, 1.05rem);
+    --fs-display: clamp(1.35rem, 2.85vw, 1.85rem);
+    --fs-stat: clamp(1.42rem, 2.75vw, 1.72rem);
+    --sp-section: clamp(1.75rem, 4vw, 2.9rem);
+    --fs-body: 1.04rem;
+    --fs-small: .9rem;
+  }
+  body:not(.canvas-editing) #app.screen:has(> .ed-hero) .ed-hero .hero.hero-tall {
+    min-height: clamp(290px, calc(48vw - 82px), 470px);
+  }
+  body:not(.canvas-editing) #app.screen:has(> .ed-hero) .ed-hero .hero.hero-short {
+    min-height: clamp(205px, calc(30vw - 70px), 275px);
+  }
+  body:not(.canvas-editing) #app.screen:has(> .ed-hero) .ed-hero .hero-type {
+    padding-block: clamp(2rem, 5.2vw, 4.3rem) clamp(1.8rem, 4.7vw, 3.5rem);
   }
 }
