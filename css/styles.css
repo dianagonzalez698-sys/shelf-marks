@@ -6664,3 +6664,22 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   border-image-repeat: stretch;
   filter: drop-shadow(0 5px 8px rgba(40, 27, 10, .18));
 }
+
+
+/* Published desktop homepage: match the editor's fit-to-page visual scale.
+   Unlike CSS zoom, transform preserves the original viewport-based hero and
+   decorative sizing. Expand the unscaled canvas to fill the viewport after
+   transforming; the compensating bottom margin avoids a blank scroll tail.
+   Section data, art positioning, and image assets remain unchanged. */
+@media (min-width: 851px) {
+  body:not(.canvas-editing) #app.home-published-fit {
+    --home-published-scale: .78;
+    width: calc(100vw / var(--home-published-scale));
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    transform: scale(var(--home-published-scale));
+    transform-origin: top left;
+    margin-bottom: calc(var(--home-original-height, 0px) * -.22);
+  }
+}

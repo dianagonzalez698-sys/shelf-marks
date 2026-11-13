@@ -441,6 +441,25 @@ export function wireEditing(setPage, stop, refreshLayer = () => {}, start = () =
   startEditing = start;
 }
 
+// The published home uses the editor's fit scale without zooming viewport
+// units (which previously stretched the hero). Track its real content height
+// so scaled pages don't leave invisible extra scroll at the bottom.
+let publishedHomeObserver = null;
+function syncPublishedHomeFit(app, isHome) {
+  app.classList.toggle('home-published-fit', !!isHome);
+  if (!publishedHomeObserver && typeof ResizeObserver !== 'undefined') {
+    publishedHomeObserver = new ResizeObserver(() => {
+      if (app.classList.contains('home-published-fit'))
+        app.style.setProperty('--home-original-height', app.scrollHeight + 'px');
+    });
+  }
+  publishedHomeObserver?.disconnect();
+  if (isHome) {
+    app.style.setProperty('--home-original-height', app.scrollHeight + 'px');
+    publishedHomeObserver?.observe(app);
+  } else app.style.removeProperty('--home-original-height');
+}
+
 export function render() {
   if (rendering) return;
   rendering = true;
@@ -473,6 +492,7 @@ export function render() {
     current = { path, view, params: match.params, query };
 
     app.innerHTML = view.html || '';
+    syncPublishedHomeFit(app, view.editPage === 'home');
     // Content-heavy screens keep their own forms. Other non-layout pages get
     // a small, independent art-and-text canvas without homepage section tools.
     const hasOwnEditor = /^\/book\/[^/]+(?:\/journal|\/edit)?$/.test(path) || ['/add', '/new'].includes(path);
