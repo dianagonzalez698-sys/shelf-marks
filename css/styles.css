@@ -6751,3 +6751,14 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
 .book-archive-page .book-inline-start { font-size: .92rem; }
 .book-archive-page .book-archive-prose { font-size: 1.36rem; }
 .book-archive-page.is-unwritten .book-empty-dateline { font-size: .88rem; }
+
+
+/* Challenge cover eyebrow: preserve the author's case instead of forcing
+   capitals. A per-section Capitalization choice still overrides this default.
+   Size and ink remain tied to the Ui / Small labels live editor controls. */
+#app.screen .ed-challengeHero { --tt-label: none; }
+#app.screen .ed-challengeHero .hero .ed-kicker {
+  font-size: calc(var(--fs-label) * var(--fz-ui, 1));
+  color: var(--c-label-ink, var(--c-banner-ink-dim));
+  text-transform: var(--tt-label, none);
+}
