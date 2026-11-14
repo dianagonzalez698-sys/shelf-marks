@@ -6745,3 +6745,41 @@ body.canvas-editing.canvas-preview-full .canvas-toolbar [data-canvas="toggle-fit
 .book-challenge-panel .book-challenge-list > .hint { margin: 0 0 10px; }
 .book-challenge-panel .book-challenge-choice .switch-text em { font-style: italic; }
 .book-challenge-panel .book-challenge-choice.is-automatic .switch-text em { opacity: .8; }
+
+
+/* Individual book pages: readable editorial sizing without moving artwork,
+   changing decorative offsets, or affecting the Library and homepage. */
+.book-archive-page .book-archive-nav { font-size: .91rem; }
+.book-archive-page .book-archive-nav .book-archive-edit { font-size: .9rem; }
+.book-archive-page .lit-overline { font-size: .9rem; line-height: 1.55; letter-spacing: .13em; }
+.book-archive-page .book-archive-intro h1 { font-size: clamp(3.3rem, 5.25vw, 6rem); }
+.book-archive-page .book-archive-author { font-size: clamp(1.75rem, 2.25vw, 2.1rem); }
+.book-archive-page .book-archive-facts { font-size: .93rem; line-height: 1.45; }
+.book-archive-page .book-archive-cover-caption { font-size: .79rem; }
+.book-archive-page .book-archive-next-step p { font-size: 1.25rem; line-height: 1.55; }
+.book-archive-page .book-archive-primary,
+.book-archive-page .book-archive-jump,
+.book-archive-page .book-archive-next-step #book-decor-toggle { font-size: .91rem; }
+.book-archive-page .book-archive-writing .lit-overline,
+.book-archive-page .book-archive-aside .lit-overline { font-size: .9rem; }
+.book-archive-page .book-archive-page-marker { font-size: .83rem; }
+.book-archive-page .book-archive-aside h3 { font-size: 2.15rem; }
+.book-archive-page .book-archive-aside p:not(.lit-overline),
+.book-archive-page .book-archive-aside small { font-size: 1.19rem; line-height: 1.55; }
+.book-archive-page .book-archive-aside li { font-size: 1.2rem; line-height: 1.5; }
+.book-archive-page .book-archive-aside .book-challenge-picked {
+  display: block; margin: 3px 0 0 25px; color: var(--c-ink-soft);
+  font-size: .91rem; font-style: italic;
+}
+.book-archive-page .book-archive-tags span { font-size: .88rem; }
+.book-archive-page .book-inline-heading > p:last-child { font-size: 1.2rem; }
+.book-archive-page .book-inline-journal label span,
+.book-archive-page .book-draft-state { font-size: .95rem; }
+.book-archive-page .book-inline-journal textarea,
+.book-archive-page .book-inline-journal select { font-size: 1.15rem; }
+.book-archive-page .book-inline-preview p:not(.lit-overline),
+.book-archive-page .book-inline-preview blockquote { font-size: 1.18rem; }
+.book-archive-page .book-entry-heading button,
+.book-archive-page .book-inline-start { font-size: .92rem; }
+.book-archive-page .book-archive-prose { font-size: 1.36rem; }
+.book-archive-page.is-unwritten .book-empty-dateline { font-size: .88rem; }

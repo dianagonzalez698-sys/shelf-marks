@@ -262,15 +262,9 @@ export function bookFormView(params = {}) {
             </div>
             ${guessed ? `<p class="hint">Pre-selected from the catalog; change if needed.</p>` : ''}
           </div>
-          <div class="book-classification-fields">
-            <p class="hint">Book classifications · used automatically by matching challenges</p>
-            <label class="switch-row"><input type="checkbox" id="f-classic" ${draft.isClassic ? 'checked' : ''}><span class="switch-text">Classic</span></label>
-            <label class="switch-row"><input type="checkbox" id="f-reread" ${draft.isReread ? 'checked' : ''}><span class="switch-text">Re-read</span></label>
-            <label class="switch-row"><input type="checkbox" id="f-tbr" ${draft.isTbr ? 'checked' : ''}><span class="switch-text">From my physical TBR</span></label>
-          </div>
           <div class="book-challenge-list" id="book-challenge-list">
             <p class="field-label">My reading challenges <span class="muted">(${activeChallenges.length})</span></p>
-            <p class="hint">All active challenges appear here. Checked automatically when this book matches a rule; you can include or exclude it yourself.</p>
+            <p class="hint">Select the challenges this book belongs to. Matching rules are preselected; you can adjust any of them.</p>
             ${activeChallenges.length ? activeChallenges.map(challenge => {
               const include = (challenge.includeBooks || []).includes(draft.id);
               const exclude = (challenge.excludeBooks || []).includes(draft.id);
@@ -364,9 +358,11 @@ export function bookFormView(params = {}) {
           author: root.querySelector('#f-author')?.value.trim() || '',
           authors: [root.querySelector('#f-author')?.value.trim() || ''],
           format,
-          isClassic: root.querySelector('#f-classic').checked,
-          isReread: root.querySelector('#f-reread').checked,
-          isTbr: root.querySelector('#f-tbr').checked,
+          // Legacy classification flags stay intact; challenge selections
+          // are managed through the unified, dynamic challenge checklist.
+          isClassic: !!draft.isClassic,
+          isReread: !!draft.isReread,
+          isTbr: !!draft.isTbr,
           firstPublishYear: year || null,
           series: root.querySelector('#f-series')?.value.trim() || '',
           tags: [...tags],
@@ -388,7 +384,7 @@ export function bookFormView(params = {}) {
           challengePreview();
         });
       });
-      for (const field of ['#f-title', '#f-author', '#f-year', '#f-series', '#f-classic', '#f-reread', '#f-tbr']) {
+      for (const field of ['#f-title', '#f-author', '#f-year', '#f-series']) {
         root.querySelector(field)?.addEventListener('input', challengePreview);
         root.querySelector(field)?.addEventListener('change', challengePreview);
       }
@@ -560,9 +556,9 @@ export function bookFormView(params = {}) {
           dateFinished: readingStatus.value === 'read' ? dateFinished : '',
           dateStarted: started && isValidISO(started) ? started : null,
           format,
-          isClassic: root.querySelector('#f-classic').checked,
-          isReread: root.querySelector('#f-reread').checked,
-          isTbr: root.querySelector('#f-tbr').checked,
+          isClassic: !!draft.isClassic,
+          isReread: !!draft.isReread,
+          isTbr: !!draft.isTbr,
           series: seriesInput.value.trim() || null,
           tags: [...tags],
           shelves: [...root.querySelectorAll('[data-personal-shelf]:checked')].map(el=>el.value),
