@@ -478,10 +478,9 @@ function render({ preservePanel = false } = {}) {
   if (!preservePanel) paintPanel();
 }
 
-function select(id) { showDesignEditor(); selected = id; advancedOpen = false; panelMode = id ? 'selected' : (simplePage ? 'add' : 'sections'); render(); }
+function select(id) { selected = id; advancedOpen = false; panelMode = id ? 'selected' : (simplePage ? 'add' : 'sections'); render(); }
 export function inspectSection(id) {
   if (!editing || !id || !layout.getSection(activePage, id)) return;
-  showDesignEditor();
   selectedSectionId = id;
   selected = null;
   panelMode = 'section';
@@ -494,7 +493,6 @@ document.addEventListener('canvas:inspect-text', (event) => {
 });
 export function inspectText(sectionId, key) {
   if (!editing || !sectionId || !key || !layout.getSection(activePage, sectionId)) return;
-  showDesignEditor();
   // Challenge banner words are supplied by the challenge record until an
   // override is entered. The generic inline editor would otherwise show an
   // empty box and no styling controls. Open the proper banner Text panel.
@@ -939,20 +937,11 @@ function sectionPicker() {
 // Keep the page's original layout width; scale the entire rendered page only
 // while the inspector is open. This is a viewport fit, never a saved design edit.
 let canvasFitEnabled = true;
-// Full preview displays the identical 100%-width canvas used outside Design Mode.
-// Its compact controls never change the underlying editorial layout.
-let canvasPreviewFull = true;
-function showDesignEditor() {
-  if (!editing || !canvasPreviewFull) return;
-  canvasPreviewFull = false;
-  document.body.classList.remove('canvas-preview-full');
-  syncCanvasFit();
-}
 function syncCanvasFit() {
   const app = document.getElementById('app');
   const panel = document.getElementById('canvas-panel');
   if (!app) return;
-  const fit = editing && !canvasPreviewFull && canvasFitEnabled && window.innerWidth > 850 && panel && !panel.hidden;
+  const fit = editing && canvasFitEnabled && window.innerWidth > 850 && panel && !panel.hidden;
   if (!fit) {
     app.style.removeProperty('--canvas-fit-scale');
     app.style.removeProperty('--canvas-fit-offset');
@@ -967,9 +956,6 @@ function syncCanvasFit() {
   }
   const button = document.querySelector('[data-canvas="toggle-fit"]');
   if (button) { button.textContent = canvasFitEnabled ? '100%' : 'Fit page'; button.title = canvasFitEnabled ? 'Show page at actual size' : 'Fit the entire page beside the editor'; }
-  const preview = document.querySelector('[data-canvas="toggle-preview"]');
-  if (preview) { preview.textContent = canvasPreviewFull ? 'Edit page' : 'Full preview'; preview.title = canvasPreviewFull ? 'Open Design Mode controls' : 'See the homepage exactly as it appears after Done'; }
-  document.body.classList.toggle('canvas-preview-full', editing && canvasPreviewFull);
 }
 window.addEventListener('resize', syncCanvasFit);
 
@@ -979,7 +965,6 @@ function ensureTools() {
   bar.id = 'canvas-toolbar'; bar.className = 'canvas-toolbar';
   bar.innerHTML = `<span class="canvas-toolbar-title">DESIGN MODE</span>
     <span class="canvas-save-state">Editing this page · Saved locally</span>
-    <button type="button" data-canvas="toggle-preview" title="See the page at live size">Edit page</button>
     <button type="button" data-canvas="toggle-fit" title="Show page at actual size">100%</button>
     <button type="button" data-canvas="undo" title="Undo (⌘/Ctrl+Z)" aria-label="Undo">↶</button>
     <button type="button" data-canvas="redo" title="Redo (⌘/Ctrl+Shift+Z or Ctrl+Y)" aria-label="Redo">↷</button>
@@ -1021,7 +1006,6 @@ function ensureTools() {
       const name = document.getElementById('canvas-site-name')?.value.trim();
       if (name) theme.setContent('siteName', name).then(() => toast('Site name saved.', 'good'));
     }
-    if (action === 'toggle-preview') { canvasPreviewFull = !canvasPreviewFull; syncCanvasFit(); }
     if (action === 'toggle-fit') { canvasFitEnabled = !canvasFitEnabled; syncCanvasFit(); }
     if (action === 'finish') document.getElementById('edit-page')?.click();
     if (action === 'remove' && selected) removeSelected();
@@ -1161,11 +1145,11 @@ function ensureTools() {
 export function setPage(pageId, { simple = false } = {}) { settingsStyleSelected = null; activePage = pageId; simplePage = !!simple; selected = null; selectedSectionId = null; selectedText = null; advancedOpen = false; panelMode = simplePage ? 'add' : 'sections'; history = []; future = []; saveState = 'saved'; render(); }
 export function setEditing(next) {
   editing = next;
-  if (next) { panelMode = simplePage ? 'add' : 'sections'; settingsStyleSelected = null; selectedSectionId = null; selectedText = null; canvasPreviewFull = true; canvasFitEnabled = true; }
+  if (next) { panelMode = simplePage ? 'add' : 'sections'; settingsStyleSelected = null; selectedSectionId = null; selectedText = null; canvasFitEnabled = true; }
   ensureTools();
   document.body.classList.toggle('canvas-editing', next);
   if (!next) selected = null;
-  // Full-size preview is the default; opening the editor fits the page beside its controls.
+  // The original full-width Design Mode toolbar and sidebar remain available.
   // paintPanel intentionally does nothing outside editing. Explicitly hide
   // the old panel here or it remains floating over unrelated pages.
   const panel = document.getElementById('canvas-panel');
