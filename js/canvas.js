@@ -730,8 +730,19 @@ function paintPanel() {
         }).catch(() => toast('Could not save that typography change.', 'bad'));
       };
       panel.querySelector('#canvas-text-font').onchange = e => {
-        input.style.fontFamily = e.target.value || getComputedStyle(document.documentElement).getPropertyValue('--f-body') || 'inherit';
-        updateStyle({ [role.font]: e.target.value });
+        const font = e.target.value;
+        // A previous individual-word font treatment can silently override
+        // the newly selected whole-text font. Choosing a font for this line
+        // replaces only the old inline font family, not its other formatting.
+        input.querySelectorAll('[style]').forEach(node => {
+          if (node.style.fontFamily) {
+            node.style.removeProperty('font-family');
+            if (!node.getAttribute('style')) node.removeAttribute('style');
+          }
+        });
+        input.style.fontFamily = font || getComputedStyle(document.documentElement).getPropertyValue('--f-ui') || 'inherit';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        updateStyle({ [role.font]: font });
       };
       panel.querySelector('#canvas-text-size').oninput = e => {
         const value = Number(e.target.value);
@@ -760,6 +771,20 @@ function paintPanel() {
     // The page itself is the preview. Update the rendered words during typing
     // without re-rendering the inspector and stealing the caret.
     let textSaveTimer = null;
+    let latestText = richValue(input.innerHTML);
+    // Commit snapshots sequentially; a previous asynchronous store write
+    // must never overwrite newer text or a just-changed font selection.
+    let pendingWrite = Promise.resolve();
+    const save = () => {
+      const next = latestText = richValue(input.innerHTML);
+      pendingWrite = pendingWrite.catch(() => {}).then(async () => {
+        const current = layout.getSection(activePage, target.sectionId);
+        if (current && current[target.key] !== next) {
+          await layout.updateSection(activePage, target.sectionId, { [target.key]: next });
+        }
+      });
+      return pendingWrite;
+    };
     input.addEventListener('input', () => {
       const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
       const visible = [...(block?.querySelectorAll('[data-edit]') || [])].find(el => el.dataset.edit === target.key);
@@ -777,13 +802,6 @@ function paintPanel() {
         save().catch(() => toast('Text could not be saved.', 'bad'));
       }, 300);
     });
-    const save = async () => {
-      const current = layout.getSection(activePage, target.sectionId);
-      const next = richValue(input.innerHTML);
-      if (current && current[target.key] !== next) {
-        await layout.updateSection(activePage, target.sectionId, { [target.key]: next });
-      }
-    };
     input.addEventListener('blur', () => {
       if (textSaveTimer) clearTimeout(textSaveTimer);
       textSaveTimer = null;
