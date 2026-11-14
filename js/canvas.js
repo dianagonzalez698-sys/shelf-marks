@@ -565,7 +565,7 @@ function paintPanel() {
           ${[70,80,90,100,110,125,150,175,200,250].map(n => `<option value="${n}">${n}%</option>`).join('')}
         </select></label>
         <div class="canvas-selection-actions">
-          <button type="button" id="canvas-selection-bold" aria-label="Bold selection">B</button>
+          <button type="button" id="canvas-selection-bold" aria-label="Toggle bold (⌘B / Ctrl+B)" title="Toggle bold (⌘B / Ctrl+B)">B</button>
           <button type="button" id="canvas-selection-italic" aria-label="Italicize selection"><i>I</i></button>
           <label class="canvas-selection-ink">Color <input id="canvas-selection-color" type="color" value="#49312b"></label>
           <button type="button" id="canvas-selection-reset">Clear style</button>
@@ -686,7 +686,28 @@ function paintPanel() {
     inlineFont.onchange = () => { if (inlineFont.value) applySelectionStyle({ fontFamily:inlineFont.value }); inlineFont.value = ''; };
     const inlineSize = panel.querySelector('#canvas-selection-size');
     inlineSize.onchange = () => { if (inlineSize.value) applySelectionStyle({ fontSize:inlineSize.value+'%' }); inlineSize.value = ''; };
-    panel.querySelector('#canvas-selection-bold').onclick = () => applySelectionStyle({ fontWeight:'700' });
+    // Use the native rich-text toggle so an already-bold selection becomes
+    // regular again. The toolbar and ⌘B / Ctrl+B share exactly one action.
+    const toggleSelectionBold = () => {
+      const selection = window.getSelection();
+      if (!selection?.rangeCount || !input.contains(selection.anchorNode)) {
+        if (savedRange) {
+          input.focus();
+          selection?.removeAllRanges();
+          selection?.addRange(savedRange.cloneRange());
+        } else input.focus();
+      }
+      document.execCommand('bold', false, null);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      rememberSelection();
+    };
+    panel.querySelector('#canvas-selection-bold').onclick = toggleSelectionBold;
+    input.addEventListener('keydown', (event) => {
+      if ((event.metaKey || event.ctrlKey) && !event.altKey && event.key.toLowerCase() === 'b') {
+        event.preventDefault();
+        toggleSelectionBold();
+      }
+    });
     panel.querySelector('#canvas-selection-italic').onclick = () => applySelectionStyle({ fontStyle:'italic' });
     panel.querySelector('#canvas-selection-color').onchange = e => {
       applySelectionStyle({ color:e.target.value });
@@ -708,7 +729,19 @@ function paintPanel() {
         if (block) block.style.setProperty({ Display: '--fz-display', Ui: '--fz-ui', Script: '--fz-script', Body: '--fz-body' }[role.role] || '--fz-body', String(value / 100));
       };
       panel.querySelector('#canvas-text-size').onchange = e => updateStyle({ [role.size]: String(Number(e.target.value) / 100) });
-      panel.querySelector('#canvas-text-weight').onchange = e => updateStyle({ [role.weight]: e.target.value });
+      panel.querySelector('#canvas-text-weight').onchange = e => {
+        const value = e.target.value;
+        // Apply directly to the displayed section so selecting Regular
+        // visibly removes the role's boldness without awaiting persistence.
+        const block = [...document.querySelectorAll('#app [data-sec]')]
+          .find(el => el.dataset.sec === target.sectionId);
+        const varName = { Display:'--fw-display', Body:'--fw-body', Ui:'--fw-label', Script:'--fw-script' }[role.role];
+        if (block && varName) {
+          if (value) block.style.setProperty(varName, value);
+          else block.style.removeProperty(varName);
+        }
+        updateStyle({ [role.weight]: value });
+      };
       panel.querySelector('#canvas-text-italic').onchange = e => updateStyle({ [role.italic]: e.target.checked ? 'italic' : 'normal' });
       panel.querySelector('#canvas-text-color').oninput = e => updateStyle({ [role.ink]: e.target.value });
 
