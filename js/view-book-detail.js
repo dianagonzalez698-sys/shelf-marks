@@ -1,6 +1,7 @@
 // A book is a small page in the reader's literary archive, distinct from the
 // form used to change it. Everything here reads existing book records.
-import { getBook, state, saveBook } from './state.js';
+import { getBook, state, saveBook, allChallenges } from './state.js';
+import { eligibility } from './rules.js?v=121';
 import { esc, attr, coverImg, toast, navigate } from './ui.js';
 import { formatDate } from './periods.js';
 import { src as artworkSrc } from './assets.js';
@@ -18,11 +19,12 @@ export function bookDetailView({ id } = {}) {
 
   const status = book.status || (book.dateFinished ? 'read' : 'want');
   const shelves = (state.settings.customShelves || []).filter(s => (book.shelves || []).includes(s.id));
-  const challengeNames = [
-    book.isClassic && 'Classic Every Quarter',
-    book.isTbr && 'Physical TBR Every Other Month',
-    book.isReread && 'Re-read',
-  ].filter(Boolean);
+  // The same eligible-book calculation powers the Challenges page and the
+  // Add/Edit Book checkboxes. Manual includes and excludes take precedence
+  // over any rule, and archived challenges are omitted automatically.
+  const matchingChallenges = allChallenges()
+    .map(challenge => ({ challenge, status: eligibility(book, challenge) }))
+    .filter(item => item.status === 'matched' || item.status === 'picked');
   const readingDates = [book.dateStarted && `Started ${formatDate(book.dateStarted)}`,
     book.dateFinished && `Finished ${formatDate(book.dateFinished)}`].filter(Boolean);
   const hasWriting = !!(book.review || book.favoriteQuote || book.notes || book.journalArtworkId || (book.journalDecorations || []).length);
@@ -99,8 +101,10 @@ export function bookDetailView({ id } = {}) {
         </main>
         <aside class="book-archive-aside">
           <section><p class="lit-overline">READING CHALLENGES</p><h3>How it counts</h3>
-            ${challengeNames.length ? `<ul>${challengeNames.map(name=>`<li><span>✧</span> ${esc(name)}</li>`).join('')}</ul>` : '<p>No challenge categories selected yet.</p>'}
-            ${book.dateFinished && status === 'read' ? '<small>Completed reading dates count toward applicable goals.</small>' : '<small>Finish dates determine progress on dated challenges.</small>'}
+            ${matchingChallenges.length ? `<ul>${matchingChallenges.map(({challenge, status: choice})=>`<li><span>✧</span> ${esc(challenge.name)}${choice === 'picked' ? '<small class="book-challenge-picked">Hand-selected</small>' : ''}</li>`).join('')}</ul>` : '<p>No reading challenges selected for this book.</p>'}
+            ${book.dateFinished && status === 'read'
+              ? '<small>Finish dates determine which challenge period receives credit.</small>'
+              : '<small>Selected challenges appear here now. Their reading progress updates when you finish and log the book.</small>'}
           </section>
           <section><p class="lit-overline">MY SHELVES</p><h3>Filed under</h3>
             ${shelves.length || (book.tags || []).length ? `<div class="book-archive-tags">${[...shelves.map(s=>s.name),...(book.tags || [])].map(name=>`<span>${esc(name)}</span>`).join('')}</div>` : '<p>No personal shelves or tags yet.</p>'}
