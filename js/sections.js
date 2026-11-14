@@ -1425,8 +1425,8 @@ export const SECTION_TYPES = {
           <span class="hero-scrim" style="--scrim:${Number(sec.scrim == null ? 50 : sec.scrim) / 100}"></span>
           <div class="hero-type">
             ${sec.showWindow !== false ? kicker(sec.eyebrowText || describeWindow(c.window), 'eyebrowText') : ''}
-            <h1 class="hero-title" data-edit="titleText">${esc(sec.titleText || c.name)}</h1>
-            ${sec.showBlurb !== false && (sec.subtitleText || c.blurb) ? `<p class="hero-sub" data-edit="subtitleText">${esc(sec.subtitleText || c.blurb)}</p>` : ''}
+            <h1 class="hero-title" data-edit="titleText">${rich(sec.titleText || c.name)}</h1>
+            ${sec.showBlurb !== false && (sec.subtitleText || c.blurb) ? `<p class="hero-sub" data-edit="subtitleText">${rich(sec.subtitleText || c.blurb)}</p>` : ''}
           </div>
         </div>`, 'ed-bleed');
     },
