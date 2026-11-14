@@ -81,7 +81,8 @@ export function applySectionVars(el, sec) {
 
 /** Which type role a given text field is drawn in. */
 const ROLE_FOR_KEY = {
-  eyebrow: 'Ui', kicker: 'Ui',
+  eyebrow: 'Ui', kicker: 'Ui', eyebrowText: 'Ui',
+  titleText: 'Display', subtitleText: 'Body',
   title: 'Display',
   subtitle: 'Body', body: 'Body', text: 'Body',
   note: 'Body', caption: 'Body', quote: 'Body',
