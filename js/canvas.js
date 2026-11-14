@@ -493,14 +493,9 @@ document.addEventListener('canvas:inspect-text', (event) => {
 });
 export function inspectText(sectionId, key) {
   if (!editing || !sectionId || !key || !layout.getSection(activePage, sectionId)) return;
-  // Challenge banner words are supplied by the challenge record until an
-  // override is entered. The generic inline editor would otherwise show an
-  // empty box and no styling controls. Open the proper banner Text panel.
-  if (layout.getSection(activePage, sectionId).type === 'challengeHero') {
-    inspectSection(sectionId);
-    document.querySelector('#canvas-panel [data-inspector-tab="content"]')?.click();
-    return;
-  }
+  // All text on all editable pages opens the matching inline text inspector,
+  // including challenge banners. Their inherited record copy is used as the
+  // starting value until a personal text override is saved.
   selectedText = { sectionId, key };
   selectedSectionId = sectionId;
   selected = null;
@@ -559,7 +554,7 @@ function paintPanel() {
     panel.innerHTML = `<div class="canvas-panel-head"><strong>EDIT TEXT</strong><button type="button" data-canvas="text-back">← Back</button></div>${tabs}
       <p class="canvas-section-label">${esc(SECTION_TYPES[sec.type]?.label || 'Section')}<strong>${esc(label)}</strong></p>
       <p class="canvas-panel-hint">Edit the text below. Changes use the same fonts as your page.</p>
-      <div id="canvas-inline-text" class="canvas-inline-text" contenteditable="true" role="textbox" aria-label="${esc(label)}" aria-multiline="${!!field?.multiline}">${rich(sec[selectedText.key] || wordSectionEditableText(sec, selectedText.key) || '')}</div>
+      <div id="canvas-inline-text" class="canvas-inline-text" contenteditable="true" role="textbox" aria-label="${esc(label)}" aria-multiline="${!!field?.multiline}">${rich(sec[selectedText.key] || wordSectionEditableText(sec, selectedText.key) || [...(document.querySelectorAll('#app [data-sec]') || [])].find(el => el.dataset.sec === selectedText.sectionId)?.querySelector('[data-edit="' + selectedText.key + '"]')?.textContent || '')}</div>
       <details class="canvas-selection-format canvas-selection-disclosure" aria-label="Selected text formatting"><summary>Style individual words</summary>
         <p>Highlight words in the text box to style them separately.</p>
         <label>Selected text font
