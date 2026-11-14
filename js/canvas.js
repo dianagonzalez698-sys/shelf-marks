@@ -607,19 +607,25 @@ function paintPanel() {
       if (!live) return;
       const liveCss = getComputedStyle(live);
       const sectionCss = section ? getComputedStyle(section) : null;
-      const available = Math.max(190, panel.clientWidth - 42);
-      const naturalWidth = Math.max(available, live.getBoundingClientRect().width || live.clientWidth || available);
-      const scale = Math.min(1, available / naturalWidth);
-      const properties = ['fontFamily', 'fontSize', 'fontWeight', 'fontStyle',
-        'lineHeight', 'letterSpacing', 'wordSpacing', 'textTransform',
-        'textAlign', 'textIndent', 'textDecoration', 'fontVariant',
-        'fontKerning', 'textWrap', 'hyphens', 'color'];
+      // The sidebar is an editor, not a miniature duplicate of the whole
+      // page. A banner line can be >1000px wide: zooming that width into a
+      // 350px inspector made ordinary text 3–6px tall. Keep the real family,
+      // emphasis and colour, but show its text at a legible editor size.
+      const properties = ['fontFamily', 'fontWeight', 'fontStyle',
+        'letterSpacing', 'wordSpacing', 'textTransform',
+        'textDecoration', 'fontVariant', 'fontKerning', 'color'];
       for (const key of properties) input.style[key] = liveCss[key];
-      input.style.width = naturalWidth + 'px';
+      const actualSize = parseFloat(liveCss.fontSize) || 17;
+      input.style.fontSize = Math.max(17, Math.min(30, actualSize)) + 'px';
+      input.style.lineHeight = '1.45';
+      input.style.width = '100%';
       input.style.boxSizing = 'border-box';
-      input.style.zoom = String(scale);
+      input.style.zoom = '1';
       input.style.whiteSpace = 'pre-wrap';
-      input.style.overflowWrap = liveCss.overflowWrap || 'break-word';
+      input.style.textAlign = 'left';
+      input.style.textIndent = '0';
+      input.style.textWrap = 'wrap';
+      input.style.overflowWrap = 'anywhere';
       // Keep white-on-dark quotations legible without changing their ink.
       // The live section's solid colour, when available, is used here too.
       const ink = liveCss.color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
