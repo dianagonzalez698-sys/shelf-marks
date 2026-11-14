@@ -615,9 +615,9 @@ function paintPanel() {
         'letterSpacing', 'wordSpacing', 'textTransform',
         'textDecoration', 'fontVariant', 'fontKerning', 'color'];
       for (const key of properties) input.style[key] = liveCss[key];
-      const actualSize = parseFloat(liveCss.fontSize) || 17;
-      input.style.fontSize = Math.max(17, Math.min(30, actualSize)) + 'px';
-      input.style.lineHeight = '1.45';
+      const actualSize = parseFloat(liveCss.fontSize) || 16;
+      input.style.fontSize = Math.max(15, Math.min(21, actualSize)) + 'px';
+      input.style.lineHeight = '1.35';
       input.style.width = '100%';
       input.style.boxSizing = 'border-box';
       input.style.zoom = '1';
@@ -715,13 +715,24 @@ function paintPanel() {
     panel.querySelector('#canvas-selection-reset').onclick = () => applySelectionStyle({}, true);
     if (role) {
       const updateStyle = (patch) => {
+        const block = [...document.querySelectorAll('#app [data-sec]')]
+          .find(el => el.dataset.sec === target.sectionId);
+        // Apply the new role values synchronously: the same element is used
+        // for the published page, so this is true WYSIWYG rather than waiting
+        // for a storage write before repainting the chosen text.
+        if (block) applySectionVars(block, { ...layout.getSection(activePage, target.sectionId), ...patch });
+        syncInlineTextPreview();
         layout.updateSection(activePage, target.sectionId, patch).then(() => {
-          const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
-          if (block) applySectionVars(block, layout.getSection(activePage, target.sectionId));
+          const currentBlock = [...document.querySelectorAll('#app [data-sec]')]
+            .find(el => el.dataset.sec === target.sectionId);
+          if (currentBlock) applySectionVars(currentBlock, layout.getSection(activePage, target.sectionId));
           syncInlineTextPreview();
         }).catch(() => toast('Could not save that typography change.', 'bad'));
       };
-      panel.querySelector('#canvas-text-font').onchange = e => updateStyle({ [role.font]: e.target.value });
+      panel.querySelector('#canvas-text-font').onchange = e => {
+        input.style.fontFamily = e.target.value || getComputedStyle(document.documentElement).getPropertyValue('--f-body') || 'inherit';
+        updateStyle({ [role.font]: e.target.value });
+      };
       panel.querySelector('#canvas-text-size').oninput = e => {
         const value = Number(e.target.value);
         panel.querySelector('#canvas-text-size-value').textContent = value + '%';
@@ -748,6 +759,7 @@ function paintPanel() {
     }
     // The page itself is the preview. Update the rendered words during typing
     // without re-rendering the inspector and stealing the caret.
+    let textSaveTimer = null;
     input.addEventListener('input', () => {
       const block = [...document.querySelectorAll('#app [data-sec]')].find(el => el.dataset.sec === target.sectionId);
       const visible = [...(block?.querySelectorAll('[data-edit]') || [])].find(el => el.dataset.edit === target.key);
@@ -756,6 +768,14 @@ function paintPanel() {
         if (block?.classList.contains('ed-statement') && target.key === 'text')
           attachStatementWidthHandle(visible, target.sectionId);
       }
+      // Save the exact text being previewed, including selected-word styles.
+      // Without this, changing fields can leave an older challenge value
+      // visible until a blur event happens.
+      if (textSaveTimer) clearTimeout(textSaveTimer);
+      textSaveTimer = setTimeout(() => {
+        textSaveTimer = null;
+        save().catch(() => toast('Text could not be saved.', 'bad'));
+      }, 300);
     });
     const save = async () => {
       const current = layout.getSection(activePage, target.sectionId);
@@ -764,7 +784,11 @@ function paintPanel() {
         await layout.updateSection(activePage, target.sectionId, { [target.key]: next });
       }
     };
-    input.addEventListener('blur', () => save().catch(() => toast('Text could not be saved.', 'bad')));
+    input.addEventListener('blur', () => {
+      if (textSaveTimer) clearTimeout(textSaveTimer);
+      textSaveTimer = null;
+      save().catch(() => toast('Text could not be saved.', 'bad'));
+    });
     panel.querySelector('[data-canvas="text-save"]').onclick = () => {
       save().then(() => toast('Text saved.', 'good')).catch(() => toast('Text could not be saved.', 'bad'));
     };
