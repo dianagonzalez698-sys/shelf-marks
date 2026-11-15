@@ -282,7 +282,7 @@ export function bookmarkLabels(challenge) {
         challengeName: challenge.name,
         periodKey: String(i + 1),
         title: challenge.filter?.type === 'title' && challenge.bookmarkTitles?.[id]
-          ? `Book ${i + 1} · ${challenge.bookmarkTitles[id]}`
+          ? challenge.bookmarkTitles[id]
           : `Book ${i + 1}`,
         assignedTitle: challenge.filter?.type === 'title' ? (challenge.bookmarkTitles?.[id] || '') : '',
         bonus: false,

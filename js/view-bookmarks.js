@@ -7,8 +7,8 @@ import {
 import {
   esc, attr, toast, markVisual, checkBadge, openSheet, confirmSheet,
 } from './ui.js';
-import { evaluate, bookmarkLabels } from './rules.js?v=149';
-import { renderSections } from './sections.js?v=107';
+import { evaluate, bookmarkLabels } from './rules.js?v=152';
+import { renderSections } from './sections.js?v=152';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
 
@@ -168,7 +168,7 @@ function openBookmarkArtworkStudio() {
 
 let closeBookmarkPopout = null;
 
-function openBookmark(id, anchor = null) {
+export function openBookmark(id, anchor = null) {
   if (closeBookmarkPopout) closeBookmarkPopout();
   const challenges = allChallenges();
   let meta = null;
@@ -193,6 +193,7 @@ function openBookmark(id, anchor = null) {
   const requirement = (() => {
     if (!challenge) return '';
     if (meta && meta.bonus) return 'Complete every period of this challenge.';
+    if (meta?.assignedTitle) return `Finish “${meta.assignedTitle}” to earn this bookmark.`;
     if (period) return `Finish ${period.target} qualifying book${period.target === 1 ? '' : 's'} in ${period.label}. ${period.count} so far.`;
     return `Keep going on ${challenge.name}.`;
   })();

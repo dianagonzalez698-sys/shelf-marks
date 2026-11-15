@@ -9,16 +9,17 @@ import {
   esc, attr, toast, progressBar, progressLine, markVisual, checkBadge, checkGlyph,
   openSheet, navigate, confirmSheet, coverImg, render,
 } from './ui.js';
-import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js?v=149';
+import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js?v=152';
 import { formatDate, quarters, YEAR } from './periods.js';
 import { FILTER_TYPES, WINDOW_TYPES } from './config.js?v=121';
 import { t } from './theme.js';
-import { renderSections, renderSection } from './sections.js?v=149';
+import { renderSections, renderSection } from './sections.js?v=152';
 import { figure, backdrop, media } from './media.js';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
 import { openMediaEditor } from './view-layout.js?v=149';
 import { searchBooks, debounce } from './openlibrary.js';
+import { openBookmark } from './view-bookmarks.js?v=152';
 
 /* ----------------------------------------------------------------- list ---- */
 
@@ -161,6 +162,17 @@ export function challengeDetailView(params) {
       } else {
         focusedFor = null;
       }
+
+      // Challenge bookmarks open the bookmark itself, with its artwork,
+      // assigned title, requirement, and unlock status—not the archive page.
+      root.querySelectorAll('a.bm[href^="#/bookmarks?focus="]').forEach(link => {
+        link.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const id = new URLSearchParams(link.getAttribute('href').split('?')[1] || '').get('focus');
+          if (id) openBookmark(id, link);
+        });
+      });
 
       const open = () => openEditor(challenge);
       root.querySelectorAll('[data-bookmark-assignments]').forEach(button => { button.onclick = open; });
@@ -401,7 +413,7 @@ export function openEditor(challenge) {
         if (!enabled) return;
         const titles = [...selectedTitles.values()];
         assignmentBox.innerHTML = `<label class="ch-assignments-title">One book per bookmark</label>
-          <p class="hint">Choose which selected title earns each bookmark. Finishing Book 2 can unlock Bookmark 2 even before Book 1.</p>
+          <p class="hint">Choose which selected title earns each bookmark. Mark the assigned title as Read and enter its finish date to earn that bookmark, in any order.</p>
           <div class="ch-assignments-list">${assignedBookmarkIds().map((id, i) => `
             <label class="ch-assignment-row"><span>Bookmark ${i + 1}</span>
               <select data-assigned-bookmark="${attr(id)}">
