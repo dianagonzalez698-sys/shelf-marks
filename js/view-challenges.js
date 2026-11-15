@@ -395,7 +395,7 @@ export function openEditor(challenge) {
         return Array.from({ length: count }, (_, i) => `${prefix}-${i + 1}`);
       };
       const paintBookmarkAssignments = () => {
-        const enabled = filterEl.value === 'title' && windowEl.value !== 'recurring';
+        const enabled = !creating && filterEl.value === 'title' && windowEl.value !== 'recurring';
         assignmentBox.hidden = !enabled;
         if (!enabled) return;
         const titles = [...selectedTitles.values()];
