@@ -384,6 +384,34 @@ export function openEditor(challenge) {
         .filter(Boolean).map((title) => [title.trim().toLocaleLowerCase(), title.trim()]));
       const titleKey = (title) => String(title || '').trim().toLocaleLowerCase();
 
+      // Stable bookmark IDs retain artwork; assignments are book titles.
+      const assignedTitles = { ...(c.bookmarkTitles || {}) };
+      const assignmentBox = sheet.querySelector('#ch-bookmark-assignments');
+      const assignedBookmarkIds = () => {
+        const id = c.id || slug(nameEl.value || 'challenge');
+        const count = Math.max(0, Math.min(999, Number(targetEl.value) || 0));
+        if (Array.isArray(c.bookmarks) && c.bookmarks.length) return c.bookmarks.slice(0, count);
+        const prefix = c.bookmarkPrefix || id;
+        return Array.from({ length: count }, (_, i) => `${prefix}-${i + 1}`);
+      };
+      const paintBookmarkAssignments = () => {
+        const enabled = filterEl.value === 'title' && windowEl.value !== 'recurring';
+        assignmentBox.hidden = !enabled;
+        if (!enabled) return;
+        const titles = [...selectedTitles.values()];
+        assignmentBox.innerHTML = `<label class="ch-assignments-title">One book per bookmark</label>
+          <p class="hint">Choose which selected title earns each bookmark. Finishing Book 2 can unlock Bookmark 2 even before Book 1.</p>
+          <div class="ch-assignments-list">${assignedBookmarkIds().map((id, i) => `
+            <label class="ch-assignment-row"><span>Bookmark ${i + 1}</span>
+              <select data-assigned-bookmark="${attr(id)}">
+                <option value="">Choose a title…</option>
+                ${titles.map(title => `<option value="${attr(title)}" ${titleKey(assignedTitles[id]) === titleKey(title) ? 'selected' : ''}>${esc(title)}</option>`).join('')}
+              </select></label>`).join('')}</div>
+          <p class="hint">Your bookmark artwork stays the same. Titles not yet in your Library can be assigned.</p>`;
+        assignmentBox.querySelectorAll('[data-assigned-bookmark]').forEach(select => {
+          select.onchange = () => { assignedTitles[select.dataset.assignedBookmark] = select.value; };
+        });
+      };
       const windowExtra = sheet.querySelector('#window-extra');
       const targetNote = sheet.querySelector('#target-note');
       const bookmarkNote = sheet.querySelector('#bookmark-note');
