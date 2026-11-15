@@ -17,7 +17,7 @@ import { renderSections, renderSection } from './sections.js?v=149';
 import { figure, backdrop, media } from './media.js';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
-import { openMediaEditor } from './view-layout.js?v=147';
+import { openMediaEditor } from './view-layout.js?v=149';
 import { searchBooks, debounce } from './openlibrary.js';
 
 /* ----------------------------------------------------------------- list ---- */
