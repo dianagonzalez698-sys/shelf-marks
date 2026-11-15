@@ -1476,6 +1476,9 @@ export const SECTION_TYPES = {
         ${sec.showBar !== false
           ? progressLine(`${earned} of ${ids.length} collected`, pct, { tone: 'apricot', done: earned === ids.length })
           : ''}
+        ${c.filter?.type === 'title' && !r.recurring
+          ? '<button type="button" class="ch-bookmark-assign-link" data-bookmark-assignments>Assign books to bookmarks</button>'
+          : ''}
         <div class="bm-grid">
           ${ids.map((id) => {
             const meta = labels.get(id);
