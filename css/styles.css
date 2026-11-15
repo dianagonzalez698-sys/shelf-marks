@@ -6788,3 +6788,12 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
 }
 #canvas-panel .canvas-selection-disclosure { margin: 8px 0; }
 #canvas-panel .canvas-text-done { margin-top: 10px; }
+
+
+/* Per-bookmark title assignment is offered only for title-list challenges. */
+#ch-bookmark-assignments[hidden] { display: none; }
+#ch-bookmark-assignments .ch-assignments-title { display: block; margin-bottom: 8px; font-weight: 600; }
+#ch-bookmark-assignments .ch-assignments-list { display: grid; gap: 11px; margin: 14px 0 10px; }
+#ch-bookmark-assignments .ch-assignment-row { display: grid; grid-template-columns: minmax(80px, 100px) minmax(0, 1fr); align-items: center; gap: 12px; font-size: .97rem; }
+#ch-bookmark-assignments .ch-assignment-row select { width: 100%; min-width: 0; }
+@media (max-width: 520px) { #ch-bookmark-assignments .ch-assignment-row { grid-template-columns: 1fr; gap: 5px; } }
