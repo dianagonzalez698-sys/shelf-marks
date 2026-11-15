@@ -357,6 +357,8 @@ export function openEditor(challenge) {
         <p class="hint" id="bookmark-note"></p>
       </div>
 
+      <div class="field" id="ch-bookmark-assignments" hidden></div>
+
       ${!creating ? `<div class="field">
         <label>Cover artwork</label>
         <button class="btn" id="ch-edit-cover" type="button">Edit cover artwork</button>
