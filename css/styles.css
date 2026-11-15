@@ -6797,3 +6797,11 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
 #ch-bookmark-assignments .ch-assignment-row { display: grid; grid-template-columns: minmax(80px, 100px) minmax(0, 1fr); align-items: center; gap: 12px; font-size: .97rem; }
 #ch-bookmark-assignments .ch-assignment-row select { width: 100%; min-width: 0; }
 @media (max-width: 520px) { #ch-bookmark-assignments .ch-assignment-row { grid-template-columns: 1fr; gap: 5px; } }
+
+#app .ch-bookmark-assign-link {
+  display: block; margin: 0 0 17px auto; padding: 4px 0;
+  border: 0; border-bottom: 1px solid currentColor;
+  background: none; color: var(--c-accent, #ad4069);
+  font: inherit; font-size: .94rem; cursor: pointer;
+}
+#app .ch-bookmark-assign-link:hover { opacity: .8; }
