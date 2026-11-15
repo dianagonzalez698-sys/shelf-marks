@@ -9,7 +9,7 @@ import {
   esc, attr, toast, progressBar, progressLine, markVisual, checkBadge, checkGlyph,
   openSheet, navigate, confirmSheet, coverImg, render,
 } from './ui.js';
-import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js?v=149';
+import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js?v=152';
 import { formatDate, quarters, YEAR } from './periods.js';
 import { FILTER_TYPES, WINDOW_TYPES } from './config.js?v=121';
 import { t } from './theme.js';
