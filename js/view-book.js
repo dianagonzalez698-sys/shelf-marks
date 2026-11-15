@@ -8,7 +8,7 @@ import { esc, attr, toast, coverImg, navigate, confirmSheet, bookmarkArt, openSh
 import { searchBooks, debounce, guessFormat } from './openlibrary.js';
 import { AUTHOR_SERIES_HINTS } from './config.js?v=121';
 import { todayISO, isValidISO, formatDate } from './periods.js';
-import { bookmarkCatalog, matchesFilter, describeFilter } from './rules.js?v=121';
+import { bookmarkCatalog, matchesFilter, describeFilter } from './rules.js?v=149';
 import * as assets from './assets.js';
 
 // Handed from the search screen to the form screen.
