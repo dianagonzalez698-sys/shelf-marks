@@ -1056,14 +1056,31 @@ export function openSectionEditor(pageId, sectionId, { mountIn = null } = {}) {
             }
             // Keep the actual journal page in step with the text box without
             // replacing the entire section (which would disrupt the editor).
+            const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
             if (['text', 'textarea', 'rich'].includes(fieldDef.type)) {
-              const sectionNode = [...document.querySelectorAll('#app [data-sec]')].find(node => node.dataset.sec === sectionId);
               const previewKey = key === 'eyebrow' ? 'kicker' : key;
-              const visible = [...(sectionNode?.querySelectorAll('[data-edit]') || [])].find(node => node.dataset.edit === previewKey);
+              let visible = [...(sectionNode?.querySelectorAll('[data-edit]') || [])].find(node => node.dataset.edit === previewKey);
+              // The challenge subtitle may have been hidden when the section
+              // was last rendered. Typing a new subtitle must create the live
+              // line immediately, not merely save a value behind a hidden p.
+              if (!visible && key === 'subtitleText' && String(v).trim() && sectionNode?.classList.contains('ed-challengeHero')) {
+                const type = sectionNode.querySelector('.hero-type');
+                if (type) {
+                  visible = document.createElement('p');
+                  visible.className = 'hero-sub';
+                  visible.dataset.edit = 'subtitleText';
+                  type.appendChild(visible);
+                }
+              }
               if (visible) visible.innerHTML = rich(v);
             }
             if (fieldDef.type === 'font') el.style.fontFamily = v || 'inherit';
-            await commit({ [key]: v }, { rebuild: !!fieldDef.controls });
+            // Entering a subtitle explicitly opts it back into view even
+            // when a previous Show blurb setting was disabled.
+            const patch = key === 'subtitleText' && String(v).trim()
+              ? { subtitleText: v, showBlurb: true }
+              : { [key]: v };
+            await commit(patch, { rebuild: !!fieldDef.controls });
           });
         });
 
