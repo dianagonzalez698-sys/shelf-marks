@@ -717,6 +717,23 @@ export function openEditor(challenge) {
           filter.tag = v;
         }
 
+        // Optional title-specific awards only apply to non-recurring title rules.
+        // Once any title is assigned, require a unique selected title per slot.
+        let bookmarkTitles = {};
+        if (filter.type === 'title' && windowEl.value !== 'recurring') {
+          const ids = assignedBookmarkIds();
+          bookmarkTitles = Object.fromEntries(ids
+            .filter(id => selectedTitles.has(titleKey(assignedTitles[id])))
+            .map(id => [id, selectedTitles.get(titleKey(assignedTitles[id]))]));
+          const countAssigned = Object.keys(bookmarkTitles).length;
+          const hasPartial = ids.some(id => assignedTitles[id]) && countAssigned !== ids.length;
+          const distinct = new Set(Object.values(bookmarkTitles).map(titleKey));
+          if (hasPartial || (countAssigned && distinct.size !== ids.length)) {
+            toast('Choose a different selected title for each bookmark, or leave all unassigned.', 'bad');
+            assignmentBox.querySelector('select')?.focus();
+            return;
+          }
+        }
         // Build the window
         let win = { type: windowEl.value, year: YEAR };
         if (win.type === 'quarter') {
@@ -742,6 +759,7 @@ export function openEditor(challenge) {
           window: win,
           target,
           bookmarkPrefix: c.bookmarkPrefix || c.id || null,
+          bookmarkTitles,
         };
         if (!record.bookmarkPrefix) record.bookmarkPrefix = record.id;
         // Existing recurring challenges retain their awarded bookmark ids.
