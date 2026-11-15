@@ -1,5 +1,5 @@
 import { allChallenges, bookmarkStats, state, saveSettings, uid } from './state.js';
-import { esc, attr, toast } from './ui.js';
+import { esc, attr, toast, openSheet } from './ui.js';
 import * as assets from './assets.js';
 
 const FEATURES = [
@@ -20,7 +20,7 @@ export function collectionsView() {
   const booksOn = (id) => state.books.filter(b=>(b.shelves || []).includes(id));
   const cover = (item) => assets.src(item.coverAssetId);
   const card = (item,index) => `<a class="lit-cabinet-piece lit-cabinet-${item.type}" data-collection-id="${attr(item.id)}" data-collection-tone="${attr(item.tone || 'paper')}" href="${attr(item.href)}">
-    <div class="lit-cabinet-art">${cover(item) ? `<img src="${attr(cover(item))}" alt="" loading="lazy">` : `<span class="lit-cabinet-ornament" aria-hidden="true">${item.ornament}</span>`}</div>
+    <div class="lit-cabinet-art" data-collection-art="${attr(item.id)}">${cover(item) ? `<img src="${attr(cover(item))}" alt="" loading="lazy">` : `<span class="lit-cabinet-ornament" aria-hidden="true">${item.ornament}</span>`}<span class="lit-cabinet-art-edit" aria-hidden="true">Change image</span></div>
     <div class="lit-cabinet-copy"><span class="lit-cabinet-index">${item.type === 'feature' ? item.number : String(index - FEATURES.length + 1).padStart(2,'0')} &nbsp; / &nbsp; ${esc(item.label)}</span>
       <h2 data-preview-title="${attr(item.id)}">${esc(item.title)}</h2><p data-preview-description="${attr(item.id)}">${esc(item.description)}</p>
       <small>${item.type === 'feature' ? esc(countFor(item.id,marks)) : `${booksOn(item.id).length} ${booksOn(item.id).length === 1 ? 'book' : 'books'}`} <span aria-hidden="true">↗</span></small></div>
@@ -63,8 +63,90 @@ export function collectionsView() {
           if (personal) await saveSettings({customShelves:currentShelves.map(s=>s.id===id ? {...s,...patch} : s)});
           else await saveSettings({collectionDesign:{...(state.settings.collectionDesign || {}),[id]:{...(state.settings.collectionDesign?.[id] || {}),...patch}}});
           toast('Collection updated.','good');
-        } catch (_) { toast('Could not update the collection.','bad'); }
+          return true;
+        } catch (_) { toast('Could not update the collection.','bad'); return false; }
       };
+      // In Design Mode, the picture itself is its editor. This also works
+      // for the three built-in collections and every personal shelf.
+      const openCoverPicker = (id) => {
+        const currentItem = items.find(item => item.id === id);
+        if (!currentItem) return;
+        const savedImages = assets.list();
+        openSheet(`
+          <h2>Artwork for ${esc(currentItem.title)}</h2>
+          <p class="hint">Choose a saved picture or upload a new one. Only this collection changes.</p>
+          <div class="lit-collection-picker-grid">
+            ${savedImages.map(image => `<button type="button" data-cover-choose="${attr(image.id)}"
+                class="lit-collection-picker-choice${currentItem.coverAssetId === image.id ? ' is-selected' : ''}"
+                aria-label="Use ${attr(image.name || 'this artwork')} for ${attr(currentItem.title)}"
+                aria-pressed="${currentItem.coverAssetId === image.id}">
+              <img src="${attr(image.dataUrl)}" alt="" loading="lazy"><span>${esc(image.name || 'Untitled')}</span>
+            </button>`).join('')}
+          </div>
+          <label class="lit-collection-upload-label">＋ Upload new artwork
+            <input type="file" accept="image/*" data-collection-picker-upload>
+          </label>
+          <div class="btn-row lit-collection-picker-footer">
+            <button type="button" class="btn" data-collection-picker-clear>Remove image</button>
+            <button type="button" class="btn btn-primary" data-close>Done</button>
+          </div>
+        `, {
+          onMount(sheet, close) {
+            const choose = async (assetId) => {
+              const previous = currentItem.coverAssetId || '';
+              // Update this image immediately, then persist through the same
+              // collection setting as the existing Manage Collections editor.
+              const card = [...root.querySelectorAll('[data-collection-id]')].find(node => node.dataset.collectionId === id);
+              const art = card?.querySelector('[data-collection-art]');
+              const image = assets.src(assetId);
+              if (art) {
+                art.querySelector('img, .lit-cabinet-ornament')?.remove();
+                const node = document.createElement(image ? 'img' : 'span');
+                if (image) { node.src = image; node.alt = ''; }
+                else { node.className = 'lit-cabinet-ornament'; node.textContent = currentItem.ornament; }
+                art.prepend(node);
+              }
+              try {
+                const stored = await update(id, { coverAssetId: assetId });
+                if (!stored) throw new Error('Save failed');
+                currentItem.coverAssetId = assetId;
+                close();
+              } catch (_) {
+                if (art) {
+                  art.querySelector('img, .lit-cabinet-ornament')?.remove();
+                  const previousSrc = assets.src(previous);
+                  const node = document.createElement(previousSrc ? 'img' : 'span');
+                  if (previousSrc) { node.src = previousSrc; node.alt = ''; }
+                  else { node.className = 'lit-cabinet-ornament'; node.textContent = currentItem.ornament; }
+                  art.prepend(node);
+                }
+              }
+            };
+            sheet.querySelectorAll('[data-cover-choose]').forEach(button => {
+              button.onclick = () => choose(button.dataset.coverChoose);
+            });
+            sheet.querySelector('[data-collection-picker-clear]').onclick = () => choose('');
+            sheet.querySelector('[data-collection-picker-upload]').onchange = async event => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              try {
+                const image = await assets.add(file, { kind: 'artwork' });
+                await choose(image.id);
+              } catch (_) { toast('Could not upload that picture.', 'bad'); }
+            };
+          },
+        });
+      };
+      // Capture only artwork clicks during Design Mode. Normal card links
+      // keep their usual navigation when Design Mode is off.
+      root.querySelectorAll('[data-collection-art]').forEach(art => {
+        art.addEventListener('click', event => {
+          if (!document.body.classList.contains('canvas-editing')) return;
+          event.preventDefault();
+          event.stopPropagation();
+          openCoverPicker(art.dataset.collectionArt);
+        });
+      });
       root.querySelector('#lit-curation-create').addEventListener('submit', async e => {
         e.preventDefault();
         const name = root.querySelector('#lit-new-shelf').value.trim();
