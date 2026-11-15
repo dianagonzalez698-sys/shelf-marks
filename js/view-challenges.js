@@ -163,6 +163,7 @@ export function challengeDetailView(params) {
       }
 
       const open = () => openEditor(challenge);
+      root.querySelectorAll('[data-bookmark-assignments]').forEach(button => { button.onclick = open; });
       const visibleEdit = root.querySelector('#edit-challenge-inline');
       if (visibleEdit) visibleEdit.onclick = open;
       const top = document.getElementById('edit-top');
