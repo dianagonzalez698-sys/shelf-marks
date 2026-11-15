@@ -1,7 +1,7 @@
 // A book is a small page in the reader's literary archive, distinct from the
 // form used to change it. Everything here reads existing book records.
 import { getBook, state, saveBook, allChallenges } from './state.js';
-import { eligibility } from './rules.js?v=149';
+import { eligibility } from './rules.js?v=152';
 import { esc, attr, coverImg, toast, navigate } from './ui.js';
 import { formatDate } from './periods.js';
 import { src as artworkSrc } from './assets.js';
