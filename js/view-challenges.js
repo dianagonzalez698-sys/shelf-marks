@@ -19,6 +19,7 @@ import * as layout from './layout.js';
 import * as assets from './assets.js';
 import { openMediaEditor } from './view-layout.js?v=149';
 import { searchBooks, debounce } from './openlibrary.js';
+import { openBookmark } from './view-bookmarks.js';
 
 /* ----------------------------------------------------------------- list ---- */
 
@@ -161,6 +162,17 @@ export function challengeDetailView(params) {
       } else {
         focusedFor = null;
       }
+
+      // Challenge bookmarks open the bookmark itself, with its artwork,
+      // assigned title, requirement, and unlock status—not the archive page.
+      root.querySelectorAll('a.bm[href^="#/bookmarks?focus="]').forEach(link => {
+        link.addEventListener('click', event => {
+          event.preventDefault();
+          event.stopPropagation();
+          const id = new URLSearchParams(link.getAttribute('href').split('?')[1] || '').get('focus');
+          if (id) openBookmark(id, link);
+        });
+      });
 
       const open = () => openEditor(challenge);
       root.querySelectorAll('[data-bookmark-assignments]').forEach(button => { button.onclick = open; });
