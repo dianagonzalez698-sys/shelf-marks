@@ -1587,9 +1587,9 @@ export function challengeSpread(c, index = 0) {
       })).join('')}</span>
     </div>
     <div class="spread-body">
-      ${displayWindow ? `<p class="ed-kicker">${esc(displayWindow)}</p>` : ''}
-      <h3 class="spread-title">${esc(displayTitle)}</h3>
-      ${displayBlurb ? `<p class="ed-sub">${esc(displayBlurb)}</p>` : ''}
+      ${displayWindow ? `<p class="ed-kicker">${rich(displayWindow)}</p>` : ''}
+      <h3 class="spread-title">${rich(displayTitle)}</h3>
+      ${displayBlurb ? `<p class="ed-sub">${rich(displayBlurb)}</p>` : ''}
       ${ids.length ? progressLine(`${earned} of ${ids.length} bookmarks`, pct, { tone: 'apricot', done: earned === ids.length })
         : `<p class="hint">${r.targetUnset ? 'No target set yet' : `${r.count} matching`}</p>`}
     </div>
