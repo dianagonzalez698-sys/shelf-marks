@@ -3,7 +3,7 @@
 import { load, onChange, saveSettings, state } from './state.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
-import * as layout from './layout.js?v=146';
+import * as layout from './layout.js';
 import * as canvas from './canvas.js?v=146';
 import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
