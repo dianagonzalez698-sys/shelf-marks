@@ -15,7 +15,7 @@ import {
   bookmarkStats, allChallenges, getChallenge, sortedBooks, unlockMap,
   allWords, getWord, wordStats,
 } from './state.js';
-import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility } from './rules.js?v=121';
+import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility } from './rules.js?v=149';
 import { focusQuarter, focusBimonth, daysLeftLabel, formatDate, yearPeriod, inPeriod } from './periods.js';
 import { t, FONT_STACKS } from './theme.js';
 import * as notebook from './notebook.js';
@@ -1475,6 +1475,9 @@ export const SECTION_TYPES = {
         </div>
         ${sec.showBar !== false
           ? progressLine(`${earned} of ${ids.length} collected`, pct, { tone: 'apricot', done: earned === ids.length })
+          : ''}
+        ${c.filter?.type === 'title' && !r.recurring
+          ? '<button type="button" class="ch-bookmark-assign-link" data-bookmark-assignments>Assign books to bookmarks</button>'
           : ''}
         <div class="bm-grid">
           ${ids.map((id) => {

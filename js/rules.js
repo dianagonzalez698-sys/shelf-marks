@@ -213,7 +213,24 @@ export function evaluate(challenge, books) {
     count = periods[0] ? periods[0].count : 0;
     target = perTarget;
     const ids = countedBookmarks(challenge);
-    for (let i = 0; i < Math.min(count, ids.length); i += 1) earned.push(ids[i]);
+    // Title-specific challenges may assign ONE particular title per bookmark.
+    // A completed book unlocks only its assigned bookmark, regardless of
+    // finish order. Other challenges keep their original count-based awards.
+    const assignments = challenge.filter?.type === 'title' ? challenge.bookmarkTitles : null;
+    if (assignments && ids.some(id => norm(assignments[id]))) {
+      const completed = periods[0]?.books || [];
+      const completedTitles = new Set(completed.map(b => norm(b.title)));
+      for (const id of ids) {
+        if (norm(assignments[id]) && completedTitles.has(norm(assignments[id]))) earned.push(id);
+      }
+      count = earned.length;
+      if (periods[0]) {
+        periods[0].count = count;
+        periods[0].complete = target != null && count >= target;
+      }
+    } else {
+      for (let i = 0; i < Math.min(count, ids.length); i += 1) earned.push(ids[i]);
+    }
   }
 
   const unset = target == null;
@@ -264,7 +281,10 @@ export function bookmarkLabels(challenge) {
         challengeId: challenge.id,
         challengeName: challenge.name,
         periodKey: String(i + 1),
-        title: `Book ${i + 1}`,
+        title: challenge.filter?.type === 'title' && challenge.bookmarkTitles?.[id]
+          ? `Book ${i + 1} · ${challenge.bookmarkTitles[id]}`
+          : `Book ${i + 1}`,
+        assignedTitle: challenge.filter?.type === 'title' ? (challenge.bookmarkTitles?.[id] || '') : '',
         bonus: false,
       });
     });

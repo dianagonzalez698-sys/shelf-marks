@@ -9,15 +9,15 @@ import {
   esc, attr, toast, progressBar, progressLine, markVisual, checkBadge, checkGlyph,
   openSheet, navigate, confirmSheet, coverImg, render,
 } from './ui.js';
-import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js?v=121';
+import { evaluate, describeFilter, describeWindow, bookmarkLabels, eligibility, matchesFilter } from './rules.js?v=149';
 import { formatDate, quarters, YEAR } from './periods.js';
 import { FILTER_TYPES, WINDOW_TYPES } from './config.js?v=121';
 import { t } from './theme.js';
-import { renderSections, renderSection } from './sections.js?v=146';
+import { renderSections, renderSection } from './sections.js?v=149';
 import { figure, backdrop, media } from './media.js';
 import * as layout from './layout.js';
 import * as assets from './assets.js';
-import { openMediaEditor } from './view-layout.js?v=147';
+import { openMediaEditor } from './view-layout.js?v=149';
 import { searchBooks, debounce } from './openlibrary.js';
 
 /* ----------------------------------------------------------------- list ---- */
@@ -163,6 +163,7 @@ export function challengeDetailView(params) {
       }
 
       const open = () => openEditor(challenge);
+      root.querySelectorAll('[data-bookmark-assignments]').forEach(button => { button.onclick = open; });
       const visibleEdit = root.querySelector('#edit-challenge-inline');
       if (visibleEdit) visibleEdit.onclick = open;
       const top = document.getElementById('edit-top');
@@ -357,6 +358,8 @@ export function openEditor(challenge) {
         <p class="hint" id="bookmark-note"></p>
       </div>
 
+      <div class="field" id="ch-bookmark-assignments" hidden></div>
+
       ${!creating ? `<div class="field">
         <label>Cover artwork</label>
         <button class="btn" id="ch-edit-cover" type="button">Edit cover artwork</button>
@@ -382,6 +385,34 @@ export function openEditor(challenge) {
         .filter(Boolean).map((title) => [title.trim().toLocaleLowerCase(), title.trim()]));
       const titleKey = (title) => String(title || '').trim().toLocaleLowerCase();
 
+      // Stable bookmark IDs retain artwork; assignments are book titles.
+      const assignedTitles = { ...(c.bookmarkTitles || {}) };
+      const assignmentBox = sheet.querySelector('#ch-bookmark-assignments');
+      const assignedBookmarkIds = () => {
+        const id = c.id || slug(nameEl.value || 'challenge');
+        const count = Math.max(0, Math.min(999, Number(targetEl.value) || 0));
+        if (Array.isArray(c.bookmarks) && c.bookmarks.length) return c.bookmarks.slice(0, count);
+        const prefix = c.bookmarkPrefix || id;
+        return Array.from({ length: count }, (_, i) => `${prefix}-${i + 1}`);
+      };
+      const paintBookmarkAssignments = () => {
+        const enabled = !creating && filterEl.value === 'title' && windowEl.value !== 'recurring';
+        assignmentBox.hidden = !enabled;
+        if (!enabled) return;
+        const titles = [...selectedTitles.values()];
+        assignmentBox.innerHTML = `<label class="ch-assignments-title">One book per bookmark</label>
+          <p class="hint">Choose which selected title earns each bookmark. Finishing Book 2 can unlock Bookmark 2 even before Book 1.</p>
+          <div class="ch-assignments-list">${assignedBookmarkIds().map((id, i) => `
+            <label class="ch-assignment-row"><span>Bookmark ${i + 1}</span>
+              <select data-assigned-bookmark="${attr(id)}">
+                <option value="">Choose a title…</option>
+                ${titles.map(title => `<option value="${attr(title)}" ${titleKey(assignedTitles[id]) === titleKey(title) ? 'selected' : ''}>${esc(title)}</option>`).join('')}
+              </select></label>`).join('')}</div>
+          <p class="hint">Your bookmark artwork stays the same. Titles not yet in your Library can be assigned.</p>`;
+        assignmentBox.querySelectorAll('[data-assigned-bookmark]').forEach(select => {
+          select.onchange = () => { assignedTitles[select.dataset.assignedBookmark] = select.value; };
+        });
+      };
       const windowExtra = sheet.querySelector('#window-extra');
       const targetNote = sheet.querySelector('#target-note');
       const bookmarkNote = sheet.querySelector('#bookmark-note');
@@ -442,6 +473,7 @@ export function openEditor(challenge) {
             picked.querySelectorAll('[data-remove-title]').forEach((button) => {
               button.onclick = () => { selectedTitles.delete(titleKey(button.dataset.removeTitle)); paintTitles(); };
             });
+            paintBookmarkAssignments();
             const search = query.value.trim().toLowerCase();
             const matches = library.filter((book) => `${book.title} ${book.author || ''}`.toLowerCase().includes(search));
             const unique = [...new Map(matches.map((book) => [titleKey(book.title), book])).values()];
@@ -612,13 +644,14 @@ export function openEditor(challenge) {
         }
       }
 
-      filterEl.addEventListener('change', () => { paintFilterExtra(); paintNotes(); });
-      windowEl.addEventListener('change', paintWindowExtra);
-      targetEl.addEventListener('input', paintNotes);
+      filterEl.addEventListener('change', () => { paintFilterExtra(); paintNotes(); paintBookmarkAssignments(); });
+      windowEl.addEventListener('change', () => { paintWindowExtra(); paintBookmarkAssignments(); });
+      targetEl.addEventListener('input', () => { paintNotes(); paintBookmarkAssignments(); });
       windowExtra.addEventListener('change', paintNotes);
       nameEl.addEventListener('input', paintNotes);
       paintFilterExtra();
       paintWindowExtra();
+      paintBookmarkAssignments();
       if (pendingChallengeForm?.id === c.id) {
         const saved = pendingChallengeForm.values;
         const titleDraft = pendingChallengeForm.selectedTitles;
@@ -638,6 +671,7 @@ export function openEditor(challenge) {
         }
         if (filterEl.value === 'title') paintFilterExtra();
         paintNotes();
+        paintBookmarkAssignments();
       }
 
       sheet.querySelector('#ch-form').onsubmit = async (e) => {
@@ -684,6 +718,23 @@ export function openEditor(challenge) {
           filter.tag = v;
         }
 
+        // Optional title-specific awards only apply to non-recurring title rules.
+        // Once any title is assigned, require a unique selected title per slot.
+        let bookmarkTitles = {};
+        if (filter.type === 'title' && windowEl.value !== 'recurring') {
+          const ids = assignedBookmarkIds();
+          bookmarkTitles = Object.fromEntries(ids
+            .filter(id => selectedTitles.has(titleKey(assignedTitles[id])))
+            .map(id => [id, selectedTitles.get(titleKey(assignedTitles[id]))]));
+          const countAssigned = Object.keys(bookmarkTitles).length;
+          const hasPartial = ids.some(id => assignedTitles[id]) && countAssigned !== ids.length;
+          const distinct = new Set(Object.values(bookmarkTitles).map(titleKey));
+          if (hasPartial || (countAssigned && distinct.size !== ids.length)) {
+            toast('Choose a different selected title for each bookmark, or leave all unassigned.', 'bad');
+            assignmentBox.querySelector('select')?.focus();
+            return;
+          }
+        }
         // Build the window
         let win = { type: windowEl.value, year: YEAR };
         if (win.type === 'quarter') {
@@ -709,6 +760,7 @@ export function openEditor(challenge) {
           window: win,
           target,
           bookmarkPrefix: c.bookmarkPrefix || c.id || null,
+          bookmarkTitles,
         };
         if (!record.bookmarkPrefix) record.bookmarkPrefix = record.id;
         // Existing recurring challenges retain their awarded bookmark ids.
