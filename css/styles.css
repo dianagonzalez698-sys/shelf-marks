@@ -6805,3 +6805,39 @@ body.canvas-editing #app .ed-statement .canvas-text-width-handle:focus-visible {
   font: inherit; font-size: .94rem; cursor: pointer;
 }
 #app .ch-bookmark-assign-link:hover { opacity: .8; }
+
+
+/* Collections: edit an individual card image directly in Design Mode.
+   This does not change any card dimensions or saved decorative placements. */
+.lit-cabinet-art-edit { display: none; }
+body.canvas-editing .lit-collections .lit-cabinet-art { cursor: pointer; outline: 1px dashed color-mix(in srgb, var(--c-accent) 55%, transparent); outline-offset: 3px; }
+body.canvas-editing .lit-collections .lit-cabinet-art-edit {
+  position: absolute; z-index: 3; right: 12px; bottom: 12px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 7px 12px; border-radius: 4px;
+  background: var(--c-bg-raised, #fcf8f2); color: var(--c-accent, #a53c61);
+  border: 1px solid var(--c-rule-strong, #d7c4b4);
+  font: 600 .78rem/1.1 var(--f-ui, Georgia, serif);
+  box-shadow: 0 2px 9px #372b2220; pointer-events: none;
+}
+body.canvas-editing .lit-collections .lit-cabinet-piece:hover { transform: none; }
+.lit-collection-picker-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px; max-height: 330px; overflow: auto; padding: 8px 3px; margin: 10px 0 15px;
+}
+.lit-collection-picker-choice {
+  display: flex; flex-direction: column; gap: 6px; min-width: 0;
+  padding: 6px; text-align: left; cursor: pointer;
+  border: 1px solid var(--c-rule, #dacdbe); background: var(--c-bg, #faf7f1);
+  color: var(--c-ink, #49392f); font: .8rem/1.3 var(--f-body, Georgia, serif);
+}
+.lit-collection-picker-choice img { display: block; width: 100%; height: 115px; object-fit: cover; }
+.lit-collection-picker-choice span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lit-collection-picker-choice.is-selected { outline: 2px solid var(--c-accent, #a53c61); }
+.lit-collection-upload-label {
+  display: block; margin: 10px 0; padding: 13px; text-align: center;
+  border: 1px dashed var(--c-rule-strong, #d7c4b4); cursor: pointer;
+  color: var(--c-accent, #a53c61);
+}
+.lit-collection-upload-label input { display: block; max-width: 100%; margin: 8px auto 0; }
+.lit-collection-picker-footer { margin-top: 15px; }
