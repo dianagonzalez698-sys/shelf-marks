@@ -41,17 +41,21 @@ export function booksView(params = {}) {
         ${activeCustom && assets.src(activeCustom.coverAssetId) ? `<div class="lit-custom-shelf-art"><img src="${attr(assets.src(activeCustom.coverAssetId))}" alt="" loading="lazy"></div>` : ''}
       </header>
       <nav class="lit-shelf-tabs" aria-label="Reading shelves">${shelfChoices.map(([key,label])=>`<a href="${filterLink(key,query)}" ${shelf === key ? 'class="active" aria-current="page"' : ''}>${esc(label)}<span>${counts[key]}</span></a>`).join('')}</nav>
-      <div class="lit-shelf-tools"><form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search my books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search my Library">⌕</button></form>
-        <a class="lit-shelf-openlibrary" href="#/add">+ Find &amp; add books</a>
-        ${search ? `<a class="lit-shelf-clear" href="${filterLink(shelf, {...query, search: ''})}">Clear search ×</a>` : ''}
-        ${search ? `<a class="lit-shelf-search-openlibrary" href="#/add?search=${encodeURIComponent(query.search || '')}">Find “${esc(query.search)}” on Open Library ↗</a>` : ''}
-        <details class="lit-shelf-manage-control" id="shelf-manager"><summary>✧ Edit shelves</summary>
+      <div class="lit-shelf-tools">
+        <div class="lit-shelf-search-area">
+          <form id="shelf-search"><label class="visually-hidden" for="shelf-query">Search books</label><input id="shelf-query" placeholder="Search my books, authors, or tags…" value="${attr(query.search || '')}"><button type="submit" aria-label="Search my Library">⌕</button></form>
+          ${search ? `<div class="lit-shelf-search-links"><a class="lit-shelf-clear" href="${filterLink(shelf, {...query, search: ''})}">Clear search ×</a><a class="lit-shelf-search-openlibrary" href="#/add?search=${encodeURIComponent(query.search || '')}">Search Open Library for “${esc(query.search)}”</a></div>` : ''}
+        </div>
+        <div class="lit-shelf-actions" role="group" aria-label="Library tools">
+          <a class="lit-shelf-openlibrary" href="#/add">+ Add books</a>
+          <details class="lit-shelf-manage-control" id="shelf-manager"><summary>Manage shelves <span aria-hidden="true">⌄</span></summary>
           <div class="lit-shelf-manage-panel">
             <form id="shelf-create"><label for="shelf-name">New shelf name</label><div><input id="shelf-name" maxlength="45" placeholder="e.g. Cozy mysteries" required><button type="submit">Create shelf</button></div></form>
             ${customShelves.length ? `<div class="lit-shelf-manage-list">${customShelves.map((s)=>`<div><span>${esc(s.name)}</span><button type="button" data-delete-shelf="${attr(s.id)}" aria-label="Remove shelf ${attr(s.name)}">Remove</button></div>`).join('')}</div>` : '<p class="hint">Your own shelves can hold books from any reading status.</p>'}
           </div>
-        </details>
-        <label>Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
+          </details>
+        </div>
+        <label class="lit-shelf-sort">Sort by <select id="shelf-sort"><option value="recent" ${sort === 'recent' ? 'selected' : ''}>Recently added</option><option value="title" ${sort === 'title' ? 'selected' : ''}>Title A–Z</option></select></label></div>
       <div class="lit-shelf-count"><span>THE CATALOGUE</span><span id="shelf-visible-count" aria-live="polite">${String(initialVisible).padStart(2,'0')} ${initialVisible === 1 ? 'VOLUME' : 'VOLUMES'}</span></div>
       ${shown.length ? `<div class="lit-shelf-grid">${shown.map((b,i)=>`<article class="lit-shelf-book" data-searchable="${attr(`${b.title} ${b.author} ${(b.tags || []).join(' ')}`.toLowerCase())}" ${search && !`${b.title} ${b.author} ${(b.tags || []).join(' ')}`.toLowerCase().includes(search) ? 'hidden' : ''}>
         <div class="lit-shelf-folio"><span>№ ${String(i + 1).padStart(2,'0')}</span><span data-book-folio-status="${attr(b.id)}">${esc(statusOf(b) === 'read' ? 'FINISHED' : statusOf(b) === 'reading' ? 'IN PROGRESS' : statusOf(b) === 'dnf' ? 'SET ASIDE' : 'TO BE READ')}</span></div>
