@@ -19,7 +19,7 @@ import * as layout from './layout.js';
 import * as assets from './assets.js';
 import { openMediaEditor } from './view-layout.js?v=149';
 import { searchBooks, debounce } from './openlibrary.js';
-import { openBookmark } from './view-bookmarks.js';
+import { openBookmark } from './view-bookmarks.js?v=152';
 
 /* ----------------------------------------------------------------- list ---- */
 
@@ -413,7 +413,7 @@ export function openEditor(challenge) {
         if (!enabled) return;
         const titles = [...selectedTitles.values()];
         assignmentBox.innerHTML = `<label class="ch-assignments-title">One book per bookmark</label>
-          <p class="hint">Choose which selected title earns each bookmark. Finishing Book 2 can unlock Bookmark 2 even before Book 1.</p>
+          <p class="hint">Choose which selected title earns each bookmark. Mark the assigned title as Read and enter its finish date to earn that bookmark, in any order.</p>
           <div class="ch-assignments-list">${assignedBookmarkIds().map((id, i) => `
             <label class="ch-assignment-row"><span>Bookmark ${i + 1}</span>
               <select data-assigned-bookmark="${attr(id)}">
