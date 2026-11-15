@@ -13,15 +13,15 @@ import { homeView } from './view-home.js?v=149';
 import { booksView } from './view-books.js?v=140';
 import { addView, bookFormView, rememberAddOrigin } from './view-book.js?v=149';
 import { bookDetailView } from './view-book-detail.js?v=149';
-import { challengesView, challengeDetailView } from './view-challenges.js?v=149';
-import { bookmarksView } from './view-bookmarks.js?v=149';
+import { challengesView, challengeDetailView } from './view-challenges.js?v=151';
+import { bookmarksView } from './view-bookmarks.js?v=151';
 import { settingsView } from './view-settings.js';
 import { customizeView } from './view-customize.js';
 import { assetsView } from './view-assets.js';
 import { layoutView } from './view-layout.js?v=149';
 import { wordsView, wordDetailView } from './view-words.js';
 import { notebookView, notebookEntryView } from './view-notebook.js';
-import { collectionsView } from './view-collections.js';
+import { collectionsView } from './view-collections.js?v=151';
 import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=149';
 import { wireEditing } from './ui.js';
 
