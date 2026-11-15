@@ -11,7 +11,7 @@
 
 import { richValue, toast, esc, attr } from './ui.js';
 import * as layout from './layout.js';
-import { openSectionEditor } from './view-layout.js?v=95';
+import { openSectionEditor } from './view-layout.js?v=147';
 import { HOME_PAGE_ID } from './view-home.js';
 import { roleForKey, applySectionVars } from './sections.js?v=131';
 import { FONT_STACKS, fontWeights, fontHasItalic } from './theme.js';

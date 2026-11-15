@@ -4,7 +4,7 @@ import { load, onChange, saveSettings, state } from './state.js';
 import * as theme from './theme.js';
 import * as assets from './assets.js';
 import * as layout from './layout.js';
-import * as canvas from './canvas.js?v=146';
+import * as canvas from './canvas.js?v=147';
 import * as notebook from './notebook.js';
 import { installOrnateFrame } from './frames.js';
 import { route, startRouter, refresh, navigate, initArtFallback } from './ui.js';
@@ -13,16 +13,16 @@ import { homeView } from './view-home.js?v=146';
 import { booksView } from './view-books.js?v=140';
 import { addView, bookFormView, rememberAddOrigin } from './view-book.js?v=142';
 import { bookDetailView } from './view-book-detail.js?v=142';
-import { challengesView, challengeDetailView } from './view-challenges.js?v=146';
+import { challengesView, challengeDetailView } from './view-challenges.js?v=147';
 import { bookmarksView } from './view-bookmarks.js?v=121';
 import { settingsView } from './view-settings.js';
 import { customizeView } from './view-customize.js';
 import { assetsView } from './view-assets.js';
-import { layoutView } from './view-layout.js?v=146';
+import { layoutView } from './view-layout.js?v=147';
 import { wordsView, wordDetailView } from './view-words.js';
 import { notebookView, notebookEntryView } from './view-notebook.js';
 import { collectionsView } from './view-collections.js';
-import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=95';
+import { toggleEditing, isEditing, setEditPage, refreshEditing } from './edit-page.js?v=147';
 import { wireEditing } from './ui.js';
 
 // The navigation uses the same saved banner heading as each challenge page.
