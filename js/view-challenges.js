@@ -472,6 +472,7 @@ export function openEditor(challenge) {
             picked.querySelectorAll('[data-remove-title]').forEach((button) => {
               button.onclick = () => { selectedTitles.delete(titleKey(button.dataset.removeTitle)); paintTitles(); };
             });
+            paintBookmarkAssignments();
             const search = query.value.trim().toLowerCase();
             const matches = library.filter((book) => `${book.title} ${book.author || ''}`.toLowerCase().includes(search));
             const unique = [...new Map(matches.map((book) => [titleKey(book.title), book])).values()];
@@ -642,13 +643,14 @@ export function openEditor(challenge) {
         }
       }
 
-      filterEl.addEventListener('change', () => { paintFilterExtra(); paintNotes(); });
-      windowEl.addEventListener('change', paintWindowExtra);
-      targetEl.addEventListener('input', paintNotes);
+      filterEl.addEventListener('change', () => { paintFilterExtra(); paintNotes(); paintBookmarkAssignments(); });
+      windowEl.addEventListener('change', () => { paintWindowExtra(); paintBookmarkAssignments(); });
+      targetEl.addEventListener('input', () => { paintNotes(); paintBookmarkAssignments(); });
       windowExtra.addEventListener('change', paintNotes);
       nameEl.addEventListener('input', paintNotes);
       paintFilterExtra();
       paintWindowExtra();
+      paintBookmarkAssignments();
       if (pendingChallengeForm?.id === c.id) {
         const saved = pendingChallengeForm.values;
         const titleDraft = pendingChallengeForm.selectedTitles;
@@ -668,6 +670,7 @@ export function openEditor(challenge) {
         }
         if (filterEl.value === 'title') paintFilterExtra();
         paintNotes();
+        paintBookmarkAssignments();
       }
 
       sheet.querySelector('#ch-form').onsubmit = async (e) => {
